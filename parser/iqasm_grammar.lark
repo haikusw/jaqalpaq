@@ -1,0 +1,63 @@
+start: header_statements body_statements
+
+// Header Rules
+header_statements: [header_statement (seq_sep header_statement)*]
+header_statement: register_statement | map_statement | let_statement
+register_statement: "reg" array_declaration
+map_statement: "map" map_target map_source
+map_target: IDENTIFIER | array_declaration
+map_source: IDENTIFIER | array_slice
+let_statement: "let" IDENTIFIER SIGNED_NUMBER
+
+// Body rules
+body_statements: [body_statement (seq_sep body_statement)*]
+body_statement: gate_statement | macro_definition | loop_statement | gate_block
+gate_statement: gate_name gate_arg_list
+gate_name: IDENTIFIER
+gate_arg_list: gate_arg*
+gate_arg: IDENTIFIER | SIGNED_NUMBER
+macro_definition: "macro" gate_arg_list gate_block
+loop_statement: "loop" let_or_integer gate_block
+
+// Gate blocks
+gate_block: sequential_gate_block | parallel_gate_block
+sequential_gate_block: "{" sequential_statements "}"
+sequential_statements: [sequential_statement (seq_sep sequential_statement)*]
+sequential_statement: gate_statement | loop_statement | parallel_gate_block
+parallel_gate_block: "<" parallel_statements ">"
+parallel_statements: [parallel_statement (par_sep parallel_statement)*]
+parallel_statement: gate_statement | sequential_gate_block
+
+// Common rules
+array_declaration: IDENTIFIER "[" let_or_integer "]"
+array_slice: IDENTIFIER "[" slice_indexing "]"
+slice_indexing: slice_single | slice_begin_end | slice_full
+slice_single: let_or_integer
+slice_begin_end: let_or_integer ":" let_or_signed_integer
+slice_full: let_or_integer ":" let_or_signed_integer ":" let_or_signed_integer
+let_or_integer: IDENTIFIER | INTEGER
+let_or_signed_integer: IDENTIFIER | INTEGER
+?seq_sep: ";" | NEWLINE
+?par_sep: "|" | NEWLINE
+
+// Comment rules
+LINE_COMMENT: "//" /[^\n]/*
+BLOCK_COMMENT: "/*" /.*/ "*/"
+%ignore LINE_COMMENT
+%ignore BLOCK_COMMENT
+
+// Identifier rules
+IDENTIFIER: NON_NUMERIC_IDENTIFIER_CHAR IDENTIFIER_CHAR*
+NON_NUMERIC_IDENTIFIER_CHAR: /[a-zA-Z_?-]/
+IDENTIFIER_CHAR: NON_NUMERIC_IDENTIFIER_CHAR | DIGIT
+
+// Imports
+%import common.SIGNED_NUMBER
+%import common.NUMBER
+%import common.INT  ->  INTEGER
+%import common.WS
+%import common.NEWLINE
+%import common.DIGIT
+
+// Ignore whitespace
+%ignore WS
