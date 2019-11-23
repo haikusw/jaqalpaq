@@ -1,8 +1,8 @@
 start: header_statements body_statements
 
 // Header Rules
-header_statements: [header_statement (_seq_sep header_statement)*]
-header_statement: register_statement | map_statement | let_statement
+header_statements: [header_statement (_seq_sep header_statement)* _seq_sep?]
+?header_statement: register_statement | map_statement | let_statement
 register_statement: "reg" array_declaration
 map_statement: "map" map_target map_source
 ?map_target: IDENTIFIER | array_declaration

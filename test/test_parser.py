@@ -97,6 +97,10 @@ class ParserTesterMixin:
         children = [cls.make_identifier(name), iteration_var, block]
         return {'type': 'loop_statement', 'children': children}
 
+    @classmethod
+    def make_header_statements(cls, statement_list):
+        return {'type': 'header_statements', 'children': statement_list}
+
 
 class ParserTester(ParserTesterMixin, unittest.TestCase):
 
@@ -200,3 +204,17 @@ class ParserTester(ParserTesterMixin, unittest.TestCase):
         act_tree = self.simplify_tree(tree)
         self.assertEqual(exp_tree, act_tree)
 
+    def test_header(self):
+        """Test a bunch of header statements together."""
+        text = "reg q[3]\n" +\
+            "map a[2] q[0:3:2]\n" +\
+            "let pi 3.14; let reps 100\n"
+        parser = self.make_parser(start='header_statements')
+        tree = parser.parse(text)
+        reg_stmt = self.make_register_statement(self.make_array_declaration('q', 3))
+        map_stmt = self.make_map_statement(self.make_array_declaration('a', 2), self.make_array_slice('q', 0, 3, 2))
+        let0_stmt = self.make_let_statement('pi', 3.14)
+        let1_stmt = self.make_let_statement('reps', 100)
+        exp_tree = self.make_header_statements([reg_stmt, map_stmt, let0_stmt, let1_stmt])
+        act_tree = self.simplify_tree(tree)
+        self.assertEqual(exp_tree, act_tree)
