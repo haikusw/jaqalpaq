@@ -1,44 +1,46 @@
 start: header_statements body_statements
 
 // Header Rules
-header_statements: [header_statement (seq_sep header_statement)*]
+header_statements: [header_statement (_seq_sep header_statement)*]
 header_statement: register_statement | map_statement | let_statement
 register_statement: "reg" array_declaration
 map_statement: "map" map_target map_source
-map_target: IDENTIFIER | array_declaration
-map_source: IDENTIFIER | array_slice
+?map_target: IDENTIFIER | array_declaration
+?map_source: IDENTIFIER | array_slice
 let_statement: "let" IDENTIFIER SIGNED_NUMBER
 
 // Body rules
-body_statements: [body_statement (seq_sep body_statement)*]
+body_statements: [body_statement (_seq_sep body_statement)*]
 body_statement: gate_statement | macro_definition | loop_statement | gate_block
-gate_statement: gate_name gate_arg_list
-gate_name: IDENTIFIER
-gate_arg_list: gate_arg*
-gate_arg: IDENTIFIER | SIGNED_NUMBER
-macro_definition: "macro" gate_arg_list gate_block
+gate_statement: _gate_name _gate_arg_list
+_gate_name: IDENTIFIER
+_gate_arg_list: _gate_arg*
+_gate_arg: IDENTIFIER | SIGNED_NUMBER
+macro_definition: "macro" _gate_def_list gate_block
+_gate_def_list: IDENTIFIER*
 loop_statement: "loop" let_or_integer gate_block
 
 // Gate blocks
-gate_block: sequential_gate_block | parallel_gate_block
-sequential_gate_block: "{" sequential_statements "}"
-sequential_statements: [sequential_statement (seq_sep sequential_statement)*]
-sequential_statement: gate_statement | loop_statement | parallel_gate_block
-parallel_gate_block: "<" parallel_statements ">"
-parallel_statements: [parallel_statement (par_sep parallel_statement)*]
-parallel_statement: gate_statement | sequential_gate_block
+?gate_block: sequential_gate_block | parallel_gate_block
+sequential_gate_block: "{" _sequential_statements "}"
+_sequential_statements: [_sequential_statement (_seq_sep _sequential_statement)*]
+_sequential_statement: gate_statement | loop_statement | parallel_gate_block
+parallel_gate_block: "<" _parallel_statements ">"
+_parallel_statements: [_parallel_statement (_par_sep _parallel_statement)*]
+_parallel_statement: gate_statement | sequential_gate_block
 
 // Common rules
 array_declaration: IDENTIFIER "[" let_or_integer "]"
-array_slice: IDENTIFIER "[" slice_indexing "]"
-slice_indexing: slice_single | slice_begin_end | slice_full
-slice_single: let_or_integer
-slice_begin_end: let_or_integer ":" let_or_signed_integer
-slice_full: let_or_integer ":" let_or_signed_integer ":" let_or_signed_integer
-let_or_integer: IDENTIFIER | INTEGER
-let_or_signed_integer: IDENTIFIER | INTEGER
-?seq_sep: ";" | NEWLINE
-?par_sep: "|" | NEWLINE
+array_slice: IDENTIFIER "[" _slice_indexing "]"
+_slice_indexing: _slice_single | _slice_begin_end | _slice_full
+_slice_single: let_or_integer
+_slice_begin_end: let_or_integer ":" let_or_signed_integer
+_slice_full: let_or_integer ":" let_or_signed_integer ":" let_or_signed_integer
+?let_or_integer: IDENTIFIER | INTEGER
+?let_or_signed_integer: IDENTIFIER | SIGNED_INTEGER
+_seq_sep: ";" | _NEWLINE
+_par_sep: "|" | _NEWLINE
+_NEWLINE: NEWLINE
 
 // Comment rules
 LINE_COMMENT: "//" /[^\n]/*
@@ -48,16 +50,17 @@ BLOCK_COMMENT: "/*" /.*/ "*/"
 
 // Identifier rules
 IDENTIFIER: NON_NUMERIC_IDENTIFIER_CHAR IDENTIFIER_CHAR*
-NON_NUMERIC_IDENTIFIER_CHAR: /[a-zA-Z_?-]/
+NON_NUMERIC_IDENTIFIER_CHAR: /[a-zA-Z_]/
 IDENTIFIER_CHAR: NON_NUMERIC_IDENTIFIER_CHAR | DIGIT
 
 // Imports
 %import common.SIGNED_NUMBER
 %import common.NUMBER
 %import common.INT  ->  INTEGER
-%import common.WS
+%import common.SIGNED_INT  ->  SIGNED_INTEGER
+%import common.WS_INLINE
 %import common.NEWLINE
 %import common.DIGIT
 
 // Ignore whitespace
-%ignore WS
+%ignore WS_INLINE
