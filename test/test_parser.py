@@ -61,6 +61,10 @@ class ParserTesterMixin:
         return {'type': 'array_slice', 'children': [cls.make_identifier(name)] + slices}
 
     @classmethod
+    def make_array_element(cls, name, index):
+        return {'type': 'array_element', 'children': [cls.make_identifier(name), cls.make_integer(index)]}
+
+    @classmethod
     def make_let_statement(cls, name, value):
         return {'type': 'let_statement', 'children': [cls.make_identifier(name), cls.make_signed_number(value)]}
 
@@ -73,6 +77,9 @@ class ParserTesterMixin:
     def make_gate_arg(cls, arg):
         if isinstance(arg, str):
             return cls.make_identifier(arg)
+        elif isinstance(arg, dict):
+            # Already converted.
+            return arg
         else:
             return cls.make_signed_number(arg)
 
@@ -92,14 +99,21 @@ class ParserTesterMixin:
         return {'type': 'macro_definition', 'children': children}
 
     @classmethod
-    def make_loop_statement(cls, name, iterations, block):
-        iteration_var = cls.make_gate_arg(iterations)
-        children = [cls.make_identifier(name), iteration_var, block]
+    def make_loop_statement(cls, iterations, block):
+        if isinstance(iterations, int):
+            iteration_var = cls.make_integer(iterations)
+        else:
+            iteration_var = cls.make_identifier(iterations)
+        children = [iteration_var, block]
         return {'type': 'loop_statement', 'children': children}
 
     @classmethod
-    def make_header_statements(cls, statement_list):
-        return {'type': 'header_statements', 'children': statement_list}
+    def make_header_statements(cls, *statement_list):
+        return {'type': 'header_statements', 'children': list(statement_list)}
+
+    @classmethod
+    def make_body_statements(cls, *statement_list):
+        return {'type': 'body_statements', 'children': list(statement_list)}
 
 
 class ParserTester(ParserTesterMixin, unittest.TestCase):
@@ -158,6 +172,15 @@ class ParserTester(ParserTesterMixin, unittest.TestCase):
         act_tree = self.simplify_tree(tree)
         self.assertEqual(exp_tree, act_tree)
 
+    def test_gate_with_array_element(self):
+        """Test a gate with an argument that is an element of an array."""
+        text = "g q[0]"
+        parser = self.make_parser(start='gate_statement')
+        tree = parser.parse(text)
+        exp_tree = self.make_gate_statement('g', self.make_array_element('q', 0))
+        act_tree = self.simplify_tree(tree)
+        self.assertEqual(exp_tree, act_tree)
+
     def test_serial_gate_block(self):
         """Test a serial gate block with a separator."""
         text = "{g 0 ; h 1}"
@@ -204,6 +227,15 @@ class ParserTester(ParserTesterMixin, unittest.TestCase):
         act_tree = self.simplify_tree(tree)
         self.assertEqual(exp_tree, act_tree)
 
+    def test_loop_statement(self):
+        """Test creating a loop."""
+        text = "loop 1 { g0 1 }"
+        parser = self.make_parser(start='loop_statement')
+        tree = parser.parse(text)
+        exp_tree = self.make_loop_statement(1, self.make_serial_gate_block(self.make_gate_statement('g0', 1)))
+        act_tree = self.simplify_tree(tree)
+        self.assertEqual(exp_tree, act_tree)
+
     def test_header(self):
         """Test a bunch of header statements together."""
         text = "reg q[3]\n" +\
@@ -215,6 +247,46 @@ class ParserTester(ParserTesterMixin, unittest.TestCase):
         map_stmt = self.make_map_statement(self.make_array_declaration('a', 2), self.make_array_slice('q', 0, 3, 2))
         let0_stmt = self.make_let_statement('pi', 3.14)
         let1_stmt = self.make_let_statement('reps', 100)
-        exp_tree = self.make_header_statements([reg_stmt, map_stmt, let0_stmt, let1_stmt])
+        exp_tree = self.make_header_statements(reg_stmt, map_stmt, let0_stmt, let1_stmt)
+        act_tree = self.simplify_tree(tree)
+        self.assertEqual(exp_tree, act_tree)
+
+    def test_body(self):
+        """Test a bunch of body statements together"""
+        text = "macro foo a b {\n" +\
+            "g0 a\n" +\
+            "g1 b\n" +\
+            "}\n" +\
+            "loop 5 < foo q r >\n" +\
+            "x q[7]\n"
+        parser = self.make_parser(start='body_statements')
+        tree = parser.parse(text)
+        macro_body = self.make_serial_gate_block(self.make_gate_statement('g0', 'a'),
+                                                 self.make_gate_statement('g1', 'b'))
+        macro_def = self.make_macro_statement('foo', 'a', 'b', macro_body)
+        loop_block = self.make_parallel_gate_block(self.make_gate_statement('foo', 'q', 'r'))
+        loop_stmt = self.make_loop_statement(5, loop_block)
+        gate_stmt = self.make_gate_statement('x', self.make_array_element('q', 7))
+        exp_tree = self.make_body_statements(macro_def, loop_stmt, gate_stmt)
+        act_tree = self.simplify_tree(tree)
+        self.assertEqual(exp_tree, act_tree)
+
+    def test_nested_blocks(self):
+        """Test nested parallel and sequential blocks."""
+        text = "{<x a | y b> ; <{z 0 \n w 1}>}"
+        parser = self.make_parser(start='sequential_gate_block')
+        tree = parser.parse(text)
+        exp_tree = self.make_serial_gate_block(
+            self.make_parallel_gate_block(
+                self.make_gate_statement('x', 'a'),
+                self.make_gate_statement('y', 'b')
+            ),
+            self.make_parallel_gate_block(
+                self.make_serial_gate_block(
+                    self.make_gate_statement('z', 0),
+                    self.make_gate_statement('w', 1)
+                )
+            )
+        )
         act_tree = self.simplify_tree(tree)
         self.assertEqual(exp_tree, act_tree)
