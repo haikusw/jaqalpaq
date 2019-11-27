@@ -6,7 +6,7 @@ from lark.tree import Tree
 from lark.lexer import Token
 
 
-grammar_filename = '../parser/iqasm_grammar.lark'
+grammar_filename = 'parser/iqasm_grammar.lark'
 
 
 class ParserTesterMixin:
