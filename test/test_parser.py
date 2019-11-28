@@ -290,3 +290,21 @@ class ParserTester(ParserTesterMixin, unittest.TestCase):
         )
         act_tree = self.simplify_tree(tree)
         self.assertEqual(exp_tree, act_tree)
+
+    def test_empty_line(self):
+        """Test file beginning with empty lines"""
+        text = "\nreg q[7]"
+        parser = self.make_parser()
+        parser.parse(text)
+
+    def test_comment_line(self):
+        """Test full line comment"""
+        text = "reg q[7]\n// comment\n"
+        parser = self.make_parser()
+        parser.parse(text)
+
+    def test_line_with_whitespace(self):
+        """Test line with whitespace"""
+        text = "reg q[7]\n \n"
+        parser = self.make_parser()
+        parser.parse(text)
