@@ -46,6 +46,18 @@ class NamedQubit:
 	def name(self):
 		return self._name
 	
+	@property
+	def fundamental(self):
+		return False
+	
+	@property
+	def alias_from(self):
+		return self._alias_from
+	
+	@property
+	def alias_index(self):
+		return self._alias_index
+	
 	def resolve_qubit(self):
 		return self._alias_from.resolve_qubit(self.alias_index)
 	
