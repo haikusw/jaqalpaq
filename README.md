@@ -6,10 +6,10 @@ Key components that we should provide:
 * The ability to automatically schedule gates in an efficient (but not necessarily optimal) manner given an unscheduled program.
 * The ability to decompose arbitrary unitary operations into native ion-trap gates.
 * The ability to convert the data structures used by many other quantum software toolchains to our internal representation.
-** IBM's Qiskit/OpenQASM
-** Rigetti's Quil/pyquil/quilc
-** Google's Cirq
-** Microsoft's Q#
-** ETH Zurich's ProjectQ
-** CQC's t|ket>
+    * IBM's Qiskit/OpenQASM
+    * Rigetti's Quil/pyquil/quilc
+    * Google's Cirq
+    * Microsoft's Q#
+    * ETH Zurich's ProjectQ
+    * CQC's t|ket>
 * Extensions to some or all of the above toolchains to properly support ion-based quantum computation, as needed.
