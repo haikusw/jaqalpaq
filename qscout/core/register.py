@@ -14,25 +14,25 @@ class Register:
 			if ((alias_slice.stop - alias_slice.start) // alias_slice.step) != size:
 				raise QSCOUTError("Register %s declared size does not match actual size.")
 		
-		@property
-		def name(self):
-			return self._name
-		
-		@property
-		def size(self):
-			return self._name
-		
-		@property
-		def fundamental(self):
-			return self._alias_from is None
-		
-		def resolve_qubit(self, idx):
-			if idx >= self.size:
-				raise QSCOUTError("Index out of range.")
-			if self.fundamental:
-				return (self, idx)
-			else:
-				return self._alias_from.resolve_qubit(self.alias_slice.start + idx * self.alias_slice.step)
+	@property
+	def name(self):
+		return self._name
+	
+	@property
+	def size(self):
+		return self._size
+	
+	@property
+	def fundamental(self):
+		return self._alias_from is None
+	
+	def resolve_qubit(self, idx):
+		if idx >= self.size:
+			raise QSCOUTError("Index out of range.")
+		if self.fundamental:
+			return (self, idx)
+		else:
+			return self._alias_from.resolve_qubit(self.alias_slice.start + idx * self.alias_slice.step)
 
 class NamedQubit:
 	def __init__(self, name, alias_from, alias_index):

@@ -1,18 +1,21 @@
 from .block import GateBlock, LoopStatement
 from .constant import Constant
 from .gate import GateStatement
-from .gatedef import GateDefinition
+from .gatedef import GateDefinition, NATIVE_GATES
 from .macro import Macro
 #from .parameter import QUBIT_PARAMETER, FLOAT_PARAMETER, PARAMETER_TYPES, Parameter
 from .register import Register, NamedQubit
-from qscout import RESERVED_WORDS
+from qscout import RESERVED_WORDS, QSCOUTError
 import re
 
 class ScheduledCircuit:
-	def __init__(self):
+	def __init__(self, qscout_native_gates=False):
 		self._constants = {}
 		self._macros = {}
 		self._native_gates = {}
+		if qscout_native_gates:
+			for gate in NATIVE_GATES:
+				self._native_gates[gate.name] = gate
 		self._registers = {}
 		self._gates = GateBlock()
 	
@@ -36,17 +39,17 @@ class ScheduledCircuit:
 	def gates(self):
 		return self._gates
 	
-	def validate_identifier(name):
+	def validate_identifier(self, name):
 		if name in self.constants: return False
 		if name in self.macros: return False
 		if name in self.native_gates: return False
 		if name in self.registers: return False
 		if name in RESERVED_WORDS: return False
-		if re.match('^[a-zA-Z][a-zA-Z0-9]$', name): return True
+		if re.match('^[a-zA-Z][a-zA-Z0-9]*$', name): return True
 		return False
 	
 	def let(self, name, value):
-		if validate_identifier(name):
+		if self.validate_identifier(name):
 			self.constants[name] = Constant(name, value)
 			return self.constants[name]
 		else:
@@ -58,7 +61,7 @@ class ScheduledCircuit:
 		self.registers[name] = Register(name, size)
 	
 	def map(self, name, size=None, source=None, idxs=None):
-		if validate_identifier(name):
+		if self.validate_identifier(name):
 			if source is None:
 				raise QSCOUTError("Map statement for %s must have a source." % name)
 			elif source in self.registers:
@@ -87,10 +90,10 @@ class ScheduledCircuit:
 			raise QSCOUTError("Name %s already used or invalid." % name)
 	
 	def macro(self, name, parameters=None, body=None):
-		if validate_identifier(name):
+		if self.validate_identifier(name):
 			if parameters is not None:
 				for parameter in parameters:
-					if (not validate_identifier(parameter.name)) or parameter.name == name:
+					if (not self.validate_identifier(parameter.name)) or parameter.name == name:
 						raise QSCOUTError("Name %s already used or invalid." % parameter.name)
 			self.macros[name] = Macro(name, parameters, body)
 			return self.macros[name]

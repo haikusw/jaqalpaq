@@ -8,20 +8,20 @@ def notate_slice(s):
 
 def generate_qasm_program(circ):
 	program = ""
-	for register in circ.registers:
+	for register in circ.registers.values():
 		if register.fundamental:
 			program += generate_qasm_reg(register)
 	program += "\n"
-	for const in circ.constants:
+	for const in circ.constants.values():
 		program += generate_qasm_let(const)
 	program += "\n"
-	for register in circ.registers:
+	for register in circ.registers.values():
 		if not register.fundamental:
 			program += generate_qasm_map(register)
 	program += "\n"
-	for macro in circ.macros:
+	for macro in circ.macros.values():
 		program += generate_qasm_macro(macro)
-	for statement in circ.gates:
+	for statement in circ.gates.gates:
 		if isinstance(statement, GateStatement):
 			program += generate_qasm_gate(statement, 0)
 		elif isinstance(statement, LoopStatement):
@@ -31,22 +31,22 @@ def generate_qasm_program(circ):
 	return program
 
 def generate_qasm_reg(register):
-	return "reg " + register.name + "[" + register.size + "]\n"
+	return "reg " + register.name + "[" + str(register.size) + "]\n"
 
 def generate_qasm_let(const):
-	return "let " + const.name + " " + const.value + "\n"
+	return "let " + const.name + " " + str(const.value) + "\n"
 
 def generate_qasm_map(register):
 	if isinstance(register, NamedQubit):
 		return "map " + register.name + " " + register.alias_from.name + "[" + str(register.alias_index) + "]\n"
 	else:
-		return "map " + register.name + " [" + register.size + "]" + register.alias_from.name + "[" + notate_slice(register.alias_slice) + "]\n"
+		return "map " + register.name + " [" + str(register.size) + "]" + register.alias_from.name + "[" + notate_slice(register.alias_slice) + "]\n"
 
 def generate_qasm_macro(macro):
 	return "macro " + macro.name + " " + " ".join([parameter.name for parameter in macro.parameters]) + " " + generate_qasm_block(macro.body, 0, False) + "\n"
 
 def generate_qasm_gate(statement, depth):
-	return "\t" * depth + statement.name + " ".join([str(val) for key, val in statement.parameters]) + "\n"
+	return "\t" * depth + statement.name + " ".join([str(val) for val in statement.parameters.values()]) + "\n"
 
 def generate_qasm_loop(statement, depth):
 	return "\t" * depth + "loop " + str(statement.iterations) + generate_qasm_block(statement.gates, depth, False)

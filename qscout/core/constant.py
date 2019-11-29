@@ -5,8 +5,8 @@ class Constant:
 	
 	@property
 	def name(self):
-		return self.name
+		return self._name
 	
 	@property
 	def value(self):
-		return self.value
+		return self._value
