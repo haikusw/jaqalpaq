@@ -65,28 +65,32 @@ class ScheduledCircuit:
 		if self.validate_identifier(name):
 			if source is None:
 				raise QSCOUTError("Map statement for %s must have a source." % name)
-			elif source in self.registers:
+			else:
+				if source in self.registers:
+					source_r = self.registers[source]
+				elif source.name in self.registers and self.registers[source.name] == source:
+					source_r = source
+				else:
+					raise QSCOUTError("Register %s does not exist." % source)
 				if size is None:
-					if isinstance(self.registers[source], NamedQubit):
+					if isinstance(source_r, NamedQubit):
 						if idxs is None:
-							self.registers[name] = self.registers[source].renamed(name)
+							self.registers[name] = source_r.renamed(name)
 						else:
 							raise QSCOUTError("Cannot index into single qubit %s." % source)
 					else:
 						if idxs is None:
 							raise QSCOUTError("Must specify size when mapping register %s." % name)
 						else:
-							self.registers[name] = NamedQubit(name, self.registers[source], idxs)
+							self.registers[name] = NamedQubit(name, source_r, idxs)
 				else:
-					if isinstance(self.registers[source], Register):
+					if isinstance(source_r, Register):
 						if idxs is None:
-							self.registers[name] = Register(name, size, self.registers[source], slice(0, self.registers[source].size))
+							self.registers[name] = Register(name, size, source_r, slice(0, source_r.size))
 						else:
-							self.registers[name] = Register(name, size, self.registers[source], idxs)
+							self.registers[name] = Register(name, size, source_r, idxs)
 					else:
 						raise QSCOUTError("Cannot construct register from single qubit %s." % source)
-			else:
-				raise QSCOUTError("Register %s does not exist." % source)
 		else:
 			raise QSCOUTError("Name %s already used or invalid." % name)
 		return self.registers[name]

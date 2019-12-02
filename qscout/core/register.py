@@ -9,9 +9,12 @@ class Register:
 		self._alias_from = alias_from
 		self._alias_slice = alias_slice
 		if alias_slice is not None: # TODO: Support let-expression parametrized slices
+			start = alias_slice.start or 0
+			step = alias_slice.step
+			if step is None: step = 1
 			if alias_slice.stop > alias_from.size:
 				raise QSCOUTError("Index out of range.")
-			if ((alias_slice.stop - alias_slice.start) // alias_slice.step) != size:
+			if ((alias_slice.stop - start) // step) != size:
 				raise QSCOUTError("Register %s declared size does not match actual size.")
 		
 	@property
@@ -25,6 +28,14 @@ class Register:
 	@property
 	def fundamental(self):
 		return self._alias_from is None
+	
+	@property
+	def alias_from(self):
+		return self._alias_from
+	
+	@property
+	def alias_slice(self):
+		return self._alias_slice
 	
 	def resolve_qubit(self, idx):
 		if idx >= self.size:

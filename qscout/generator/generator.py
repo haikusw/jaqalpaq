@@ -14,11 +14,11 @@ def generate_qasm_program(circ):
 	program += "\n"
 	for const in circ.constants.values():
 		program += generate_qasm_let(const)
-	program += "\n"
+	if circ.constants: program += "\n"
 	for register in circ.registers.values():
 		if not register.fundamental:
 			program += generate_qasm_map(register)
-	program += "\n"
+	if len(circ.registers) > 1: program += "\n"
 	for macro in circ.macros.values():
 		program += generate_qasm_macro(macro)
 	for statement in circ.gates.gates:
@@ -40,7 +40,7 @@ def generate_qasm_map(register): # TODO: Support let-expression parametrized ind
 	if isinstance(register, NamedQubit):
 		return "map " + register.name + " " + register.alias_from.name + "[" + str(register.alias_index) + "]\n"
 	else:
-		return "map " + register.name + " [" + str(register.size) + "]" + register.alias_from.name + "[" + notate_slice(register.alias_slice) + "]\n"
+		return "map " + register.name + "[" + str(register.size) + "] " + register.alias_from.name + "[" + notate_slice(register.alias_slice) + "]\n"
 
 def generate_qasm_macro(macro):
 	return "macro " + macro.name + " " + " ".join([parameter.name for parameter in macro.parameters]) + " " + generate_qasm_block(macro.body, 0, False) + "\n"
@@ -77,4 +77,4 @@ def generate_qasm_value(val):
 	if isinstance(val, Constant) or isinstance(val, NamedQubit) or isinstance(val, Parameter):
 		return val.name
 	elif isinstance(val, float) or isinstance(val, int):
-		return str(val)
+		return str(val) # TODO: Request that we support scientific notation on angle parameters, or else fix this to not use scientific notation!
