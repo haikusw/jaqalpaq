@@ -44,7 +44,7 @@ _par_sep: "|" | _NEWLINE
 _NEWLINE: NEWLINE
 
 // Comment rules
-LINE_COMMENT: "//" /[^\n]/*
+LINE_COMMENT: "//" /[^\n]*/
 BLOCK_COMMENT: "/*" /.*/ "*/"
 %ignore LINE_COMMENT
 %ignore BLOCK_COMMENT
