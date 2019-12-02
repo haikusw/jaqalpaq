@@ -33,6 +33,9 @@ class Register:
 			return (self, idx)
 		else:
 			return self._alias_from.resolve_qubit(self.alias_slice.start + idx * self.alias_slice.step)
+	
+	def __getitem__(self, key):
+		return NamedQubit(self.name + '[' + str(key) + ']', self, key)
 
 class NamedQubit:
 	def __init__(self, name, alias_from, alias_index):

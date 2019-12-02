@@ -1,4 +1,4 @@
-from qscout.core import GateStatement, GateBlock, LoopStatement, Register, NamedQubit
+from qscout.core import GateStatement, GateBlock, LoopStatement, Register, NamedQubit, Constant, Parameter
 
 def notate_slice(s):
 	if s.step:
@@ -30,13 +30,13 @@ def generate_qasm_program(circ):
 			program += generate_qasm_block(statement, 0, True)
 	return program
 
-def generate_qasm_reg(register):
+def generate_qasm_reg(register): # TODO: Support let-expression parametrized indices
 	return "reg " + register.name + "[" + str(register.size) + "]\n"
 
 def generate_qasm_let(const):
-	return "let " + const.name + " " + str(const.value) + "\n"
+	return "let " + const.name + " " + generate_qasm_value(const.value) + "\n"
 
-def generate_qasm_map(register):
+def generate_qasm_map(register): # TODO: Support let-expression parametrized indices
 	if isinstance(register, NamedQubit):
 		return "map " + register.name + " " + register.alias_from.name + "[" + str(register.alias_index) + "]\n"
 	else:
@@ -46,10 +46,10 @@ def generate_qasm_macro(macro):
 	return "macro " + macro.name + " " + " ".join([parameter.name for parameter in macro.parameters]) + " " + generate_qasm_block(macro.body, 0, False) + "\n"
 
 def generate_qasm_gate(statement, depth):
-	return "\t" * depth + statement.name + " ".join([str(val) for val in statement.parameters.values()]) + "\n"
+	return "\t" * depth + statement.name + " " + " ".join([generate_qasm_value(val) for val in statement.parameters.values()]) + "\n"
 
 def generate_qasm_loop(statement, depth):
-	return "\t" * depth + "loop " + str(statement.iterations) + generate_qasm_block(statement.gates, depth, False)
+	return "\t" * depth + "loop " + generate_qasm_value(statement.iterations) + " " + generate_qasm_block(statement.gates, depth, False)
 
 def generate_qasm_block(statement, depth, indent_first_line):
 	output = ""
@@ -60,10 +60,21 @@ def generate_qasm_block(statement, depth, indent_first_line):
 	else:
 		output += "{\n"
 	for gate in statement.gates:
-		output += generate_qasm_gate(gate, depth+1)
+		if isinstance(gate, GateStatement):
+			output += generate_qasm_gate(gate, depth+1)
+		elif isinstance(gate, LoopStatement):
+			output += generate_qasm_loop(gate, depth+1)
+		elif isinstance(gate, GateBlock):
+			output += generate_qasm_block(gate, depth+1, True)
 	output += "\t" * depth
 	if statement.parallel:
 		output += ">\n"
 	else:
 		output += "}\n"
 	return output
+
+def generate_qasm_value(val):
+	if isinstance(val, Constant) or isinstance(val, NamedQubit) or isinstance(val, Parameter):
+		return val.name
+	elif isinstance(val, float) or isinstance(val, int):
+		return str(val)

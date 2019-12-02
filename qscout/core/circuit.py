@@ -59,6 +59,7 @@ class ScheduledCircuit:
 		if self.registers:
 			raise QSCOUTError("Only one reg statement per program is permitted.")
 		self.registers[name] = Register(name, size)
+		return self.registers[name]
 	
 	def map(self, name, size=None, source=None, idxs=None):
 		if self.validate_identifier(name):
@@ -88,6 +89,7 @@ class ScheduledCircuit:
 				raise QSCOUTError("Register %s does not exist." % source)
 		else:
 			raise QSCOUTError("Name %s already used or invalid." % name)
+		return self.registers[name]
 	
 	def macro(self, name, parameters=None, body=None):
 		if self.validate_identifier(name):
