@@ -1,7 +1,7 @@
 start: header_statements body_statements
 
 // Header Rules
-header_statements: [header_statement (_seq_sep header_statement)* _seq_sep?]
+header_statements: [_seq_sep? header_statement (_seq_sep header_statement)* _seq_sep?]
 ?header_statement: register_statement | map_statement | let_statement
 register_statement: "reg" array_declaration
 map_statement: "map" map_target map_source
@@ -39,8 +39,8 @@ _slice_begin_end: let_or_integer ":" let_or_signed_integer
 _slice_full: let_or_integer ":" let_or_signed_integer ":" let_or_signed_integer
 ?let_or_integer: IDENTIFIER | INTEGER
 ?let_or_signed_integer: IDENTIFIER | SIGNED_INTEGER
-_seq_sep: ";" | _NEWLINE
-_par_sep: "|" | _NEWLINE
+_seq_sep: ";" | _NEWLINE+
+_par_sep: "|" | _NEWLINE+
 _NEWLINE: NEWLINE
 
 // Comment rules
