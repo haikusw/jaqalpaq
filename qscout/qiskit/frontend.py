@@ -31,7 +31,7 @@ def qscout_circuit_from_qiskit_circuit(circuit):
 			target = instr[1][0]
 			if target.register.name in qsc.registers:
 				qsc.gate(QISKIT_NAMES[instr[0].name], qsc.registers[target.register.name][target.index], *[float(param) for param in instr[0].params])
-			else: # TODO: Have a dictionary somewhere that maps Qiskit names to QSCOUT names instead of relying on case tricks.
+			else:
 				raise QSCOUTError("Gate register %s invalid!" % target.register.name)
 		elif instr[0].name == 'ms':
 			targets = instr[1]
