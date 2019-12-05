@@ -1,12 +1,23 @@
 """Test that the grammar properly parses iQASM"""
 import unittest
+import pathlib
 
 from lark import Lark
 from lark.tree import Tree
 from lark.lexer import Token
 
 
-grammar_filename = '../iqasm/iqasm_grammar.lark'
+# Accommodate both running from the test directory (as PyCharm does) and running from the project root.
+
+top_grammar_filename = 'parser/iqasm_grammar.lark'
+test_grammar_filename = '../parser/iqasm_grammar.lark'
+
+if pathlib.Path(top_grammar_filename).exists():
+    grammar_filename = top_grammar_filename
+elif pathlib.Path(test_grammar_filename):
+    grammar_filename = test_grammar_filename
+else:
+    raise IOError('Cannot find grammar file')
 
 
 class ParserTesterMixin:
@@ -291,3 +302,21 @@ class ParserTester(ParserTesterMixin, unittest.TestCase):
         )
         act_tree = self.simplify_tree(tree)
         self.assertEqual(exp_tree, act_tree)
+
+    def test_empty_line(self):
+        """Test file beginning with empty lines"""
+        text = "\nreg q[7]"
+        parser = self.make_parser()
+        parser.parse(text)
+
+    def test_comment_line(self):
+        """Test full line comment"""
+        text = "reg q[7]\n// comment\n"
+        parser = self.make_parser()
+        parser.parse(text)
+
+    def test_line_with_whitespace(self):
+        """Test line with whitespace"""
+        text = "reg q[7]\n \n"
+        parser = self.make_parser()
+        parser.parse(text)
