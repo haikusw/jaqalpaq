@@ -1,10 +1,22 @@
 from unittest import TestCase
+import pathlib
 
 from lark import Lark
 
 from iqasm.parse import *
 
-grammar_filename = '../iqasm/iqasm_grammar.lark'
+
+# Accommodate both running from the test directory (as PyCharm does) and running from the project root.
+
+top_grammar_filename = 'iqasm/iqasm_grammar.lark'
+test_grammar_filename = '../iqasm/iqasm_grammar.lark'
+
+if pathlib.Path(top_grammar_filename).exists():
+    grammar_filename = top_grammar_filename
+elif pathlib.Path(test_grammar_filename):
+    grammar_filename = test_grammar_filename
+else:
+    raise IOError('Cannot find grammar file')
 
 
 class TestVisitor(ParseTreeVisitor):
