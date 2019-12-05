@@ -3,11 +3,11 @@ start: header_statements body_statements
 // Header Rules
 header_statements: [header_statement (_seq_sep header_statement)* _seq_sep?]
 ?header_statement: register_statement | map_statement | let_statement
-register_statement: "reg" array_declaration
-map_statement: "map" map_target map_source
+register_statement: _REG array_declaration
+map_statement: _MAP map_target map_source
 ?map_target: IDENTIFIER | array_declaration
 ?map_source: IDENTIFIER | array_slice
-let_statement: "let" IDENTIFIER SIGNED_NUMBER
+let_statement: _LET IDENTIFIER SIGNED_NUMBER
 
 // Body rules
 body_statements: [body_statement (_seq_sep body_statement)* _seq_sep?]
@@ -16,9 +16,9 @@ gate_statement: _gate_name _gate_arg_list
 _gate_name: IDENTIFIER
 _gate_arg_list: _gate_arg*
 _gate_arg: array_element | IDENTIFIER | SIGNED_NUMBER
-macro_definition: "macro" _gate_def_list gate_block
+macro_definition: _MACRO _gate_def_list gate_block
 _gate_def_list: IDENTIFIER*
-loop_statement: "loop" let_or_integer gate_block
+loop_statement: _LOOP let_or_integer gate_block
 
 // Gate blocks
 ?gate_block: sequential_gate_block | parallel_gate_block
@@ -53,6 +53,14 @@ BLOCK_COMMENT: "/*" /.*/ "*/"
 IDENTIFIER: NON_NUMERIC_IDENTIFIER_CHAR IDENTIFIER_CHAR*
 NON_NUMERIC_IDENTIFIER_CHAR: /[a-zA-Z_]/
 IDENTIFIER_CHAR: NON_NUMERIC_IDENTIFIER_CHAR | DIGIT
+
+// Keywords
+// We do this to allow us to forbid gates with these names
+_REG.2: "reg"
+_MAP.2: "map"
+_LET.2: "let"
+_MACRO.2: "macro"
+_LOOP.2: "loop"
 
 // Imports
 %import common.SIGNED_NUMBER

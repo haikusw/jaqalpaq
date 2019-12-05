@@ -6,14 +6,15 @@ from lark.tree import Tree
 from lark.lexer import Token
 
 
-grammar_filename = '../parser/iqasm_grammar.lark'
+grammar_filename = '../iqasm/iqasm_grammar.lark'
 
 
 class ParserTesterMixin:
 
     def make_parser(self, *args, **kwargs) -> Lark:
         with open(grammar_filename, 'r') as fd:
-             return Lark(fd, *args, **kwargs)
+            kwargs['parser'] = 'lalr'
+            return Lark(fd, *args, **kwargs)
 
     @classmethod
     def simplify_tree(cls, tree):

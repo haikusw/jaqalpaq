@@ -48,11 +48,15 @@ class TestVisitor(ParseTreeVisitor):
 
 class ParseTreeVisitorTester(TestCase):
 
+    def make_parser(self, *args, **kwargs) -> Lark:
+        with open(grammar_filename, 'r') as fd:
+            kwargs['parser'] = 'lalr'
+            return Lark(fd, *args, **kwargs)
+
     def test_array_declaration(self):
         """Test visiting an array declaration."""
         text = 'foo[42]'
-        with open(grammar_filename, 'r') as fd:
-            parser = Lark(fd, start='array_declaration')
+        parser = self.make_parser(start='array_declaration')
         tree = parser.parse(text)
         visitor = TestVisitor()
         exp_result = {'type': 'array_declaration', 'identifier': 'foo', 'size': 42}
@@ -62,8 +66,7 @@ class ParseTreeVisitorTester(TestCase):
     def test_array_element(self):
         """Test visiting an array element."""
         text = 'foo[42]'
-        with open(grammar_filename, 'r') as fd:
-            parser = Lark(fd, start='array_element')
+        parser = self.make_parser(start='array_element')
         tree = parser.parse(text)
         visitor = TestVisitor()
         exp_result = {'type': 'array_element', 'identifier': 'foo', 'index': 42}
@@ -78,8 +81,7 @@ class ParseTreeVisitorTester(TestCase):
             ('foo[0:42]', ('foo', slice(0, 42))),
             ('foo[a:3:-1]', ('foo', slice('a', 3, -1)))
         ]
-        with open(grammar_filename, 'r') as fd:
-            parser = Lark(fd, start='array_slice')
+        parser = self.make_parser(start='array_slice')
         visitor = TestVisitor()
         for text, (identifier, index_slice) in cases:
             tree = parser.parse(text)
@@ -93,8 +95,7 @@ class ParseTreeVisitorTester(TestCase):
             ('reg q[9]', ('q', 9)),
             ('reg foo [ abc ]', ('foo', 'abc'))
         ]
-        with open(grammar_filename, 'r') as fd:
-            parser = Lark(fd, start='register_statement')
+        parser = self.make_parser(start='register_statement')
         visitor = TestVisitor()
         for text, (identifier, size) in cases:
             tree = parser.parse(text)
@@ -109,8 +110,7 @@ class ParseTreeVisitorTester(TestCase):
             ('map q[2] r[0:4:2]', ({'type': 'array_declaration', 'identifier': 'q', 'size': 2},
                                      {'type': 'array_slice', 'identifier': 'r', 'index_slice': slice(0, 4, 2)}))
         ]
-        with open(grammar_filename, 'r') as fd:
-            parser = Lark(fd, start='map_statement')
+        parser = self.make_parser(start='map_statement')
         visitor = TestVisitor()
         for text, (target, source) in cases:
             tree = parser.parse(text)
@@ -124,8 +124,7 @@ class ParseTreeVisitorTester(TestCase):
             ('let pi 3.14', ('pi', 3.14)),
             ('let a -1', ('a', -1))
         ]
-        with open(grammar_filename, 'r') as fd:
-            parser = Lark(fd, start='let_statement')
+        parser = self.make_parser(start='let_statement')
         visitor = TestVisitor()
         for text, (identifier, number) in cases:
             tree = parser.parse(text)
@@ -139,8 +138,7 @@ class ParseTreeVisitorTester(TestCase):
             ('foo 42 43', ('foo', [42, 43])),
             ('bar a[2]', ('bar', [{'type': 'array_element', 'identifier': 'a', 'index': 2}]))
         ]
-        with open(grammar_filename, 'r') as fd:
-            parser = Lark(fd, start='gate_statement')
+        parser = self.make_parser(start='gate_statement')
         visitor = TestVisitor()
         for text, (gate_name, gate_args) in cases:
             tree = parser.parse(text)
@@ -155,8 +153,7 @@ class ParseTreeVisitorTester(TestCase):
             ('{foo\nbar}', [('foo', []), ('bar', [])]),
             ('{foo a[5]}', [('foo', [{'type': 'array_element', 'identifier': 'a', 'index': 5}])])
         ]
-        with open(grammar_filename, 'r') as fd:
-            parser = Lark(fd, start='sequential_gate_block')
+        parser = self.make_parser(start='sequential_gate_block')
         visitor = TestVisitor()
         for text, gate_statements in cases:
             tree = parser.parse(text)
@@ -173,8 +170,7 @@ class ParseTreeVisitorTester(TestCase):
             ('<foo\nbar>', [('foo', []), ('bar', [])]),
             ('<foo a[5]>', [('foo', [{'type': 'array_element', 'identifier': 'a', 'index': 5}])])
         ]
-        with open(grammar_filename, 'r') as fd:
-            parser = Lark(fd, start='parallel_gate_block')
+        parser = self.make_parser(start='parallel_gate_block')
         visitor = TestVisitor()
         for text, gate_statements in cases:
             tree = parser.parse(text)
@@ -192,8 +188,7 @@ class ParseTreeVisitorTester(TestCase):
                                          'statements': [{'type': 'gate_statement', 'gate_name': 'g0',
                                                          'gate_args': ['a', 'b']}]}))
         ]
-        with open(grammar_filename, 'r') as fd:
-            parser = Lark(fd, start='macro_definition')
+        parser = self.make_parser(start='macro_definition')
         visitor = TestVisitor()
         for text, (name, arguments, block) in cases:
             tree = parser.parse(text)
@@ -208,8 +203,7 @@ class ParseTreeVisitorTester(TestCase):
                                      'statements': [{'type': 'gate_statement',
                                                      'gate_name': 'g0', 'gate_args': ['a', 'b']}]}))
         ]
-        with open(grammar_filename, 'r') as fd:
-            parser = Lark(fd, start='loop_statement')
+        parser = self.make_parser(start='loop_statement')
         visitor = TestVisitor()
         for text, (repetition_count, block) in cases:
             tree = parser.parse(text)
@@ -242,8 +236,7 @@ class ParseTreeVisitorTester(TestCase):
                  ]
              })
         ]
-        with open(grammar_filename, 'r') as fd:
-            parser = Lark(fd, start='start')
+        parser = self.make_parser(start='start')
         visitor = TestVisitor()
         for text, exp_result in cases:
             tree = parser.parse(text)
