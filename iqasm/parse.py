@@ -1,15 +1,117 @@
 """Parsing related functions and data types"""
 
 from abc import ABC, abstractmethod
+import pathlib
 
-from lark import Lark, Transformer
+from lark import Lark, Transformer, Tree
 
 
 def parse_with_lark(text_or_fd, *args, **kwargs):
     """Parse the given text or file descriptor using Lark. Return the Lark parse tree."""
-    parser = Lark(start='start', *args, **kwargs)
+    parser = make_lark_parser(*args, **kwargs)
     tree = parser.parse(text_or_fd)
     return tree
+
+
+def make_lark_parser(*args, **kwargs):
+    """Create a lark parser with some default arguments."""
+    kwargs_with_defaults = {
+        'start': 'start',
+        'parser': 'lalr',
+        **kwargs
+    }
+    with open(get_grammar_path(), 'r') as fd:
+        parser = Lark(fd, *args, **kwargs_with_defaults)
+    return parser
+
+
+def get_grammar_path(filename='iqasm_grammar.lark'):
+    """Return the path to the lark grammar file."""
+    return pathlib.Path(__file__).parent / filename
+
+
+class VisitTransformer(Transformer):
+    """A Lark transformer that traverses the tree and calls the appropriate methods in the ParseTreeVisitor class.
+
+    If you're unsure of whether you should be using this class, you should not be using this class.
+    """
+
+    def __init__(self, visitor):
+        super().__init__(visit_tokens=True)
+        self._visitor = visitor
+
+    def start(self, args):
+        header_statements, body_statements = args
+        return self._visitor.visit_program(header_statements, body_statements)
+
+    def register_statement(self, args):
+        array_declaration, = args
+        return self._visitor.visit_register_statement(array_declaration)
+
+    def map_statement(self, args):
+        target, source = args
+        return self._visitor.visit_map_statement(target, source)
+
+    def let_statement(self, args):
+        identifier, number = args
+        return self._visitor.visit_let_statement(identifier, number)
+
+    def body_statements(self, args):
+        return args
+
+    def header_statements(self, args):
+        return args
+
+    def gate_statement(self, args):
+        gate_name = args[0]
+        gate_args = args[1:]
+        return self._visitor.visit_gate_statement(gate_name, gate_args)
+
+    def macro_definition(self, args):
+        identifiers = args[:-1]
+        gate_block = args[-1]
+        macro_name = identifiers[0]
+        macro_args = identifiers[1:]
+        return self._visitor.visit_macro_definition(macro_name, macro_args, gate_block)
+
+    def loop_statement(self, args):
+        repetition_count, block = args
+        return self._visitor.visit_loop_statement(repetition_count, block)
+
+    def sequential_gate_block(self, args):
+        return self._visitor.visit_sequential_gate_block(args)
+
+    def parallel_gate_block(self, args):
+        return self._visitor.visit_parallel_gate_block(args)
+
+    def array_declaration(self, args):
+        identifier, size = args
+        return self._visitor.visit_array_declaration(identifier, size)
+
+    def array_element(self, args):
+        identifier, index = args
+        return self._visitor.visit_array_element(identifier, index)
+
+    def array_slice(self, args):
+        identifier = args[0]
+        slice_args = args[1:]
+        index_slice = slice(*slice_args)
+        return self._visitor.visit_array_slice(identifier, index_slice)
+
+    def IDENTIFIER(self, string):
+        return self._visitor.visit_identifier(string)
+
+    def SIGNED_NUMBER(self, string):
+        return self._visitor.visit_signed_number(string)
+
+    def NUMBER(self, string):
+        return self._visitor.visit_number(string)
+
+    def INTEGER(self, string):
+        return self._visitor.visit_integer(string)
+
+    def SIGNED_INTEGER(self, string):
+        return self._visitor.visit_signed_integer(string)
 
 
 class ParseTreeVisitor(ABC):
@@ -22,6 +124,9 @@ class ParseTreeVisitor(ABC):
     they are overridden.
 
     """
+
+    # Derived classes may overwrite this to change behavior.
+    transformer_class = VisitTransformer
 
     def visit(self, tree):
         """Visit this tree and return the result of successively calling the visit_* methods."""
@@ -122,82 +227,103 @@ class ParseTreeVisitor(ABC):
         pass
 
 
-class VisitTransformer(Transformer):
-    """A Lark transformer that traverses the tree and calls the appropriate methods in the ParseTreeVisitor class."""
+class TreeRewriteVisitor(ParseTreeVisitor):
+    """A base class that serves to mostly rewrite a parse tree without knowing the exact implementation of the tree.
+    Each method by default returns or reconstructs its portion of the tree."""
 
-    def __init__(self, visitor: ParseTreeVisitor):
-        super().__init__(visit_tokens=True)
-        self._visitor = visitor
+    ##
+    # Overrides of visit methods
+    #
 
-    def start(self, args):
-        header_statements, body_statements = args
-        return self._visitor.visit_program(header_statements, body_statements)
+    def visit_identifier(self, token):
+        return token
 
-    def register_statement(self, args):
-        array_declaration, = args
-        return self._visitor.visit_register_statement(array_declaration)
+    def visit_signed_number(self, token):
+        return token
 
-    def map_statement(self, args):
-        target, source = args
-        return self._visitor.visit_map_statement(target, source)
+    def visit_number(self, token):
+        return token
 
-    def let_statement(self, args):
-        identifier, number = args
-        return self._visitor.visit_let_statement(identifier, number)
+    def visit_integer(self, token):
+        return token
 
-    def body_statements(self, args):
-        return args
+    def visit_signed_integer(self, token):
+        return token
 
-    def header_statements(self, args):
-        return args
+    def visit_program(self, header_statements, body_statements):
+        return self.make_program(header_statements, body_statements)
 
-    def gate_statement(self, args):
-        gate_name = args[0]
-        gate_args = args[1:]
-        return self._visitor.visit_gate_statement(gate_name, gate_args)
+    def visit_register_statement(self, array_declaration):
+        return self.make_register_statement(array_declaration)
 
-    def macro_definition(self, args):
-        identifiers = args[:-1]
-        gate_block = args[-1]
-        macro_name = identifiers[0]
-        macro_args = identifiers[1:]
-        return self._visitor.visit_macro_definition(macro_name, macro_args, gate_block)
+    def visit_map_statement(self, target, source):
+        return self.make_map_statement(target, source)
 
-    def loop_statement(self, args):
-        repetition_count, block = args
-        return self._visitor.visit_loop_statement(repetition_count, block)
+    def visit_let_statement(self, identifier, number):
+        return self.make_let_statement(identifier, number)
 
-    def sequential_gate_block(self, args):
-        return self._visitor.visit_sequential_gate_block(args)
+    def visit_gate_statement(self, gate_name, gate_args):
+        return self.make_gate_statement(gate_name, gate_args)
 
-    def parallel_gate_block(self, args):
-        return self._visitor.visit_parallel_gate_block(args)
+    def visit_macro_definition(self, name, arguments, block):
+        return self.make_macro_definition(name, arguments, block)
 
-    def array_declaration(self, args):
-        identifier, size = args
-        return self._visitor.visit_array_declaration(identifier, size)
+    def visit_loop_statement(self, repetition_count, block):
+        return self.make_loop_statement(repetition_count, block)
 
-    def array_element(self, args):
-        identifier, index = args
-        return self._visitor.visit_array_element(identifier, index)
+    def visit_sequential_gate_block(self, statements):
+        return self.make_sequential_gate_block(statements)
 
-    def array_slice(self, args):
-        identifier = args[0]
-        slice_args = args[1:]
-        index_slice = slice(*slice_args)
-        return self._visitor.visit_array_slice(identifier, index_slice)
+    def visit_parallel_gate_block(self, statements):
+        return self.make_parallel_gate_block(statements)
 
-    def IDENTIFIER(self, string):
-        return self._visitor.visit_identifier(string)
+    def visit_array_declaration(self, identifier, size):
+        return self.make_array_declaration(identifier, size)
 
-    def SIGNED_NUMBER(self, string):
-        return self._visitor.visit_signed_number(string)
+    def visit_array_element(self, identifier, index):
+        return self.make_array_element(identifier, index)
 
-    def NUMBER(self, string):
-        return self._visitor.visit_number(string)
+    def visit_array_slice(self, identifier, index_slice):
+        return self.make_array_slice(identifier, index_slice)
 
-    def INTEGER(self, string):
-        return self._visitor.visit_integer(string)
+    ##
+    # New methods to construct parts of the tree
+    #
 
-    def SIGNED_INTEGER(self, string):
-        return self._visitor.visit_signed_integer(string)
+    def make_program(self, header_statements, body_statements):
+        return Tree('start', [Tree('header_statements', header_statements), Tree('body_statements', body_statements)])
+
+    def make_register_statement(self, array_declaration):
+        return Tree('register_statement', [array_declaration])
+
+    def make_map_statement(self, target, source):
+        return Tree('map_statement', [target, source])
+
+    def make_let_statement(self, identifier, number):
+        return Tree('let_statement', [identifier, number])
+
+    def make_gate_statement(self, gate_name, gate_args):
+        return Tree('gate_statement', [gate_name] + gate_args)
+
+    def make_macro_definition(self, name, arguments, block):
+        return Tree('macro_definition', [name] + arguments + [block])
+
+    def make_loop_statement(self, repetition_count, block):
+        return Tree('loop_statement', [repetition_count, block])
+
+    def make_sequential_gate_block(self, statements):
+        return Tree('sequential_gate_block', statements)
+
+    def make_parallel_gate_block(self, statements):
+        return Tree('parallel_gate_block', statements)
+
+    def make_array_declaration(self, identifier, size):
+        return Tree('array_declaration', [identifier, size])
+
+    def make_array_element(self, identifier, index):
+        return Tree('array_element', [identifier, index])
+
+    def make_array_slice(self, identifier, index_slice):
+        # TODO: This is not quite right, but we should revisit this when correcting array slice semantics.
+        return Tree('array_slice', [identifier] + [index for index in [index_slice.start, index_slice.stop, index_slice.step]
+                                                   if index is not None])

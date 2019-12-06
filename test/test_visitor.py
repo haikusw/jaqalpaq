@@ -1,8 +1,6 @@
 from unittest import TestCase
 import pathlib
 
-from lark import Lark
-
 from iqasm.parse import *
 
 
@@ -255,3 +253,130 @@ class ParseTreeVisitorTester(TestCase):
             act_result = visitor.visit(tree)
             print(tree)
             self.assertEqual(exp_result, act_result, f"Failed to parse {text}")
+
+
+class TreeRewriteTester(TestCase):
+    """Tests for basic functionality of the TreeRewriteVisitor base class. All tests compare the tree against its
+    transformed self, which should be identical."""
+
+    def make_parser(self, *, start):
+        return make_lark_parser(start=start)
+
+    def run_tests(self, texts, parser):
+        for text in texts:
+            tree = parser.parse(text)
+            rw_tree = self.visitor.visit(tree)
+            self.assertEqual(tree, rw_tree)
+            self.assertIsNot(tree, rw_tree)
+
+    def setUp(self):
+        self.visitor = TreeRewriteVisitor()
+
+    def test_register_statement(self):
+        parser = self.make_parser(start='register_statement')
+        texts = [
+            'reg r[1]',
+            'reg QASDF[abc]'
+        ]
+        self.run_tests(texts, parser)
+
+    def test_map_statement(self):
+        parser = self.make_parser(start='map_statement')
+        texts = [
+            'map a b',
+            'map q[3] r[0:5:2]'
+        ]
+        self.run_tests(texts, parser)
+
+    def test_let_statement(self):
+        parser = self.make_parser(start='let_statement')
+        texts = [
+            'let pi 3.14',
+            'let q 5'
+        ]
+        self.run_tests(texts, parser)
+
+    def test_gate_statement(self):
+        parser = self.make_parser(start='gate_statement')
+        texts = [
+            'g0 a b',
+            'foo',
+            'h r[5]',
+            'r 1.23'
+        ]
+        self.run_tests(texts, parser)
+
+    def test_macro_definition(self):
+        parser = self.make_parser(start='macro_definition')
+        texts = [
+            'macro foo {}',
+            'macro foo {bar}',
+            'macro foo a b {g a b}',
+            'macro foo <>',
+            'macro foo <bar>'
+        ]
+        self.run_tests(texts, parser)
+
+    def test_loop_statement(self):
+        parser = self.make_parser(start='loop_statement')
+        texts = [
+            'loop 5 {}',
+            'loop 77 {g; h}',
+            'loop COUNT {foo}'
+        ]
+        self.run_tests(texts, parser)
+
+    def test_sequential_gate_block(self):
+        parser = self.make_parser(start='sequential_gate_block')
+        texts = [
+            '{}',
+            '{foo}',
+            '{foo\nbar}',
+            '{foo;bar;baz}',
+            '{foo ; <a | b>}'
+        ]
+        self.run_tests(texts, parser)
+
+    def test_parallel_gate_block(self):
+        parser = self.make_parser(start='parallel_gate_block')
+        texts = [
+            '<>',
+            '<foo>',
+            '<foo\nbar>',
+            '<foo|bar|baz>',
+            '<foo | {a ; b}>'
+        ]
+        self.run_tests(texts, parser)
+
+    def test_array_declaration(self):
+        parser = self.make_parser(start='array_declaration')
+        texts = [
+            'g[2]',
+            'foo[bar]'
+        ]
+        self.run_tests(texts, parser)
+
+    def test_array_element(self):
+        parser = self.make_parser(start='array_element')
+        texts = [
+            'g[2]',
+            'foo[bar]'
+        ]
+        self.run_tests(texts, parser)
+
+    def test_array_slice(self):
+        # TODO: add cases with blank values once we've fixed array slices in the grammar
+        parser = self.make_parser(start='array_slice')
+        texts = [
+            'a[0:5]',
+            'b[5:3:-1]',
+            'c[a:b]'
+        ]
+        self.run_tests(texts, parser)
+
+    def test_program(self):
+        parser = self.make_parser(start='start')
+        texts = [
+            'reg r[3]; g a b'
+        ]
+        self.run_tests(texts, parser)
