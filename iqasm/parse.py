@@ -3,7 +3,7 @@
 from abc import ABC, abstractmethod
 import pathlib
 
-from lark import Lark, Transformer, Tree
+from lark import Lark, Transformer, Tree, Token
 
 
 def parse_with_lark(text_or_fd, *args, **kwargs):
@@ -327,3 +327,26 @@ class TreeRewriteVisitor(ParseTreeVisitor):
         # TODO: This is not quite right, but we should revisit this when correcting array slice semantics.
         return Tree('array_slice', [identifier] + [index for index in [index_slice.start, index_slice.stop, index_slice.step]
                                                    if index is not None])
+
+    def make_identifier(self, identifier_string):
+        return Token('IDENTIFIER', identifier_string)
+
+    def make_signed_number(self, number):
+        if not isinstance(number, float) and not isinstance(number, int):
+            raise TypeError(f"Expected number, found {number}")
+        return Token('SIGNED_NUMBER', str(number))
+
+    def make_number(self, number):
+        if (not isinstance(number, float) and not isinstance(number, int)) or number < 0:
+            raise TypeError(f"Expected non-negative number, found {number}")
+        return Token('NUMBER', str(number))
+
+    def make_integer(self, number):
+        if not isinstance(number, int) or number < 0:
+            raise TypeError(f"Expected non-negative integer, found {number}")
+        return Token('INTEGER', str(number))
+
+    def make_signed_integer(self, number):
+        if not isinstance(number, int):
+            raise TypeError(f"Expected integer, found {number}")
+        return Token('SIGNED_INTEGER', str(number))
