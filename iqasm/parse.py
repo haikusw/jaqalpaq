@@ -57,10 +57,10 @@ class VisitTransformer(Transformer):
         return self._visitor.visit_let_statement(identifier, number)
 
     def body_statements(self, args):
-        return args
+        return [stmt for stmt in args if stmt is not None]
 
     def header_statements(self, args):
-        return args
+        return [stmt for stmt in args if stmt is not None]
 
     def gate_statement(self, args):
         gate_name = args[0]
@@ -350,3 +350,73 @@ class TreeRewriteVisitor(ParseTreeVisitor):
         if not isinstance(number, int):
             raise TypeError(f"Expected integer, found {number}")
         return Token('SIGNED_INTEGER', str(number))
+
+    ##
+    # New methods to check if a portion of a tree or token is of a given type
+    #
+
+    def is_program(self, tree):
+        return self._is_tree(tree, 'start')
+
+    def is_register_statement(self, tree):
+        return self._is_tree(tree, 'register_statement')
+
+    def is_map_statement(self, tree):
+        return self._is_tree(tree, 'map_statement')
+
+    def is_let_statement(self, tree):
+        return self._is_tree(tree, 'let_statement')
+
+    def is_body_statements(self, tree):
+        # Note: The visitor would not visit this directly but as part of visiting the whole program
+        return self._is_tree(tree, 'body_statements')
+
+    def is_header_statements(self, tree):
+        return self._is_tree(tree, 'header_statements')
+
+    def is_gate_statement(self, tree):
+        return self._is_tree(tree, 'gate_statement')
+
+    def is_macro_definition(self, tree):
+        return self._is_tree(tree, 'macro_definition')
+
+    def is_loop_statement(self, tree):
+        return self._is_tree(tree, 'loop_statement')
+
+    def is_sequential_gate_block(self, tree):
+        return self._is_tree(tree, 'sequential_gate_block')
+
+    def is_parallel_gate_block(self, tree):
+        return self._is_tree(tree, 'gate_block')
+
+    def is_array_declaration(self, tree):
+        return self._is_tree(tree, 'array_declaration')
+
+    def is_array_element(self, tree):
+        return self._is_tree(tree, 'array_element')
+
+    def is_array_slice(self, tree):
+        return self._is_tree(tree, 'array_slice')
+
+    def is_identifier(self, token):
+        return self._is_token(token, 'IDENTIFIER')
+
+    def is_signed_number(self, token):
+        return self._is_token(token, 'SIGNED_NUMBER')
+
+    def is_number(self, token):
+        return self._is_token(token, 'NUMBER')
+
+    def is_integer(self, token):
+        return self._is_token(token, 'INTEGER')
+
+    def is_signed_integer(self, token):
+        return self._is_token(token, 'SIGNED_INTEGER')
+
+    @staticmethod
+    def _is_tree(tree, data):
+        return isinstance(tree, Tree) and tree.data == data
+
+    @staticmethod
+    def _is_token(token, data):
+        return isinstance(token, Token) and token.type == data
