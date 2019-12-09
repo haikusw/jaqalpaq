@@ -1,7 +1,6 @@
 import unittest
 from pathlib import Path
-from test.test_parser import ParserTesterMixin
-
+from iqasm.testing.mixin import ParserTesterMixin
 
 top_example_dir = Path('examples')
 test_example_dir = Path('../examples')

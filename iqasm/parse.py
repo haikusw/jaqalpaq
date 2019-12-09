@@ -321,7 +321,7 @@ class TreeRewriteVisitor(ParseTreeVisitor):
         return Tree('macro_definition', [name] + arguments + [block])
 
     def make_loop_statement(self, repetition_count, block):
-        return Tree('loop_statement', [repetition_count, block])
+        return Tree('loop_statement', [self.enforce_integer_if_numeric(repetition_count), block])
 
     def make_sequential_gate_block(self, statements):
         return Tree('sequential_gate_block', statements)
@@ -330,15 +330,20 @@ class TreeRewriteVisitor(ParseTreeVisitor):
         return Tree('parallel_gate_block', statements)
 
     def make_array_declaration(self, identifier, size):
-        return Tree('array_declaration', [identifier, size])
+        return Tree('array_declaration', [identifier, self.enforce_integer_if_numeric(size)])
 
     def make_array_element(self, identifier, index):
-        return Tree('array_element', [identifier, index])
+        return Tree('array_element', [identifier, self.enforce_integer_if_numeric(index)])
 
     def make_array_slice(self, identifier, index_slice):
         # TODO: This is not quite right, but we should revisit this when correcting array slice semantics.
-        return Tree('array_slice', [identifier] + [index for index in [index_slice.start, index_slice.stop, index_slice.step]
-                                                   if index is not None])
+        index_start = self.enforce_integer_if_numeric(index_slice.start) if index_slice.start is not None else None
+        index_stop = self.enforce_signed_integer_if_numeric(index_slice.stop) if index_slice.stop is not None else None
+        index_step = self.enforce_signed_integer_if_numeric(index_slice.step) if index_slice.step is not None else None
+
+        indices = [index for index in [index_start, index_stop, index_step] if index is not None]
+
+        return Tree('array_slice', [identifier] + indices)
 
     def make_let_identifier(self, identifier):
         return Tree('let_identifier', [identifier])
@@ -365,6 +370,29 @@ class TreeRewriteVisitor(ParseTreeVisitor):
         if not isinstance(number, int):
             raise TypeError(f"Expected integer, found {number}")
         return Token('SIGNED_INTEGER', str(number))
+
+    def enforce_integer_if_numeric(self, number):
+        if self.is_integer(number):
+            return number
+        elif self.is_signed_integer(number) or self.is_number(number) or self.is_signed_number(number):
+            if float(number) < 0 or float(number) != int(number):
+                raise ValueError(f'Expected integer, found {number}')
+            return self.make_integer(int(number))
+        else:
+            # Likely an identifier
+            return number
+
+    def enforce_signed_integer_if_numeric(self, number):
+        if self.is_signed_integer(number):
+            return number
+        elif self.is_integer(number):
+            return self.make_signed_integer(int(number))
+        elif self.is_number(number) or self.is_signed_number(number):
+            if float(number) != int(number):
+                raise ValueError(f"Expected signed integer, found {number}")
+            return self.make_signed_integer(int(number))
+        else:
+            return number
 
     ##
     # New methods to check if a portion of a tree or token is of a given type
