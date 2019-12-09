@@ -98,6 +98,10 @@ class VisitTransformer(Transformer):
         index_slice = slice(*slice_args)
         return self._visitor.visit_array_slice(identifier, index_slice)
 
+    def let_identifier(self, args):
+        identifier = args[0]
+        return self._visitor.visit_let_identifier(identifier)
+
     def IDENTIFIER(self, string):
         return self._visitor.visit_identifier(string)
 
@@ -226,6 +230,11 @@ class ParseTreeVisitor(ABC):
         definite bound, and a string is an identifier used as that bound."""
         pass
 
+    @abstractmethod
+    def visit_let_identifier(self, identifier):
+        """Visit an identifier that can only exist if it was previously declared by a let statement."""
+        pass
+
 
 class TreeRewriteVisitor(ParseTreeVisitor):
     """A base class that serves to mostly rewrite a parse tree without knowing the exact implementation of the tree.
@@ -286,6 +295,9 @@ class TreeRewriteVisitor(ParseTreeVisitor):
     def visit_array_slice(self, identifier, index_slice):
         return self.make_array_slice(identifier, index_slice)
 
+    def visit_let_identifier(self, identifier):
+        return self.make_let_identifier(identifier)
+
     ##
     # New methods to construct parts of the tree
     #
@@ -327,6 +339,9 @@ class TreeRewriteVisitor(ParseTreeVisitor):
         # TODO: This is not quite right, but we should revisit this when correcting array slice semantics.
         return Tree('array_slice', [identifier] + [index for index in [index_slice.start, index_slice.stop, index_slice.step]
                                                    if index is not None])
+
+    def make_let_identifier(self, identifier):
+        return Tree('let_identifier', [identifier])
 
     def make_identifier(self, identifier_string):
         return Token('IDENTIFIER', identifier_string)

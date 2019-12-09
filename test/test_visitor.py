@@ -55,6 +55,9 @@ class TestVisitor(ParseTreeVisitor):
     def visit_array_slice(self, identifier, index_slice):
         return {'type': 'array_slice', 'identifier': identifier, 'index_slice': index_slice}
 
+    def visit_let_identifier(self, identifier):
+        return identifier
+
 
 class ParseTreeVisitorTester(TestCase):
 
@@ -251,7 +254,6 @@ class ParseTreeVisitorTester(TestCase):
         for text, exp_result in cases:
             tree = parser.parse(text)
             act_result = visitor.visit(tree)
-            print(tree)
             self.assertEqual(exp_result, act_result, f"Failed to parse {text}")
 
 

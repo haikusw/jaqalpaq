@@ -15,7 +15,7 @@ body_statements: [body_statement (_seq_sep body_statement)* _seq_sep?]
 gate_statement: _gate_name _gate_arg_list
 _gate_name: IDENTIFIER
 _gate_arg_list: _gate_arg*
-_gate_arg: array_element | IDENTIFIER | SIGNED_NUMBER
+_gate_arg: array_element | let_identifier | SIGNED_NUMBER
 macro_definition: _MACRO _gate_def_list gate_block
 _gate_def_list: IDENTIFIER*
 loop_statement: _LOOP let_or_integer gate_block
@@ -37,8 +37,9 @@ _slice_indexing: _slice_single | _slice_begin_end | _slice_full
 _slice_single: let_or_integer
 _slice_begin_end: let_or_integer ":" let_or_signed_integer
 _slice_full: let_or_integer ":" let_or_signed_integer ":" let_or_signed_integer
-?let_or_integer: IDENTIFIER | INTEGER
-?let_or_signed_integer: IDENTIFIER | SIGNED_INTEGER
+?let_or_integer: let_identifier | INTEGER
+?let_or_signed_integer: let_identifier | SIGNED_INTEGER
+let_identifier: IDENTIFIER  // As its own rule this is easier to filter on the backend
 _seq_sep: ";" | _NEWLINE+
 _par_sep: "|" | _NEWLINE+
 _NEWLINE: NEWLINE
