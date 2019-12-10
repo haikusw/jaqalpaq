@@ -10,7 +10,7 @@ class LetVisitorTester(ParserTesterMixin, TestCase):
         """Test replacing a gate argument."""
         text = "let x 5; foo x"
         exp_result = self.make_program(
-            self.make_header_statements(self.make_let_statement('x', 5)),
+            self.make_header_statements(),
             self.make_body_statements(self.make_gate_statement('foo', 5))
         )
         act_result = self.make_simple_tree(text)
@@ -20,7 +20,7 @@ class LetVisitorTester(ParserTesterMixin, TestCase):
         """Test replacing the loop count."""
         text = "let x 5; loop x {}"
         exp_result = self.make_program(
-            self.make_header_statements(self.make_let_statement('x', 5)),
+            self.make_header_statements(),
             self.make_body_statements(self.make_loop_statement(5, self.make_serial_gate_block()))
         )
         act_result = self.make_simple_tree(text)
@@ -31,7 +31,6 @@ class LetVisitorTester(ParserTesterMixin, TestCase):
         text = "let x 5; reg q[x]"
         exp_result = self.make_program(
             self.make_header_statements(
-                self.make_let_statement('x', 5),
                 self.make_register_statement(self.make_array_declaration('q', 5))
             ),
             self.make_body_statements()
@@ -43,7 +42,7 @@ class LetVisitorTester(ParserTesterMixin, TestCase):
         """Test replacing the index in an array element."""
         text = "let x 5; foo q[x]"
         exp_result = self.make_program(
-            self.make_header_statements(self.make_let_statement('x', 5)),
+            self.make_header_statements(),
             self.make_body_statements(self.make_gate_statement('foo', self.make_array_element('q', 5)))
         )
         act_result = self.make_simple_tree(text)
@@ -54,9 +53,6 @@ class LetVisitorTester(ParserTesterMixin, TestCase):
         text = "let a 0; let b 10; let c 2; map r[5] q[a:b:c]"
         exp_result = self.make_program(
             self.make_header_statements(
-                self.make_let_statement('a', 0),
-                self.make_let_statement('b', 10),
-                self.make_let_statement('c', 2),
                 self.make_map_statement(self.make_array_declaration('r', 5), self.make_array_slice('q', 0, 10, 2))
             ),
             self.make_body_statements()
@@ -91,7 +87,7 @@ class LetVisitorTester(ParserTesterMixin, TestCase):
         """Test using a dictionary to override the let statement given in the text."""
         text = 'let a 2; foo a'
         exp_result = self.make_program(
-            self.make_header_statements(self.make_let_statement('a', 2)),
+            self.make_header_statements(),
             self.make_body_statements(self.make_gate_statement('foo', 5))
         )
         override_dict = {'a': 5}

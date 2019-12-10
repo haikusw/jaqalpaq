@@ -30,7 +30,8 @@ class LetTransformer(TreeRewriteVisitor):
         if identifier in self.mapping:
             raise ValueError(f'Redefinition of let value {identifier}')
         self.mapping[identifier] = self.override_dict.get(identifier, number)
-        return self.make_let_statement(identifier, number)
+        # Return value of None effectively removes this statement from the parse tree
+        return None
 
     def visit_let_identifier(self, identifier):
         if identifier in self.mapping:
