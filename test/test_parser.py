@@ -9,8 +9,8 @@ from lark.lexer import Token
 
 # Accommodate both running from the test directory (as PyCharm does) and running from the project root.
 
-top_grammar_filename = 'parser/iqasm_grammar.lark'
-test_grammar_filename = '../parser/iqasm_grammar.lark'
+top_grammar_filename = 'iqasm/iqasm_grammar.lark'
+test_grammar_filename = '../iqasm/iqasm_grammar.lark'
 
 if pathlib.Path(top_grammar_filename).exists():
     grammar_filename = top_grammar_filename
@@ -24,7 +24,8 @@ class ParserTesterMixin:
 
     def make_parser(self, *args, **kwargs) -> Lark:
         with open(grammar_filename, 'r') as fd:
-             return Lark(fd, *args, **kwargs)
+            kwargs['parser'] = 'lalr'
+            return Lark(fd, *args, **kwargs)
 
     @classmethod
     def simplify_tree(cls, tree):
