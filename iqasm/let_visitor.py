@@ -1,4 +1,4 @@
-from .parse import TreeRewriteVisitor
+from .macro_context_visitor import MacroContextRewriteVisitor
 
 
 def expand_let_values(tree, override_dict=None):
@@ -18,11 +18,12 @@ def expand_let_values(tree, override_dict=None):
     return transformer.visit(tree)
 
 
-class LetTransformer(TreeRewriteVisitor):
+class LetTransformer(MacroContextRewriteVisitor):
     """A Transformer that automatically fills in let values. We use a lark transformer so that we can chain
     this """
 
     def __init__(self, override_dict):
+        super().__init__()
         self.mapping = {}
         self.override_dict = {label: self.make_signed_number(value) for label, value in override_dict.items()}
 
@@ -40,8 +41,12 @@ class LetTransformer(TreeRewriteVisitor):
             raise ValueError(f"Unknown identifier {identifier}")
 
     def visit_let_or_map_identifier(self, identifier):
-        if identifier in self.mapping:
+        if identifier in self.mapping and not self._is_identifier_shadowed(identifier):
             return self.mapping[identifier]
         else:
             # This could be an alias with the map statement.
-            return self.make_identifier(identifier)
+            return self.make_let_or_map_identifier(identifier)
+
+    def _is_identifier_shadowed(self, identifier):
+        """Return if this identifier is currently shadowed by a local macro argument."""
+        return self.macro_args is not None and identifier in self.macro_args

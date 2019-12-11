@@ -94,6 +94,58 @@ class LetVisitorTester(ParserTesterMixin, TestCase):
         act_result = self.make_simple_tree(text, override_dict=override_dict)
         self.assertEqual(exp_result, act_result)
 
+    def test_macro_sub(self):
+        """Test a substitution inside a macro."""
+        text = 'let a 2; macro foo {g0 a}'
+        exp_result = self.make_program(
+            self.make_header_statements(),
+            self.make_body_statements(
+                self.make_macro_statement(
+                    'foo',
+                    self.make_serial_gate_block(
+                        self.make_gate_statement('g0', 2)
+                    )
+                )
+            )
+        )
+        act_result = self.make_simple_tree(text)
+        self.assertEqual(exp_result, act_result)
+
+    def test_macro_nosub(self):
+        """Test not substituting a value inside a macro."""
+        text = 'let a 2; macro foo {g0 b}'
+        exp_result = self.make_program(
+            self.make_header_statements(),
+            self.make_body_statements(
+                self.make_macro_statement(
+                    'foo',
+                    self.make_serial_gate_block(
+                        self.make_gate_statement('g0', self.make_let_or_map_identifier('b'))
+                    )
+                )
+            )
+        )
+        act_result = self.make_simple_tree(text)
+        self.assertEqual(exp_result, act_result)
+
+    def test_macro_arg_shadow(self):
+        """Test not substituting inside a macro because one of the macro's arguments shadows the alias."""
+        text = 'let a 2; macro foo a {g0 a}'
+        exp_result = self.make_program(
+            self.make_header_statements(),
+            self.make_body_statements(
+                self.make_macro_statement(
+                    'foo',
+                    'a',
+                    self.make_serial_gate_block(
+                        self.make_gate_statement('g0', self.make_let_or_map_identifier('a'))
+                    )
+                )
+            )
+        )
+        act_result = self.make_simple_tree(text)
+        self.assertEqual(exp_result, act_result)
+
     def test_override_nonexistent_let(self):
         """Test that we cannot override a value that is not given in the text."""
         text = 'foo x[a]'
