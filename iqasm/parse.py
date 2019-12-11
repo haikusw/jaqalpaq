@@ -68,11 +68,21 @@ class VisitTransformer(Transformer):
         return self._visitor.visit_gate_statement(gate_name, gate_args)
 
     def macro_definition(self, args):
-        identifiers = args[:-1]
-        gate_block = args[-1]
+        identifiers = args[0].children
+        gate_block = args[1]
         macro_name = identifiers[0]
         macro_args = identifiers[1:]
         return self._visitor.visit_macro_definition(macro_name, macro_args, gate_block)
+
+    def macro_header(self, args):
+        macro_name = args[0]
+        macro_args = args[1:]
+        ret = self._visitor.visit_macro_header(macro_name, macro_args)
+        if ret is None:
+            # This allows macro_header to be optional in the visitor
+            return Tree('macro_header', args)
+        else:
+            return ret
 
     def loop_statement(self, args):
         repetition_count, block = args
@@ -197,6 +207,11 @@ class ParseTreeVisitor(ABC):
     def visit_macro_definition(self, name, arguments, block):
         """Visit a macro definition. The arguments are gathered into a list, but the block is merely the result of
         the appropriate visit_*_block method."""
+        pass
+
+    def visit_macro_header(self, name, arguments):
+        """Visit the head of a macro. This override is optional as the information will be passed to
+        visit_macro_definiton."""
         pass
 
     @abstractmethod
@@ -330,7 +345,11 @@ class TreeRewriteVisitor(ParseTreeVisitor):
         return Tree('gate_statement', [gate_name] + gate_args)
 
     def make_macro_definition(self, name, arguments, block):
-        return Tree('macro_definition', [name] + arguments + [block])
+        macro_header = self.make_macro_header(name, arguments)
+        return Tree('macro_definition', [macro_header, block])
+
+    def make_macro_header(self, name, arguments):
+        return Tree('macro_header', [name] + arguments)
 
     def make_loop_statement(self, repetition_count, block):
         return Tree('loop_statement', [self.enforce_integer_if_numeric(repetition_count), block])

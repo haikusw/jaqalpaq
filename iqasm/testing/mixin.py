@@ -100,7 +100,9 @@ class ParserTesterMixin:
     def make_macro_statement(cls, name, *args):
         gate_block = args[-1]
         args = args[:-1]
-        children = [cls.make_identifier(name)] + [cls.make_identifier(arg) for arg in args] + [gate_block]
+        macro_header = {'type': 'macro_header',
+                        'children': [cls.make_identifier(name)] + [cls.make_identifier(arg) for arg in args]}
+        children = [macro_header, gate_block]
         return {'type': 'macro_definition', 'children': children}
 
     @classmethod
