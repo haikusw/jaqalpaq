@@ -102,8 +102,8 @@ class ParserTesterMixin:
         args = args[:-1]
         macro_header = {'type': 'macro_header',
                         'children': [cls.make_identifier(name)] + [cls.make_identifier(arg) for arg in args]}
-        children = [macro_header, gate_block]
-        return {'type': 'macro_definition', 'children': children}
+        macro_gate_block = {'type': 'macro_gate_block', 'children': [gate_block]}
+        return {'type': 'macro_definition', 'children': [macro_header, macro_gate_block]}
 
     @classmethod
     def make_loop_statement(cls, iterations, block):

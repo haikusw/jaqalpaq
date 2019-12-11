@@ -37,6 +37,9 @@ class TestVisitor(ParseTreeVisitor):
     def visit_macro_definition(self, name, arguments, block):
         return {'type': 'macro_definition', 'name': name, 'arguments': arguments, 'block': block}
 
+    def visit_macro_gate_block(self, block):
+        return {'type': 'macro_gate_block', 'block': block}
+
     def visit_loop_statement(self, repetition_count, block):
         return {'type': 'loop_statement', 'repetition_count': repetition_count, 'block': block}
 
@@ -200,9 +203,10 @@ class ParseTreeVisitorTester(TestCase):
         """Test visiting a macro definition."""
         cases = [
             ('macro foo a b {g0 a b}', ('foo', ['a', 'b'],
-                                        {'type': 'sequential_gate_block',
-                                         'statements': [{'type': 'gate_statement', 'gate_name': 'g0',
-                                                         'gate_args': ['a', 'b']}]}))
+                                        {'type': 'macro_gate_block',
+                                         'block': {'type': 'sequential_gate_block',
+                                                   'statements': [{'type': 'gate_statement', 'gate_name': 'g0',
+                                                                   'gate_args': ['a', 'b']}]}}))
         ]
         parser = self.make_parser(start='macro_definition')
         visitor = TestVisitor()

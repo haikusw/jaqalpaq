@@ -84,6 +84,15 @@ class VisitTransformer(Transformer):
         else:
             return ret
 
+    def macro_gate_block(self, args):
+        block = args[0]
+        ret = self._visitor.visit_macro_gate_block(block)
+        if ret is None:
+            # This allows macro_block to be optional in the visitor
+            return Tree('macro_gate_block', args)
+        else:
+            return ret
+
     def loop_statement(self, args):
         repetition_count, block = args
         return self._visitor.visit_loop_statement(repetition_count, block)
@@ -211,7 +220,12 @@ class ParseTreeVisitor(ABC):
 
     def visit_macro_header(self, name, arguments):
         """Visit the head of a macro. This override is optional as the information will be passed to
-        visit_macro_definiton."""
+        visit_macro_definition."""
+        pass
+
+    def visit_macro_gate_block(self, block):
+        """Visit the block of a macro. This override is optional as the information will be passed to
+        visit_macro_definition."""
         pass
 
     @abstractmethod
@@ -346,10 +360,18 @@ class TreeRewriteVisitor(ParseTreeVisitor):
 
     def make_macro_definition(self, name, arguments, block):
         macro_header = self.make_macro_header(name, arguments)
-        return Tree('macro_definition', [macro_header, block])
+        macro_gate_block = self.make_macro_gate_block(block)
+        return Tree('macro_definition', [macro_header, macro_gate_block])
 
     def make_macro_header(self, name, arguments):
         return Tree('macro_header', [name] + arguments)
+
+    def make_macro_gate_block(self, block):
+        if self.is_macro_gate_block(block):
+            # This allows use for much more transparent uses of this method and allows other methods to ignore
+            # the exact form of the gate block they receive, which in term makes them more flexible.
+            return block
+        return Tree('macro_gate_block', [block])
 
     def make_loop_statement(self, repetition_count, block):
         return Tree('loop_statement', [self.enforce_integer_if_numeric(repetition_count), block])
@@ -456,6 +478,12 @@ class TreeRewriteVisitor(ParseTreeVisitor):
 
     def is_macro_definition(self, tree):
         return self._is_tree(tree, 'macro_definition')
+
+    def is_macro_header(self, tree):
+        return self._is_tree(tree, 'macro_header')
+
+    def is_macro_gate_block(self, tree):
+        return self._is_tree(tree, 'macro_gate_block')
 
     def is_loop_statement(self, tree):
         return self._is_tree(tree, 'loop_statement')
