@@ -1,5 +1,6 @@
 from .parse import TreeRewriteVisitor
 
+
 class MacroContextRewriteVisitor(TreeRewriteVisitor):
     """A base class for visitors that need to account for whether they are operating in a macro context or not."""
 
@@ -21,4 +22,11 @@ class MacroContextRewriteVisitor(TreeRewriteVisitor):
     def macro_args(self):
         return self._macro_args
 
-    
+    def visit_macro_header(self, name, arguments):
+        self._macro_name = self.extract_identifier(name)
+        self._macro_args = [self.extract_identifier(arg) for arg in arguments]
+
+    def visit_macro_gate_block(self, block):
+        # Since this method is called after visiting everything in the block, we clean up the context.
+        self._macro_name = None
+        self._macro_args = None
