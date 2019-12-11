@@ -50,10 +50,10 @@ class LetVisitorTester(ParserTesterMixin, TestCase):
 
     def test_array_slice(self):
         """Test replacing elements of an array slice."""
-        text = "let a 0; let b 10; let c 2; map r[5] q[a:b:c]"
+        text = "let a 0; let b 10; let c 2; map r q[a:b:c]"
         exp_result = self.make_program(
             self.make_header_statements(
-                self.make_map_statement(self.make_array_declaration('r', 5), self.make_array_slice('q', 0, 10, 2))
+                self.make_map_statement('r', self.make_array_slice('q', 0, 10, 2))
             ),
             self.make_body_statements()
         )

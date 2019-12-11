@@ -5,8 +5,8 @@ header_statements: [_seq_sep? header_statement (_seq_sep header_statement)* _seq
 ?header_statement: register_statement | map_statement | let_statement
 register_statement: _REG array_declaration
 map_statement: _MAP map_target map_source
-?map_target: IDENTIFIER | array_declaration
-?map_source: IDENTIFIER | array_slice
+?map_target: IDENTIFIER
+?map_source: IDENTIFIER | array_slice | array_element
 let_statement: _LET IDENTIFIER SIGNED_NUMBER
 
 // Body rules

@@ -32,16 +32,16 @@ class ParserTester(ParserTesterMixin, unittest.TestCase):
         text = "map a b"
         parser = self.make_parser(start='map_statement')
         tree = parser.parse(text)
-        exp_tree = self.make_map_statement(self.make_identifier('a'), self.make_identifier('b'))
+        exp_tree = self.make_map_statement('a', self.make_identifier('b'))
         act_tree = self.simplify_tree(tree)
         self.assertEqual(exp_tree, act_tree)
 
     def test_map_array(self):
         """Test parsing the map statement creating an array"""
-        text = "map a[2] q[1:3]"
+        text = "map a q[1:3]"
         parser = self.make_parser(start='map_statement')
         tree = parser.parse(text)
-        exp_tree = self.make_map_statement(self.make_array_declaration('a', 2), self.make_array_slice('q', 1, 3))
+        exp_tree = self.make_map_statement('a', self.make_array_slice('q', 1, 3))
         act_tree = self.simplify_tree(tree)
         self.assertEqual(exp_tree, act_tree)
 
@@ -139,12 +139,12 @@ class ParserTester(ParserTesterMixin, unittest.TestCase):
     def test_header(self):
         """Test a bunch of header statements together."""
         text = "reg q[3]\n" +\
-            "map a[2] q[0:3:2]\n" +\
+            "map a q[0:3:2]\n" +\
             "let pi 3.14; let reps 100\n"
         parser = self.make_parser(start='header_statements')
         tree = parser.parse(text)
         reg_stmt = self.make_register_statement(self.make_array_declaration('q', 3))
-        map_stmt = self.make_map_statement(self.make_array_declaration('a', 2), self.make_array_slice('q', 0, 3, 2))
+        map_stmt = self.make_map_statement('a', self.make_array_slice('q', 0, 3, 2))
         let0_stmt = self.make_let_statement('pi', 3.14)
         let1_stmt = self.make_let_statement('reps', 100)
         exp_tree = self.make_header_statements(reg_stmt, map_stmt, let0_stmt, let1_stmt)

@@ -120,8 +120,8 @@ class ParseTreeVisitorTester(TestCase):
         """Test visiting a map statement."""
         cases = [
             ('map a b', ('a', 'b')),
-            ('map q[2] r[0:4:2]', ({'type': 'array_declaration', 'identifier': 'q', 'size': 2},
-                                     {'type': 'array_slice', 'identifier': 'r', 'index_slice': slice(0, 4, 2)}))
+            ('map q r[0:4:2]', ('q',
+                                {'type': 'array_slice', 'identifier': 'r', 'index_slice': slice(0, 4, 2)}))
         ]
         parser = self.make_parser(start='map_statement')
         visitor = TestVisitor()
@@ -286,7 +286,7 @@ class TreeRewriteTester(TestCase):
         parser = self.make_parser(start='map_statement')
         texts = [
             'map a b',
-            'map q[3] r[0:5:2]'
+            'map q r[0:5:2]'
         ]
         self.run_tests(texts, parser)
 

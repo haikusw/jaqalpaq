@@ -51,8 +51,8 @@ class ParserTesterMixin:
         return {'type': 'SIGNED_NUMBER', 'value': str(value)}
 
     @classmethod
-    def make_map_statement(cls, source, target):
-        return {'type': 'map_statement', 'children': [source, target]}
+    def make_map_statement(cls, target, source):
+        return {'type': 'map_statement', 'children': [cls.make_identifier(target), source]}
 
     @classmethod
     def make_array_slice(cls, name, first_arg, *args):

@@ -463,3 +463,80 @@ class TreeRewriteVisitor(ParseTreeVisitor):
     @staticmethod
     def _is_token(token, data):
         return isinstance(token, Token) and token.type == data
+
+    ##
+    # Deconstruct trees and tokens into their parts, used to go top down instead of (actually in addition to) bottom-up
+    #
+
+    def deconstruct_array_declaration(self, tree):
+        """Return the portion of the tree that is the identifier and the size."""
+        identifier, size = tree.children
+        return identifier, size
+
+    def deconstruct_array_slice(self, tree):
+        """Return the portion of the tree that is the identifier and a 3-tuple with tokens representing the slice."""
+        identifier = tree.children[0]
+        slice_args = tree.children[1:]
+        if len(slice_args) == 1:
+            slice_args = (None, slice_args[0], None)
+        elif len(slice_args) == 2:
+            slice_args = (slice_args[0], slice_args[1], None)
+        elif len(slice_args) == 3:
+            slice_args = tuple(slice_args)
+        else:
+            raise ValueError(f"Expected 1, 2, or 3 element slice, found {slice_args}")
+
+        return identifier, slice_args
+
+    def deconstruct_array_element(self, tree):
+        """Return the portion of the tree that is the identifier and the index."""
+        identifier, index = tree.children
+        return identifier, index
+
+    def extract_identifier(self, token):
+        """Return an identifier as a string."""
+        return str(token)
+
+    def extract_integer(self, token):
+        return int(token)
+
+    def extract_signed_integer(self, token):
+        return int(token)
+
+    def extract_number(self, token):
+        return float(token)
+
+    def extract_signed_number(self, token):
+        return float(token)
+
+    def extract_token(self, token):
+        """Figure out what the token is and call the appropriate extract method."""
+        if self.is_identifier(token):
+            return self.extract_identifier(token)
+        elif self.is_integer(token):
+            return self.extract_integer(token)
+        elif self.is_signed_integer(token):
+            return self.extract_signed_integer(token)
+        elif self.is_number(token):
+            return self.extract_number(token)
+        elif self.is_signed_number(token):
+            return self.extract_signed_number(token)
+        else:
+            raise TypeError(f"Unknown token: {token}")
+
+    def extract_array_slice(self, tree):
+        """Return a Python slice object from the given tree."""
+        # TODO: Fix this when we fix array slice semantics
+        def extract_value(arg):
+            if self.is_identifier(arg):
+                return self.extract_identifier(arg)
+            elif self.is_integer(arg):
+                return self.extract_integer(arg)
+            elif self.is_signed_integer(arg):
+                return self.extract_signed_integer(arg)
+            else:
+                raise ValueError(f"Unknown tree in array slice: {arg}")
+        args = [extract_value(arg) for arg in tree.children[1:]]
+        if len(args) > 3:
+            raise ValueError(f"Too many slice arguments")
+        return slice(*args)
