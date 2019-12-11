@@ -68,7 +68,7 @@ class LetVisitorTester(ParserTesterMixin, TestCase):
 
     def test_unknown_let(self):
         """Test that use of an unknown value raises an exception"""
-        text = 'foo x'
+        text = 'foo a[x]'
         with self.assertRaises(Exception):
             self.make_simple_tree(text)
 
@@ -96,7 +96,7 @@ class LetVisitorTester(ParserTesterMixin, TestCase):
 
     def test_override_nonexistent_let(self):
         """Test that we cannot override a value that is not given in the text."""
-        text = 'foo a'
+        text = 'foo x[a]'
         override_dict = {'a': 5}
         with self.assertRaises(Exception):
             self.make_simple_tree(text, override_dict=override_dict)

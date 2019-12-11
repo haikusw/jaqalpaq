@@ -102,6 +102,10 @@ class VisitTransformer(Transformer):
         identifier = args[0]
         return self._visitor.visit_let_identifier(identifier)
 
+    def let_or_map_identifier(self, args):
+        identifier = args[0]
+        return self._visitor.visit_let_or_map_identifier(identifier)
+
     def IDENTIFIER(self, string):
         return self._visitor.visit_identifier(string)
 
@@ -235,6 +239,11 @@ class ParseTreeVisitor(ABC):
         """Visit an identifier that can only exist if it was previously declared by a let statement."""
         pass
 
+    @abstractmethod
+    def visit_let_or_map_identifier(self, identifier):
+        """Visit an identifier that must be declared in either a let or map statement."""
+        pass
+
 
 class TreeRewriteVisitor(ParseTreeVisitor):
     """A base class that serves to mostly rewrite a parse tree without knowing the exact implementation of the tree.
@@ -298,6 +307,9 @@ class TreeRewriteVisitor(ParseTreeVisitor):
     def visit_let_identifier(self, identifier):
         return self.make_let_identifier(identifier)
 
+    def visit_let_or_map_identifier(self, identifier):
+        return self.make_let_or_map_identifier(identifier)
+
     ##
     # New methods to construct parts of the tree
     #
@@ -347,6 +359,9 @@ class TreeRewriteVisitor(ParseTreeVisitor):
 
     def make_let_identifier(self, identifier):
         return Tree('let_identifier', [identifier])
+
+    def make_let_or_map_identifier(self, identifier):
+        return Tree('let_or_map_identifier', [identifier])
 
     def make_identifier(self, identifier_string):
         return Token('IDENTIFIER', identifier_string)

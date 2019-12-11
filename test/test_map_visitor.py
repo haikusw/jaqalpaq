@@ -27,10 +27,11 @@ class MapVisitorTester(ParserTesterMixin, TestCase):
 
     def test_single_element(self):
         """Test a substitution of a single register location to a non-array alias."""
+        # TODO: This case is actually ambiguous with the current grammar as q[1] can be an element or slice
         text = "reg q[3]; map a q[1]; foo a"
         exp_result = self.make_program(
             self.make_header_statements(self.make_register_statement(self.make_array_declaration('q', 3))),
-            self.make_body_statements(self.make_gate_statement('foo', 'a'))
+            self.make_body_statements(self.make_gate_statement('foo', self.make_array_element('q', 1)))
         )
         act_result = self.make_simple_tree(text)
         self.assertEqual(exp_result, act_result)

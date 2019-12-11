@@ -38,3 +38,10 @@ class LetTransformer(TreeRewriteVisitor):
             return self.mapping[identifier]
         else:
             raise ValueError(f"Unknown identifier {identifier}")
+
+    def visit_let_or_map_identifier(self, identifier):
+        if identifier in self.mapping:
+            return self.mapping[identifier]
+        else:
+            # This could be an alias with the map statement.
+            return self.make_identifier(identifier)

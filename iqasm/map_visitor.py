@@ -83,6 +83,20 @@ class MapTransformer(TreeRewriteVisitor):
 
         return self.make_array_element(identifier, index)
 
+    def visit_let_or_map_identifier(self, identifier):
+        """Replace this identifier with the appropriate alias, if available."""
+
+        extracted_id = self.extract_identifier(identifier)
+
+        if extracted_id in self.mapping:
+            mapped_identifier, mapped_range = self.mapping[extracted_id]
+            if not isinstance(mapped_range, int):
+                raise ValueError(f"Array {identifier} used in scalar context")
+            return self.make_array_element(self.make_identifier(mapped_identifier), self.make_integer(mapped_range))
+        else:
+            # This could have been assigned in a let statement.
+            return identifier
+
     def _map_array_element(self, identifier, index):
         """Map an alias array element to the appropriate register location.
 

@@ -39,6 +39,10 @@ class ParserTesterMixin:
         return {'type': 'let_identifier', 'children': [cls.make_identifier(name)]}
 
     @classmethod
+    def make_let_or_map_identifier(cls, name):
+        return {'type': 'let_or_map_identifier', 'children': [cls.make_identifier(name)]}
+
+    @classmethod
     def make_integer(cls, value):
         return {'type': 'INTEGER', 'value': str(value)}
 
@@ -77,7 +81,7 @@ class ParserTesterMixin:
     @classmethod
     def make_gate_arg(cls, arg):
         if isinstance(arg, str):
-            return cls.make_let_identifier(arg)
+            return cls.make_let_or_map_identifier(arg)
         elif isinstance(arg, dict):
             # Already converted.
             return arg

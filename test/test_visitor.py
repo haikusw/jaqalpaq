@@ -58,6 +58,9 @@ class TestVisitor(ParseTreeVisitor):
     def visit_let_identifier(self, identifier):
         return identifier
 
+    def visit_let_or_map_identifier(self, identifier):
+        return identifier
+
 
 class ParseTreeVisitorTester(TestCase):
 
