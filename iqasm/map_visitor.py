@@ -1,4 +1,4 @@
-from .parse import TreeRewriteVisitor
+from .macro_context_visitor import MacroContextRewriteVisitor
 
 
 def expand_map_values(tree):
@@ -9,10 +9,12 @@ def expand_map_values(tree):
     return transformer.visit(tree)
 
 
-class MapTransformer(TreeRewriteVisitor):
+class MapTransformer(MacroContextRewriteVisitor):
     """A transformer that replaces mapped entries with register entries."""
 
     def __init__(self):
+        super().__init__()
+
         # Mapping of register names to their size, used to validate map statements.
         self.registers = {}
 
@@ -88,14 +90,14 @@ class MapTransformer(TreeRewriteVisitor):
 
         extracted_id = self.extract_identifier(identifier)
 
-        if extracted_id in self.mapping:
+        if extracted_id in self.mapping and not self._is_identifier_shadowed(identifier):
             mapped_identifier, mapped_range = self.mapping[extracted_id]
             if not isinstance(mapped_range, int):
                 raise ValueError(f"Array {identifier} used in scalar context")
             return self.make_array_element(self.make_identifier(mapped_identifier), self.make_integer(mapped_range))
         else:
             # This could have been assigned in a let statement.
-            return identifier
+            return self.make_let_or_map_identifier(identifier)
 
     def _map_array_element(self, identifier, index):
         """Map an alias array element to the appropriate register location.
@@ -119,3 +121,7 @@ class MapTransformer(TreeRewriteVisitor):
             raise ValueError(f"Array element {identifier}[{index}] out of range")
 
         return register_id, register_index
+
+    def _is_identifier_shadowed(self, identifier):
+        """Return if this identifier is currently shadowed by a local macro argument."""
+        return self.macro_args is not None and identifier in self.macro_args

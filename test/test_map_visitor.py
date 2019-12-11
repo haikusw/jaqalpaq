@@ -36,6 +36,58 @@ class MapVisitorTester(ParserTesterMixin, TestCase):
         act_result = self.make_simple_tree(text)
         self.assertEqual(exp_result, act_result)
 
+    def test_macro_sub(self):
+        """Test substitution within a macro."""
+        text = "reg q[3]; map a q; macro foo {g0 a[0]}"
+        exp_result = self.make_program(
+            self.make_header_statements(self.make_register_statement(self.make_array_declaration('q', 3))),
+            self.make_body_statements(
+                self.make_macro_statement(
+                    'foo',
+                    self.make_serial_gate_block(
+                        self.make_gate_statement('g0', self.make_array_element('q', 0))
+                    )
+                )
+            )
+        )
+        act_result = self.make_simple_tree(text)
+        self.assertEqual(exp_result, act_result)
+
+    def test_macro_nosub(self):
+        """Test not substituting within a macro."""
+        text = "reg q[3]; map b q[0]; macro foo {g0 a}"
+        exp_result = self.make_program(
+            self.make_header_statements(self.make_register_statement(self.make_array_declaration('q', 3))),
+            self.make_body_statements(
+                self.make_macro_statement(
+                    'foo',
+                    self.make_serial_gate_block(
+                        self.make_gate_statement('g0', self.make_let_or_map_identifier('a'))
+                    )
+                )
+            )
+        )
+        act_result = self.make_simple_tree(text)
+        self.assertEqual(exp_result, act_result)
+
+    def test_macro_shadowed(self):
+        """Test not substituting within a macro because the alias is shadowed by a parameter"""
+        text = "reg q[3]; map b q[0]; macro foo b {g0 b}"
+        exp_result = self.make_program(
+            self.make_header_statements(self.make_register_statement(self.make_array_declaration('q', 3))),
+            self.make_body_statements(
+                self.make_macro_statement(
+                    'foo',
+                    'b',
+                    self.make_serial_gate_block(
+                        self.make_gate_statement('g0', self.make_let_or_map_identifier('b'))
+                    )
+                )
+            )
+        )
+        act_result = self.make_simple_tree(text)
+        self.assertEqual(exp_result, act_result)
+
     def make_simple_tree(self, text):
         parser = self.make_parser()
         tree = parser.parse(text)
