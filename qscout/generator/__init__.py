@@ -1,1 +1,1 @@
-from .generator import generate_qasm_program
+from .generator import generate_jaqal_program
