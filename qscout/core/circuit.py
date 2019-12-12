@@ -39,6 +39,27 @@ class ScheduledCircuit:
 	def gates(self):
 		return self._gates
 	
+	def fundamental_registers(self):
+		return [r for r in self.registers.values() if r.fundamental]
+	
+	def used_qubit_indices(self, block=None):
+		indices = {r.name: set() for r in self.fundamental_registers}
+		if block is None: block = self.gates # TODO: Clean up the syntax to make this less awkward.
+		for instr in block.gates:
+			if isinstance(instr, LoopStatement):
+				new_indices = self.used_qubit_indices(self, instr.gates)
+				for k in new_indices:
+					indices[k] |= new_indices[k]
+			elif isinstance(instr, GateBlock):
+				new_indices = self.used_qubit_indices(self, instr)
+				for k in new_indices:
+					indices[k] |= new_indices[k]
+			else:
+				for param in instr.parameters:
+					if isinstance(parameter, NamedQubit): # TODO: Do we support passing entire registers as parameters to macros?
+						reg, idx = parameter.resolve_qubit()
+						indices[reg.name].add(idx)
+	
 	def validate_identifier(self, name):
 		if name in self.constants: return False
 		if name in self.macros: return False
@@ -124,7 +145,7 @@ class ScheduledCircuit:
 		self.gates.gates.append(b) # TODO: Clean up the syntax to make this less awkward.
 		return b
 	
-	def loop(self, iterations, gates=None, parallel=None):
+	def loop(self, iterations, gates=None, parallel=False):
 		# Parallel is ignored if a GateBlock is passed in; it's only used if building a GateBlock at the same time as the LoopStatement.
 		# This is intentional, but may or may not be wise.
 		if isinstance(gates, GateBlock):
