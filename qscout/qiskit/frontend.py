@@ -27,7 +27,7 @@ def qscout_circuit_from_qiskit_circuit(circuit):
 			pass # TODO: Use barriers to inform the scheduler, once the scheduler exists.
 		elif instr[0].name == 'snapshot':
 			raise QSCOUTError("Physical hardware does not support snapshot instructions.")
-		elif instr[0].name in ('i', 'r', 'sx', 'sy', 'x', 'y', 'rz'):
+		elif instr[0].name in QISKIT_NAMES:
 			target = instr[1][0]
 			if target.register.name in qsc.registers:
 				qsc.gate(QISKIT_NAMES[instr[0].name], qsc.registers[target.register.name][target.index], *[float(param) for param in instr[0].params])

@@ -77,4 +77,4 @@ def generate_jaqal_value(val):
 	if isinstance(val, Constant) or isinstance(val, NamedQubit) or isinstance(val, Parameter):
 		return val.name
 	elif isinstance(val, float) or isinstance(val, int):
-		return str(val) # TODO: Request that we support scientific notation on angle parameters, or else fix this to not use scientific notation!
+		return str(val)

@@ -1,7 +1,7 @@
 import ply.yacc as yacc
 from qscout.core import GateBlock, LoopStatement, ScheduledCircuit, Constant, GateStatement, GateDefinition, Macro, Parameter, Register, NamedQubit
 from qscout import QSCOUTError
-from qscout.parser.lexer import tokens # IMPORTANT: PLY has a bad time if this is a relative import, for some reason.
+from qscout.parser.lexer import get_lexer, tokens # IMPORTANT: PLY has a bad time if this is a relative import, for some reason.
 
 def p_program(p):
 	'program : header_statements body_statements'
@@ -251,4 +251,7 @@ def p_number(p):
 			  | FLOAT'''
 	p[0] = p[1]
 
-parser = yacc.yacc()
+def parse_jaqal_string(jaqal):
+	lexer = get_lexer()
+	parser = yacc.yacc()
+	return parser.parse(jaqal, lexer)

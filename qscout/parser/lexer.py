@@ -47,4 +47,5 @@ def t_error(t):
 	print("Illegal input '%s'" % t.value)
 	t.lexer.skip(1)
 
-lexer = lex.lex()
+def get_lexer():
+	lexer = lex.lex()

@@ -10,7 +10,7 @@ class IonCompiler(AbstractCompiler):
 	def __init__(self, device):
 		self._device = device
 	def quil_to_native_quil(self, program: Program, *, protoquil=None) -> Program:
-		return program # TODO: Implement native ion gates, transpiler pass to convert arbitrary circuit.
+		return program # TODO: Implement transpiler pass to convert arbitrary circuit.
 	
 	def native_quil_to_executable(self, nq_program: Program) -> Optional[ScheduledCircuit]:
 		n = max(nq_program.get_qubits()) + 1
