@@ -45,7 +45,7 @@ class ScheduledCircuit:
 		if name in self.native_gates: return False
 		if name in self.registers: return False
 		if name in RESERVED_WORDS: return False
-		if re.match('^[a-zA-Z][a-zA-Z0-9]*$', name): return True
+		if re.match('^[a-zA-Z_][a-zA-Z0-9_]*$', name): return True
 		return False
 	
 	def let(self, name, value):
