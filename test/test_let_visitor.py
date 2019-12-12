@@ -170,6 +170,64 @@ class LetVisitorTester(ParserTesterMixin, TestCase):
         act_result = self.make_simple_tree(text)
         self.assertEqual(exp_result, act_result)
 
+    def test_loop_counter(self):
+        """Test replacing the counter of a loop."""
+        text = 'let a 2; loop a {}'
+        exp_result = self.make_program(
+            self.make_header_statements(),
+            self.make_body_statements(
+                self.make_loop_statement(
+                    2,
+                    self.make_serial_gate_block()
+                )
+            )
+        )
+        act_result = self.make_simple_tree(text)
+        self.assertEqual(exp_result, act_result)
+
+    def test_loop_counter_in_macro(self):
+        """Test replacing the counter of a loop in the definition of a macro."""
+        cases = [
+            (
+                'let a 2; macro foo { loop a {} }',
+                self.make_program(
+                    self.make_header_statements(),
+                    self.make_body_statements(
+                        self.make_macro_statement(
+                            'foo',
+                            self.make_serial_gate_block(
+                                self.make_loop_statement(
+                                    2,
+                                    self.make_serial_gate_block(),
+                                )
+                            )
+                        )
+                    )
+                )
+            ),
+            (
+                'let a 2; macro foo a { loop a {} }',
+                self.make_program(
+                    self.make_header_statements(),
+                    self.make_body_statements(
+                        self.make_macro_statement(
+                            'foo',
+                            'a',
+                            self.make_serial_gate_block(
+                                self.make_loop_statement(
+                                    'a',
+                                    self.make_serial_gate_block(),
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        ]
+        for text, exp_result in cases:
+            act_result = self.make_simple_tree(text)
+            self.assertEqual(exp_result, act_result, f"Could not parse `{text}`")
+
     def make_simple_tree(self, text, override_dict=None):
         parser = self.make_parser()
         tree = parser.parse(text)
