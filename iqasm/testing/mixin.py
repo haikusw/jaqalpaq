@@ -1,3 +1,5 @@
+import numbers
+
 from lark import Lark, Tree, Token
 
 from iqasm.parse import make_lark_parser
@@ -67,7 +69,16 @@ class ParserTesterMixin:
 
     @classmethod
     def make_array_element(cls, name, index):
-        return {'type': 'array_element', 'children': [cls.make_identifier(name), cls.make_integer(index)]}
+        return {'type': 'array_element', 'children': [cls.make_identifier(name), cls.make_array_index(index)]}
+
+    @classmethod
+    def make_array_index(cls, index):
+        if isinstance(index, numbers.Integral):
+            return cls.make_integer(index)
+        elif isinstance(index, str):
+            return cls.make_let_identifier(index)
+        else:
+            raise TypeError(f"Unknown type for array index {index}")
 
     @classmethod
     def make_let_statement(cls, name, value):

@@ -503,6 +503,12 @@ class TreeRewriteVisitor(ParseTreeVisitor):
     def is_array_slice(self, tree):
         return self._is_tree(tree, 'array_slice')
 
+    def is_let_identifier(self, tree):
+        return self._is_tree(tree, 'let_identifier')
+
+    def is_let_or_map_identifier(self, tree):
+        return self._is_tree(tree, 'let_or_map_identifier')
+
     def is_identifier(self, token):
         return self._is_token(token, 'IDENTIFIER')
 
@@ -529,6 +535,12 @@ class TreeRewriteVisitor(ParseTreeVisitor):
     ##
     # Deconstruct trees and tokens into their parts, used to go top down instead of (actually in addition to) bottom-up
     #
+
+    def deconstruct_sequential_gate_block(self, tree):
+        return tree.children
+
+    def deconstruct_parallel_gate_block(self, tree):
+        return tree.children
 
     def deconstruct_array_declaration(self, tree):
         """Return the portion of the tree that is the identifier and the size."""

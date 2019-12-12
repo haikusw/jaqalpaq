@@ -66,12 +66,6 @@ class LetVisitorTester(ParserTesterMixin, TestCase):
         with self.assertRaises(Exception):
             self.make_simple_tree(text)
 
-    def test_unknown_let(self):
-        """Test that use of an unknown value raises an exception"""
-        text = 'foo a[x]'
-        with self.assertRaises(Exception):
-            self.make_simple_tree(text)
-
     def test_unexpected_float(self):
         """Test using a floating point number where it does not belong."""
         text = 'let pi 3.14; reg qt[pi]'
@@ -130,28 +124,51 @@ class LetVisitorTester(ParserTesterMixin, TestCase):
 
     def test_macro_arg_shadow(self):
         """Test not substituting inside a macro because one of the macro's arguments shadows the alias."""
-        text = 'let a 2; macro foo a {g0 a}'
+        cases = [
+            ('let a 2; macro foo a {g0 a}',
+             self.make_program(
+                self.make_header_statements(),
+                self.make_body_statements(
+                    self.make_macro_statement(
+                        'foo',
+                        'a',
+                        self.make_serial_gate_block(
+                            self.make_gate_statement('g0', self.make_let_or_map_identifier('a'))
+                        )
+                    )
+                )
+             )),
+            ('let a 2; macro foo a {g0 r[a]}',
+             self.make_program(
+                 self.make_header_statements(),
+                 self.make_body_statements(
+                     self.make_macro_statement(
+                         'foo',
+                         'a',
+                         self.make_serial_gate_block(
+                             self.make_gate_statement('g0', self.make_array_element('r', 'a'))
+                         )
+                     )
+                 )
+             )
+             )
+        ]
+
+        for text, exp_result in cases:
+            act_result = self.make_simple_tree(text)
+            self.assertEqual(exp_result, act_result, f"Failed to parse {text}")
+
+    def test_override_nonexistent_let(self):
+        """Test that we cannot override a value that is not given in the text."""
+        text = 'foo a'
         exp_result = self.make_program(
             self.make_header_statements(),
             self.make_body_statements(
-                self.make_macro_statement(
-                    'foo',
-                    'a',
-                    self.make_serial_gate_block(
-                        self.make_gate_statement('g0', self.make_let_or_map_identifier('a'))
-                    )
-                )
+                self.make_gate_statement('foo', 'a')
             )
         )
         act_result = self.make_simple_tree(text)
         self.assertEqual(exp_result, act_result)
-
-    def test_override_nonexistent_let(self):
-        """Test that we cannot override a value that is not given in the text."""
-        text = 'foo x[a]'
-        override_dict = {'a': 5}
-        with self.assertRaises(Exception):
-            self.make_simple_tree(text, override_dict=override_dict)
 
     def make_simple_tree(self, text, override_dict=None):
         parser = self.make_parser()

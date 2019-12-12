@@ -35,10 +35,11 @@ class LetTransformer(MacroContextRewriteVisitor):
         return None
 
     def visit_let_identifier(self, identifier):
-        if identifier in self.mapping:
+        if identifier in self.mapping and not self._is_identifier_shadowed(identifier):
             return self.mapping[identifier]
         else:
-            raise ValueError(f"Unknown identifier {identifier}")
+            # This would still be valid if i.e. we are inside a macro definition.
+            return self.make_let_identifier(identifier)
 
     def visit_let_or_map_identifier(self, identifier):
         if identifier in self.mapping and not self._is_identifier_shadowed(identifier):
