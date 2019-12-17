@@ -492,7 +492,7 @@ class TreeRewriteVisitor(ParseTreeVisitor):
         return self._is_tree(tree, 'sequential_gate_block')
 
     def is_parallel_gate_block(self, tree):
-        return self._is_tree(tree, 'gate_block')
+        return self._is_tree(tree, 'parallel_gate_block')
 
     def is_array_declaration(self, tree):
         return self._is_tree(tree, 'array_declaration')
