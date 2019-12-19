@@ -42,23 +42,25 @@ class ScheduledCircuit:
 	def fundamental_registers(self):
 		return [r for r in self.registers.values() if r.fundamental]
 	
-	def used_qubit_indices(self, block=None):
+	def used_qubit_indices(self, instr=None):
+		if isinstance(instr, LoopStatement):
+			return self.used_qubit_indices(self, instr.gates)
+		
 		indices = {r.name: set() for r in self.fundamental_registers}
-		if block is None: block = self.gates # TODO: Clean up the syntax to make this less awkward.
-		for instr in block.gates:
-			if isinstance(instr, LoopStatement):
-				new_indices = self.used_qubit_indices(self, instr.gates)
+		if instr is None: instr = self.gates # TODO: Clean up the syntax to make this less awkward.
+		
+		if isinstance(instr, GateBlock):
+			for sub_instr in instr.gates:
+				new_indices = self.used_qubit_indices(self, sub_instr)
 				for k in new_indices:
 					indices[k] |= new_indices[k]
-			elif isinstance(instr, GateBlock):
-				new_indices = self.used_qubit_indices(self, instr)
-				for k in new_indices:
-					indices[k] |= new_indices[k]
-			else:
-				for param in instr.parameters:
-					if isinstance(parameter, NamedQubit): # TODO: Do we support passing entire registers as parameters to macros?
-						reg, idx = parameter.resolve_qubit()
-						indices[reg.name].add(idx)
+		else:
+			for param in instr.parameters:
+				if isinstance(parameter, NamedQubit): # TODO: Do we support passing entire registers as parameters to macros?
+					reg, idx = parameter.resolve_qubit()
+					indices[reg.name].add(idx)
+		
+		return indices
 	
 	def validate_identifier(self, name):
 		if name in self.constants: return False
