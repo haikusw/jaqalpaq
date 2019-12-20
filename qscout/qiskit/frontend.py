@@ -24,11 +24,50 @@ def qscout_circuit_from_qiskit_circuit(circuit):
 	# circuit is passed to the scheduler, it'll try to parallelize as many of the gates
 	# within each block as possible, while keeping the blocks themselves sequential.
 	block = qsc.block(parallel = None)
+	measure_accumulator = set()
+	reset_accumulator = set()
 	for instr in circuit.data:
+		if reset_accumulator:
+			if instr[0].name == 'reset':
+				target = instr[1][0]
+				if target.register.name in qsc.registers:
+					reset_accumulator.add(target.resolve_qubit(target.index)[1])
+				else:
+					raise QSCOUTError("Register %s invalid!" % target.register.name)
+				if len(reset_accumulator) == n:
+					qsc.gate('prepare_all')
+					reset_accumulator = {}
+				continue
+			else:
+				raise QSCOUTError("Cannot reset only qubits %s and not whole register." % reset_accumulator)
+				# reset_accumulator = set()
+		if measure_accumulator:
+			if instr[0].name == 'measure':
+				target = instr[1][0]
+				if target.register.name in qsc.registers:
+					measure_accumulator.add(target.resolve_qubit(target.index)[1])
+				else:
+					raise QSCOUTError("Register %s invalid!" % target.register.name)
+				if len(measure_accumulator) == n:
+					qsc.gate('measure_all')
+					measure_accumulator = {}
+				continue
+			else:
+				raise QSCOUTError("Cannot measure only qubits %s and not whole register." % reset_accumulator)
+				# measure_accumulator = set()
 		if instr[0].name == 'measure': # TODO: Support intermediate measure_all/prepare_all pairs.
-			pass # Ignore whatever measurements the qiskit circuit object tells us to make, because we'll just measure every qubit at the end of the circuit.
+			target = instr[1][0]
+			if target.register.name in qsc.registers:
+				reset_accumulator = {target.resolve_qubit(target.index)[1]}
+			else:
+				raise QSCOUTError("Register %s invalid!" % target.register.name)
 		elif instr[0].name == 'reset':
-			raise QSCOUTError("Physical hardware does not currently support resetting ions!")
+			if len(qsc.gates.gates) > 1: # TODO: Clean up the syntax to make this less awkward.
+				target = instr[1][0]
+				if target.register.name in qsc.registers:
+					reset_accumulator = {target.resolve_qubit(target.index)[1]}
+				else:
+					raise QSCOUTError("Register %s invalid!" % target.register.name)
 		elif instr[0].name == 'barrier':
 			block = qsc.block(parallel = None) # Use barriers to inform the scheduler, as explained above.
 		elif instr[0].name == 'snapshot':
@@ -50,5 +89,6 @@ def qscout_circuit_from_qiskit_circuit(circuit):
 				raise QSCOUTError("Gate register %s invalid!" % targets[0].register.name)
 		else: # TODO: Check native gateset and determine allowed gates accordingly.
 			raise QSCOUTError("Instruction %s not available on trapped ion hardware; try unrolling first." % instr[0].name)
-	qsc.gate('measure_all')
+	if qsc.gates.gates[-1].name != 'measure_all': # TODO: Clean up the syntax to make this less awkward.
+		qsc.gate('measure_all')
 	return qsc
