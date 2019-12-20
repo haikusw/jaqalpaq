@@ -58,7 +58,7 @@ def p_program(p):
 			print(b)
 			c.macro(b[1], b[2], process_statement(b[3], {param.name: param for param in b[2]}))
 		else:
-			c.gates.gates.append(process_statement(b))
+			c.gates.append(process_statement(b))
 	p[0] = c
 
 def p_program_blanks(p):

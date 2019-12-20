@@ -53,15 +53,15 @@ class IonCompiler(AbstractCompiler):
 				else:
 					raise QSCOUTError("Gate %s not in native gate set." % instr.name)
 			elif isinstance(instr, Reset):
-				if len(qsc.gates.gates) > 1: # TODO: Clean up the syntax to make this less awkward.
+				if len(qsc.gates) > 1:
 					qsc.gate('prepare_all')
 			elif isinstance(instr, ResetQubit):
-				if len(qsc.gates.gates) > 1: # TODO: Clean up the syntax to make this less awkward.
+				if len(qsc.gates) > 1:
 					reset_accumulator = {instr.qubit.index}
 			elif isinstance(instr, Measurement):
 				measure_accumulator = {instr.qubit.index} # We ignore the classical register.
 			else:
 				raise QSCOUTError("Instruction %s not supported." % instr.out())
-		if qsc.gates.gates[-1].name != 'measure_all': # TODO: Clean up the syntax to make this less awkward.
+		if qsc.gates[-1].name != 'measure_all':
 			qsc.gate('measure_all')
 		return qsc
