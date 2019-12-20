@@ -11,7 +11,7 @@ class Register:
 			raise QSCOUTError("Illegal size specification in map statement defining %s." % name)
 		self._alias_from = alias_from
 		self._alias_slice = alias_slice
-		if alias_slice is not None: # TODO: Support let-expression parametrized slices
+		if alias_slice is not None:
 			if isinstance(alias_slice.start, AnnotatedValue) or isinstance(alias_slice.stop, AnnotatedValue) or isinstance(alias_slice.step, AnnotatedValue) or isinstance(alias_from, AnnotatedValue):
 				# Verify that the Parameters given have the correct types
 				if isinstance(alias_slice.start, AnnotatedValue) and alias_slice.start.kind not in (INT_TYPE, None):
