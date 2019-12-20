@@ -55,14 +55,14 @@ def qscout_circuit_from_qiskit_circuit(circuit):
 			else:
 				raise QSCOUTError("Cannot measure only qubits %s and not whole register." % reset_accumulator)
 				# measure_accumulator = set()
-		if instr[0].name == 'measure': # TODO: Support intermediate measure_all/prepare_all pairs.
+		if instr[0].name == 'measure':
 			target = instr[1][0]
 			if target.register.name in qsc.registers:
 				reset_accumulator = {target.resolve_qubit(target.index)[1]}
 			else:
 				raise QSCOUTError("Register %s invalid!" % target.register.name)
 		elif instr[0].name == 'reset':
-			if len(qsc.gates.gates) > 1: # TODO: Clean up the syntax to make this less awkward.
+			if len(qsc.gates) > 1:
 				target = instr[1][0]
 				if target.register.name in qsc.registers:
 					reset_accumulator = {target.resolve_qubit(target.index)[1]}
@@ -89,6 +89,6 @@ def qscout_circuit_from_qiskit_circuit(circuit):
 				raise QSCOUTError("Gate register %s invalid!" % targets[0].register.name)
 		else: # TODO: Check native gateset and determine allowed gates accordingly.
 			raise QSCOUTError("Instruction %s not available on trapped ion hardware; try unrolling first." % instr[0].name)
-	if qsc.gates.gates[-1].name != 'measure_all': # TODO: Clean up the syntax to make this less awkward.
+	if qsc.gates[-1].name != 'measure_all':
 		qsc.gate('measure_all')
 	return qsc

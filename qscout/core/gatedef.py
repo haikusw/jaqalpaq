@@ -41,6 +41,9 @@ class AbstractGate:
 		for name in params:
 			self.parameters[name].validate(params[name])
 		return GateStatement(self.name, params)
+	
+	def __call__(self, *args, **kwargs):
+		self.call(*args, **kwargs)
 
 class GateDefinition(AbstractGate):
 	pass

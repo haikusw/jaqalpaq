@@ -46,15 +46,15 @@ class ScheduledCircuit:
 			return self.used_qubit_indices(self, instr.gates)
 		
 		indices = {r.name: set() for r in self.fundamental_registers}
-		if instr is None: instr = self.gates # TODO: Clean up the syntax to make this less awkward.
+		if instr is None: instr = self.gates
 		
 		if isinstance(instr, GateBlock):
-			for sub_instr in instr.gates:
+			for sub_instr in instr:
 				new_indices = self.used_qubit_indices(self, sub_instr)
 				for k in new_indices:
 					indices[k] |= new_indices[k]
 		elif isinstance(instr, GateStatement):
-			if instr.name in self.gates:
+			if instr.name in self.native_gates:
 				for param_name in instr.parameters:
 					param = instr.parameters[param_name]
 					if isinstance(param, NamedQubit):
@@ -144,12 +144,12 @@ class ScheduledCircuit:
 	
 	def gate(self, name, *args, **kwargs):
 		g = self.build_gate(name, *args, **kwargs)
-		self.gates.gates.append(g) # TODO: Clean up the syntax to make this less awkward.
+		self.gates.append(g)
 		return g
 	
 	def block(self, parallel=False, gates=None):
 		b = GateBlock(parallel, gates)
-		self.gates.gates.append(b) # TODO: Clean up the syntax to make this less awkward.
+		self.gates.append(b)
 		return b
 	
 	def loop(self, iterations, gates=None, parallel=False):
@@ -159,5 +159,5 @@ class ScheduledCircuit:
 			l = LoopStatement(iterations, gates)
 		else:
 			l = LoopStatement(iterations, GateBlock(parallel, gates))
-		self.gates.gates.append(l) # TODO: Clean up the syntax to make this less awkward.
+		self.gates.append(l)
 		return l
