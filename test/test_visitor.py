@@ -1,8 +1,6 @@
 from unittest import TestCase
 import pathlib
 
-from lark import Lark
-
 from iqasm.parse import *
 
 
@@ -39,6 +37,9 @@ class TestVisitor(ParseTreeVisitor):
     def visit_macro_definition(self, name, arguments, block):
         return {'type': 'macro_definition', 'name': name, 'arguments': arguments, 'block': block}
 
+    def visit_macro_gate_block(self, block):
+        return {'type': 'macro_gate_block', 'block': block}
+
     def visit_loop_statement(self, repetition_count, block):
         return {'type': 'loop_statement', 'repetition_count': repetition_count, 'block': block}
 
@@ -56,6 +57,12 @@ class TestVisitor(ParseTreeVisitor):
 
     def visit_array_slice(self, identifier, index_slice):
         return {'type': 'array_slice', 'identifier': identifier, 'index_slice': index_slice}
+
+    def visit_let_identifier(self, identifier):
+        return identifier
+
+    def visit_let_or_map_identifier(self, identifier):
+        return identifier
 
 
 class ParseTreeVisitorTester(TestCase):
@@ -119,8 +126,8 @@ class ParseTreeVisitorTester(TestCase):
         """Test visiting a map statement."""
         cases = [
             ('map a b', ('a', 'b')),
-            ('map q[2] r[0:4:2]', ({'type': 'array_declaration', 'identifier': 'q', 'size': 2},
-                                     {'type': 'array_slice', 'identifier': 'r', 'index_slice': slice(0, 4, 2)}))
+            ('map q r[0:4:2]', ('q',
+                                {'type': 'array_slice', 'identifier': 'r', 'index_slice': slice(0, 4, 2)}))
         ]
         parser = self.make_parser(start='map_statement')
         visitor = TestVisitor()
@@ -196,9 +203,10 @@ class ParseTreeVisitorTester(TestCase):
         """Test visiting a macro definition."""
         cases = [
             ('macro foo a b {g0 a b}', ('foo', ['a', 'b'],
-                                        {'type': 'sequential_gate_block',
-                                         'statements': [{'type': 'gate_statement', 'gate_name': 'g0',
-                                                         'gate_args': ['a', 'b']}]}))
+                                        {'type': 'macro_gate_block',
+                                         'block': {'type': 'sequential_gate_block',
+                                                   'statements': [{'type': 'gate_statement', 'gate_name': 'g0',
+                                                                   'gate_args': ['a', 'b']}]}}))
         ]
         parser = self.make_parser(start='macro_definition')
         visitor = TestVisitor()
@@ -253,5 +261,131 @@ class ParseTreeVisitorTester(TestCase):
         for text, exp_result in cases:
             tree = parser.parse(text)
             act_result = visitor.visit(tree)
-            print(tree)
             self.assertEqual(exp_result, act_result, f"Failed to parse {text}")
+
+
+class TreeRewriteTester(TestCase):
+    """Tests for basic functionality of the TreeRewriteVisitor base class. All tests compare the tree against its
+    transformed self, which should be identical."""
+
+    def make_parser(self, *, start):
+        return make_lark_parser(start=start)
+
+    def run_tests(self, texts, parser):
+        for text in texts:
+            tree = parser.parse(text)
+            rw_tree = self.visitor.visit(tree)
+            self.assertEqual(tree, rw_tree)
+            self.assertIsNot(tree, rw_tree)
+
+    def setUp(self):
+        self.visitor = TreeRewriteVisitor()
+
+    def test_register_statement(self):
+        parser = self.make_parser(start='register_statement')
+        texts = [
+            'reg r[1]',
+            'reg QASDF[abc]'
+        ]
+        self.run_tests(texts, parser)
+
+    def test_map_statement(self):
+        parser = self.make_parser(start='map_statement')
+        texts = [
+            'map a b',
+            'map q r[0:5:2]'
+        ]
+        self.run_tests(texts, parser)
+
+    def test_let_statement(self):
+        parser = self.make_parser(start='let_statement')
+        texts = [
+            'let pi 3.14',
+            'let q 5'
+        ]
+        self.run_tests(texts, parser)
+
+    def test_gate_statement(self):
+        parser = self.make_parser(start='gate_statement')
+        texts = [
+            'g0 a b',
+            'foo',
+            'h r[5]',
+            'r 1.23'
+        ]
+        self.run_tests(texts, parser)
+
+    def test_macro_definition(self):
+        parser = self.make_parser(start='macro_definition')
+        texts = [
+            'macro foo {}',
+            'macro foo {bar}',
+            'macro foo a b {g a b}',
+            'macro foo <>',
+            'macro foo <bar>'
+        ]
+        self.run_tests(texts, parser)
+
+    def test_loop_statement(self):
+        parser = self.make_parser(start='loop_statement')
+        texts = [
+            'loop 5 {}',
+            'loop 77 {g; h}',
+            'loop COUNT {foo}'
+        ]
+        self.run_tests(texts, parser)
+
+    def test_sequential_gate_block(self):
+        parser = self.make_parser(start='sequential_gate_block')
+        texts = [
+            '{}',
+            '{foo}',
+            '{foo\nbar}',
+            '{foo;bar;baz}',
+            '{foo ; <a | b>}'
+        ]
+        self.run_tests(texts, parser)
+
+    def test_parallel_gate_block(self):
+        parser = self.make_parser(start='parallel_gate_block')
+        texts = [
+            '<>',
+            '<foo>',
+            '<foo\nbar>',
+            '<foo|bar|baz>',
+            '<foo | {a ; b}>'
+        ]
+        self.run_tests(texts, parser)
+
+    def test_array_declaration(self):
+        parser = self.make_parser(start='array_declaration')
+        texts = [
+            'g[2]',
+            'foo[bar]'
+        ]
+        self.run_tests(texts, parser)
+
+    def test_array_element(self):
+        parser = self.make_parser(start='array_element')
+        texts = [
+            'g[2]',
+            'foo[bar]'
+        ]
+        self.run_tests(texts, parser)
+
+    def test_array_slice(self):
+        # TODO: add cases with blank values once we've fixed array slices in the grammar
+        parser = self.make_parser(start='array_slice')
+        texts = [
+            'a[0:5]',
+            'b[5:3:-1]',
+            'c[a:b]'
+        ]
+        self.run_tests(texts, parser)
+
+    def test_program(self):
+        parser = self.make_parser(start='start')
+        texts = [
+            'reg r[3]; g a b'
+        ]
+        self.run_tests(texts, parser)

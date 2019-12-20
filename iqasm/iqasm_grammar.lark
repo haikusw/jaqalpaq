@@ -5,8 +5,8 @@ header_statements: [_seq_sep? header_statement (_seq_sep header_statement)* _seq
 ?header_statement: register_statement | map_statement | let_statement
 register_statement: _REG array_declaration
 map_statement: _MAP map_target map_source
-?map_target: IDENTIFIER | array_declaration
-?map_source: IDENTIFIER | array_slice
+?map_target: IDENTIFIER
+?map_source: IDENTIFIER | array_slice | array_element
 let_statement: _LET IDENTIFIER SIGNED_NUMBER
 
 // Body rules
@@ -15,8 +15,10 @@ body_statements: [body_statement (_seq_sep body_statement)* _seq_sep?]
 gate_statement: _gate_name _gate_arg_list
 _gate_name: IDENTIFIER
 _gate_arg_list: _gate_arg*
-_gate_arg: array_element | IDENTIFIER | SIGNED_NUMBER
-macro_definition: _MACRO _gate_def_list gate_block
+_gate_arg: array_element | let_or_map_identifier | SIGNED_NUMBER
+macro_definition: macro_header macro_gate_block
+macro_header: _MACRO _gate_def_list
+macro_gate_block: gate_block  // Separating this rule makes tracking contexts easier
 _gate_def_list: IDENTIFIER*
 loop_statement: _LOOP let_or_integer gate_block
 
@@ -37,8 +39,10 @@ _slice_indexing: _slice_single | _slice_begin_end | _slice_full
 _slice_single: let_or_integer
 _slice_begin_end: let_or_integer ":" let_or_signed_integer
 _slice_full: let_or_integer ":" let_or_signed_integer ":" let_or_signed_integer
-?let_or_integer: IDENTIFIER | INTEGER
-?let_or_signed_integer: IDENTIFIER | SIGNED_INTEGER
+?let_or_integer: let_identifier | INTEGER
+?let_or_signed_integer: let_identifier | SIGNED_INTEGER
+let_identifier: IDENTIFIER  // As its own rule this is easier to filter on the backend
+let_or_map_identifier: IDENTIFIER
 _seq_sep: ";" | _NEWLINE+
 _par_sep: "|" | _NEWLINE+
 _NEWLINE: NEWLINE
