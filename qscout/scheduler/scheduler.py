@@ -1,4 +1,4 @@
-from qscout.core import GateBlock, LoopStatement, GateStatement, QUBIT_PARAMETER
+from qscout.core import GateBlock, LoopStatement, GateStatement, QUBIT_TYPE
 
 def schedule_circuit(circ):
 	schedule_block(circ, circ.gates)
@@ -102,9 +102,9 @@ def can_parallelize_gate(circ, block, instr, qubits):
 def can_parallelize_subinstr(circ, sub_instr):
 	if not isinstance(sub_instr, GateStatement):
 		return False # Too much nested structure.
-	if sub_instr.name not in circ.native_gates:
+	if sub_instr.name not in circ.gates:
 		return False # Can't do macros in parallel, because they could include anything.
-	if len([p for p in circ.native_gates[sub_instr.name].parameters if p.kind == QUBIT_PARAMETER]) > 1:
+	if len([p for p in circ.gates[sub_instr.name].parameters if p.kind == QUBIT_TYPE]) > 1:
 		return False # Can't do multiple 2-qubit gates at once.
 	if sub_instr.name in ['prepare_all', 'measure_all']:
 		return False # Can't do gates while preparing or measuring ions.

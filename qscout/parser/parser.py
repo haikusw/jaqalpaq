@@ -6,16 +6,32 @@ from qscout.parser.lexer import get_lexer, tokens # IMPORTANT: PLY has a bad tim
 def p_program(p):
 	'program : header_statements body_statements'
 	c = ScheduledCircuit(True)
+	def resolve_id(name, params, allow_reg=True):
+		if name is None:
+			return None
+		elif name in c.registers and allow_reg:
+			return (c.registers[name])
+		elif name in c.constants:
+			return (c.constants[name])
+		elif name in params:
+			return (params[name])
+		elif isinstance(name, (int, float)):
+			return name # The "identifier" isn't actually an identifier, it's a literal!
+		else:
+			raise QSCOUTError("Unknown identifier %s" % str(name))
 	for hs in p[1]:
 		if hs[0] == 'let':
-			c.let(hs[1], hs[2])
+			c.let(hs[1], resolve_id(hs[2], {}, False))
 		elif hs[0] == 'reg':
-			c.reg(hs[1], hs[2])
+			c.reg(hs[1], resolve_id(hs[2], {}, False))
 		elif hs[0] == 'map':
-			c.map(*hs[1:])
+			if isinstance(hs[3], slice):
+				c.map(hs[1], resolve_id(hs[2], {}, True), slice(resolve_id(hs[3].start, {}, False), resolve_id(hs[3].stop, {}, False), resolve_id(hs[3].step, {}, False)))
+			else:
+				c.map(hs[1], resolve_id(hs[2], {}, True), resolve_id(hs[3], {}, False))
 	def process_statement(s, params = {}):
 		if s[0] == 'loop':
-			return LoopStatement(s[1], process_statement(s[2], params))
+			return LoopStatement(resolve_id(s[1], params, False), process_statement(s[2], params))
 		elif s[0] == 'par':
 			return GateBlock(True, [process_statement(x, params) for x in s[1]])
 		elif s[0] == 'seq':
@@ -27,16 +43,9 @@ def p_program(p):
 				if arg[0] == 'number':
 					args.append(arg[1])
 				elif arg[0] == 'id':
-					if arg[1] in c.registers:
-						args.append(c.registers[arg[1]])
-					elif arg[1] in c.constants:
-						args.append(c.constants[arg[1]])
-					elif arg[1] in params:
-						args.append(params[arg[1]])
-					else:
-						raise QSCOUTError("Unknown identifier %s" % str(arg[1]))
+					args.append(resolve_id(arg[1], params))
 				elif arg[0] == 'array':
-					args.append(c.registers[arg[1][0]][arg[1][1]])
+					args.append(c.registers[arg[1][0]][resolve_id(arg[1][1], params, False)])
 				else:
 					print(s)
 					raise QSCOUTError("Parse failed: unknown token %s" % str(arg[0]))
@@ -77,22 +86,22 @@ def p_register_statement(p):
 
 def p_map_statement(p):
 	'map_statement : MAP map_target map_source'
-	p[0] = ('map', p[2][0], p[2][1], p[3][0], p[3][1])
+	p[0] = ('map', p[2], p[3][0], p[3][1])
 
 def p_map_target_id(p):
 	'map_target : IDENTIFIER'
-	p[0] = (p[1], None)
-
-def p_map_target_array(p):
-	'map_target : array_declaration'
 	p[0] = p[1]
+
+# def p_map_target_array(p):
+# 	'map_target : array_declaration'
+# 	p[0] = p[1]
 
 def p_map_source_id(p):
 	'map_source : IDENTIFIER'
 	p[0] = (p[1], None)
 
 def p_map_source_array(p):
-	'map_target : array_slice'
+	'map_source : array_slice'
 	p[0] = p[1]
 
 def p_let_statement(p):
@@ -232,7 +241,7 @@ def p_slice_indexing_three(p):
 def p_let_or_integer(p):
 	'''let_or_integer : IDENTIFIER
 					  | INTEGER'''
-	p[0] = int(p[1]) # TODO: Allow let-expressions.
+	p[0] = p[1]
 
 def p_seq_sep(p):
 	'''seq_sep : SEMICOLON

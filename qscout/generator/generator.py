@@ -1,10 +1,10 @@
-from qscout.core import GateStatement, GateBlock, LoopStatement, Register, NamedQubit, Constant, Parameter
+from qscout.core import GateStatement, GateBlock, LoopStatement, Register, NamedQubit, Constant, Parameter, AnnotatedValue
 
 def notate_slice(s):
 	if s.step:
-		return "%s:%s:%s" % (s.start or 0, s.stop, s.step)
+		return "%s:%s:%s" % (generate_jaqal_value(s.start or 0), generate_jaqal_value(s.stop), generate_jaqal_value(s.step))
 	else:
-		return "%s:%s" % (s.start or 0, s.stop)
+		return "%s:%s" % (generate_jaqal_value(s.start or 0), generate_jaqal_value(s.stop))
 
 def generate_jaqal_program(circ):
 	program = ""
@@ -30,17 +30,19 @@ def generate_jaqal_program(circ):
 			program += generate_jaqal_block(statement, 0, True)
 	return program
 
-def generate_jaqal_reg(register): # TODO: Support let-expression parametrized indices
-	return "reg " + register.name + "[" + str(register.size) + "]\n"
+def generate_jaqal_reg(register):
+	return "reg " + register.name + "[" + generate_jaqal_value(register.size) + "]\n"
 
 def generate_jaqal_let(const):
 	return "let " + const.name + " " + generate_jaqal_value(const.value) + "\n"
 
-def generate_jaqal_map(register): # TODO: Support let-expression parametrized indices
+def generate_jaqal_map(register):
 	if isinstance(register, NamedQubit):
-		return "map " + register.name + " " + register.alias_from.name + "[" + str(register.alias_index) + "]\n"
+		return "map " + register.name + " " + register.alias_from.name + "[" + generate_jaqal_value(register.alias_index) + "]\n"
+	elif register.alias_slice is not None:
+		return "map " + register.name + " " + register.alias_from.name + "[" + notate_slice(register.alias_slice) + "]\n"
 	else:
-		return "map " + register.name + "[" + str(register.size) + "] " + register.alias_from.name + "[" + notate_slice(register.alias_slice) + "]\n"
+		return "map " + register.name + " " + register.alias_from.name + "\n"
 
 def generate_jaqal_macro(macro):
 	return "macro " + macro.name + " " + " ".join([parameter.name for parameter in macro.parameters]) + " " + generate_jaqal_block(macro.body, 0, False) + "\n"
@@ -74,7 +76,7 @@ def generate_jaqal_block(statement, depth, indent_first_line):
 	return output
 
 def generate_jaqal_value(val):
-	if isinstance(val, Constant) or isinstance(val, NamedQubit) or isinstance(val, Parameter):
+	if isinstance(val, Register) or isinstance(val, NamedQubit) or isinstance(val, AnnotatedValue):
 		return val.name
 	elif isinstance(val, float) or isinstance(val, int):
 		return str(val)

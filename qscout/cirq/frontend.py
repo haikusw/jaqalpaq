@@ -34,6 +34,6 @@ def qscout_circuit_from_cirq_circuit(ccirc):
 				else:
 					raise QSCOUTError("Convert circuit to ion gates before compiling.")
 			else:
-				raise QSCOUTError("Cannot compile operation %s." % op)
+				raise QSCOUTError("Cannot compile operation %s." % op) # TODO: Support non-gate instructions.
 	qcirc.gate('measure_all')
 	return qcirc
