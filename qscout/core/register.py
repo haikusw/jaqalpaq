@@ -1,5 +1,6 @@
 from qscout import QSCOUTError
-from .parameter import AnnotatedValue, Constant, Parameter INT_TYPE, REGISTER_TYPE
+from .parameter import AnnotatedValue, Parameter, INT_TYPE, REGISTER_TYPE
+from .constant import Constant
 
 class Register:
 	def __init__(self, name, size=None, alias_from=None, alias_slice=None):

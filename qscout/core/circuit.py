@@ -8,6 +8,7 @@ from qscout import RESERVED_WORDS, QSCOUTError
 import re
 
 class ScheduledCircuit:
+	"""Test docstrings."""
 	def __init__(self, qscout_native_gates=False):
 		self._constants = {}
 		self._macros = {}
@@ -41,7 +42,7 @@ class ScheduledCircuit:
 	def fundamental_registers(self):
 		return [r for r in self.registers.values() if r.fundamental]
 	
-	def used_qubit_indices(self, instr = None, context = {}}):
+	def used_qubit_indices(self, instr = None, context = {}):
 		if isinstance(instr, LoopStatement):
 			return self.used_qubit_indices(self, instr.gates)
 		

@@ -33,7 +33,7 @@ def schedule_block(circ, block):
 				block[i:i+1] = block[i].gates
 			i += inc			
 
-def schedule_instr(circ, instr, target, freeze_timestamps)
+def schedule_instr(circ, instr, target, freeze_timestamps):
 	used_qubits = circ.used_qubit_indices(instr)
 	is_block = isinstance(instr, GateBlock)
 	is_gate = isinstance(instr, GateStatement)

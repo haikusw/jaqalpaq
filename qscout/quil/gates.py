@@ -1,3 +1,6 @@
+from pyquil.gate_matrices import RX, RY
+import numpy as np
+
 def R(theta, phi):
 	return np.array([[np.cos(phi / 2.0), (-1j * np.cos(theta) - np.sin(theta)) * np.sin(phi / 2.0)],
 					[(-1j * np.cos(theta) + np.sin(theta)) * np.sin(phi / 2.0), np.cos(phi / 2.0)]])
