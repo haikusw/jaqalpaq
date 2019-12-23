@@ -15,8 +15,8 @@ API Reference
 Jaqal-PUP currently consists of the :mod:`qscout` Python package, and its seven subpackages.
 
 * The :mod:`qscout.core` package implements an object representation of scheduled quantum circuits. It supports programmatically constructing and manipulating circuits.
-* The :mod:`qscout.parser` package parses Jaqal source files into :mod:`qscout.core` ScheduledCircuit objects.
-* The :mod:`qscout.generator` package generates Jaqal code that implements the quantum circuit described by a ScheduledCircuit object.
+* The :mod:`qscout.parser` package parses Jaqal source files into :mod:`qscout.core` :class:`ScheduledCircuit` objects.
+* The :mod:`qscout.generator` package generates Jaqal code that implements the quantum circuit described by a :class:`ScheduledCircuit` object.
 * The :mod:`qscout.scheduler` package modifies circuits to execute more gates in parallel, without changing the function of the circuit or breaking the restrictions of the QSCOUT hardware.
 * The :mod:`qscout.cirq`, :mod:`qscout.qiskit`, and :mod:`qscout.quil` packages allow conversion between :mod:`qscout.core` objects and their counterparts in other popular quantum software development frameworks.
 
