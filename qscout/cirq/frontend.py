@@ -12,6 +12,12 @@ CIRQ_NAMES = {
 }
 
 def qscout_circuit_from_cirq_circuit(ccirc):
+	"""Converts a Cirq Circuit to a Jaqal-PUP :class:`ScheduledCircuit`.
+
+	:param cirq.Circuit ccirc: The Circuit to convert.
+	:returns qscout.core.ScheduledCircuit: The same quantum circuit, converted to Jaqal-PUP.
+	:raises QSCOUTError: if the input contains any instructions other than cirq.XXPowGate, cirq.XPowGate, cirq.YPowGate, cirq.ZPowGate, or cirq.PhasedXPowGate.
+	"""
 	qcirc = ScheduledCircuit(True)
 	try:
 		n = 1 + max([qb.x for qb in ccirc.all_qubits()])

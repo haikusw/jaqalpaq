@@ -1,1 +1,2 @@
+#: Words that cannot be used as names of constants, macros, or registers in Jaqal code.
 RESERVED_WORDS = ['let', 'map', 'reg', 'macro', 'loop', 'version']
