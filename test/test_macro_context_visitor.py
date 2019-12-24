@@ -1,7 +1,7 @@
 import unittest
 
-from iqasm.macro_context_visitor import MacroContextRewriteVisitor
-from iqasm.parse import make_lark_parser
+from jaqal.macro_context_visitor import MacroContextRewriteVisitor
+from jaqal.parse import make_lark_parser
 
 
 class TestVisitor(MacroContextRewriteVisitor):

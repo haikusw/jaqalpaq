@@ -1,7 +1,7 @@
 from unittest import TestCase
 
-from iqasm.testing.mixin import ParserTesterMixin
-from iqasm.map_visitor import expand_map_values
+from jaqal.testing.mixin import ParserTesterMixin
+from jaqal.map_visitor import expand_map_values
 
 
 class MapVisitorTester(ParserTesterMixin, TestCase):

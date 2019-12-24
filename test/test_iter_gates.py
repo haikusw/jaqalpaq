@@ -1,7 +1,7 @@
 import unittest
 
-from iqasm.iter_gates import parse_unitary_timed_gates
-from iqasm.iter_gates import Gate, Loop, ParallelGateBlock, SequentialGateBlock
+from jaqal.iter_gates import parse_unitary_timed_gates
+from jaqal.iter_gates import Gate, Loop, ParallelGateBlock, SequentialGateBlock
 
 
 class GateParserTester(unittest.TestCase):
