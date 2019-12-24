@@ -1,8 +1,8 @@
 import unittest
 from pathlib import Path
-from iqasm.testing.mixin import ParserTesterMixin
+from jaqal.testing.mixin import ParserTesterMixin
 
-from iqasm.iter_gates import parse_unitary_timed_gates
+from jaqal.iter_gates import parse_unitary_timed_gates
 
 top_example_dir = Path('examples')
 test_example_dir = Path('../examples')

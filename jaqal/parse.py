@@ -25,7 +25,7 @@ def make_lark_parser(*args, **kwargs):
     return parser
 
 
-def get_grammar_path(filename='iqasm_grammar.lark'):
+def get_grammar_path(filename='jaqal_grammar.lark'):
     """Return the path to the lark grammar file."""
     return pathlib.Path(__file__).parent / filename
 

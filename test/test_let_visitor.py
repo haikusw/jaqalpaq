@@ -1,7 +1,7 @@
 from unittest import TestCase
 
-from iqasm.testing.mixin import ParserTesterMixin
-from iqasm.let_visitor import expand_let_values
+from jaqal.testing.mixin import ParserTesterMixin
+from jaqal.let_visitor import expand_let_values
 
 
 class LetVisitorTester(ParserTesterMixin, TestCase):
