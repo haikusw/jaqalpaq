@@ -1,7 +1,7 @@
 import unittest
 
-from iqasm.testing.mixin import ParserTesterMixin
-from iqasm.macro_expansion_visitor import expand_macros
+from jaqal.testing.mixin import ParserTesterMixin
+from jaqal.macro_expansion_visitor import expand_macros
 
 
 class ExpandMacrosTester(ParserTesterMixin, unittest.TestCase):

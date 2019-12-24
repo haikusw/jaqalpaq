@@ -1,12 +1,12 @@
-"""Test that the grammar properly parses iQASM"""
+"""Test that the grammar properly parses Jaqal"""
 import unittest
 import pathlib
 
 # Accommodate both running from the test directory (as PyCharm does) and running from the project root.
-from iqasm.testing.mixin import ParserTesterMixin
+from jaqal.testing.mixin import ParserTesterMixin
 
-top_grammar_filename = 'iqasm/iqasm_grammar.lark'
-test_grammar_filename = '../iqasm/iqasm_grammar.lark'
+top_grammar_filename = 'jaqal/jaqal_grammar.lark'
+test_grammar_filename = '../jaqal/jaqal_grammar.lark'
 
 if pathlib.Path(top_grammar_filename).exists():
     grammar_filename = top_grammar_filename
