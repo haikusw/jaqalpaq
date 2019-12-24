@@ -117,6 +117,21 @@ class VisitTransformer(Transformer):
         index_slice = slice(*slice_args)
         return self._visitor.visit_array_slice(identifier, index_slice)
 
+    def array_slice_start(self, args):
+        return self._array_slice_element(args)
+
+    def array_slice_stop(self, args):
+        return self._array_slice_element(args)
+
+    def array_slice_step(self, args):
+        return self._array_slice_element(args)
+
+    def _array_slice_element(self, args):
+        if args:
+            return args[0]
+        else:
+            return None
+
     def let_identifier(self, args):
         identifier = args[0]
         return self._visitor.visit_let_identifier(identifier)
@@ -386,13 +401,16 @@ class TreeRewriteVisitor(ParseTreeVisitor):
         return Tree('array_declaration', [identifier, self.enforce_integer_if_numeric(size)])
 
     def make_array_element(self, identifier, index):
-        return Tree('array_element', [identifier, self.enforce_integer_if_numeric(index)])
+        return Tree('array_element', [identifier, self.enforce_signed_integer_if_numeric(index)])
 
     def make_array_slice(self, identifier, index_slice):
-        # TODO: This is not quite right, but we should revisit this when correcting array slice semantics.
-        index_start = self.enforce_integer_if_numeric(index_slice.start) if index_slice.start is not None else None
-        index_stop = self.enforce_signed_integer_if_numeric(index_slice.stop) if index_slice.stop is not None else None
-        index_step = self.enforce_signed_integer_if_numeric(index_slice.step) if index_slice.step is not None else None
+        index_start_children = [self.enforce_signed_integer_if_numeric(index_slice.start)] if index_slice.start is not None else []
+        index_stop_children = [self.enforce_signed_integer_if_numeric(index_slice.stop)] if index_slice.stop is not None else []
+        index_step_children = [self.enforce_signed_integer_if_numeric(index_slice.step)] if index_slice.step is not None else []
+
+        index_start = Tree('array_slice_start', index_start_children)
+        index_stop = Tree('array_slice_stop', index_stop_children)
+        index_step = Tree('array_slice_step', index_step_children)
 
         indices = [index for index in [index_start, index_stop, index_step] if index is not None]
 
@@ -549,18 +567,13 @@ class TreeRewriteVisitor(ParseTreeVisitor):
 
     def deconstruct_array_slice(self, tree):
         """Return the portion of the tree that is the identifier and a 3-tuple with tokens representing the slice."""
-        identifier = tree.children[0]
-        slice_args = tree.children[1:]
-        if len(slice_args) == 1:
-            slice_args = (None, slice_args[0], None)
-        elif len(slice_args) == 2:
-            slice_args = (slice_args[0], slice_args[1], None)
-        elif len(slice_args) == 3:
-            slice_args = tuple(slice_args)
-        else:
-            raise ValueError(f"Expected 1, 2, or 3 element slice, found {slice_args}")
+        identifier, slice_start, slice_stop, slice_step = tree.children
 
-        return identifier, slice_args
+        slice_start = slice_start.children[0] if slice_start.children else None
+        slice_stop = slice_stop.children[0] if slice_stop.children else None
+        slice_step = slice_step.children[0] if slice_step.children else None
+
+        return identifier, (slice_start, slice_stop, slice_step)
 
     def deconstruct_array_element(self, tree):
         """Return the portion of the tree that is the identifier and the index."""
@@ -597,20 +610,3 @@ class TreeRewriteVisitor(ParseTreeVisitor):
             return self.extract_signed_number(token)
         else:
             raise TypeError(f"Unknown token: {token}")
-
-    def extract_array_slice(self, tree):
-        """Return a Python slice object from the given tree."""
-        # TODO: Fix this when we fix array slice semantics
-        def extract_value(arg):
-            if self.is_identifier(arg):
-                return self.extract_identifier(arg)
-            elif self.is_integer(arg):
-                return self.extract_integer(arg)
-            elif self.is_signed_integer(arg):
-                return self.extract_signed_integer(arg)
-            else:
-                raise ValueError(f"Unknown tree in array slice: {arg}")
-        args = [extract_value(arg) for arg in tree.children[1:]]
-        if len(args) > 3:
-            raise ValueError(f"Too many slice arguments")
-        return slice(*args)

@@ -41,7 +41,7 @@ class ParserTester(ParserTesterMixin, unittest.TestCase):
         text = "map a q[1:3]"
         parser = self.make_parser(start='map_statement')
         tree = parser.parse(text)
-        exp_tree = self.make_map_statement('a', self.make_array_slice('q', 1, 3))
+        exp_tree = self.make_map_statement('a', self.make_array_slice('q', 1, 3, None))
         act_tree = self.simplify_tree(tree)
         self.assertEqual(exp_tree, act_tree)
 

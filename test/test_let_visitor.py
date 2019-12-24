@@ -72,11 +72,6 @@ class LetVisitorTester(ParserTesterMixin, TestCase):
         with self.assertRaises(Exception):
             self.make_simple_tree(text)
 
-    def test_unexpected_negative(self):
-        text = 'let a -3; foo arr[a]'
-        with self.assertRaises(Exception):
-            self.make_simple_tree(text)
-
     def test_override_dict(self):
         """Test using a dictionary to override the let statement given in the text."""
         text = 'let a 2; foo a'

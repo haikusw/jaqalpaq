@@ -94,9 +94,13 @@ class ParseTreeVisitorTester(TestCase):
 
     def test_array_slice(self):
         """Test visiting an array slice."""
-        # TODO: I realize now the semantics is a bit wrong. This should be fixed in a future issue.
         cases = [
-            ('foo[42]', ('foo', slice(42))),
+            ('foo[42:]', ('foo', slice(42, None, None))),
+            ('foo[:42]', ('foo', slice(None, 42, None))),
+            ('foo[:]', ('foo', slice(None, None, None))),
+            ('foo[::]', ('foo', slice(None, None, None))),
+            ('foo[::2]', ('foo', slice(None, None, 2))),
+            ('foo[-1::-2]', ('foo', slice(-1, None, -2))),
             ('foo[0:42]', ('foo', slice(0, 42))),
             ('foo[a:3:-1]', ('foo', slice('a', 3, -1)))
         ]
@@ -374,9 +378,12 @@ class TreeRewriteTester(TestCase):
         self.run_tests(texts, parser)
 
     def test_array_slice(self):
-        # TODO: add cases with blank values once we've fixed array slices in the grammar
         parser = self.make_parser(start='array_slice')
         texts = [
+            'a[:5]',
+            'a[5:]',
+            'a[::22]',
+            'a[-1::-2]',
             'a[0:5]',
             'b[5:3:-1]',
             'c[a:b]'
