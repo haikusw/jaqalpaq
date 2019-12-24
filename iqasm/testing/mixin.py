@@ -61,10 +61,15 @@ class ParserTesterMixin:
         return {'type': 'map_statement', 'children': [cls.make_identifier(target), source]}
 
     @classmethod
-    def make_array_slice(cls, name, first_arg, *args):
-        slices = [cls.make_integer(first_arg)]
-        for arg in args:
-            slices.append(cls.make_signed_integer(arg))
+    def make_array_slice(cls, name, slice_start, slice_stop, slice_step):
+        slice_start_children = [cls.make_signed_integer(slice_start)] if slice_start is not None else []
+        slice_stop_children = [cls.make_signed_integer(slice_stop)] if slice_stop is not None else []
+        slice_step_children = [cls.make_signed_integer(slice_step)] if slice_step is not None else []
+        slices = [
+            {'type': 'array_slice_start', 'children': slice_start_children},
+            {'type': 'array_slice_stop', 'children': slice_stop_children},
+            {'type': 'array_slice_step', 'children': slice_step_children},
+        ]
         return {'type': 'array_slice', 'children': [cls.make_identifier(name)] + slices}
 
     @classmethod
@@ -74,7 +79,7 @@ class ParserTesterMixin:
     @classmethod
     def make_array_index(cls, index):
         if isinstance(index, numbers.Integral):
-            return cls.make_integer(index)
+            return cls.make_signed_integer(index)
         elif isinstance(index, str):
             return cls.make_let_identifier(index)
         else:

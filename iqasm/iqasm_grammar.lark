@@ -33,12 +33,16 @@ _parallel_statement: gate_statement | sequential_gate_block
 
 // Common rules
 array_declaration: IDENTIFIER "[" let_or_integer "]"
-array_element: IDENTIFIER "[" let_or_integer "]"
-array_slice: IDENTIFIER "[" _slice_indexing "]"
-_slice_indexing: _slice_single | _slice_begin_end | _slice_full
-_slice_single: let_or_integer
-_slice_begin_end: let_or_integer ":" let_or_signed_integer
-_slice_full: let_or_integer ":" let_or_signed_integer ":" let_or_signed_integer
+array_element: IDENTIFIER "[" let_or_signed_integer "]"
+array_slice: IDENTIFIER "[" array_slice_start array_slice_stop array_slice_step "]"
+array_slice_start: let_or_signed_integer? ":"
+array_slice_stop: let_or_signed_integer?
+array_slice_step: (":" let_or_signed_integer?)?
+_slice_indexing: let_or_signed_integer? ":" let_or_signed_integer? (":" let_or_signed_integer?)?
+// _slice_indexing: _slice_single | _slice_begin_end | _slice_full
+// _slice_single: let_or_integer
+// _slice_begin_end: let_or_integer ":" let_or_signed_integer
+// _slice_full: let_or_integer ":" let_or_signed_integer ":" let_or_signed_integer
 ?let_or_integer: let_identifier | INTEGER
 ?let_or_signed_integer: let_identifier | SIGNED_INTEGER
 let_identifier: IDENTIFIER  // As its own rule this is easier to filter on the backend
