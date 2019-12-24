@@ -28,21 +28,21 @@ class ExampleFileTester(ParserTesterMixin, unittest.TestCase):
 
     def test_hadamard(self):
         """Test Hadamard example"""
-        self.implement_file_test(example_dir / "hadamard.xqasm")
+        self.implement_file_test(example_dir / "hadamard.jaqal")
  
     def test_gst(self):
         """Test Single Qubit GST example"""
-        self.implement_file_test(example_dir / "single_qubit_gst.xqasm")
+        self.implement_file_test(example_dir / "single_qubit_gst.jaqal")
 
     def test_hadamard_unitary_timed_gates(self):
         """Test visiting the hadamard program"""
-        file_path = example_dir / "hadamard.xqasm"
+        file_path = example_dir / "hadamard.jaqal"
         text = Path(file_path).read_text()
         parse_unitary_timed_gates(text)
         
     def test_gst_unitary_timed_gates(self):
         """Test visiting the gst program"""
-        file_path = example_dir / "single_qubit_gst.xqasm"
+        file_path = example_dir / "single_qubit_gst.jaqal"
         text = Path(file_path).read_text()
         parse_unitary_timed_gates(text)
  
