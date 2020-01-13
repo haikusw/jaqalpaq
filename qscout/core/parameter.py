@@ -7,27 +7,79 @@ INT_TYPE = 'int'
 PARAMETER_TYPES = (QUBIT_TYPE, FLOAT_TYPE, REGISTER_TYPE, INT_TYPE, None)
 
 class AnnotatedValue:
+	"""
+	An abstract base class that represents a named (and optionally type-annotated) value.
+	The actual value it represents may be context-dependent, but the name and type
+	annotation are not.
+	Currently, it's used to implement both gate parameters and let statements, though it
+	may find other uses as the language evolves.
+	
+	:param str name: The name the AnnotatedValue is labeled with.
+	:param kind: Optionally, an annotation denoting the the type of the value as
+		:data:`qscout.core.QUBIT_TYPE`, :data:`qscout.core.FLOAT_TYPE`,
+		:data:`qscout.core.REGISTER_TYPE`, or :data:`qscout.core.INT_TYPE`.
+		If None, can hold a value of any type (like a macro parameter).
+	"""
 	def __init__(self, name, kind):
 		self._name = name
 		if kind not in PARAMETER_TYPES:
 			raise QSCOUTError("Invalid parameter type specifier %s." % kind)
 		self._kind = kind
+	
 	@property
 	def name(self):
+		"""
+		The name the AnnotatedValue is labeled with.
+		"""
 		return self._name
 	
 	@property
 	def kind(self):
+		"""
+		Optionally, an annotation denoting the type of the value.
+		"""
 		return self._kind
 	
 	def resolve_value(self, context={}):
+		"""
+		Determines what value the AnnotatedValue represents in a particular context. For
+		example, a gate parameter may have different values each time the gate is called.
+		The implementation provided here simply checks to see if the name of this
+		AnnotatedValue is defined in the context, and if so returns its value. However,
+		subclasses are likely to provide different behavior.
+		
+		:param dict context: A dictionary mapping names defined in the scope of interest
+			to the values corresponding to those names.
+		
+		:returns: What value the AnnotatedValue represents.
+		:raises QSCOUTError: If the AnnotatedValue doesn't represent a fixed value within
+			the context specified.
+		"""
 		if self.name in context:
 			return context[self.name]
 		else:
 			raise QSCOUTError("Unbound identifier %s." % alias_index.name)
 
-class Parameter(AnnotatedValue):	
+class Parameter(AnnotatedValue):
+	"""
+	Base: :class:`AnnotatedValue`
+	
+	Represents a parameter that a gate or macro accepts. In addition to the functionality
+	of the base class, it also supports type-checking. Furthermore, it can be indexed and
+	sliced, if it represents a :class:`Register` parameter. Thus, it can be used within
+	the body of a macro exactly as if it were a register defined by a ``map`` or ``reg``
+	statement.
+	"""
+	
 	def validate(self, value):
+		"""
+		Checks to see if the given value can be passed to this Parameter.
+		Specifically, the value's type is checked against any type annotation this
+		Parameter may have.
+		
+		:param value: The candidate value to validate.
+		:raises QSCOUTError: If the value is not acceptable for this Parameter.
+		"""
 		from .register import NamedQubit, Register
 		
 		if self.kind == QUBIT_TYPE:

@@ -7,6 +7,13 @@ def notate_slice(s):
 		return "%s:%s" % (generate_jaqal_value(s.start or 0), generate_jaqal_value(s.stop))
 
 def generate_jaqal_program(circ):
+	"""
+	Converts a :class:`qscout.core.ScheduledCircuit` object to the Jaqal program it represents.
+	
+	:param ScheduledCircuit circ: The circuit to output.
+	:returns: The text of a Jaqal program that describes that circuit.
+	:rtype: str
+	"""
 	program = ""
 	for register in circ.registers.values():
 		if register.fundamental:

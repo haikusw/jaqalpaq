@@ -1,6 +1,32 @@
 from qscout.core import GateBlock, LoopStatement, GateStatement, QUBIT_TYPE
 
 def schedule_circuit(circ):
+	"""
+	Takes every :class:`qscout.core.GateBlock` in a circuit with ``parallel=None``, and
+	replaces it with a block that is functionally identical (contains the same gates,
+	without reordering any non-commuting operations); complies with the restrictions of
+	the QSCOUT hardware and low-level software stack; and reorders gates to act in
+	parallel where possible.
+	
+	Currently the restrictions on parallelization are:
+	
+	* Two-qubit gates cannot occur in parallel with any other operation.
+	* State preparation and measurement cannot occur in parallel with any other operation.
+	* No qubit can be involved in multiple simultaneous gates.
+	* Macro-defined gates cannot occur in parallel with any other operation.
+	* Loop statements cannot occur in parallel with any other operation.
+	
+	These restrictions are not enforced by Jaqal itself, and other submodules may generate
+	code that does not comply with them if instructed to by the user, but they will not
+	execute on the current version of the QSCOUT hardware, and so this scheduler does not
+	introduce them.
+	
+	Additionally, sequential blocks cannot be nested directly in other sequential blocks;
+	when the process of scheduling creates such a nesting, it will automatically replace
+	the inner block with every gate it contains.
+	
+	:param ScheduledCircuit circ: The circuit to parallelize (in-place).
+	"""
 	schedule_block(circ, circ.gates)
 
 def schedule_block(circ, block):
@@ -53,6 +79,7 @@ def schedule_instr(circ, instr, target, freeze_timestamps):
 			target[defrost].gates.append(instr)
 	elif is_block:
 		# You can't nest two sequential blocks, so we flatten the block.
+		# TODO: Make sure this never parallelizes things that were supposed to be fixed to sequential.
 		for sub_instr in instr:
 			schedule_instr(circ, sub_instr, new_block, freeze_timestamps)
 		return # We've frozen all the relevant qubits already.

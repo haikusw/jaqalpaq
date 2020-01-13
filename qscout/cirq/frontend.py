@@ -12,11 +12,12 @@ CIRQ_NAMES = {
 }
 
 def qscout_circuit_from_cirq_circuit(ccirc):
-	"""Converts a Cirq Circuit to a Jaqal-PUP :class:`ScheduledCircuit`.
+	"""Converts a Cirq Circuit object to a :class:`qscout.core.ScheduledCircuit`.
 
 	:param cirq.Circuit ccirc: The Circuit to convert.
-	:returns qscout.core.ScheduledCircuit: The same quantum circuit, converted to Jaqal-PUP.
-	:raises QSCOUTError: if the input contains any instructions other than cirq.XXPowGate, cirq.XPowGate, cirq.YPowGate, cirq.ZPowGate, or cirq.PhasedXPowGate.
+	:returns: The same quantum circuit, converted to Jaqal-PUP.
+	:rtype: ScheduledCircuit
+	:raises QSCOUTError: if the input contains any instructions other than ``cirq.XXPowGate``, ``cirq.XPowGate``, ``cirq.YPowGate``, ``cirq.ZPowGate``, or ``cirq.PhasedXPowGate``.
 	"""
 	qcirc = ScheduledCircuit(True)
 	try:

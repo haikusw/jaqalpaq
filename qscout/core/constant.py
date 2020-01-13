@@ -2,6 +2,15 @@ from .parameter import AnnotatedValue, INT_TYPE, FLOAT_TYPE
 from qscout import QSCOUTError
 
 class Constant(AnnotatedValue):
+	"""
+	Bases: :class:`qscout.core.AnnotatedValue`
+	
+	Represents a Jaqal let statement.
+	
+	:param str name: The name to bind the constant to.
+	:param value: The numeric value to bind to that name; can be either a literal value or another Constant.
+	:type value: Constant, int, or float
+	"""
 	def __init__(self, name, value):
 		if isinstance(value, Constant):
 			super().__init__(self, name, value.kind)
@@ -15,7 +24,16 @@ class Constant(AnnotatedValue):
 	
 	@property
 	def value(self):
+		"""
+		The fixed value of the constant.
+		"""
 		return self._value
 	
 	def resolve_value(self, context={}):
+		"""
+		Overrides: :meth:`qscout.core.AnnotatedValue.resolve_value`
+		
+		Unlike the superclass, ignores the context and simply returns the fixed value of
+		the constant.
+		"""
 		return self.value
