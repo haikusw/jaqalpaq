@@ -4,11 +4,11 @@ from cirq import XXPowGate, XPowGate, YPowGate, ZPowGate, PhasedXPowGate
 import numpy as np
 
 CIRQ_NAMES = {
-	XXPowGate: (lambda g: ('MS', 0, g.exponent * np.pi / 2)),
-	XPowGate: (lambda g: ('R', 0, g.exponent * np.pi)),
-	YPowGate: (lambda g: ('R', np.pi/2, g.exponent * np.pi)),
-	ZPowGate: (lambda g: ('Rz', g.exponent * np.pi)),
-	PhasedXPowGate: (lambda g: ('R', g.phase_exponent * np.pi, g.exponent * np.pi))
+	XXPowGate: (lambda g: ('MS', 0, g.exponent * 180.0)),
+	XPowGate: (lambda g: ('R', 0, g.exponent * 180.0)),
+	YPowGate: (lambda g: ('R', 90.0, g.exponent * 180.0)),
+	ZPowGate: (lambda g: ('Rz', g.exponent * 180.0)),
+	PhasedXPowGate: (lambda g: ('R', g.phase_exponent * 180.0, g.exponent * 180.0))
 }
 
 def qscout_circuit_from_cirq_circuit(ccirc):

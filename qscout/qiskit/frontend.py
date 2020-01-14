@@ -3,6 +3,7 @@ from qscout.core import ScheduledCircuit
 from qiskit.converters import dag_to_circuit
 from qscout import QSCOUTError
 #from sympy.core.evalf import N
+import numpy as np
 
 QISKIT_NAMES = {'i': 'I', 'r': 'R', 'sx': 'Sx', 'sy': 'Sy', 'x': 'Px', 'y': 'Py', 'rz': 'Rz'}
 
@@ -75,14 +76,14 @@ def qscout_circuit_from_qiskit_circuit(circuit):
 		elif instr[0].name in QISKIT_NAMES:
 			target = instr[1][0]
 			if target.register.name in qsc.registers:
-				block.append(qsc.build_gate(QISKIT_NAMES[instr[0].name], qsc.registers[target.register.name][target.index], *[float(param) for param in instr[0].params]))
+				block.append(qsc.build_gate(QISKIT_NAMES[instr[0].name], qsc.registers[target.register.name][target.index], *[float(param) * 180.0 / np.pi for param in instr[0].params]))
 			else:
 				raise QSCOUTError("Gate register %s invalid!" % target.register.name)
 		elif instr[0].name == 'ms':
 			targets = instr[1]
 			if targets[0].register.name in qsc.registers:
 				if targets[1].register.name in qsc.registers:
-					block.append(qsc.build_gate('MS', *[qsc.registers[target.register.name][target.index] for target in targets], *[float(param) for param in instr[0].params]))
+					block.append(qsc.build_gate('MS', *[qsc.registers[target.register.name][target.index] for target in targets], *[float(param) * 180.0 / np.pi for param in instr[0].params]))
 				else:
 					raise QSCOUTError("Gate register %s invalid!" % targets[1].register.name)
 			else:

@@ -4,6 +4,7 @@ from pyquil.quil import Program, Gate
 from pyquil.quilbase import Measurement, ResetQubit, Reset
 from qscout.core import ScheduledCircuit
 from qscout import QSCOUTError
+import numpy as np
 
 QUIL_NAMES = {'I': 'I', 'R': 'R', 'SX': 'Sx', 'SY': 'Sy', 'X': 'Px', 'Y': 'Py', 'RZ': 'Rz', 'MS': 'MS'}
 
@@ -49,7 +50,7 @@ class IonCompiler(AbstractCompiler):
 					# measure_accumulator = set()
 			if isinstance(instr, Gate):
 				if instr.name in QUIL_NAMES:
-					qsc.gate(QUIL_NAMES[instr.name], *[qreg[qubit.index] for qubit in instr.qubits], *[float(p) for p in instr.params])
+					qsc.gate(QUIL_NAMES[instr.name], *[qreg[qubit.index] for qubit in instr.qubits], *[float(p) * 180 / np.pi for p in instr.params])
 				else:
 					raise QSCOUTError("Gate %s not in native gate set." % instr.name)
 			elif isinstance(instr, Reset):
