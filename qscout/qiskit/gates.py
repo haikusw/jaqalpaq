@@ -165,8 +165,8 @@ class RGate(Gate):
 		rz(theta) a;
 		}
 	
-	:param float theta: The angle by which the gate rotates the state.
-	:param float phi: The phase angle that sets the planar axis to rotate around.
+	:param float theta: The angle that sets the planar axis to rotate around.
+	:param float phi: The angle by which the gate rotates the state.
 	:param label: What to label the gate on, e.g., circuit diagrams.
 	:type label: str or None
 	"""

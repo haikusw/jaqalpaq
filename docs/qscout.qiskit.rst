@@ -29,8 +29,8 @@ standard extension.
 	
 	Add a single-qubit gate representing arbitrary rotation around an axis in the X-Y plane to a circuit.
 	
-	:param float theta: The angle by which the gate rotates the state.
-	:param float phi: The phase angle that sets the planar axis to rotate around.
+	:param float theta: The angle that sets the planar axis to rotate around.
+	:param float phi: The angle by which the gate rotates the state.
 	:param q: The qubit to act on.
 	:type q: qiskit.circuit.Bit, qiskit.circuit.Register, int, slice, list, or range
 
