@@ -6,7 +6,9 @@ qscout package
    :undoc-members:
    :show-inheritance:
 
-.. autodata:: RESERVED_WORDS
+.. data:: RESERVED_WORDS
+	
+	The current list of words that cannot be used as names of constants, macros, or registers in Jaqal code.
 
 Subpackages
 -----------
