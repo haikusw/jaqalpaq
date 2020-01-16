@@ -27,10 +27,15 @@ from qiskit.circuit import QuantumRegister
 from .gates import MSGate, SXGate, SYGate, RGate
 
 class IonUnroller(TransformationPass):
+	"""
+	A Qiskit transpiler pass that attempts to map an arbitrary circuit onto the native
+	gates of the QSCOUT hardware, usually to prepare for conversion to Jaqal.
+	"""
+	
 	def __init__(self):
 		super().__init__()
 	
-	def get_rule(self, node):
+	def _get_rule(self, node):
 		q = QuantumRegister(node.op.num_qubits, "q")
 		if node.name == 'u1':
 			rule = [(RZGate(node.op.params[0]), [q[0]], [])]
@@ -82,6 +87,14 @@ class IonUnroller(TransformationPass):
 		return rule
 	
 	def run(self, dag):
+		"""
+		Apply this transpiler pass to a circuit in directed acyclic graph representation.
+		
+		:param qiskit.dagcircuit.DAGCircuit dag: The circuit to transpile.
+		:returns: The transpiled circuit.
+		:rtype: qiskit.dagcircuit.DAGCircuit
+		:raises qiskit.exceptions.QiskitError: If the circuit contains a parametrized non-basis gate, or contains a gate that cannot be unrolled.
+		"""
 		# Walk through the DAG and expand each non-basis node
 		for node in dag.op_nodes():
 			basic_insts = ['measure', 'reset', 'barrier', 'snapshot']
@@ -90,11 +103,11 @@ class IonUnroller(TransformationPass):
 				#  instructions should be part of the device-reported basis. Currently, no
 				#  backend reports "measure", for example.
 				continue
-			if node.name in ['i', 'r', 'sx', 'sy', 'x', 'y', 'xx', 'rz', 'ms']:  # If already a base, ignore.
+			if node.name in ['i', 'r', 'sx', 'sy', 'x', 'y', 'rz', 'ms2']:  # If already a base, ignore.
 				continue
 
 			try:
-				rule = self.get_rule(node)
+				rule = self._get_rule(node)
 			except TypeError as err:
 				if any(isinstance(p, ParameterExpression) for p in node.op.params):
 					raise QiskitError('Unrolling gates parameterized by expressions '

@@ -21,13 +21,39 @@ from qiskit.extensions.standard.rz import RZGate
 from qiskit.qasm import pi
 
 class MSGate(Gate):
-	"""two-parameter Mølmer-Sørensen gate"""
+	"""
+	The two-parameter Mølmer-Sørensen gate, as implemented on QSCOUT hardware.
+	Note that this is *not* equivalent to Qiskit's MSGate. It's equivalent to ::
+	
+		exp(-i theta/2 (cos(phi) XI + sin(phi) YI) (cos(phi) IX + sin(phi) IY))
+		
+	or to the OpenQASM sequence ::
+	
+		gate ms2(theta, phi) a,b
+		{
+		rz(phi) a;
+		rz(phi+pi/2) b;
+		CX b,a;
+		rz(-pi/2) a;
+		ry(theta+pi/2) b;
+		CX a,b;
+		ry(-pi/2) b;
+		CX b,a;
+		rz(-phi-pi/2) a;
+		rz(-phi) b;
+		}
+	
+	:param float theta: The angle by which the gate rotates the state.
+	:param float phi: The phase angle determining the mix of XX and YY rotation.
+	:param label: What to label the gate on, e.g., circuit diagrams.
+	:type label: str or None
+	"""
 	def __init__(self, theta, phi, label=None):
-		super().__init__("ms", 2, [theta, phi], label=label)
+		super().__init__("ms2", 2, [theta, phi], label=label)
 	
 	def _define(self):
 		"""
-		gate ms(theta, phi) a,b
+		gate ms2(theta, phi) a,b
 		{
 		rz(phi) a;
 		rz(phi+pi/2) b;
@@ -60,18 +86,24 @@ class MSGate(Gate):
 			definition.append(inst)
 		self.definition = definition
 
-def ms(self, theta, phi, a, b):
+def ms2(self, theta, phi, a, b):
 	return self.append(MSGate(theta, phi), [a, b], [])
-QuantumCircuit.ms = ms
+QuantumCircuit.ms2 = ms2
 
 class SXGate(Gate):
-	"""sqrt(X) gate"""
+	"""
+	The `sqrt(X)` gate, as implemented on QSCOUT hardware. It's equivalent to a `pi/2`
+	rotation around the X-axis on the Bloch sphere.
+	
+	:param label: What to label the gate on, e.g., circuit diagrams.
+	:type label: str or None
+	"""
 	def __init__(self, label=None):
 		super().__init__("sx", 1, [], label=label)
 	
 	def _define(self):
 		"""
-		gate sx() a
+		gate sx a
 		{
 		rx(pi/2) a;
 		}
@@ -90,13 +122,19 @@ def sx(self, q):
 QuantumCircuit.sx = sx
 
 class SYGate(Gate):
-	"""sqrt(Y) gate"""
+	"""
+	The `sqrt(Y)` gate, as implemented on QSCOUT hardware. It's equivalent to a `pi/2`
+	rotation around the Y-axis on the Bloch sphere.
+	
+	:param label: What to label the gate on, e.g., circuit diagrams.
+	:type label: str or None
+	"""
 	def __init__(self, label=None):
 		super().__init__("sy", 1, [], label=label)
 	
 	def _define(self):
 		"""
-		gate sy() a
+		gate sy a
 		{
 		ry(pi/2) a;
 		}
@@ -115,7 +153,23 @@ def sy(self, q):
 QuantumCircuit.sy = sy
 
 class RGate(Gate):
-	"""arbitrary rotation around an axis in the X-Y plane"""
+	"""
+	A single-qubit gate representing arbitrary rotation around an axis in the X-Y plane,
+	as implemented on QSCOUT hardware. Note that this is essentially a different
+	parametrization of Qiskit's U2 gate. It's equivalent to the OpenQASM sequence ::
+	
+		gate r(theta, phi) a
+		{
+		rz(-theta) a;
+		rx(phi) a;
+		rz(theta) a;
+		}
+	
+	:param float theta: The angle by which the gate rotates the state.
+	:param float phi: The phase angle that sets the planar axis to rotate around.
+	:param label: What to label the gate on, e.g., circuit diagrams.
+	:type label: str or None
+	"""
 	def __init__(self, axis_angle, rotation_angle, label=None):
 		super().__init__("r", 1, [axis_angle, rotation_angle], label=label)
 	

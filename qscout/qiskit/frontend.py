@@ -43,7 +43,7 @@ def qscout_circuit_from_qiskit_circuit(circuit):
 	:raises QSCOUTError: If any instruction acts on a qubit from a register other than the circuit's qregs.
 	:raises QSCOUTError: If the circuit includes a snapshot instruction.
 	:raises QSCOUTError: If the user tries to measure or reset only some of the qubits, rather than all of them.
-	:raises QSCOUTError: If the circuit includes a gate other than i, r, sx, sy, x, y, rz, or ms.
+	:raises QSCOUTError: If the circuit includes a gate other than i, r (:class:`qscout.qiskit.RGate`), sx (:class:`qscout.qiskit.SXGate`), sy (:class:`qscout.qiskit.SYGate`), x, y, rz, or ms2 (:class:`qscout.qiskit.MSGate`).
 	"""
 	n = sum([qreg.size for qreg in circuit.qregs])
 	qsc = ScheduledCircuit(True) # TODO: Allow user to supply a different native gateset.
@@ -113,7 +113,7 @@ def qscout_circuit_from_qiskit_circuit(circuit):
 				block.append(qsc.build_gate(QISKIT_NAMES[instr[0].name], qsc.registers[target.register.name][target.index], *[float(param) * 180.0 / np.pi for param in instr[0].params]))
 			else:
 				raise QSCOUTError("Gate register %s invalid!" % target.register.name)
-		elif instr[0].name == 'ms':
+		elif instr[0].name == 'ms2':
 			targets = instr[1]
 			if targets[0].register.name in qsc.registers:
 				if targets[1].register.name in qsc.registers:
