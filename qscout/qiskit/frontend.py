@@ -8,9 +8,43 @@ import numpy as np
 QISKIT_NAMES = {'i': 'I', 'r': 'R', 'sx': 'Sx', 'sy': 'Sy', 'x': 'Px', 'y': 'Py', 'rz': 'Rz'}
 
 def qscout_circuit_from_dag_circuit(dag):
+	"""
+	Converts a Qiskit directed-acyclic-graph representation of a circuit to a :class:`qscout.core.ScheduledCircuit`.
+	See :func:`qscout_circuit_from_qiskit_circuit` for details.
+	
+	:param qiskit.dagcircuit.DAGCircuit dag: The directed acyclic graph circuit to convert.
+	:returns: The same quantum circuit, converted to Jaqal-PUP.
+	:rtype: qscout.core.ScheduledCircuit
+	"""
 	return qscout_circuit_from_qiskit_circuit(dag_to_circuit(dag))
 
 def qscout_circuit_from_qiskit_circuit(circuit):
+	"""
+	Converts a Qiskit circuit to a :class:`qscout.core.ScheduledCircuit`. The circuit will
+	be structured into a sequence of unscheduled blocks. All instructions between one
+	barrier statement and the next will be put into an unscheduled block together. If the 
+	:mod:`qscout.scheduler` is run on the circuit, as many as possible of those gates will
+	be parallelized within each block, while maintaining the order of the blocks.
+	Otherwise, the circuit will be treated as a fully sequential circuit.
+	
+	Measurement and reset commands are supported, but only if applied to every qubit in
+	the circuit in immediate succession. If so, they will be mapped to a prepare_all or
+	measure_all gate. If the circuit does not end with a measurement, then a measure_all
+	gate will be appended to it.
+	
+	Circuits containing multiple quantum registers will be converted to circuits with a
+	single quantum register, containing all the qubits from each register. The parts of
+	that larger register that correspond to each of the original registers will be mapped
+	with the appropriate names.
+	
+	:param qiskit.circuit.QuantumCircuit dag: The circuit to convert.
+	:returns: The same quantum circuit, converted to Jaqal-PUP.
+	:rtype: qscout.core.ScheduledCircuit
+	:raises QSCOUTError: If any instruction acts on a qubit from a register other than the circuit's qregs.
+	:raises QSCOUTError: If the circuit includes a snapshot instruction.
+	:raises QSCOUTError: If the user tries to measure or reset only some of the qubits, rather than all of them.
+	:raises QSCOUTError: If the circuit includes a gate other than i, r, sx, sy, x, y, rz, or ms.
+	"""
 	n = sum([qreg.size for qreg in circuit.qregs])
 	qsc = ScheduledCircuit(True) # TODO: Allow user to supply a different native gateset.
 	baseregister = qsc.reg('baseregister', n)
