@@ -4,11 +4,11 @@ from cirq import XXPowGate, XPowGate, YPowGate, ZPowGate, PhasedXPowGate
 import numpy as np
 
 CIRQ_NAMES = {
-	XXPowGate: (lambda g: ('MS', 0, g.exponent * 180.0)),
-	XPowGate: (lambda g: ('R', 0, g.exponent * 180.0)),
-	YPowGate: (lambda g: ('R', 90.0, g.exponent * 180.0)),
-	ZPowGate: (lambda g: ('Rz', g.exponent * 180.0)),
-	PhasedXPowGate: (lambda g: ('R', g.phase_exponent * 180.0, g.exponent * 180.0))
+	XXPowGate: (lambda g, q1, q2: ('MS', q1, q2, 0, g.exponent * 180.0)),
+	XPowGate: (lambda g, q: ('R', q, 0, g.exponent * 180.0)),
+	YPowGate: (lambda g, q: ('R', q, 90.0, g.exponent * 180.0)),
+	ZPowGate: (lambda g, q: ('Rz', q, g.exponent * 180.0)),
+	PhasedXPowGate: (lambda g, q: ('R', q, g.phase_exponent * 180.0, g.exponent * 180.0))
 }
 
 def qscout_circuit_from_cirq_circuit(ccirc):
@@ -35,9 +35,9 @@ def qscout_circuit_from_cirq_circuit(ccirc):
 			if op.gate:
 				if type(op.gate) in CIRQ_NAMES:
 					if line:
-						qcirc.gate(*CIRQ_NAMES[type(op.gate)](op.gate), *[allqubits[qb.x] for qb in op.qubits])
+						qcirc.gate(*CIRQ_NAMES[type(op.gate)](op.gate, *[allqubits[qb.x] for qb in op.qubits]))
 					else:
-						qcirc.gate(*CIRQ_NAMES[type(op.gate)](op.gate), *[allqubits[qubitmap[qb]] for qb in op.qubits])
+						qcirc.gate(*CIRQ_NAMES[type(op.gate)](op.gate, *[allqubits[qubitmap[qb]] for qb in op.qubits]))
 				else:
 					raise QSCOUTError("Convert circuit to ion gates before compiling.")
 			else:
