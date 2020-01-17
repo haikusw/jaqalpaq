@@ -5,7 +5,7 @@ from qscout import QSCOUTError
 #from sympy.core.evalf import N
 import numpy as np
 
-QISKIT_NAMES = {'i': 'I', 'r': 'R', 'sx': 'Sx', 'sy': 'Sy', 'x': 'Px', 'y': 'Py', 'rz': 'Rz'}
+QISKIT_NAMES = {'i': 'I', 'r': 'R', 'sx': 'Sx', 'sy': 'Sy', 'x': 'Px', 'y': 'Py', 'rz': 'Rz', 'ms2': 'MS'}
 
 def qscout_circuit_from_dag_circuit(dag):
 	"""
@@ -18,7 +18,7 @@ def qscout_circuit_from_dag_circuit(dag):
 	"""
 	return qscout_circuit_from_qiskit_circuit(dag_to_circuit(dag))
 
-def qscout_circuit_from_qiskit_circuit(circuit):
+def qscout_circuit_from_qiskit_circuit(circuit, names = None, native_gates = None):
 	"""
 	Converts a Qiskit circuit to a :class:`qscout.core.ScheduledCircuit`. The circuit will
 	be structured into a sequence of unscheduled blocks. All instructions between one
@@ -38,15 +38,26 @@ def qscout_circuit_from_qiskit_circuit(circuit):
 	with the appropriate names.
 	
 	:param qiskit.circuit.QuantumCircuit dag: The circuit to convert.
+	:param names: A mapping from names of Qiskit gates to the corresponding native Jaqal gate names.
+		If omitted, maps i, r (:class:`qscout.qiskit.RGate`), sx (:class:`qscout.qiskit.SXGate`),
+		sy (:class:`qscout.qiskit.SYGate`), x, y, rz, and ms2 (:class:`qscout.qiskit.MSGate`)
+		to their QSCOUT counterparts.
+	:type names: dict or None
+	:param native_gates: The native gate set to target. If None, target the QSCOUT native gates.
+	:type native_gates: dict or None
 	:returns: The same quantum circuit, converted to Jaqal-PUP.
 	:rtype: qscout.core.ScheduledCircuit
 	:raises QSCOUTError: If any instruction acts on a qubit from a register other than the circuit's qregs.
 	:raises QSCOUTError: If the circuit includes a snapshot instruction.
 	:raises QSCOUTError: If the user tries to measure or reset only some of the qubits, rather than all of them.
-	:raises QSCOUTError: If the circuit includes a gate other than i, r (:class:`qscout.qiskit.RGate`), sx (:class:`qscout.qiskit.SXGate`), sy (:class:`qscout.qiskit.SYGate`), x, y, rz, or ms2 (:class:`qscout.qiskit.MSGate`).
+	:raises QSCOUTError: If the circuit includes a gate not included in `names`.
 	"""
 	n = sum([qreg.size for qreg in circuit.qregs])
-	qsc = ScheduledCircuit(True) # TODO: Allow user to supply a different native gateset.
+	qsc = ScheduledCircuit(native_gates is None) # TODO: Allow user to supply a different native gateset.
+	if native_gates is not None:
+		qsc.native_gates.update(native_gates)
+	if names is None:
+		names = QISKIT_NAMES
 	baseregister = qsc.reg('baseregister', n)
 	offset = 0
 	for qreg in circuit.qregs:
@@ -107,21 +118,12 @@ def qscout_circuit_from_qiskit_circuit(circuit):
 			block = qsc.block(parallel = None) # Use barriers to inform the scheduler, as explained above.
 		elif instr[0].name == 'snapshot':
 			raise QSCOUTError("Physical hardware does not support snapshot instructions.")
-		elif instr[0].name in QISKIT_NAMES:
-			target = instr[1][0]
-			if target.register.name in qsc.registers:
-				block.append(qsc.build_gate(QISKIT_NAMES[instr[0].name], qsc.registers[target.register.name][target.index], *[float(param) * 180.0 / np.pi for param in instr[0].params]))
-			else:
-				raise QSCOUTError("Gate register %s invalid!" % target.register.name)
-		elif instr[0].name == 'ms2':
+		elif instr[0].name in names:
 			targets = instr[1]
-			if targets[0].register.name in qsc.registers:
-				if targets[1].register.name in qsc.registers:
-					block.append(qsc.build_gate('MS', *[qsc.registers[target.register.name][target.index] for target in targets], *[float(param) * 180.0 / np.pi for param in instr[0].params]))
-				else:
-					raise QSCOUTError("Gate register %s invalid!" % targets[1].register.name)
-			else:
-				raise QSCOUTError("Gate register %s invalid!" % targets[0].register.name)
+			for target in targets:
+				if target.register.name not in qsc.registers:
+					raise QSCOUTError("Gate register %s invalid!" % target.register.name)
+			block.append(qsc.build_gate(names[instr[0].name], *[qsc.registers[target.register.name][target.index] for target in targets], *[float(param) * 180.0 / np.pi for param in instr[0].params]))
 		else: # TODO: Check native gateset and determine allowed gates accordingly.
 			raise QSCOUTError("Instruction %s not available on trapped ion hardware; try unrolling first." % instr[0].name)
 	if qsc.gates[-1].name != 'measure_all':

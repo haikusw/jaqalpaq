@@ -13,6 +13,13 @@ class IonCompiler(AbstractCompiler):
 	A compiler that converts Quil programs to Jaqal circuits that can be executed on the QSCOUT device.
 	
 	:param pyquil.device.AbstractDevice device: The quantum device the compiler should target.
+	:param names: A mapping from names of Qiskit gates to the corresponding native Jaqal gate names.
+		If omitted, maps I, R (:func:`qscout.quil.R`), SX (:data:`qscout.quil.SX`),
+		SY (:data:`qscout.quil.SY`), X, Y, RZ, and MS (:func:`qscout.quil.MS`)
+		to their QSCOUT counterparts.
+	:type names: dict or None
+	:param native_gates: The native gate set to target. If None, target the QSCOUT native gates.
+	:type native_gates: dict or None
 	"""
 	
 	def __init__(self, device, names = None, native_gates = None):
@@ -52,12 +59,14 @@ class IonCompiler(AbstractCompiler):
 		:rtype: qscout.core.ScheduledCircuit
 		:raises QSCOUTError: If the program includes a non-gate instruction other than resets or measurements.
 		:raises QSCOUTError: If the user tries to measure or reset only some of the qubits, rather than all of them.
-		:raises QSCOUTError: If the program includes a gate other than I, R, SX, SY, X, Y, RZ, or MS.
+		:raises QSCOUTError: If the program includes a gate not included in `names`.
 		"""
 		n = max(nq_program.get_qubits()) + 1
 		if n > len(self._device.qubits()):
 			raise QSCOUTError("Program uses more qubits (%d) than device supports (%d)." % (n, len(self._device.qubits())))
-		qsc = ScheduledCircuit(self.native_gates == None)
+		qsc = ScheduledCircuit(self.native_gates is None)
+		if self.native_gates is not None:
+			qsc.native_gates.update(self.native_gates)
 		qsc.gates.parallel = None # Quil doesn't support barriers, so either the user
 								  # won't run the the scheduler and everything will happen
 								  # sequentially, or the user will and everything can be
