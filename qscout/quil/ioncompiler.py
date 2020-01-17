@@ -15,8 +15,12 @@ class IonCompiler(AbstractCompiler):
 	:param pyquil.device.AbstractDevice device: The quantum device the compiler should target.
 	"""
 	
-	def __init__(self, device):
+	def __init__(self, device, names = None, native_gates = None):
 		self._device = device
+		self.names = names
+		if self.names is None:
+			self.names = QUIL_NAMES
+		self.native_gates = native_gates
 	def quil_to_native_quil(self, program: Program, *, protoquil=None) -> Program:
 		"""
 		Currently does nothing. Eventually, will compile a Quil program down to the native
@@ -43,7 +47,7 @@ class IonCompiler(AbstractCompiler):
 		measure_all gate. If the circuit does not end with a measurement, then a measure_all
 		gate will be appended to it.
 	
-		:param pyquil.quil.Program nq_program: The program to compule.
+		:param pyquil.quil.Program nq_program: The program to compile.
 		:returns: The same quantum program, converted to Jaqal-PUP.
 		:rtype: qscout.core.ScheduledCircuit
 		:raises QSCOUTError: If the program includes a non-gate instruction other than resets or measurements.
@@ -53,7 +57,7 @@ class IonCompiler(AbstractCompiler):
 		n = max(nq_program.get_qubits()) + 1
 		if n > len(self._device.qubits()):
 			raise QSCOUTError("Program uses more qubits (%d) than device supports (%d)." % (n, len(self._device.qubits())))
-		qsc = ScheduledCircuit(True) # TODO: Allow user to supply a different native gateset.
+		qsc = ScheduledCircuit(self.native_gates == None)
 		qsc.gates.parallel = None # Quil doesn't support barriers, so either the user
 								  # won't run the the scheduler and everything will happen
 								  # sequentially, or the user will and everything can be
@@ -84,8 +88,8 @@ class IonCompiler(AbstractCompiler):
 					raise QSCOUTError("Cannot measure only qubits %s and not whole register." % reset_accumulator)
 					# measure_accumulator = set()
 			if isinstance(instr, Gate):
-				if instr.name in QUIL_NAMES:
-					qsc.gate(QUIL_NAMES[instr.name], *[qreg[qubit.index] for qubit in instr.qubits], *[float(p) * 180 / np.pi for p in instr.params])
+				if instr.name in self.names:
+					qsc.gate(self.names[instr.name], *[qreg[qubit.index] for qubit in instr.qubits], *[float(p) * 180 / np.pi for p in instr.params])
 				else:
 					raise QSCOUTError("Gate %s not in native gate set." % instr.name)
 			elif isinstance(instr, Reset):
