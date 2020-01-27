@@ -2,12 +2,21 @@ start: header_statements body_statements
 
 // Header Rules
 header_statements: [_seq_sep? header_statement (_seq_sep header_statement)* _seq_sep?]
-?header_statement: register_statement | map_statement | let_statement
+?header_statement: register_statement | map_statement | let_statement | import_statement | require_statement
 register_statement: _REG array_declaration
 map_statement: _MAP map_target map_source
 ?map_target: IDENTIFIER
 ?map_source: IDENTIFIER | array_slice | array_element
 let_statement: _LET IDENTIFIER SIGNED_NUMBER
+import_statement: from_clause? _IMPORT module_list
+require_statement: from_clause? _REQUIRE module_list
+from_clause: _FROM IDENTIFIER
+module_list: _parenthesized_module_list | _unparenthesized_module_list
+// The addition of a possible newline at one spot in the parenthesized module list is a bit of a hack but hopefully
+// is good enough that people won't notice.
+_parenthesized_module_list: "(" as_clause ("," _NEWLINE* as_clause)* ")"
+_unparenthesized_module_list: as_clause ("," as_clause)*
+as_clause: IDENTIFIER [_AS IDENTIFIER]
 
 // Body rules
 body_statements: [body_statement (_seq_sep body_statement)* _seq_sep?]
@@ -64,6 +73,10 @@ _MAP.2: "map"
 _LET.2: "let"
 _MACRO.2: "macro"
 _LOOP.2: "loop"
+_IMPORT.2: "import"
+_REQUIRE.2: "require"
+_FROM.2: "from"
+_AS.2: "as"
 
 // Imports
 %import common.SIGNED_NUMBER
