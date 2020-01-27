@@ -90,6 +90,35 @@ class ParserTesterMixin:
         return {'type': 'let_statement', 'children': [cls.make_identifier(name), cls.make_signed_number(value)]}
 
     @classmethod
+    def make_import_statement(cls, from_clause, as_clauses):
+        children = list(as_clauses)
+        if from_clause is not None:
+            children.insert(0, from_clause)
+        return {'type': 'import_statement', 'children': children}
+
+    @classmethod
+    def make_require_statement(cls, from_clause, as_clauses):
+        children = list(as_clauses)
+        if from_clause is not None:
+            children.insert(0, from_clause)
+        return {'type': 'require_statement', 'children': children}
+
+    @classmethod
+    def make_from_clause(cls, module_name):
+        return {'type': 'from_clause', 'children': [cls.make_identifier(module_name)]}
+
+    @classmethod
+    def make_as_clause(cls, name, alias=None):
+        children = [cls.make_identifier(name)]
+        if alias is not None:
+            children.append(cls.make_identifier(alias))
+        return {'type': 'as_clause', 'children': children}
+
+    @classmethod
+    def make_all_module(cls):
+        return {'type': 'all_module', 'children': []}
+
+    @classmethod
     def make_gate_statement(cls, name, *args):
         arg_children = [cls.make_gate_arg(arg) for arg in args]
         return {'type': 'gate_statement', 'children': [cls.make_identifier(name)] + arg_children}

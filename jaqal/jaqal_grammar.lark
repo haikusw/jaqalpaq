@@ -8,10 +8,11 @@ map_statement: _MAP map_target map_source
 ?map_target: IDENTIFIER
 ?map_source: IDENTIFIER | array_slice | array_element
 let_statement: _LET IDENTIFIER SIGNED_NUMBER
-import_statement: from_clause? _IMPORT module_list
-require_statement: from_clause? _REQUIRE module_list
+import_statement: from_clause? _IMPORT _module_list
+require_statement: from_clause? _REQUIRE _module_list
 from_clause: _FROM IDENTIFIER
-module_list: _parenthesized_module_list | _unparenthesized_module_list
+_module_list: _parenthesized_module_list | _unparenthesized_module_list | all_module
+all_module: "*"
 // The addition of a possible newline at one spot in the parenthesized module list is a bit of a hack but hopefully
 // is good enough that people won't notice.
 _parenthesized_module_list: "(" as_clause ("," _NEWLINE* as_clause)* ")"

@@ -54,6 +54,88 @@ class ParserTester(ParserTesterMixin, unittest.TestCase):
         act_tree = self.simplify_tree(tree)
         self.assertEqual(exp_tree, act_tree)
 
+    def test_import_statement(self):
+        """Test parsing an import statement."""
+        text = "import foo"
+        parser = self.make_parser(start='import_statement')
+        tree = parser.parse(text)
+        exp_tree = self.make_import_statement(None, [self.make_as_clause('foo')])
+        act_tree = self.simplify_tree(tree)
+        self.assertEqual(exp_tree, act_tree)
+
+    def test_import_as_statement(self):
+        text = "import foo as bar"
+        parser = self.make_parser(start='import_statement')
+        tree = parser.parse(text)
+        exp_tree = self.make_import_statement(None, [self.make_as_clause('foo', 'bar')])
+        act_tree = self.simplify_tree(tree)
+        self.assertEqual(exp_tree, act_tree)
+
+    def test_import_from_statement(self):
+        text = "from foo import bar"
+        parser = self.make_parser(start='import_statement')
+        tree = parser.parse(text)
+        exp_tree = self.make_import_statement(self.make_from_clause('foo'), [self.make_as_clause('bar')])
+        act_tree = self.simplify_tree(tree)
+        self.assertEqual(exp_tree, act_tree)
+
+    def test_import_from_as_statement(self):
+        text = "from foo import bar0 as bar1"
+        parser = self.make_parser(start='import_statement')
+        tree = parser.parse(text)
+        exp_tree = self.make_import_statement(self.make_from_clause('foo'), [self.make_as_clause('bar0', 'bar1')])
+        act_tree = self.simplify_tree(tree)
+        self.assertEqual(exp_tree, act_tree)
+
+    def test_import_all(self):
+        text = "from foo import *"
+        parser = self.make_parser(start='import_statement')
+        tree = parser.parse(text)
+        exp_tree = self.make_import_statement(self.make_from_clause('foo'), [self.make_all_module()])
+        act_tree = self.simplify_tree(tree)
+        self.assertEqual(exp_tree, act_tree)
+
+    def test_require_statement(self):
+        """Test parsing an require statement."""
+        text = "require foo"
+        parser = self.make_parser(start='require_statement')
+        tree = parser.parse(text)
+        exp_tree = self.make_require_statement(None, [self.make_as_clause('foo')])
+        act_tree = self.simplify_tree(tree)
+        self.assertEqual(exp_tree, act_tree)
+
+    def test_require_as_statement(self):
+        text = "require foo as bar"
+        parser = self.make_parser(start='require_statement')
+        tree = parser.parse(text)
+        exp_tree = self.make_require_statement(None, [self.make_as_clause('foo', 'bar')])
+        act_tree = self.simplify_tree(tree)
+        self.assertEqual(exp_tree, act_tree)
+
+    def test_require_from_statement(self):
+        text = "from foo require bar"
+        parser = self.make_parser(start='require_statement')
+        tree = parser.parse(text)
+        exp_tree = self.make_require_statement(self.make_from_clause('foo'), [self.make_as_clause('bar')])
+        act_tree = self.simplify_tree(tree)
+        self.assertEqual(exp_tree, act_tree)
+
+    def test_require_from_as_statement(self):
+        text = "from foo require bar0 as bar1"
+        parser = self.make_parser(start='require_statement')
+        tree = parser.parse(text)
+        exp_tree = self.make_require_statement(self.make_from_clause('foo'), [self.make_as_clause('bar0', 'bar1')])
+        act_tree = self.simplify_tree(tree)
+        self.assertEqual(exp_tree, act_tree)
+
+    def test_require_all(self):
+        text = "from foo require *"
+        parser = self.make_parser(start='require_statement')
+        tree = parser.parse(text)
+        exp_tree = self.make_require_statement(self.make_from_clause('foo'), [self.make_all_module()])
+        act_tree = self.simplify_tree(tree)
+        self.assertEqual(exp_tree, act_tree)
+
     def test_gate_no_args(self):
         """Test a gate with no arguments."""
         text = "g"
