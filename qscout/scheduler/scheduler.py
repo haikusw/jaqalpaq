@@ -44,6 +44,8 @@ def schedule_block(circ, block):
 		freeze_timestamps = {regname: {idx: -1 for idx in used_qubits[regname]} for regname in used_qubits}
 		for instr in block:
 			schedule_instr(circ, instr, new_block, freeze_timestamps)
+		block.gates = instr.gates
+		block.parallel = False
 	elif force_flatten:
 		# The block we're trying to schedule is locked to sequential order, but one of the
 		# sub-blocks of that block is also sequentially ordered. (This is usually a result
@@ -59,7 +61,7 @@ def schedule_block(circ, block):
 				block[i:i+1] = block[i].gates
 			i += inc			
 
-def schedule_instr(circ, instr, target, freeze_timestamps):
+def schedule_instr(circ, instr, target, freeze_timestamps, after=-1):
 	used_qubits = circ.used_qubit_indices(instr)
 	is_block = isinstance(instr, GateBlock)
 	is_gate = isinstance(instr, GateStatement)
@@ -68,7 +70,7 @@ def schedule_instr(circ, instr, target, freeze_timestamps):
 		defrost = 0
 		for reg in used_qubits:
 			for idx in used_qubits[reg]:
-				defrost = max(defrost, freeze_timestamps[reg][idx] + 1)
+				defrost = max(after + 1, defrost, freeze_timestamps[reg][idx] + 1)
 		while defrost < len(target) and not can_parallelize(circ, target[defrost], instr, used_qubits):
 			defrost += 1
 		if defrost >= len(target):
@@ -79,10 +81,9 @@ def schedule_instr(circ, instr, target, freeze_timestamps):
 			target[defrost].gates.append(instr)
 	elif is_block:
 		# You can't nest two sequential blocks, so we flatten the block.
-		# TODO: Make sure this never parallelizes things that were supposed to be fixed to sequential.
 		for sub_instr in instr:
-			schedule_instr(circ, sub_instr, new_block, freeze_timestamps)
-		return # We've frozen all the relevant qubits already.
+			after = schedule_instr(circ, sub_instr, new_block, freeze_timestamps, after)
+		return after # We've frozen all the relevant qubits already.
 	elif is_loop:
 		# Loop statements can't be parallelized with anything; just stick it at the end
 		defrost = len(target) # Any qubit used in the loop shouldn't be touched
@@ -92,6 +93,7 @@ def schedule_instr(circ, instr, target, freeze_timestamps):
 	for reg in used_qubits:
 		for idx in used_qubits[reg]:
 			freeze_timestamps[reg][idx] = defrost
+	return defrost
 
 def can_parallelize(circ, block, instr, qubits):
 	if isinstance(block, GateBlock) and block.parallel:
