@@ -11,7 +11,7 @@ CIRQ_NAMES = {
 	PhasedXPowGate: (lambda g, q: ('R', q, g.phase_exponent * 180.0, g.exponent * 180.0))
 }
 
-def qscout_circuit_from_cirq_circuit(ccirc):
+def qscout_circuit_from_cirq_circuit(ccirc, names = None, native_gates = None):
 	"""Converts a Cirq Circuit object to a :class:`qscout.core.ScheduledCircuit`.
 
 	:param cirq.Circuit ccirc: The Circuit to convert.
@@ -19,7 +19,11 @@ def qscout_circuit_from_cirq_circuit(ccirc):
 	:rtype: ScheduledCircuit
 	:raises QSCOUTError: if the input contains any instructions other than ``cirq.XXPowGate``, ``cirq.XPowGate``, ``cirq.YPowGate``, ``cirq.ZPowGate``, or ``cirq.PhasedXPowGate``.
 	"""
-	qcirc = ScheduledCircuit(True) # TODO: Allow user to supply a different native gateset.
+	qcirc = ScheduledCircuit(native_gates is None)
+		if native_gates is not None:
+			qcirc.native_gates.update(native_gates)
+	if names is None:
+		names = CIRQ_NAMES
 	try:
 		n = 1 + max([qb.x for qb in ccirc.all_qubits()])
 		line = True
@@ -40,11 +44,11 @@ def qscout_circuit_from_cirq_circuit(ccirc):
 		block = qcirc.block(parallel=True) # Note: If you tell Cirq you want MS gates in parallel, we'll generate a Jaqal file with exactly that, never mind that QSCOUT can't execute it.
 		for op in moment:
 			if op.gate:
-				if type(op.gate) in CIRQ_NAMES:
+				if type(op.gate) in names:
 					if line:
-						block.append(qcirc.build_gate(*CIRQ_NAMES[type(op.gate)](op.gate, *[allqubits[qb.x] for qb in op.qubits])))
+						block.append(qcirc.build_gate(*names[type(op.gate)](op.gate, *[allqubits[qb.x] for qb in op.qubits])))
 					else:
-						block.append(qcirc.build_gate(*CIRQ_NAMES[type(op.gate)](op.gate, *[allqubits[qubitmap[qb]] for qb in op.qubits])))
+						block.append(qcirc.build_gate(*names[type(op.gate)](op.gate, *[allqubits[qubitmap[qb]] for qb in op.qubits])))
 				else:
 					raise QSCOUTError("Convert circuit to ion gates before compiling.")
 			else:
