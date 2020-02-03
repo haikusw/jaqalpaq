@@ -59,7 +59,7 @@ IDENTIFIER_CHAR: NON_NUMERIC_IDENTIFIER_CHAR | DIGIT
 
 // Keywords
 // We do this to allow us to forbid gates with these names
-_REG.2: "reg"
+_REG.2: "register"
 _MAP.2: "map"
 _LET.2: "let"
 _MACRO.2: "macro"

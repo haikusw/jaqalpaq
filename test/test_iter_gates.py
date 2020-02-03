@@ -14,21 +14,21 @@ class GateParserTester(unittest.TestCase):
         self.run_test(text, exp_result)
 
     def test_one_gate_with_args(self):
-        text = 'reg r[6]; foo 1 3.14 r[5]'
+        text = 'register r[6]; foo 1 3.14 r[5]'
         exp_result = [
             Gate('foo', [1, 3.14, ('r', 5)])
         ]
         self.run_test(text, exp_result)
 
     def test_gate_with_let(self):
-        text = 'reg r[6]; let a 2; foo r[a]'
+        text = 'register r[6]; let a 2; foo r[a]'
         exp_result = [
             Gate('foo', [('r', 2)])
         ]
         self.run_test(text, exp_result)
 
     def test_gate_with_map(self):
-        text = 'reg r[6]; map q r; foo q[2]'
+        text = 'register r[6]; map q r; foo q[2]'
         exp_result = [
             Gate('foo', [('r', 2)])
         ]
