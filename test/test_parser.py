@@ -193,7 +193,7 @@ class ParserTester(ParserTesterMixin, unittest.TestCase):
 
     def test_empty_line(self):
         """Test file beginning with empty lines"""
-        text = "\nreg q[7]"
+        text = "\nregister q[7]"
         parser = self.make_parser()
         parser.parse(text)
 
