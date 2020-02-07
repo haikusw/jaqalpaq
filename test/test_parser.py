@@ -20,7 +20,7 @@ class ParserTester(ParserTesterMixin, unittest.TestCase):
 
     def test_reg(self):
         """Test parsing the register statement"""
-        text = "reg q[3]"
+        text = "register q[3]"
         parser = self.make_parser(start='register_statement')
         tree = parser.parse(text)
         exp_tree = self.make_register_statement(self.make_array_declaration('q', 3))
@@ -138,7 +138,7 @@ class ParserTester(ParserTesterMixin, unittest.TestCase):
 
     def test_header(self):
         """Test a bunch of header statements together."""
-        text = "reg q[3]\n" +\
+        text = "register q[3]\n" +\
             "map a q[0:3:2]\n" +\
             "let pi 3.14; let reps 100\n"
         parser = self.make_parser(start='header_statements')
@@ -199,12 +199,12 @@ class ParserTester(ParserTesterMixin, unittest.TestCase):
 
     def test_comment_line(self):
         """Test full line comment"""
-        text = "reg q[7]\n// comment\n"
+        text = "register q[7]\n// comment\n"
         parser = self.make_parser()
         parser.parse(text)
 
     def test_line_with_whitespace(self):
         """Test line with whitespace"""
-        text = "reg q[7]\n \n"
+        text = "register q[7]\n \n"
         parser = self.make_parser()
         parser.parse(text)
