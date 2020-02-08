@@ -2,6 +2,7 @@ from unittest import TestCase
 
 from jaqal.testing.mixin import ParserTesterMixin
 from jaqal.let_visitor import expand_let_values
+from jaqal.parse import make_lark_parser
 
 
 class LetVisitorTester(ParserTesterMixin, TestCase):
@@ -43,7 +44,7 @@ class LetVisitorTester(ParserTesterMixin, TestCase):
         text = "let x 5; foo q[x]"
         exp_result = self.make_program(
             self.make_header_statements(),
-            self.make_body_statements(self.make_gate_statement('foo', self.make_array_element('q', 5)))
+            self.make_body_statements(self.make_gate_statement('foo', self.make_array_element_qual('q', 5)))
         )
         act_result = self.make_simple_tree(text)
         self.assertEqual(exp_result, act_result)
@@ -141,7 +142,7 @@ class LetVisitorTester(ParserTesterMixin, TestCase):
                          'foo',
                          'a',
                          self.make_serial_gate_block(
-                             self.make_gate_statement('g0', self.make_array_element('r', 'a'))
+                             self.make_gate_statement('g0', self.make_array_element_qual('r', 'a'))
                          )
                      )
                  )
@@ -224,7 +225,7 @@ class LetVisitorTester(ParserTesterMixin, TestCase):
             self.assertEqual(exp_result, act_result, f"Could not parse `{text}`")
 
     def make_simple_tree(self, text, override_dict=None):
-        parser = self.make_parser()
+        parser = make_lark_parser()
         tree = parser.parse(text)
         visited_tree = expand_let_values(tree, override_dict=override_dict)
         return self.simplify_tree(visited_tree)

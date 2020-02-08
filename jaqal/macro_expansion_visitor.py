@@ -52,8 +52,10 @@ class ExpandMacroTransformer(MacroContextRewriteVisitor):
         return self.make_sequential_gate_block(ret_statements)
 
     def visit_gate_statement(self, gate_name, gate_args):
-        if gate_name in self.macro_definitions:
-            return self._substitute_macro(gate_name, gate_args)
+        tuple_gate_name = self.extract_qualified_identifier(gate_name)
+
+        if tuple_gate_name in self.macro_definitions:
+            return self._substitute_macro(tuple_gate_name, gate_args)
         else:
             return self.make_gate_statement(gate_name, gate_args)
 
@@ -66,6 +68,9 @@ class ExpandMacroTransformer(MacroContextRewriteVisitor):
             is_sequential = False
         else:
             raise ValueError(f"Unknown gate block {block}")
+
+        name = (name,)
+        arguments = [(arg,) for arg in arguments]
 
         self.macro_definitions[name] = (arguments, statements, is_sequential)
 
@@ -96,10 +101,11 @@ class MacroSubstituteVisitor(TreeRewriteVisitor):
         self.subdict = subdict
 
     def visit_let_or_map_identifier(self, identifier):
-        if identifier in self.subdict:
-            return self.subdict[identifier]
-        else:
-            return self.make_let_or_map_identifier(identifier)
+        if self.is_qualified_identifier(identifier):
+            identifier_key = self.extract_qualified_identifier(identifier)
+            if identifier_key in self.subdict:
+                return self.subdict[identifier_key]
+        return self.make_let_or_map_identifier(identifier)
 
     def visit_let_identifier(self, identifier):
         if identifier in self.subdict:

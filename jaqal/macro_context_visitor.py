@@ -24,7 +24,10 @@ class MacroContextRewriteVisitor(TreeRewriteVisitor):
 
     def visit_macro_header(self, name, arguments):
         self._macro_name = self.extract_identifier(name)
-        self._macro_args = [self.extract_identifier(arg) for arg in arguments]
+        # Even though only identifiers (not qualified identifiers) are possible in this context, we still store
+        # the identifier like a qualified identifier so the rest of the code can treat qualified and unqualified
+        # identifiers uniformly.
+        self._macro_args = [(self.extract_identifier(arg),) for arg in arguments]
 
     def visit_macro_gate_block(self, block):
         # Since this method is called after visiting everything in the block, we clean up the context.

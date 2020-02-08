@@ -57,6 +57,9 @@ class IterateGatesAndLoopsVisitor(ParseTreeVisitor):
     def visit_array_element(self, identifier, index):
         return (identifier, index)
 
+    def visit_array_element_qual(self, identifier, index):
+        return (identifier, index)
+
     def visit_array_slice(self, identifier, index_slice):
         return None
 
@@ -66,6 +69,8 @@ class IterateGatesAndLoopsVisitor(ParseTreeVisitor):
     def visit_let_or_map_identifier(self, identifier):
         return identifier
 
+    def visit_qualified_identifier(self, names):
+        return names
 
 # Define the objects we return when iterating over gates. Having the `is_*` methods really just allows us
 # to check the type without having to import the classes into the user's namespace. I'm not sure if it's a
@@ -96,6 +101,9 @@ class Gate(JaqalObject):
 
     def __eq__(self, other):
         return self.gate_name == other.gate_name and self.gate_args == other.gate_args
+
+    def __repr__(self):
+        return f"Gate({self.gate_name}, {self.gate_args})"
 
 
 class Loop(JaqalObject):

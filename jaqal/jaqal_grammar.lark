@@ -23,9 +23,9 @@ as_clause: IDENTIFIER [_AS IDENTIFIER]
 body_statements: [body_statement (_seq_sep body_statement)* _seq_sep?]
 ?body_statement: gate_statement | macro_definition | loop_statement | gate_block
 gate_statement: _gate_name _gate_arg_list
-_gate_name: IDENTIFIER
+_gate_name: QUALIFIED_IDENTIFIER
 _gate_arg_list: _gate_arg*
-_gate_arg: array_element | let_or_map_identifier | SIGNED_NUMBER
+_gate_arg: array_element_qual | let_or_map_identifier | SIGNED_NUMBER
 macro_definition: macro_header macro_gate_block
 macro_header: _MACRO _gate_def_list
 macro_gate_block: gate_block  // Separating this rule makes tracking contexts easier
@@ -44,14 +44,15 @@ _parallel_statement: gate_statement | sequential_gate_block
 // Common rules
 array_declaration: IDENTIFIER "[" let_or_integer "]"
 array_element: IDENTIFIER "[" let_or_signed_integer "]"
+array_element_qual: QUALIFIED_IDENTIFIER "[" let_or_signed_integer "]"
 array_slice: IDENTIFIER "[" array_slice_start array_slice_stop array_slice_step "]"
 array_slice_start: let_or_signed_integer? ":"
 array_slice_stop: let_or_signed_integer?
 array_slice_step: (":" let_or_signed_integer?)?
 ?let_or_integer: let_identifier | INTEGER
 ?let_or_signed_integer: let_identifier | SIGNED_INTEGER
-let_identifier: IDENTIFIER  // As its own rule this is easier to filter on the backend
-let_or_map_identifier: IDENTIFIER
+let_identifier: QUALIFIED_IDENTIFIER  // As its own rule this is easier to filter on the backend
+let_or_map_identifier: QUALIFIED_IDENTIFIER
 _seq_sep: ";" | _NEWLINE+
 _par_sep: "|" | _NEWLINE+
 _NEWLINE: NEWLINE
@@ -64,8 +65,11 @@ BLOCK_COMMENT: "/*" /.*/ "*/"
 
 // Identifier rules
 IDENTIFIER: NON_NUMERIC_IDENTIFIER_CHAR IDENTIFIER_CHAR*
+// The qualified identifier is immediately replaced by a non-terminal rule by the Jaqal parser.
+QUALIFIED_IDENTIFIER: NON_NUMERIC_IDENTIFIER_CHAR QUALIFIED_IDENTIFIER_CHAR*
 NON_NUMERIC_IDENTIFIER_CHAR: /[a-zA-Z_]/
 IDENTIFIER_CHAR: NON_NUMERIC_IDENTIFIER_CHAR | DIGIT
+QUALIFIED_IDENTIFIER_CHAR: IDENTIFIER_CHAR | "."
 
 // Keywords
 // We do this to allow us to forbid gates with these names

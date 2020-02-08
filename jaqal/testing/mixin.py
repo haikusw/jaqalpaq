@@ -7,9 +7,6 @@ from jaqal.parse import make_lark_parser
 
 class ParserTesterMixin:
 
-    def make_parser(self, *args, **kwargs) -> Lark:
-        return make_lark_parser(*args, **kwargs)
-
     @classmethod
     def simplify_tree(cls, tree):
         """Create a data structure with native Python types only retaining the information from the parse tree."""
@@ -37,12 +34,21 @@ class ParserTesterMixin:
         return {'type': "IDENTIFIER", "value": str(name)}
 
     @classmethod
+    def parse_qualified_identifier(cls, qualified_name):
+        parts = qualified_name.split('.')
+        return cls.make_qualified_identifier(*parts)
+
+    @classmethod
+    def make_qualified_identifier(cls, *names):
+        return {'type': 'qualified_identifier', "children": [cls.make_identifier(name) for name in names]}
+
+    @classmethod
     def make_let_identifier(cls, name):
-        return {'type': 'let_identifier', 'children': [cls.make_identifier(name)]}
+        return {'type': 'let_identifier', 'children': [cls.parse_qualified_identifier(name)]}
 
     @classmethod
     def make_let_or_map_identifier(cls, name):
-        return {'type': 'let_or_map_identifier', 'children': [cls.make_identifier(name)]}
+        return {'type': 'let_or_map_identifier', 'children': [cls.parse_qualified_identifier(name)]}
 
     @classmethod
     def make_integer(cls, value):
@@ -74,7 +80,11 @@ class ParserTesterMixin:
 
     @classmethod
     def make_array_element(cls, name, index):
-        return {'type': 'array_element', 'children': [cls.make_identifier(name), cls.make_array_index(index)]}
+        return {'type': 'array_element', 'children': [cls.parse_qualified_identifier(name), cls.make_array_index(index)]}
+
+    @classmethod
+    def make_array_element_qual(cls, name, index):
+        return {'type': 'array_element_qual', 'children': [cls.parse_qualified_identifier(name), cls.make_array_index(index)]}
 
     @classmethod
     def make_array_index(cls, index):
@@ -121,7 +131,7 @@ class ParserTesterMixin:
     @classmethod
     def make_gate_statement(cls, name, *args):
         arg_children = [cls.make_gate_arg(arg) for arg in args]
-        return {'type': 'gate_statement', 'children': [cls.make_identifier(name)] + arg_children}
+        return {'type': 'gate_statement', 'children': [cls.parse_qualified_identifier(name)] + arg_children}
 
     @classmethod
     def make_gate_arg(cls, arg):

@@ -6,11 +6,10 @@ import pathlib
 from lark import Lark, Transformer, Tree, Token
 
 
-def parse_with_lark(text_or_fd, *args, **kwargs):
-    """Parse the given text or file descriptor using Lark. Return the Lark parse tree."""
+def parse_with_lark(text, *args, **kwargs):
+    """Parse the given text using Lark. Return the Lark parse tree."""
     parser = make_lark_parser(*args, **kwargs)
-    tree = parser.parse(text_or_fd)
-    return tree
+    return parser.parse(text)
 
 
 def make_lark_parser(*args, **kwargs):
@@ -21,13 +20,38 @@ def make_lark_parser(*args, **kwargs):
         **kwargs
     }
     with open(get_grammar_path(), 'r') as fd:
-        parser = Lark(fd, *args, **kwargs_with_defaults)
+        parser = PreprocessingLarkParser(fd, *args, **kwargs_with_defaults)
     return parser
+
+
+class PreprocessingLarkParser(Lark):
+    """Subclass of lark parsers that run preparsing steps."""
+
+    def parse(self, *args, **kwargs):
+        tree = super().parse(*args, **kwargs)
+        tree = expand_qualified_identifiers(tree)
+        return tree
 
 
 def get_grammar_path(filename='jaqal_grammar.lark'):
     """Return the path to the lark grammar file."""
     return pathlib.Path(__file__).parent / filename
+
+
+def expand_qualified_identifiers(tree):
+    """Expand qualified identifier tokens into trees. This step is a hack to disallow spaces between elements of a
+    qualified identifier but still allow downstream elements to see them broken out by element."""
+
+    transformer = QualifiedIdentifierTransformer(visit_tokens=True)
+    return transformer.transform(tree)
+
+
+class QualifiedIdentifierTransformer(Transformer):
+    """Transformer class to replace instances of QUALIFIED_IDENTIFIER tokens with qualified_identifier trees."""
+
+    def QUALIFIED_IDENTIFIER(self, string):
+        parts = string.split('.')
+        return Tree('qualified_identifier', children=[Token('IDENTIFIER', part) for part in parts])
 
 
 class VisitTransformer(Transformer):
@@ -111,6 +135,10 @@ class VisitTransformer(Transformer):
         identifier, index = args
         return self._visitor.visit_array_element(identifier, index)
 
+    def array_element_qual(self, args):
+        identifier, index = args
+        return self._visitor.visit_array_element_qual(identifier, index)
+
     def array_slice(self, args):
         identifier = args[0]
         slice_args = args[1:]
@@ -139,6 +167,10 @@ class VisitTransformer(Transformer):
     def let_or_map_identifier(self, args):
         identifier = args[0]
         return self._visitor.visit_let_or_map_identifier(identifier)
+
+    def qualified_identifier(self, args):
+        names = tuple(name for name in args)
+        return self._visitor.visit_qualified_identifier(names)
 
     def IDENTIFIER(self, string):
         return self._visitor.visit_identifier(string)
@@ -272,6 +304,12 @@ class ParseTreeVisitor(ABC):
         pass
 
     @abstractmethod
+    def visit_array_element_qual(self, identifier, index):
+        """Visit an array, dereferenced to a single element. The index is either an identifier or integer. The
+        identifier in this case is a qualified identifier."""
+        pass
+
+    @abstractmethod
     def visit_array_slice(self, identifier, index_slice):
         """Visit an array dereferenced by slice, as used in the map statement. The identifier is the name of the
         existing array, and index_slice is a Python slice object. None represents the lack of a bound, an integer a
@@ -286,6 +324,12 @@ class ParseTreeVisitor(ABC):
     @abstractmethod
     def visit_let_or_map_identifier(self, identifier):
         """Visit an identifier that must be declared in either a let or map statement."""
+        pass
+
+    @abstractmethod
+    def visit_qualified_identifier(self, names):
+        """Visit an identifier qualified with zero or more namespaces. The identifier's name is in the most-significant
+        index."""
         pass
 
 
@@ -345,6 +389,9 @@ class TreeRewriteVisitor(ParseTreeVisitor):
     def visit_array_element(self, identifier, index):
         return self.make_array_element(identifier, index)
 
+    def visit_array_element_qual(self, identifier, index):
+        return self.make_array_element_qual(identifier, index)
+
     def visit_array_slice(self, identifier, index_slice):
         return self.make_array_slice(identifier, index_slice)
 
@@ -353,6 +400,9 @@ class TreeRewriteVisitor(ParseTreeVisitor):
 
     def visit_let_or_map_identifier(self, identifier):
         return self.make_let_or_map_identifier(identifier)
+
+    def visit_qualified_identifier(self, names):
+        return self.make_qualified_identifier(names)
 
     ##
     # New methods to construct parts of the tree
@@ -403,6 +453,9 @@ class TreeRewriteVisitor(ParseTreeVisitor):
     def make_array_element(self, identifier, index):
         return Tree('array_element', [identifier, self.enforce_signed_integer_if_numeric(index)])
 
+    def make_array_element_qual(self, identifier, index):
+        return Tree('array_element_qual', [identifier, self.enforce_signed_integer_if_numeric(index)])
+
     def make_array_slice(self, identifier, index_slice):
         index_start_children = [self.enforce_signed_integer_if_numeric(index_slice.start)] if index_slice.start is not None else []
         index_stop_children = [self.enforce_signed_integer_if_numeric(index_slice.stop)] if index_slice.stop is not None else []
@@ -421,6 +474,9 @@ class TreeRewriteVisitor(ParseTreeVisitor):
 
     def make_let_or_map_identifier(self, identifier):
         return Tree('let_or_map_identifier', [identifier])
+
+    def make_qualified_identifier(self, names):
+        return Tree('qualified_identifier', [self.make_identifier(name) for name in names])
 
     def make_identifier(self, identifier_string):
         return Token('IDENTIFIER', identifier_string)
@@ -530,6 +586,9 @@ class TreeRewriteVisitor(ParseTreeVisitor):
     def is_identifier(self, token):
         return self._is_token(token, 'IDENTIFIER')
 
+    def is_qualified_identifier(self, tree):
+        return self._is_tree(tree, 'qualified_identifier')
+
     def is_signed_number(self, token):
         return self._is_token(token, 'SIGNED_NUMBER')
 
@@ -579,6 +638,10 @@ class TreeRewriteVisitor(ParseTreeVisitor):
         """Return the portion of the tree that is the identifier and the index."""
         identifier, index = tree.children
         return identifier, index
+
+    def extract_qualified_identifier(self, tree):
+        """Return a qualified identifier as a tuple of strings."""
+        return tuple(str(child) for child in tree.children)
 
     def extract_identifier(self, token):
         """Return an identifier as a string."""

@@ -18,6 +18,13 @@ def expand_let_values(tree, override_dict=None):
     return transformer.visit(tree)
 
 
+def export_let_symbols(tree):
+    """Return a dictionary mapping let symbols found in this tree to their value."""
+    transformer = LetTransformer({})
+    transformer.visit(tree)
+    return transformer.mapping
+
+
 class LetTransformer(MacroContextRewriteVisitor):
     """A Transformer that automatically fills in let values. We use a lark transformer so that we can chain
     this """
@@ -25,25 +32,28 @@ class LetTransformer(MacroContextRewriteVisitor):
     def __init__(self, override_dict):
         super().__init__()
         self.mapping = {}
-        self.override_dict = {label: self.make_signed_number(value) for label, value in override_dict.items()}
+        self.override_dict = {(label,): self.make_signed_number(value) for label, value in override_dict.items()}
 
     def visit_let_statement(self, identifier, number):
-        if identifier in self.mapping:
-            raise ValueError(f'Redefinition of let value {identifier}')
-        self.mapping[identifier] = self.override_dict.get(identifier, number)
+        identifier_tuple = (str(identifier),)
+        if identifier_tuple in self.mapping:
+            raise ValueError(f'Redefinition of let value {identifier_tuple}')
+        self.mapping[identifier_tuple] = self.override_dict.get(identifier_tuple, number)
         # Return value of None effectively removes this statement from the parse tree
         return None
 
     def visit_let_identifier(self, identifier):
-        if identifier in self.mapping and not self._is_identifier_shadowed(identifier):
-            return self.mapping[identifier]
+        identifier_tuple = self.extract_qualified_identifier(identifier)
+        if identifier_tuple in self.mapping and not self._is_identifier_shadowed(identifier_tuple):
+            return self.mapping[identifier_tuple]
         else:
             # This would still be valid if i.e. we are inside a macro definition.
             return self.make_let_identifier(identifier)
 
     def visit_let_or_map_identifier(self, identifier):
-        if identifier in self.mapping and not self._is_identifier_shadowed(identifier):
-            return self.mapping[identifier]
+        identifier_tuple = self.extract_qualified_identifier(identifier)
+        if identifier_tuple in self.mapping and not self._is_identifier_shadowed(identifier_tuple):
+            return self.mapping[identifier_tuple]
         else:
             # This could be an alias with the map statement.
             return self.make_let_or_map_identifier(identifier)

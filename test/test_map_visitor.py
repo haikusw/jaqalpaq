@@ -2,15 +2,17 @@ from unittest import TestCase
 
 from jaqal.testing.mixin import ParserTesterMixin
 from jaqal.map_visitor import expand_map_values
+from jaqal.parse import make_lark_parser
 
 
 class MapVisitorTester(ParserTesterMixin, TestCase):
 
     def test_full_replace(self):
+        """Test replacing a register with a full macro."""
         text = "reg q[3]; map a q; foo a[0]"
         exp_result = self.make_program(
             self.make_header_statements(self.make_register_statement(self.make_array_declaration('q', 3))),
-            self.make_body_statements(self.make_gate_statement('foo', self.make_array_element('q', 0)))
+            self.make_body_statements(self.make_gate_statement('foo', self.make_array_element_qual('q', 0)))
         )
         act_result = self.make_simple_tree(text)
         self.assertEqual(exp_result, act_result)
@@ -20,7 +22,7 @@ class MapVisitorTester(ParserTesterMixin, TestCase):
         text = "reg q[7]; map a q[3:6:2]; foo a[1]"
         exp_result = self.make_program(
             self.make_header_statements(self.make_register_statement(self.make_array_declaration('q', 7))),
-            self.make_body_statements(self.make_gate_statement('foo', self.make_array_element('q', 5)))
+            self.make_body_statements(self.make_gate_statement('foo', self.make_array_element_qual('q', 5)))
         )
         act_result = self.make_simple_tree(text)
         self.assertEqual(exp_result, act_result)
@@ -30,7 +32,7 @@ class MapVisitorTester(ParserTesterMixin, TestCase):
         text = "reg q[3]; map a q[1]; foo a"
         exp_result = self.make_program(
             self.make_header_statements(self.make_register_statement(self.make_array_declaration('q', 3))),
-            self.make_body_statements(self.make_gate_statement('foo', self.make_array_element('q', 1)))
+            self.make_body_statements(self.make_gate_statement('foo', self.make_array_element_qual('q', 1)))
         )
         act_result = self.make_simple_tree(text)
         self.assertEqual(exp_result, act_result)
@@ -44,7 +46,7 @@ class MapVisitorTester(ParserTesterMixin, TestCase):
                 self.make_macro_statement(
                     'foo',
                     self.make_serial_gate_block(
-                        self.make_gate_statement('g0', self.make_array_element('q', 0))
+                        self.make_gate_statement('g0', self.make_array_element_qual('q', 0))
                     )
                 )
             )
@@ -88,7 +90,7 @@ class MapVisitorTester(ParserTesterMixin, TestCase):
         self.assertEqual(exp_result, act_result)
 
     def make_simple_tree(self, text):
-        parser = self.make_parser()
+        parser = make_lark_parser()
         tree = parser.parse(text)
         visited_tree = expand_map_values(tree)
         return self.simplify_tree(visited_tree)

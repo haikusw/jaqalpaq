@@ -30,7 +30,7 @@ class MapTransformer(MacroContextRewriteVisitor):
         assert self.is_integer(size)
         # Although in general this is not the right place to check for register inconsistencies, the errors might
         # be too confusing if we ignored the double register declaration error.
-        identifier = self.extract_identifier(identifier)
+        identifier = (self.extract_identifier(identifier),)
         if identifier in self.registers:
             raise ValueError(f"Register {identifier} already declared")
         self.registers[identifier] = self.extract_integer(size)
@@ -39,7 +39,8 @@ class MapTransformer(MacroContextRewriteVisitor):
 
     def visit_map_statement(self, target, source):
         """Create a mapping entry for this alias to the appropriate register."""
-        dst_identifier = self.extract_identifier(target)
+        # Even though this is always an identifier, we store it like a qualified identifier.
+        dst_identifier = (self.extract_identifier(target),)
 
         if self.is_identifier(source):
             src_identifier = self.extract_identifier(source)
@@ -54,6 +55,8 @@ class MapTransformer(MacroContextRewriteVisitor):
             src_range = self.extract_integer(src_element)
         else:
             raise ValueError(f"Unknown map source format: {source}")
+
+        src_identifier = (src_identifier,)
 
         if src_identifier not in self.registers:
             raise ValueError(f'Map statement references unknown register {src_identifier}')
@@ -73,7 +76,7 @@ class MapTransformer(MacroContextRewriteVisitor):
             # We assume that all let-statement references have been resolved to specific numbers by now.
             raise ValueError(f"Cannot check unresolved array index {index}")
 
-        extracted_id = self.extract_identifier(identifier)
+        extracted_id = (self.extract_identifier(identifier),)
         extracted_index = self.extract_integer(index)
 
         if extracted_id in self.mapping:
@@ -85,16 +88,46 @@ class MapTransformer(MacroContextRewriteVisitor):
 
         return self.make_array_element(identifier, index)
 
+    def visit_array_element_qual(self, qualified_identifier, index):
+        """Make sure an array element is either a register or an alias, and if it is an alias, remap it to its
+        register."""
+
+        if self.is_identifier(index):
+            # We assume that all let-statement references have been resolved to specific numbers by now.
+            raise ValueError(f"Cannot check unresolved array index {index}")
+
+        extracted_id = self.extract_qualified_identifier(qualified_identifier)
+        extracted_index = self.extract_integer(index)
+
+        if extracted_id in self.mapping:
+            mapped_identifier, mapped_index = self._map_array_element(extracted_id, extracted_index)
+            qualified_identifier = self.make_qualified_identifier(mapped_identifier)
+            index = self.make_integer(mapped_index)
+        elif extracted_id not in self.registers:
+            raise ValueError(f"Unknown array {extracted_id}")
+
+        return self.make_array_element_qual(qualified_identifier, index)
+
     def visit_let_or_map_identifier(self, identifier):
         """Replace this identifier with the appropriate alias, if available."""
 
-        extracted_id = self.extract_identifier(identifier)
+        if self.is_qualified_identifier(identifier):
+            qualified = True
+            extracted_id = self.extract_qualified_identifier(identifier)
+        else:
+            qualified = False
+            extracted_id = (self.extract_identifier(identifier),)
 
-        if extracted_id in self.mapping and not self._is_identifier_shadowed(identifier):
+        if extracted_id in self.mapping and not self._is_identifier_shadowed(extracted_id):
             mapped_identifier, mapped_range = self.mapping[extracted_id]
             if not isinstance(mapped_range, int):
                 raise ValueError(f"Array {identifier} used in scalar context")
-            return self.make_array_element(self.make_identifier(mapped_identifier), self.make_integer(mapped_range))
+            if qualified:
+                arr = self.make_array_element_qual(self.make_qualified_identifier(mapped_identifier),
+                                                   self.make_integer(mapped_range))
+            else:
+                arr = self.make_array_element(self.make_identifier(mapped_identifier), self.make_integer(mapped_range))
+            return arr
         else:
             # This could have been assigned in a let statement.
             return self.make_let_or_map_identifier(identifier)

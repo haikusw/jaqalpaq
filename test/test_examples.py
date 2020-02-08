@@ -1,6 +1,7 @@
 import unittest
 from pathlib import Path
 from jaqal.testing.mixin import ParserTesterMixin
+from jaqal.parse import make_lark_parser
 
 from jaqal.iter_gates import parse_unitary_timed_gates
 
@@ -19,7 +20,7 @@ class ExampleFileTester(ParserTesterMixin, unittest.TestCase):
 
     def implement_file_test(self, file_name):
         text = Path(file_name).read_text()
-        parser = self.make_parser()
+        parser = make_lark_parser()
         try:
             tree = parser.parse(text)
         except Exception as e: 

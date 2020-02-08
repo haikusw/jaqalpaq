@@ -2,6 +2,7 @@ import unittest
 
 from jaqal.block_normalizer import normalize_blocks_with_unitary_timing
 from jaqal.testing.mixin import ParserTesterMixin
+from jaqal.parse import make_lark_parser
 
 
 class BlockNormalizerTester(ParserTesterMixin, unittest.TestCase):
@@ -131,7 +132,7 @@ class BlockNormalizerTester(ParserTesterMixin, unittest.TestCase):
             self.make_simple_tree(text)
 
     def make_simple_tree(self, text):
-        parser = self.make_parser()
+        parser = make_lark_parser()
         tree = parser.parse(text)
         new_tree = self.simplify_tree(normalize_blocks_with_unitary_timing(tree))
         return new_tree
