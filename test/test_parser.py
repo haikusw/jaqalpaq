@@ -17,11 +17,55 @@ else:
     raise IOError('Cannot find grammar file')
 
 
-class PreparseTester(unittest.TestCase):
+class PreparseTester(ParserTesterMixin, unittest.TestCase):
     """Test pre-parsing steps, currently limited to qualified identifier expansion."""
 
     def test_gate_with_qualified_identifier(self):
-        self.fail()
+        text = "foo.g"
+        parser = make_lark_parser(start='gate_statement')
+        tree = parser.parse(text)
+        exp_tree = self.make_gate_statement('foo.g')
+        act_tree = self.simplify_tree(tree)
+        self.assertEqual(exp_tree, act_tree)
+
+    def test_qualified_gate_arg(self):
+        text = "g foo.a bar.b"
+        parser = make_lark_parser(start='gate_statement')
+        tree = parser.parse(text)
+        exp_tree = self.make_gate_statement('g',
+                                            self.make_let_or_map_identifier('foo.a'),
+                                            self.make_let_or_map_identifier('bar.b'))
+        act_tree = self.simplify_tree(tree)
+        self.assertEqual(exp_tree, act_tree)
+
+    def test_qualified_loop_count(self):
+        text = "loop foo.a { g }"
+        parser = make_lark_parser(start='loop_statement')
+        tree = parser.parse(text)
+        exp_tree = self.make_loop_statement('foo.a',
+                                            self.make_serial_gate_block(
+                                                self.make_gate_statement('g'))
+                                            )
+        act_tree = self.simplify_tree(tree)
+        self.assertEqual(exp_tree, act_tree)
+
+    def test_disallow_in_let(self):
+        text = "let foo.a 42"
+        parser = make_lark_parser(start='let_statement')
+        with self.assertRaises(Exception):
+            parser.parse(text)
+
+    def test_disallow_in_macro_arg(self):
+        text = "macro foo.a { g }"
+        parser = make_lark_parser(start='macro_definition')
+        with self.assertRaises(Exception):
+            parser.parse(text)
+
+    def test_disallow_in_register(self):
+        text = "register foo.a[5]"
+        parser = make_lark_parser(start='register_statement')
+        with self.assertRaises(Exception):
+            parser.parse(text)
 
 
 class ParserTester(ParserTesterMixin, unittest.TestCase):
