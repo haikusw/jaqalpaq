@@ -5,6 +5,8 @@ import pathlib
 
 from lark import Lark, Transformer, Tree, Token
 
+from .identifier import Identifier
+
 
 def parse_with_lark(text, *args, **kwargs):
     """Parse the given text using Lark. Return the Lark parse tree."""
@@ -50,7 +52,7 @@ class QualifiedIdentifierTransformer(Transformer):
     """Transformer class to replace instances of QUALIFIED_IDENTIFIER tokens with qualified_identifier trees."""
 
     def QUALIFIED_IDENTIFIER(self, string):
-        parts = string.split('.')
+        parts = Identifier.parse(string)
         return Tree('qualified_identifier', children=[Token('IDENTIFIER', part) for part in parts])
 
 
@@ -641,11 +643,11 @@ class TreeRewriteVisitor(ParseTreeVisitor):
 
     def extract_qualified_identifier(self, tree):
         """Return a qualified identifier as a tuple of strings."""
-        return tuple(str(child) for child in tree.children)
+        return Identifier(str(child) for child in tree.children)
 
     def extract_identifier(self, token):
-        """Return an identifier as a string."""
-        return str(token)
+        """Return an identifier as an Identifier object."""
+        return Identifier.parse(token)
 
     def extract_integer(self, token):
         return int(token)

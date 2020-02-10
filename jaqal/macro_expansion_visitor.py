@@ -1,6 +1,6 @@
 from .parse import TreeRewriteVisitor
 from .macro_context_visitor import MacroContextRewriteVisitor
-
+from .identifier import Identifier
 
 def expand_macros(tree):
     """Replace all macro invocations with their expanded gates, gate blocks, and loops."""
@@ -52,10 +52,10 @@ class ExpandMacroTransformer(MacroContextRewriteVisitor):
         return self.make_sequential_gate_block(ret_statements)
 
     def visit_gate_statement(self, gate_name, gate_args):
-        tuple_gate_name = self.extract_qualified_identifier(gate_name)
+        qual_gate_name = self.extract_qualified_identifier(gate_name)
 
-        if tuple_gate_name in self.macro_definitions:
-            return self._substitute_macro(tuple_gate_name, gate_args)
+        if qual_gate_name in self.macro_definitions:
+            return self._substitute_macro(qual_gate_name, gate_args)
         else:
             return self.make_gate_statement(gate_name, gate_args)
 
@@ -69,8 +69,8 @@ class ExpandMacroTransformer(MacroContextRewriteVisitor):
         else:
             raise ValueError(f"Unknown gate block {block}")
 
-        name = (name,)
-        arguments = [(arg,) for arg in arguments]
+        name = Identifier.parse(name)
+        arguments = [Identifier.parse(arg) for arg in arguments]
 
         self.macro_definitions[name] = (arguments, statements, is_sequential)
 

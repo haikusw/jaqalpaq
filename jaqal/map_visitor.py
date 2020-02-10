@@ -1,4 +1,5 @@
 from .macro_context_visitor import MacroContextRewriteVisitor
+from .identifier import Identifier
 
 
 def expand_map_values(tree):
@@ -30,7 +31,7 @@ class MapTransformer(MacroContextRewriteVisitor):
         assert self.is_integer(size)
         # Although in general this is not the right place to check for register inconsistencies, the errors might
         # be too confusing if we ignored the double register declaration error.
-        identifier = (self.extract_identifier(identifier),)
+        identifier = Identifier(self.extract_identifier(identifier))
         if identifier in self.registers:
             raise ValueError(f"Register {identifier} already declared")
         self.registers[identifier] = self.extract_integer(size)
@@ -40,7 +41,7 @@ class MapTransformer(MacroContextRewriteVisitor):
     def visit_map_statement(self, target, source):
         """Create a mapping entry for this alias to the appropriate register."""
         # Even though this is always an identifier, we store it like a qualified identifier.
-        dst_identifier = (self.extract_identifier(target),)
+        dst_identifier = Identifier(self.extract_identifier(target))
 
         if self.is_identifier(source):
             src_identifier = self.extract_identifier(source)
@@ -55,8 +56,6 @@ class MapTransformer(MacroContextRewriteVisitor):
             src_range = self.extract_integer(src_element)
         else:
             raise ValueError(f"Unknown map source format: {source}")
-
-        src_identifier = (src_identifier,)
 
         if src_identifier not in self.registers:
             raise ValueError(f'Map statement references unknown register {src_identifier}')
@@ -76,7 +75,7 @@ class MapTransformer(MacroContextRewriteVisitor):
             # We assume that all let-statement references have been resolved to specific numbers by now.
             raise ValueError(f"Cannot check unresolved array index {index}")
 
-        extracted_id = (self.extract_identifier(identifier),)
+        extracted_id = self.extract_identifier(identifier)
         extracted_index = self.extract_integer(index)
 
         if extracted_id in self.mapping:
@@ -116,7 +115,7 @@ class MapTransformer(MacroContextRewriteVisitor):
             extracted_id = self.extract_qualified_identifier(identifier)
         else:
             qualified = False
-            extracted_id = (self.extract_identifier(identifier),)
+            extracted_id = self.extract_identifier(identifier)
 
         if extracted_id in self.mapping and not self._is_identifier_shadowed(extracted_id):
             mapped_identifier, mapped_range = self.mapping[extracted_id]
