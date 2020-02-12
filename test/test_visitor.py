@@ -119,8 +119,8 @@ class ParseTreeVisitorTester(TestCase):
     def test_register_statement(self):
         """Test visiting a register statement."""
         cases = [
-            ('reg q[9]', ('q', 9)),
-            ('reg foo [ abc ]', ('foo', ('abc',)))
+            ('register q[9]', ('q', 9)),
+            ('register foo [ abc ]', ('foo', ('abc',)))
         ]
         parser = self.make_parser(start='register_statement')
         visitor = TestVisitor()
@@ -243,7 +243,7 @@ class ParseTreeVisitorTester(TestCase):
     def test_program(self):
         """Test visiting a program at the top level"""
         cases = [
-            ('reg q[3]\ng0 a b',
+            ('register q[3]\ng0 a b',
              {
                  'type': 'program',
                  'header_statements': [
@@ -293,8 +293,8 @@ class TreeRewriteTester(TestCase):
     def test_register_statement(self):
         parser = self.make_parser(start='register_statement')
         texts = [
-            'reg r[1]',
-            'reg QASDF[abc]'
+            'register r[1]',
+            'register QASDF[abc]'
         ]
         self.run_tests(texts, parser)
 
@@ -398,6 +398,6 @@ class TreeRewriteTester(TestCase):
     def test_program(self):
         parser = self.make_parser(start='start')
         texts = [
-            'reg r[3]; g a b'
+            'register r[3]; g a b'
         ]
         self.run_tests(texts, parser)

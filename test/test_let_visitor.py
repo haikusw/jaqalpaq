@@ -29,7 +29,7 @@ class LetVisitorTester(ParserTesterMixin, TestCase):
 
     def test_array_declaration(self):
         """Test replacing the element count in an array declaration."""
-        text = "let x 5; reg q[x]"
+        text = "let x 5; register q[x]"
         exp_result = self.make_program(
             self.make_header_statements(
                 self.make_register_statement(self.make_array_declaration('q', 5))
@@ -69,7 +69,7 @@ class LetVisitorTester(ParserTesterMixin, TestCase):
 
     def test_unexpected_float(self):
         """Test using a floating point number where it does not belong."""
-        text = 'let pi 3.14; reg qt[pi]'
+        text = 'let pi 3.14; register qt[pi]'
         with self.assertRaises(Exception):
             self.make_simple_tree(text)
 

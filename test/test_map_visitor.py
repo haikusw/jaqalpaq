@@ -9,7 +9,7 @@ class MapVisitorTester(ParserTesterMixin, TestCase):
 
     def test_full_replace(self):
         """Test replacing a register with a full macro."""
-        text = "reg q[3]; map a q; foo a[0]"
+        text = "register q[3]; map a q; foo a[0]"
         exp_result = self.make_program(
             self.make_header_statements(self.make_register_statement(self.make_array_declaration('q', 3))),
             self.make_body_statements(self.make_gate_statement('foo', self.make_array_element_qual('q', 0)))
@@ -19,7 +19,7 @@ class MapVisitorTester(ParserTesterMixin, TestCase):
 
     def test_replace_with_slice(self):
         """Test replacing an alias mapped onto a slice of a qubit register."""
-        text = "reg q[7]; map a q[3:6:2]; foo a[1]"
+        text = "register q[7]; map a q[3:6:2]; foo a[1]"
         exp_result = self.make_program(
             self.make_header_statements(self.make_register_statement(self.make_array_declaration('q', 7))),
             self.make_body_statements(self.make_gate_statement('foo', self.make_array_element_qual('q', 5)))
@@ -29,7 +29,7 @@ class MapVisitorTester(ParserTesterMixin, TestCase):
 
     def test_single_element(self):
         """Test a substitution of a single register location to a non-array alias."""
-        text = "reg q[3]; map a q[1]; foo a"
+        text = "register q[3]; map a q[1]; foo a"
         exp_result = self.make_program(
             self.make_header_statements(self.make_register_statement(self.make_array_declaration('q', 3))),
             self.make_body_statements(self.make_gate_statement('foo', self.make_array_element_qual('q', 1)))
@@ -39,7 +39,7 @@ class MapVisitorTester(ParserTesterMixin, TestCase):
 
     def test_macro_sub(self):
         """Test substitution within a macro."""
-        text = "reg q[3]; map a q; macro foo {g0 a[0]}"
+        text = "register q[3]; map a q; macro foo {g0 a[0]}"
         exp_result = self.make_program(
             self.make_header_statements(self.make_register_statement(self.make_array_declaration('q', 3))),
             self.make_body_statements(
@@ -56,7 +56,7 @@ class MapVisitorTester(ParserTesterMixin, TestCase):
 
     def test_macro_nosub(self):
         """Test not substituting within a macro."""
-        text = "reg q[3]; map b q[0]; macro foo {g0 a}"
+        text = "register q[3]; map b q[0]; macro foo {g0 a}"
         exp_result = self.make_program(
             self.make_header_statements(self.make_register_statement(self.make_array_declaration('q', 3))),
             self.make_body_statements(
@@ -73,7 +73,7 @@ class MapVisitorTester(ParserTesterMixin, TestCase):
 
     def test_macro_shadowed(self):
         """Test not substituting within a macro because the alias is shadowed by a parameter"""
-        text = "reg q[3]; map b q[0]; macro foo b {g0 b}"
+        text = "register q[3]; map b q[0]; macro foo b {g0 b}"
         exp_result = self.make_program(
             self.make_header_statements(self.make_register_statement(self.make_array_declaration('q', 3))),
             self.make_body_statements(

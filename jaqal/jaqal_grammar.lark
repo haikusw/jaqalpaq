@@ -73,7 +73,7 @@ QUALIFIED_IDENTIFIER_CHAR: IDENTIFIER_CHAR | "."
 
 // Keywords
 // We do this to allow us to forbid gates with these names
-_REG.2: "reg"
+_REG.2: "register"
 _MAP.2: "map"
 _LET.2: "let"
 _MACRO.2: "macro"
