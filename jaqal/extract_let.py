@@ -25,4 +25,7 @@ class ExtractLetVisitor(TreeRewriteVisitor):
     def visit_let_statement(self, identifier, number):
         if self.use_float:
             number = self.extract_signed_number(number)
-        self.let_mapping[self.extract_identifier(identifier)] = number
+        ext_identifier = self.extract_identifier(identifier)
+        if ext_identifier in self.let_mapping:
+            raise ValueError(f'Redefinition of let-constant {ext_identifier}')
+        self.let_mapping[ext_identifier] = number
