@@ -425,6 +425,10 @@ class TreeManipulators:
     def make_let_or_map_identifier(identifier):
         return Tree('let_or_map_identifier', [identifier])
 
+    @staticmethod
+    def make_let_or_integer(identifier):
+        return Tree('let_or_integer', [identifier])
+
     @classmethod
     def make_qualified_identifier(cls, names):
         return Tree('qualified_identifier', [cls.make_identifier(name) for name in names])
