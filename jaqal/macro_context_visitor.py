@@ -1,7 +1,5 @@
 from .parse import TreeRewriteVisitor
 
-from .identifier import Identifier
-
 
 class MacroContextRewriteVisitor(TreeRewriteVisitor):
     """A base class for visitors that need to account for whether they are operating in a macro context or not."""
@@ -22,13 +20,12 @@ class MacroContextRewriteVisitor(TreeRewriteVisitor):
 
     @property
     def macro_args(self):
+        """A list of Identifier objects which are the names of the arguments to the macro we are in. None if we
+        are not in a macro."""
         return self._macro_args
 
     def visit_macro_header(self, name, arguments):
         self._macro_name = self.extract_identifier(name)
-        # Even though only identifiers (not qualified identifiers) are possible in this context, we still store
-        # the identifier like a qualified identifier so the rest of the code can treat qualified and unqualified
-        # identifiers uniformly.
         self._macro_args = [self.extract_identifier(arg) for arg in arguments]
 
     def visit_macro_gate_block(self, block):
