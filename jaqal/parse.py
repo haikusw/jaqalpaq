@@ -431,7 +431,13 @@ class TreeManipulators:
 
     @classmethod
     def make_qualified_identifier(cls, names):
-        return Tree('qualified_identifier', [cls.make_identifier(name) for name in names])
+        children = []
+        for name in names:
+            if cls.is_identifier(name):
+                children.append(name)
+            else:
+                children.append(cls.make_identifier(name))
+        return Tree('qualified_identifier', children)
 
     @staticmethod
     def make_identifier(identifier_string):
@@ -606,6 +612,11 @@ class TreeManipulators:
     @staticmethod
     def deconstruct_parallel_gate_block(tree):
         return tree.children
+
+    @staticmethod
+    def deconstruct_macro_gate_block(tree):
+        """Return the sequential or parallel gate block inside a macro gate block."""
+        return tree.children[0]
 
     @staticmethod
     def deconstruct_array_declaration(tree):
