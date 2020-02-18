@@ -53,7 +53,7 @@ def qscout_circuit_from_qiskit_circuit(circuit, names = None, native_gates = Non
 	:raises QSCOUTError: If the circuit includes a gate not included in `names`.
 	"""
 	n = sum([qreg.size for qreg in circuit.qregs])
-	qsc = ScheduledCircuit(native_gates is None) # TODO: Allow user to supply a different native gateset.
+	qsc = ScheduledCircuit(native_gates is None)
 	if native_gates is not None:
 		qsc.native_gates.update(native_gates)
 	if names is None:
@@ -124,7 +124,7 @@ def qscout_circuit_from_qiskit_circuit(circuit, names = None, native_gates = Non
 				if target.register.name not in qsc.registers:
 					raise QSCOUTError("Gate register %s invalid!" % target.register.name)
 			block.append(qsc.build_gate(names[instr[0].name], *[qsc.registers[target.register.name][target.index] for target in targets], *[float(param) * 180.0 / np.pi for param in instr[0].params]))
-		else: # TODO: Check native gateset and determine allowed gates accordingly.
+		else:
 			raise QSCOUTError("Instruction %s not available on trapped ion hardware; try unrolling first." % instr[0].name)
 	if qsc.gates[-1].name != 'measure_all':
 		qsc.gate('measure_all')
