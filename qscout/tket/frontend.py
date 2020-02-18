@@ -33,42 +33,55 @@ def qscout_circuit_from_tket_circuit(tkcirc):
 	block = qsc.block(parallel = None)
 	measure_accumulator = set()
 	for command in tkcirc:
-		op_type = command.op.get_type()
-		if measure_accumulator:
-			if op_type == OpType.Measure:
-				target = command.qubits[0]
-				if target.reg_name in qsc.registers:
-					measure_accumulator.add(target.resolve_qubit(target.index)[1])
-				else:
-					raise QSCOUTError("Register %s invalid!" % target.register.name)
-				if len(measure_accumulator) == n:
-					block.append(qsc.build_gate('measure_all'))
-					measure_accumulator = {}
-				continue
-			else:
-				raise QSCOUTError("Cannot measure only qubits %s and not whole register." % reset_accumulator)
-				# measure_accumulator = set()
-		if op_type == OpType.Measure:
-			qb = command.qubits[0]
-			if len(qb.index != 1):
-				target = qsc.registers[qb.reg_name + '_'.join([str(x) for x in qb.index])][0]
-			else:
-				target = qsc.registers[qb.reg_name][qb.index[0]]
-			measure_accumulator = {target.resolve_qubit()[1]}
-		elif op_type == OpType.Barrier:
-			block = qsc.block(parallel = None) # Use barriers to inform the scheduler, as explained above.
-		elif op_type in (OpType.CircBox, OpType.ExpBox, OpType.PauliExpBox):
-			raise QSCOUTError() # TODO: Macros
-		elif op_type in names:
-			targets = command.qubits
-			for target in targets:
-				if len(qb.index != 1):
-					target = qsc.registers[qb.reg_name + '_'.join([str(x) for x in qb.index])][0]
-				else:
-					target = qsc.registers[qb.reg_name][qb.index[0]]
-			block.append(qsc.build_gate(*names[instr[0].name](*targets, *[float(param) * np.pi for param in op.get_params()])))
-		else:
-			raise QSCOUTError("Instruction %s not available on trapped ion hardware; try unrolling first." % instr[0].name)
+		block, measure_accumulator = convert_command(command, qsc, block, names, measure_accumulator, n)
 	if qsc.gates[-1][-1].name != 'measure_all':
 		qsc.gate('measure_all')
 	return qsc
+
+def convert_command(command, qsc, block, names, measure_accumulator, n, remaps = None):
+	if remaps is None: remaps = range(n)
+	op_type = command.op.get_type()
+	if measure_accumulator:
+		if op_type == OpType.Measure:
+			target = command.qubits[0]
+			if target.reg_name in qsc.registers:
+				measure_accumulator.add(target.resolve_qubit(target.index)[1])
+			else:
+				raise QSCOUTError("Register %s invalid!" % target.register.name)
+			if len(measure_accumulator) == n:
+				block.append(qsc.build_gate('measure_all'))
+				measure_accumulator = set()
+			return block, measure_accumulator
+		else:
+			raise QSCOUTError("Cannot measure only qubits %s and not whole register." % reset_accumulator)
+			# measure_accumulator = set()
+	if op_type == OpType.Measure:
+		qb = command.qubits[0]
+		if len(qb.index != 1):
+			target = qsc.registers[qb.reg_name + '_'.join([str(x) for x in qb.index])][0]
+		else:
+			target = qsc.registers[qb.reg_name][qb.index[0]]
+		measure_accumulator = {target.resolve_qubit()[1]}
+	elif op_type == OpType.Barrier:
+		block = qsc.block(parallel = None) # Use barriers to inform the scheduler, as explained above.
+	elif op_type in (OpType.CircBox, OpType.ExpBox, OpType.PauliExpBox):
+		new_remaps = [remaps[qb.index[0]] for qb in command.qubits]
+		macro_block = GateBlock()
+		subcirq = command.op.get_circuit()
+		for cmd in subcirq:
+			convert_command(cmd, qsc, macro_block, names, set(), n, new_remaps)
+		macro_name = 'macro_' + len(qsc.macros)
+		qsc.macro(macro_name, [], macro_block)
+		block.append(qsc.build_gate(macro_name))
+		# TODO: Re-use macros when the same circuit block appears in multiple places.
+	elif op_type in names:
+		targets = command.qubits
+		for target in targets:
+			if len(qb.index != 1): # TODO: Figure out how to pass multi-index qubits in macros.
+				target = qsc.registers[qb.reg_name + '_'.join([str(x) for x in qb.index])][0]
+			else:
+				target = qsc.registers[qb.reg_name][remaps[qb.index[0]]]
+		block.append(qsc.build_gate(*names[instr[0].name](*targets, *[float(param) * np.pi for param in op.get_params()])))
+	else:
+		raise QSCOUTError("Instruction %s not available on trapped ion hardware; try unrolling first." % instr[0].name)
+	return block, measure_accumulator
