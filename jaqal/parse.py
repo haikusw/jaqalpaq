@@ -641,6 +641,12 @@ class TreeManipulators:
         identifier, index = tree.children
         return identifier, index
 
+    @classmethod
+    def deconstruct_let_or_map_identifier(cls, tree):
+        """Return a qualified identifier from a let-or-map identifier."""
+        assert len(tree.children) == 1
+        return cls.extract_qualified_identifier(tree.children[0])
+
     @staticmethod
     def extract_qualified_identifier(tree):
         """Return a qualified identifier as a tuple of strings."""

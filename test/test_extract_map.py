@@ -47,5 +47,5 @@ class ExtractMapTester(TestCase):
     def run_test(self, text, exp_result):
         parser = make_lark_parser()
         tree = parser.parse(text)
-        act_result = extract_map(tree)
+        act_result, _ = extract_map(tree)
         self.assertEqual(exp_result, act_result)

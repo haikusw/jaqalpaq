@@ -10,7 +10,7 @@ def extract_map(tree):
 
     visitor = ExtractMapVisitor()
     visitor.visit(tree)
-    return visitor.map_mapping
+    return visitor.map_mapping, visitor.registers
 
 
 class ExtractMapVisitor(TreeRewriteVisitor):
