@@ -5,6 +5,7 @@ from .let_visitor import expand_let_values
 from .map_visitor import expand_map_values
 from .macro_expansion_visitor import expand_macros
 from .block_normalizer import normalize_blocks_with_unitary_timing
+from .identifier import Identifier
 
 
 def parse_unitary_timed_gates(jaqal_text):
@@ -16,7 +17,12 @@ def parse_unitary_timed_gates(jaqal_text):
     tree = expand_map_values(tree)
     tree = expand_macros(tree)
     tree = normalize_blocks_with_unitary_timing(tree)
+    return get_gates_and_loops(tree)
 
+
+def get_gates_and_loops(tree):
+    """Return a list of Gate and Loop objects. This assumes many stages of simplification have already happened to
+    the tree and may fail if there are unresolved symbols."""
     visitor = IterateGatesAndLoopsVisitor()
     return visitor.visit(tree)
 
@@ -70,7 +76,10 @@ class IterateGatesAndLoopsVisitor(ParseTreeVisitor):
         return identifier
 
     def visit_qualified_identifier(self, names):
-        return names
+        return str(Identifier(names))
+
+    def visit_identifier(self, identifier_string):
+        return identifier_string
 
 # Define the objects we return when iterating over gates. Having the `is_*` methods really just allows us
 # to check the type without having to import the classes into the user's namespace. I'm not sure if it's a
@@ -117,6 +126,9 @@ class Loop(JaqalObject):
     def __eq__(self, other):
         return self.repetition_count == other.repetition_count and self.block == other.block
 
+    def __repr__(self):
+        return f"Loop({self.repetition_count}, {self.block})"
+
 
 class ParallelGateBlock(JaqalObject):
 
@@ -128,6 +140,9 @@ class ParallelGateBlock(JaqalObject):
     def __eq__(self, other):
         return self.gates == other.gates
 
+    def __repr__(self):
+        return f"ParallelGateBlock({self.gates})"
+
 
 class SequentialGateBlock(JaqalObject):
 
@@ -138,3 +153,6 @@ class SequentialGateBlock(JaqalObject):
 
     def __eq__(self, other):
         return self.gates == other.gates
+
+    def __repr__(self):
+        return f"SequentialGateBlock({self.gates})"

@@ -1,15 +1,26 @@
 """Substitute let constant values into parse trees."""
-from .macro_context_visitor import MacroContextRewriteVisitor
 from numbers import Integral
+
+from .macro_context_visitor import MacroContextRewriteVisitor
+from .parse import TreeManipulators
 
 
 def resolve_let(tree, let_dict):
     """Replace all let values in this tree with their values from the let dictionary. This may fail if resolution
     would result in a value that cannot occur in context, i.e. a floating point value where an integer is required."""
 
-    visitor = ResolveLetVisitor(let_dict)
-    resolved = visitor.visit(tree)
-    return resolved
+    if TreeManipulators.is_tree(tree):
+        visitor = ResolveLetVisitor(let_dict)
+        resolved = visitor.visit(tree)
+        return resolved
+    else:
+        # Visitor objects can only handle trees, not tokens, and there are cases where it's convenient to do let-
+        # resolution on an object that may be a token.
+        if TreeManipulators.is_identifier(tree):
+            identifier = TreeManipulators.extract_identifier(tree)
+            if identifier in let_dict:
+                return let_dict[identifier]
+        return tree
 
 
 def combine_let_dicts(let_dict, *additional_dicts):
@@ -96,9 +107,10 @@ class ResolveLetVisitor(MacroContextRewriteVisitor):
     def visit_array_slice(self, identifier, index_slice):
         """Validate all parts of the slice are integers."""
         for value in [index_slice.start, index_slice.stop, index_slice.step]:
-            num = self.extract_signed_number(value)
-            if not is_integer(num):
-                raise ValueError(f'While resolving let values: illegal array slice value {num}')
+            if value is not None:
+                num = self.extract_signed_number(value)
+                if not is_integer(num):
+                    raise ValueError(f'While resolving let values: illegal array slice value {num}')
         return self.make_array_slice(identifier, index_slice)
 
     def is_macro_argument(self, identifier):

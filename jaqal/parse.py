@@ -486,9 +486,10 @@ class TreeManipulators:
         elif cls.is_integer(number):
             return cls.make_signed_integer(int(number))
         elif cls.is_number(number) or cls.is_signed_number(number):
-            if float(number) != int(number):
+            # A signed number token can be converted to a float but not an int, so we have a workaround here.
+            if float(number) != int(float(number)):
                 raise ValueError(f"Expected signed integer, found {number}")
-            return cls.make_signed_integer(int(number))
+            return cls.make_signed_integer(int(float(number)))
         else:
             return number
 
@@ -593,13 +594,21 @@ class TreeManipulators:
     def is_signed_integer(cls, token):
         return cls._is_token(token, 'SIGNED_INTEGER')
 
-    @staticmethod
-    def _is_tree(tree, data):
-        return isinstance(tree, Tree) and tree.data == data
+    @classmethod
+    def _is_tree(cls, tree, data):
+        return cls.is_tree(tree) and tree.data == data
+
+    @classmethod
+    def _is_token(cls, token, data):
+        return cls.is_token(token) and token.type == data
 
     @staticmethod
-    def _is_token(token, data):
-        return isinstance(token, Token) and token.type == data
+    def is_tree(tree):
+        return isinstance(tree, Tree)
+
+    @staticmethod
+    def is_token(token):
+        return isinstance(token, Token)
 
     ##
     # Deconstruct trees and tokens into their parts, used to go top down instead of (actually in addition to) bottom-up
