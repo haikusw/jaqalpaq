@@ -20,6 +20,8 @@ class MacroContextRewriteVisitor(TreeRewriteVisitor):
 
     @property
     def macro_args(self):
+        """A list of Identifier objects which are the names of the arguments to the macro we are in. None if we
+        are not in a macro."""
         return self._macro_args
 
     def visit_macro_header(self, name, arguments):

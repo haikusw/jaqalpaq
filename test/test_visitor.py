@@ -55,8 +55,14 @@ class TestVisitor(ParseTreeVisitor):
     def visit_array_element(self, identifier, index):
         return {'type': 'array_element', 'identifier': identifier, 'index': index}
 
+    def visit_array_element_qual(self, identifier, index):
+        return {'type': 'array_element_qual', 'identifier': identifier, 'index': index}
+
     def visit_array_slice(self, identifier, index_slice):
         return {'type': 'array_slice', 'identifier': identifier, 'index_slice': index_slice}
+
+    def visit_qualified_identifier(self, names):
+        return names
 
     def visit_let_identifier(self, identifier):
         return identifier
@@ -68,9 +74,7 @@ class TestVisitor(ParseTreeVisitor):
 class ParseTreeVisitorTester(TestCase):
 
     def make_parser(self, *args, **kwargs) -> Lark:
-        with open(grammar_filename, 'r') as fd:
-            kwargs['parser'] = 'lalr'
-            return Lark(fd, *args, **kwargs)
+        return make_lark_parser(*args, **kwargs)
 
     def test_array_declaration(self):
         """Test visiting an array declaration."""
@@ -102,7 +106,7 @@ class ParseTreeVisitorTester(TestCase):
             ('foo[::2]', ('foo', slice(None, None, 2))),
             ('foo[-1::-2]', ('foo', slice(-1, None, -2))),
             ('foo[0:42]', ('foo', slice(0, 42))),
-            ('foo[a:3:-1]', ('foo', slice('a', 3, -1)))
+            ('foo[a:3:-1]', ('foo', slice(('a',), 3, -1)))
         ]
         parser = self.make_parser(start='array_slice')
         visitor = TestVisitor()
@@ -116,7 +120,7 @@ class ParseTreeVisitorTester(TestCase):
         """Test visiting a register statement."""
         cases = [
             ('register q[9]', ('q', 9)),
-            ('register foo [ abc ]', ('foo', 'abc'))
+            ('register foo [ abc ]', ('foo', ('abc',)))
         ]
         parser = self.make_parser(start='register_statement')
         visitor = TestVisitor()
@@ -159,22 +163,23 @@ class ParseTreeVisitorTester(TestCase):
         """Test visiting a gate statement."""
         cases = [
             ('foo 42 43', ('foo', [42, 43])),
-            ('bar a[2]', ('bar', [{'type': 'array_element', 'identifier': 'a', 'index': 2}]))
+            ('bar a[2]', ('bar', [{'type': 'array_element_qual', 'identifier': ('a',), 'index': 2}]))
         ]
         parser = self.make_parser(start='gate_statement')
         visitor = TestVisitor()
         for text, (gate_name, gate_args) in cases:
             tree = parser.parse(text)
             act_result = visitor.visit(tree)
-            exp_result = {'type': 'gate_statement', 'gate_name': gate_name, 'gate_args': gate_args}
+            exp_result = {'type': 'gate_statement', 'gate_name': (gate_name,),
+                          'gate_args': gate_args}
             self.assertEqual(exp_result, act_result, f"Failed to parse {text}")
 
     def test_sequential_gate_block(self):
         """Test visiting a sequential gate block."""
         cases = [
-            ('{g0 a b; g1 1 2 3;g3}', [('g0', ['a', 'b']), ('g1', [1, 2, 3]), ('g3', [])]),
-            ('{foo\nbar}', [('foo', []), ('bar', [])]),
-            ('{foo a[5]}', [('foo', [{'type': 'array_element', 'identifier': 'a', 'index': 5}])])
+            ('{g0 a b; g1 1 2 3;g3}', [(('g0',), [('a',), ('b',)]), (('g1',), [1, 2, 3]), (('g3',), [])]),
+            ('{foo\nbar}', [(('foo',), []), (('bar',), [])]),
+            ('{foo a[5]}', [(('foo',), [{'type': 'array_element_qual', 'identifier': ('a',), 'index': 5}])])
         ]
         parser = self.make_parser(start='sequential_gate_block')
         visitor = TestVisitor()
@@ -189,9 +194,9 @@ class ParseTreeVisitorTester(TestCase):
     def test_parallel_gate_block(self):
         """Test visiting a parallel gate block."""
         cases = [
-            ('<g0 a b| g1 1 2 3|g3>', [('g0', ['a', 'b']), ('g1', [1, 2, 3]), ('g3', [])]),
-            ('<foo\nbar>', [('foo', []), ('bar', [])]),
-            ('<foo a[5]>', [('foo', [{'type': 'array_element', 'identifier': 'a', 'index': 5}])])
+            ('<g0 a b| g1 1 2 3|g3>', [(('g0',), [('a',), ('b',)]), (('g1',), [1, 2, 3]), (('g3',), [])]),
+            ('<foo\nbar>', [(('foo',), []), (('bar',), [])]),
+            ('<foo a[5]>', [(('foo',), [{'type': 'array_element_qual', 'identifier': ('a',), 'index': 5}])])
         ]
         parser = self.make_parser(start='parallel_gate_block')
         visitor = TestVisitor()
@@ -209,8 +214,8 @@ class ParseTreeVisitorTester(TestCase):
             ('macro foo a b {g0 a b}', ('foo', ['a', 'b'],
                                         {'type': 'macro_gate_block',
                                          'block': {'type': 'sequential_gate_block',
-                                                   'statements': [{'type': 'gate_statement', 'gate_name': 'g0',
-                                                                   'gate_args': ['a', 'b']}]}}))
+                                                   'statements': [{'type': 'gate_statement', 'gate_name': ('g0',),
+                                                                   'gate_args': [('a',), ('b',)]}]}}))
         ]
         parser = self.make_parser(start='macro_definition')
         visitor = TestVisitor()
@@ -225,7 +230,7 @@ class ParseTreeVisitorTester(TestCase):
         cases = [
             ('loop 3 {g0 a b}', (3, {'type': 'sequential_gate_block',
                                      'statements': [{'type': 'gate_statement',
-                                                     'gate_name': 'g0', 'gate_args': ['a', 'b']}]}))
+                                                     'gate_name': ('g0',), 'gate_args': [('a',), ('b',)]}]}))
         ]
         parser = self.make_parser(start='loop_statement')
         visitor = TestVisitor()
@@ -254,8 +259,8 @@ class ParseTreeVisitorTester(TestCase):
                  'body_statements': [
                      {
                          'type': 'gate_statement',
-                         'gate_name': 'g0',
-                         'gate_args': ['a', 'b']
+                         'gate_name': ('g0',),
+                         'gate_args': [('a',), ('b',)]
                      }
                  ]
              })

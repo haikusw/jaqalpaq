@@ -2,6 +2,7 @@ import unittest
 
 from jaqal.testing.mixin import ParserTesterMixin
 from jaqal.macro_expansion_visitor import expand_macros
+from jaqal.parse import make_lark_parser
 
 
 class ExpandMacrosTester(ParserTesterMixin, unittest.TestCase):
@@ -102,7 +103,7 @@ class ExpandMacrosTester(ParserTesterMixin, unittest.TestCase):
         self.assertEqual(exp_result, act_result)
 
     def make_simple_tree(self, text):
-        parser = self.make_parser()
+        parser = make_lark_parser()
         tree = parser.parse(text)
         visited_tree = expand_macros(tree)
         return self.simplify_tree(visited_tree)
