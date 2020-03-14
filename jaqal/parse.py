@@ -472,9 +472,10 @@ class TreeManipulators:
         if cls.is_integer(number):
             return number
         elif cls.is_signed_integer(number) or cls.is_number(number) or cls.is_signed_number(number):
-            if float(number) < 0 or float(number) != int(number):
+            # A signed number token can be converted to a float but not an int, so we have a workaround here.
+            if float(number) < 0 or float(number) != int(float(number)):
                 raise ValueError(f'Expected integer, found {number}')
-            return cls.make_integer(int(number))
+            return cls.make_integer(int(float(number)))
         else:
             # Likely an identifier
             return number
