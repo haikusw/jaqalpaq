@@ -19,6 +19,13 @@ class InterfaceTester(TestCase):
         let_dict = {}
         self.run_test(text, let_dict, exp_result)
 
+    def test_loop_with_let_count(self):
+        """Test a loop whose counter is set with a let statement."""
+        text = "let n 10; loop n { foo }"
+        exp_result = [Loop(10, SequentialGateBlock([Gate('foo', [])]))]
+        let_dict = {}
+        self.run_test(text, let_dict, exp_result)
+
     def test_nested_loop(self):
         """Test returning a loop within a loop."""
         text = "loop 5 { loop 2 { foo} }"
