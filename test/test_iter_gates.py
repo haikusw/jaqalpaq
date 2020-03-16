@@ -1,7 +1,8 @@
 import unittest
 
-from jaqal.iter_gates import parse_unitary_timed_gates
+from jaqal.iter_gates import get_gates_and_loops
 from jaqal.iter_gates import Gate, Loop, ParallelGateBlock, SequentialGateBlock
+from jaqal.parse import parse_with_lark
 
 
 class GateParserTester(unittest.TestCase):
@@ -20,20 +21,6 @@ class GateParserTester(unittest.TestCase):
         ]
         self.run_test(text, exp_result)
 
-    def test_gate_with_let(self):
-        text = 'register r[6]; let a 2; foo r[a]'
-        exp_result = [
-            Gate('foo', [('r', 2)])
-        ]
-        self.run_test(text, exp_result)
-
-    def test_gate_with_map(self):
-        text = 'register r[6]; map q r; foo q[2]'
-        exp_result = [
-            Gate('foo', [('r', 2)])
-        ]
-        self.run_test(text, exp_result)
-
     def test_loop(self):
         text = 'loop 2 {foo; bar}'
         exp_result = [
@@ -41,14 +28,6 @@ class GateParserTester(unittest.TestCase):
                 Gate('foo', []),
                 Gate('bar', [])
             ]))
-        ]
-        self.run_test(text, exp_result)
-
-    def test_macro_expansion(self):
-        text = 'macro foo {g0; g1}; foo'
-        exp_result = [
-            Gate('g0', []),
-            Gate('g1', [])
         ]
         self.run_test(text, exp_result)
 
@@ -62,31 +41,11 @@ class GateParserTester(unittest.TestCase):
         ]
         self.run_test(text, exp_result)
 
-    def test_normalize_across_macro(self):
-        text = 'macro foo <g0|{m0;m1}>; s0; <p0|{s1;foo}|{s2;s3;s4}>'
-        exp_result = [
-            Gate('s0', []),
-            ParallelGateBlock([
-                Gate('p0', []),
-                Gate('s1', []),
-                Gate('s2', [])
-            ]),
-            ParallelGateBlock([
-                Gate('g0', []),
-                Gate('m0', []),
-                Gate('s3', [])
-            ]),
-            ParallelGateBlock([
-                Gate('m1', []),
-                Gate('s4', [])
-            ])
-        ]
-        self.run_test(text, exp_result)
-
     def run_test(self, text, exp_result):
         act_result = self.make_gates(text)
         self.assertEqual(exp_result, act_result)
 
     def make_gates(self, text):
-        gates = parse_unitary_timed_gates(text)
+        tree = parse_with_lark(text)
+        gates = get_gates_and_loops(tree)
         return gates
