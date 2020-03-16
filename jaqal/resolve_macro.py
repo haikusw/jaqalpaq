@@ -1,7 +1,7 @@
 """Resolve references to macros to expansions of the gates they contain."""
 
-from jaqal.parse import TreeRewriteVisitor
-from jaqal.extract_macro import MacroRecord, ExtractMacroVisitor
+from .parse import TreeRewriteVisitor
+from .extract_macro import MacroRecord, ExtractMacroVisitor
 
 
 def resolve_macro(tree, macro_dict):
