@@ -4,6 +4,7 @@ different constant values."""
 from .parse import parse_with_lark, TreeRewriteVisitor
 from .extract_let import extract_let
 from .extract_map import extract_map
+from .extract_usepulses import extract_usepulses
 from .resolve_let import resolve_let, combine_let_dicts
 from .resolve_map import resolve_map
 from .resolve_macro import resolve_macro
@@ -20,13 +21,19 @@ class Interface:
         with open(root_filename, 'r') as fd:
             return cls(fd.read())
 
-    def __init__(self, root_text):
-        """Create a new interface using root_text as the text of the main Jaqal file."""
+    def __init__(self, root_text, allow_no_usepulses=False):
+        """Create a new interface using root_text as the text of the main Jaqal file.
+
+        If unless allow_no_usepulses is True (default=False), then the use must provide a usepulses statement.
+        """
 
         self._registers = None
 
         self._let_dict = None
         self._map_dict = None
+        self._usepulses = None
+
+        self._allow_no_usepulses = bool(allow_no_usepulses)
 
         self._initial_tree = None
 
@@ -37,6 +44,12 @@ class Interface:
         """Return a dictionary mapping tuples of qualified identifiers to the numeric values they have by default
         in the file."""
         return self._let_dict
+
+    @property
+    def usepulses(self):
+        """Return a dictionary mapping qualified identifiers to the objects they import.
+        See extract_usepulses for more details."""
+        return self._usepulses
 
     def get_uniformly_timed_gates_and_registers(self, override_dict):
         """Parse the input down to a sequence of gates with arguments that are either qubit register elements or
@@ -75,8 +88,13 @@ class Interface:
 
         self._map_dict, self._registers = extract_map(tree)
 
+        self._usepulses = extract_usepulses(tree)
+        if len(self._usepulses) > 1 or not self._usepulses and not self._allow_no_usepulses:
+            raise NotImplementedError("At most one usepulses allowed for now")
+
         tree = resolve_macro(tree, {})  # The extra argument may be used for imported macros
         self._initial_tree = strip_headers_and_macro_definitions(tree)
+
 
 def convert_to_int(token):
     float_value = float(token)
