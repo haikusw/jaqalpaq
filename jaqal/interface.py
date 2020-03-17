@@ -30,6 +30,7 @@ class Interface:
         self._registers = None
 
         self._let_dict = None
+        self._default_let_dict = None
         self._map_dict = None
         self._usepulses = None
 
@@ -38,6 +39,13 @@ class Interface:
         self._initial_tree = None
 
         self._init_parse_tree(root_text)
+
+    @property
+    def tree(self):
+        """Return the parse tree created when parsing the text given to the constructor. All functions that take a
+        tree must either take this value (which happens if you don't give a tree) or a tree that is created from
+        transforming this tree."""
+        return self._initial_tree
 
     @property
     def exported_constants(self):
@@ -51,7 +59,7 @@ class Interface:
         See extract_usepulses for more details."""
         return self._usepulses
 
-    def get_uniformly_timed_gates_and_registers(self, override_dict):
+    def get_uniformly_timed_gates_and_registers(self, override_dict=None):
         """Parse the input down to a sequence of gates with arguments that are either qubit register elements or
         numbers.
 
@@ -65,15 +73,59 @@ class Interface:
 
         """
 
-        full_let_dict = combine_let_dicts(self._let_dict, override_dict)
-        tree = resolve_let(self._initial_tree, full_let_dict)
-        map_dict = {key: resolve_let(value, full_let_dict) for key, value in self._map_dict.items()}
-        tree = resolve_map(tree, map_dict, self._registers)
+        let_dict = self.make_let_dict(override_dict)
+        tree = self.resolve_let(let_dict=let_dict)
+        tree = self.resolve_map(tree)
         tree = normalize_blocks_with_unitary_timing(tree)
-        registers = {str(name): convert_to_int(resolve_let(value, full_let_dict))
-                     for name, value in self._registers.items()}
+        registers = self.make_register_dict(let_dict)
         validate(tree, registers)
         return get_gates_and_loops(tree), registers
+
+    def make_let_dict(self, override_dict=None):
+        """Create a dictionary of all let values in the parse tree. The let values will map to parse trees. The result
+        of this call is therefore mostly useful as an input to other methods of this class."""
+        if override_dict is None:
+            if self._default_let_dict is None:
+                self._default_let_dict = combine_let_dicts(self._let_dict, {})
+            return self._default_let_dict
+        else:
+            full_let_dict = combine_let_dicts(self._let_dict, override_dict)
+            return full_let_dict
+
+    def make_register_dict(self, let_dict=None):
+        """Create a dictionary mapping register identifiers to the number of qubits they hold as an integer.
+
+        let_dict -- A dictionary mapping identifiers to parse trees. Use make_let_dict() to create this.
+        """
+        let_dict = let_dict or self.make_let_dict()
+        registers = {str(name): convert_to_int(resolve_let(value, let_dict))
+                     for name, value in self._registers.items()}
+        return registers
+
+    def resolve_let(self, tree=None, let_dict=None):
+        """Resolve all the let statements in the tree and return the new tree.
+
+        tree -- A parse tree. If not provided, will use the one stored internally. This tree is not modified.
+
+        let_dict -- A dictionary mapping identifiers to parse trees. Use make_let_dict() to create this.
+        """
+
+        tree = tree or self._initial_tree
+        let_dict = let_dict or self.make_let_dict()
+        return resolve_let(tree, let_dict)
+
+    def resolve_map(self, tree=None, let_dict=None):
+        """Resolve all references to mapped registers with the actual register reference. This cannot properly handle
+        unresolved let constants in the map definitions, therefore it is best to run after resolve_let.
+
+        tree -- A parse tree. If not provided, will use the one stored internally. This tree is not modified. You must
+        use a tree that is based on transformations of the tree stored in this Interface.
+
+        let_dict -- A dictionary mapping identifiers to parse trees. Use make_let_dict() to create this.
+        """
+        let_dict = let_dict or self.make_let_dict()
+        map_dict = {key: resolve_let(value, let_dict) for key, value in self._map_dict.items()}
+        return resolve_map(tree, map_dict, self._registers)
 
     ##
     # Private methods
