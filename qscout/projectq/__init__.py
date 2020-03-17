@@ -1,2 +1,2 @@
-from .frontend import get_engine_list
-__all__ = ['get_engine_list']
+from .frontend import get_engine_list, JaqalBackend
+__all__ = ['get_engine_list', 'JaqalBackend']

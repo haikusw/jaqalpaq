@@ -8,11 +8,20 @@ from projectq.types import WeakQubitRef
 from qscout.core import ScheduledCircuit
 from qscout import QSCOUTError
 
-one_qubit_gates = {Rx: 'Rx', Ry: 'Ry', Rz: 'Rz', X: 'Px', Y: 'Py', SqrtX: 'Sx'}
-two_qubit_gates = (Rxx: lambda g, q1, q2: ('MS', q1, q2, 0, g.angle * 180.0), Ryy: lambda g, q1, q2: ('MS', q1, q2, 90, g.angle * 180.0))
+import numpy as np
+
+one_qubit_gates = {Rx: lambda g, q: ('R', q, 0, normalize_angle(g.angle)), Ry: lambda g, q: ('R', q, 90.0, normalize_angle(g.angle)), Rz: lambda g, q: ('Rz', q, normalize_angle(g.angle)), X: lambda g, q: ('Px', q), Y: lambda g, q: ('Py', q), SqrtX: lambda g, q: ('Sx', q)}
+two_qubit_gates = {Rxx: lambda g, q1, q2: ('MS', q1, q2, 0, normalize_angle(g.angle)), Ryy: lambda g, q1, q2: ('MS', q1, q2, 90, normalize_angle(g.angle))}
 
 def get_engine_list():
-	return restrictedgateset.get_engine_list(one_qubit_gates=one_qubit_gates.keys(), two_qubit_gates=two_qubit_gates.keys(), compiler_chooser=trapped_ion_decomposer.chooser_Ry_reducer)
+	return restrictedgateset.get_engine_list(one_qubit_gates=tuple(one_qubit_gates.keys()), two_qubit_gates=tuple(two_qubit_gates.keys()), compiler_chooser=trapped_ion_decomposer.chooser_Ry_reducer)
+	
+def normalize_angle(p):
+	if p > np.pi * 2.0:
+		p -= 2.0 * np.pi
+	if p < np.pi * -2.0:
+		p += 2.0 * np.pi
+	return p
 
 class JaqalBackend(BasicEngine):
 	def __init__(self, outfile=None, one_qubit_gate_map=None, two_qubit_gate_map=None, native_gates=None):
@@ -77,13 +86,13 @@ class JaqalBackend(BasicEngine):
 	def _store(self, cmd):
 		gate = cmd.gate
 		
-		if len(self.measure_accumulator == len(self.circuit.registers['q'])):
+		if len(self.measure_accumulator) == len(self.circuit.registers['q']):
 			self.measure_accumulator = set()
 			self._block.append(self.circuit.build_gate('prepare_all'))
 		
 		if gate == Allocate:
 			qid = self._mapped_qubit_id(cmd.qubits[0][0]) # TODO: Design a cleaner way of doing the below.
-			self.q._size = max(self.q.size, qid)
+			self.q._size = max(self.q.size, qid + 1)
 		
 		elif gate == Deallocate:
 			pass # The user might stop caring about the qubit, but we need to keep it around.
@@ -94,22 +103,25 @@ class JaqalBackend(BasicEngine):
 				raise QSCOUTError("Can't measure qubit %d twice!" % qid)
 			else:
 				self.measure_accumulator.add(qid)
-				if len(self.measure_accumulator == len(self.circuit.registers['q'])):
+				if len(self.measure_accumulator) == len(self.circuit.registers['q']):
 					self._block.append(self.circuit.build_gate('measure_all'))
 		
 		elif gate == Barrier:
 			self._block = self.circuit.block(parallel=None)
 		
-		elif gate in one_qubit_gates:
+		elif type(gate) in one_qubit_gates:
 			qid = self._mapped_qubit_id(cmd.qubits[0][0])
 			if qid in self.measure_accumulator:
 				raise QSCOUTError("Can't do gates in the middle of measurement!")
 			else:
-				self._block.append(self.circuit.build_gate(self.one_qubit_gates[gate], self.q[qid], gate.angle))
+				self._block.append(self.circuit.build_gate(*self.one_qubit_gates[type(gate)](gate, self.q[qid])))
 		
-		elif gate in two_qubit_gates:
+		elif type(gate) in two_qubit_gates:
 			qids = [self._mapped_qubit_id(qb[0]) for qb in cmd.qubits]
 			for qid in qids:
 				if qid in self.measure_accumulator:
 					raise QSCOUTError("Can't do gates in the middle of measurement!")
-			self._block.append(self.circuit.build_gate(*self.two_qubit_gates[gate](gate, *[self.q[qid] for qid in qids])))
+			self._block.append(self.circuit.build_gate(*self.two_qubit_gates[type(gate)](gate, *[self.q[qid] for qid in qids])))
+		
+		else:
+			raise QSCOUTError("Unknown instruction! %s" % gate)
