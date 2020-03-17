@@ -39,11 +39,11 @@ class ExampleFileTester(ParserTesterMixin, unittest.TestCase):
         """Test visiting the hadamard program"""
         file_path = example_dir / "hadamard.jaqal"
         text = Path(file_path).read_text()
-        Interface(text)
+        Interface(text, allow_no_usepulses=True)
         
     def test_gst_unitary_timed_gates(self):
         """Test visiting the gst program"""
         file_path = example_dir / "single_qubit_gst.jaqal"
         text = Path(file_path).read_text()
-        Interface(text)
+        Interface(text, allow_no_usepulses=True)
  
