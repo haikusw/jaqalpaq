@@ -44,7 +44,7 @@ def schedule_block(circ, block):
 		freeze_timestamps = {regname: {idx: -1 for idx in used_qubits[regname]} for regname in used_qubits}
 		for instr in block:
 			schedule_instr(circ, instr, new_block, freeze_timestamps)
-		block.gates = instr.gates
+		block._gates = new_block.gates # TODO: Make this cleaner
 		block.parallel = False
 	elif force_flatten:
 		# The block we're trying to schedule is locked to sequential order, but one of the
@@ -76,9 +76,16 @@ def schedule_instr(circ, instr, target, freeze_timestamps, after=-1):
 		if defrost >= len(target):
 			target.append(instr)
 		elif is_block:
-			target[defrost].gates.extend(instr.gates)
+			if isinstance(target[defrost], GateBlock):
+				target[defrost].gates.extend(instr.gates)
+			else:
+				instr.gates.append(target[defrost])
+				target[defrost] = instr
 		else:
-			target[defrost].gates.append(instr)
+			if isinstance(target[defrost], GateBlock):
+				target[defrost].gates.append(instr)
+			else:
+				target[defrost] = GateBlock(True, [instr, target[defrost]])
 	elif is_block:
 		# You can't nest two sequential blocks, so we flatten the block.
 		for sub_instr in instr:
@@ -99,10 +106,10 @@ def can_parallelize(circ, block, instr, qubits):
 	if isinstance(block, GateBlock) and block.parallel:
 		block_used_qubits = circ.used_qubit_indices(block)
 		for reg in block_used_qubits:
-			if reg in qubits and not isdisjoint(block_used_qubits[reg], qubits[reg]):
+			if reg in qubits and not block_used_qubits[reg].isdisjoint(qubits[reg]):
 				return False # Can't act on the same qubit twice simultaneously.
 		for sub_instr in block:
-			if not can_parallelize_sub_instr(circ, sub_instr):
+			if not can_parallelize_subinstr(circ, sub_instr):
 				return False
 		if isinstance(instr, GateBlock):
 			for sub_instr in instr:
@@ -112,8 +119,15 @@ def can_parallelize(circ, block, instr, qubits):
 			return can_parallelize_gate(circ, block, instr, qubits)
 		else:
 			return False # We don't know what this is, so we can't parallelize it.
+	elif isinstance(block, GateStatement):
+		if isinstance(instr, GateStatement):
+			return can_parallelize_subinstr(circ, block) and can_parallelize_gate(circ, GateBlock(True, [block]), instr, qubits)
+		elif isinstance(instr, GateBlock):
+			return can_parallelize_subinstr(circ, block) and can_parallelize_gate(circ, instr, block, qubits)
+		else:
+			return False # We don't know what this is, so we can't parallelize it.
 	else:
-		return False # Not a parallel block; can't add more instructions in parallel.
+		return False # Not a parallel block or single gate; can't add more instructions in parallel.
 
 def can_parallelize_gate(circ, block, instr, qubits):
 	if not can_parallelize_subinstr(circ, instr):
