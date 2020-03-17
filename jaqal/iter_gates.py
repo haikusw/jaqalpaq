@@ -1,23 +1,7 @@
 """Functions for iterating over gates in a Jaqal file"""
 
-from .parse import parse_with_lark, ParseTreeVisitor
-from .let_visitor import expand_let_values
-from .map_visitor import expand_map_values
-from .macro_expansion_visitor import expand_macros
-from .block_normalizer import normalize_blocks_with_unitary_timing
+from .parse import ParseTreeVisitor
 from .identifier import Identifier
-
-
-def parse_unitary_timed_gates(jaqal_text):
-    """Given the text of a Jaqal file, iterate over all gate objects. Macros are expanded, but loops are not.
-    """
-
-    tree = parse_with_lark(jaqal_text)
-    tree = expand_let_values(tree)
-    tree = expand_map_values(tree)
-    tree = expand_macros(tree)
-    tree = normalize_blocks_with_unitary_timing(tree)
-    return get_gates_and_loops(tree)
 
 
 def get_gates_and_loops(tree):
