@@ -42,6 +42,9 @@ class IterateGatesAndLoopsVisitor(ParseTreeVisitor):
     def visit_let_statement(self, identifier, number):
         raise ValueError(f"Let statements should have been removed by now")
 
+    def visit_usepulses_statement(self, identifier, objects):
+        return None
+
     def visit_gate_statement(self, gate_name, gate_args):
         return Gate(gate_name, gate_args)
 

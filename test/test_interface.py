@@ -2,6 +2,7 @@ from unittest import TestCase
 
 from jaqal.interface import Interface
 from jaqal.iter_gates import Gate, Loop, ParallelGateBlock, SequentialGateBlock
+from jaqal.identifier import Identifier
 
 
 class InterfaceTester(TestCase):
@@ -148,7 +149,7 @@ class InterfaceTester(TestCase):
         """Test that a register is exported with its size."""
         text = "register r[7]"
         exp_result = {'r': 7}
-        iface = Interface(text)
+        iface = Interface(text, allow_no_usepulses=True)
         _, act_result = iface.get_uniformly_timed_gates_and_registers({})
         self.assertEqual(exp_result, act_result)
 
@@ -156,8 +157,16 @@ class InterfaceTester(TestCase):
         """Test that a register with a size set by a let statement is properly exported."""
         text = "let a 7; register r[a]"
         exp_result = {'r': 7}
-        iface = Interface(text)
+        iface = Interface(text, allow_no_usepulses=True)
         _, act_result = iface.get_uniformly_timed_gates_and_registers({})
+        self.assertEqual(exp_result, act_result)
+
+    def test_usepulses(self):
+        """Test getting information from the usepulses statement."""
+        text = "from foo.bar usepulses *"
+        exp_result = {Identifier.parse('foo.bar'): all}
+        iface = Interface(text, allow_no_usepulses=True)
+        act_result = iface.usepulses
         self.assertEqual(exp_result, act_result)
 
     ##
@@ -210,16 +219,28 @@ class InterfaceTester(TestCase):
         let_dict = {}
         self.run_reject(text, let_dict)
 
+    def test_reject_multiple_usepulses(self):
+        """Test that we reject multiple usepulses statements. This is temporary."""
+        text = "from foo usepulses *; from bar usepulses *"
+        let_dict = {}
+        self.run_reject(text, let_dict)
+
+    def test_reject_no_usepulses(self):
+        """Test that with allow_no_usepulses=False, the interface rejects Jaqal without usepulses."""
+        text = "gate 0 1 2 3"
+        with self.assertRaises(Exception):
+            Interface(text)
+
     ##
     # Running tests
     #
 
     def run_test(self, text, let_dict, exp_result):
-        iface = Interface(text)
+        iface = Interface(text, allow_no_usepulses=True)
         act_result, _ = iface.get_uniformly_timed_gates_and_registers(let_dict)
         self.assertEqual(exp_result, act_result)
 
     def run_reject(self, text, let_dict):
         with self.assertRaises(Exception):
-            iface = Interface(text)
+            iface = Interface(text, allow_no_usepulses=True)
             iface.get_uniformly_timed_gates_and_registers(let_dict)

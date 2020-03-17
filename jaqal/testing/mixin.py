@@ -107,15 +107,15 @@ class ParserTesterMixin:
         return {'type': 'import_statement', 'children': children}
 
     @classmethod
-    def make_require_statement(cls, from_clause, as_clauses):
+    def make_usepulses_statement(cls, from_clause, as_clauses):
         children = list(as_clauses)
         if from_clause is not None:
             children.insert(0, from_clause)
-        return {'type': 'require_statement', 'children': children}
+        return {'type': 'usepulses_statement', 'children': children}
 
     @classmethod
-    def make_from_clause(cls, module_name):
-        return {'type': 'from_clause', 'children': [cls.make_identifier(module_name)]}
+    def make_from_clause(cls, *module_names):
+        return {'type': 'from_clause', 'children': [cls.make_qualified_identifier(*module_names)]}
 
     @classmethod
     def make_as_clause(cls, name, alias=None):

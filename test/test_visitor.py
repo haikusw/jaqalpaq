@@ -31,6 +31,10 @@ class TestVisitor(ParseTreeVisitor):
     def visit_let_statement(self, identifier, number):
         return {'type': 'let_statement', 'identifier': identifier, 'number': number}
 
+    def visit_usepulses_statement(self, identifier, objects):
+        return {'type': 'usepulses_statement', 'identifier': identifier,
+                'objects': objects}
+
     def visit_gate_statement(self, gate_name, gate_args):
         return {'type': 'gate_statement', 'gate_name': gate_name, 'gate_args': gate_args}
 
