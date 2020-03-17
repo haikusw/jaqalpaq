@@ -20,6 +20,7 @@ from qiskit.qasm import pi
 from qiskit.extensions.standard.iden import IdGate
 from qiskit.extensions.standard.x import XGate
 from qiskit.extensions.standard.y import YGate
+from qiskit.extensions.standard.z import ZGate
 from qiskit.extensions.standard.rx import RXGate
 from qiskit.extensions.standard.ry import RYGate
 from qiskit.extensions.standard.rz import RZGate
@@ -75,6 +76,11 @@ class IonUnroller(TransformationPass):
 				rule = [(SXGate(), [q[0]], [])]
 			else:
 				rule = [(RGate(0, node.op.params[0]), [q[0]], [])]
+		elif node.name == 'h':
+			rule = [
+				(ZGate(), [q[0]], []),
+				(SYGate(), [q[0]], []),
+			]
 		elif node.name == 'ry':
 			if node.op.params[0] == pi:
 				rule = [(YGate(), [q[0]], [])]

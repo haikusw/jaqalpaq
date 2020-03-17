@@ -1,4 +1,4 @@
-from qscout.core import ScheduledCircuit
+from qscout.core import ScheduledCircuit, GateStatement
 # from qscoutlib import MSGate, QasmGate, IonUnroller
 from qiskit.converters import dag_to_circuit
 from qscout import QSCOUTError
@@ -61,7 +61,7 @@ def qscout_circuit_from_qiskit_circuit(circuit, names = None, native_gates = Non
 	baseregister = qsc.reg('baseregister', n)
 	offset = 0
 	for qreg in circuit.qregs:
-		qsc.map(qreg.name, qreg.size, baseregister, slice(offset, offset + qreg.size))
+		qsc.map(qreg.name, baseregister, slice(offset, offset + qreg.size))
 		offset += qreg.size
 	qsc.gate('prepare_all')
 	# We're going to divide the circuit up into blocks. Each block will contain every gate
@@ -123,9 +123,9 @@ def qscout_circuit_from_qiskit_circuit(circuit, names = None, native_gates = Non
 			for target in targets:
 				if target.register.name not in qsc.registers:
 					raise QSCOUTError("Gate register %s invalid!" % target.register.name)
-			block.append(qsc.build_gate(names[instr[0].name], *[qsc.registers[target.register.name][target.index] for target in targets], *[float(param) * 180.0 / np.pi for param in instr[0].params]))
+			block.append(qsc.build_gate(names[instr[0].name], *[qsc.registers[target.register.name][target.index] for target in targets], *[float(param) for param in instr[0].params]))
 		else:
 			raise QSCOUTError("Instruction %s not available on trapped ion hardware; try unrolling first." % instr[0].name)
-	if qsc.gates[-1].name != 'measure_all':
+	if not (isinstance(qsc.gates[-1], GateStatement) and qsc.gates[-1].name == 'measure_all'):
 		qsc.gate('measure_all')
 	return qsc

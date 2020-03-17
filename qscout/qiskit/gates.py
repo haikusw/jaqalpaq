@@ -18,6 +18,7 @@ from qiskit.extensions.standard.cx import CnotGate
 from qiskit.extensions.standard.rx import RXGate
 from qiskit.extensions.standard.ry import RYGate
 from qiskit.extensions.standard.rz import RZGate
+from qiskit.extensions.standard.rxx import RXXGate
 from qiskit.qasm import pi
 
 class MSGate(Gate):
@@ -70,17 +71,24 @@ class MSGate(Gate):
 		definition = []
 		q = QuantumRegister(2, "q")
 		theta, phi = tuple(self.params)
+# 		rule = [
+# 			(U3Gate(0, 0, phi), [q[0]], []),
+# 			(U3Gate(0, 0, phi+pi/2), [q[1]], []),
+# 			(CnotGate(), [q[1], q[0]], []),
+# 			(U3Gate(0, 0, -pi/2), [q[0]], []),
+# 			(U3Gate(theta+pi/2,0,0), [q[1]], []),
+# 			(CnotGate(), [q[0], q[1]], []),
+# 			(U3Gate(-pi/2,0,0), [q[1]], []),
+# 			(CnotGate(), [q[1], q[0]], []),
+# 			(U3Gate(0, 0, -phi-pi/2), [q[0]], []),
+# 			(U3Gate(0, 0, -phi), [q[1]], []),
+# 		]
 		rule = [
 			(U3Gate(0, 0, phi), [q[0]], []),
-			(U3Gate(0, 0, phi+pi/2), [q[1]], []),
-			(CnotGate(), [q[1], q[0]], []),
-			(U3Gate(0, 0, -pi/2), [q[0]], []),
-			(U3Gate(theta+pi/2,0,0), [q[0]], []),
-			(CnotGate(), [q[0], q[1]], []),
-			(U3Gate(-pi/2,0,0), [q[0]], []),
-			(CnotGate(), [q[1], q[0]], []),
-			(U3Gate(0, 0, -phi-pi/2), [q[0]], []),
+			(U3Gate(0, 0, phi), [q[1]], []),
+			(RXXGate(theta), [q[0], q[1]], []),
 			(U3Gate(0, 0, -phi), [q[0]], []),
+			(U3Gate(0, 0, -phi), [q[1]], []),			
 		]
 		for inst in rule:
 			definition.append(inst)
