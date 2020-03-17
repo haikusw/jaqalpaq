@@ -98,7 +98,7 @@ class IonCompiler(AbstractCompiler):
 					# measure_accumulator = set()
 			if isinstance(instr, Gate):
 				if instr.name in self.names:
-					qsc.gate(self.names[instr.name], *[qreg[qubit.index] for qubit in instr.qubits], *[float(p) * 180 / np.pi for p in instr.params])
+					qsc.gate(self.names[instr.name], *[qreg[qubit.index] for qubit in instr.qubits], *[float(p) for p in instr.params])
 				else:
 					raise QSCOUTError("Gate %s not in native gate set." % instr.name)
 			elif isinstance(instr, Reset):
