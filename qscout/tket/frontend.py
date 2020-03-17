@@ -1,13 +1,17 @@
-from pytket.device import OpType
+from pytket.circuit import OpType
 
 from qscout.core import ScheduledCircuit
 
-TKET_NAMES = {OpType.PhasedX: lambda q, alpha, beta: ('R', alpha, -beta), OpType.Rx: lambda q, theta: ('Rz', q, theta), OpType.XXPhase: lambda q1, q2, theta: ('MS', q1, q2, 0, theta)}
+import numpy as np
 
-def qscout_circuit_from_tket_circuit(tkcirc):
+from qscout import QSCOUTError
+
+TKET_NAMES = {OpType.PhasedX: lambda q, alpha, beta: ('R', q, alpha, -beta), OpType.Rz: lambda q, theta: ('Rz', q, theta), OpType.XXPhase: lambda q1, q2, theta: ('MS', q1, q2, 0, theta)}
+
+def qscout_circuit_from_tket_circuit(tkc, native_gates = None, names = None):
 	qreg_sizes = {}
 	for qb in tkc.qubits:
-		if len(qb.index != 1):
+		if len(qb.index) != 1:
 			qreg_sizes[qb.reg_name + '_'.join([str(x) for x in qb.index])] = 1
 		elif qb.reg_name in qreg_sizes:
 			qreg_sizes[qb.reg_name] = max(qreg_sizes[qb.reg_name], qb.index[0] + 1)
@@ -22,8 +26,8 @@ def qscout_circuit_from_tket_circuit(tkcirc):
 	baseregister = qsc.reg('baseregister', n)
 	offset = 0
 	for qreg in qreg_sizes:
-		qsc.map(qreg, qreg_sizes[qreg], baseregister, slice(offset, offset + qreg_sizes[qreg]))
-		offset += qreg.size
+		qsc.map(qreg, baseregister, slice(offset, offset + qreg_sizes[qreg]))
+		offset += qreg_sizes[qreg]
 	qsc.gate('prepare_all')
 	# We're going to divide the circuit up into blocks. Each block will contain every gate
 	# between one barrier statement and the next. If the circuit is output with no further
@@ -32,7 +36,7 @@ def qscout_circuit_from_tket_circuit(tkcirc):
 	# within each block as possible, while keeping the blocks themselves sequential.
 	block = qsc.block(parallel = None)
 	measure_accumulator = set()
-	for command in tkcirc:
+	for command in tkc:
 		block, measure_accumulator = convert_command(command, qsc, block, names, measure_accumulator, n)
 	if qsc.gates[-1][-1].name != 'measure_all':
 		qsc.gate('measure_all')
@@ -53,11 +57,11 @@ def convert_command(command, qsc, block, names, measure_accumulator, n, remaps =
 				measure_accumulator = set()
 			return block, measure_accumulator
 		else:
-			raise QSCOUTError("Cannot measure only qubits %s and not whole register." % reset_accumulator)
+			raise QSCOUTError("Cannot measure only qubits %s and not whole register." % measure_accumulator)
 			# measure_accumulator = set()
 	if op_type == OpType.Measure:
 		qb = command.qubits[0]
-		if len(qb.index != 1):
+		if len(qb.index) != 1:
 			target = qsc.registers[qb.reg_name + '_'.join([str(x) for x in qb.index])][0]
 		else:
 			target = qsc.registers[qb.reg_name][qb.index[0]]
@@ -76,12 +80,13 @@ def convert_command(command, qsc, block, names, measure_accumulator, n, remaps =
 		# TODO: Re-use macros when the same circuit block appears in multiple places.
 	elif op_type in names:
 		targets = command.qubits
-		for target in targets:
-			if len(qb.index != 1): # TODO: Figure out how to pass multi-index qubits in macros.
-				target = qsc.registers[qb.reg_name + '_'.join([str(x) for x in qb.index])][0]
+		qb_targets = []
+		for qb in targets:
+			if len(qb.index) != 1: # TODO: Figure out how to pass multi-index qubits in macros.
+				qb_targets.append(qsc.registers[qb.reg_name + '_'.join([str(x) for x in qb.index])][0])
 			else:
-				target = qsc.registers[qb.reg_name][remaps[qb.index[0]]]
-		block.append(qsc.build_gate(*names[instr[0].name](*targets, *[float(param) * np.pi for param in op.get_params()])))
+				qb_targets.append(qsc.registers[qb.reg_name][remaps[qb.index[0]]])
+		block.append(qsc.build_gate(*names[op_type](*qb_targets, *[float(param) * np.pi for param in command.op.get_params()])))
 	else:
-		raise QSCOUTError("Instruction %s not available on trapped ion hardware; try unrolling first." % instr[0].name)
+		raise QSCOUTError("Instruction %s not available on trapped ion hardware; try unrolling first." % op_type)
 	return block, measure_accumulator
