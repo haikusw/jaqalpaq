@@ -22,7 +22,7 @@ def p_program(p):
 	for hs in p[1]:
 		if hs[0] == 'let':
 			c.let(hs[1], resolve_id(hs[2], {}, False))
-		elif hs[0] == 'reg':
+		elif hs[0] == 'register':
 			c.reg(hs[1], resolve_id(hs[2], {}, False))
 		elif hs[0] == 'map':
 			if isinstance(hs[3], slice):
@@ -81,8 +81,8 @@ def p_header_statement(p):
 	p[0] = p[1]
 
 def p_register_statement(p):
-	'register_statement : REG array_declaration'
-	p[0] = ('reg', p[2][0], p[2][1])
+	'register_statement : REGISTER array_declaration'
+	p[0] = ('register', p[2][0], p[2][1])
 
 def p_map_statement(p):
 	'map_statement : MAP map_target map_source'

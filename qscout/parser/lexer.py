@@ -1,7 +1,7 @@
 import ply.lex as lex
 
-tokens = ('REG', 'MAP', 'LET', 'MACRO', 'LOOP', 'LBRACE', 'RBRACE', 'LANGLE', 'RANGLE', 'LBRACKET', 'RBRACKET', 'COLON', 'EOL', 'LINECOMMENT', 'BLOCKCOMMENT', 'INTEGER', 'FLOAT', 'IDENTIFIER', 'SEMICOLON', 'PIPE')
-reserved = {s: s.upper() for s in ('reg', 'map', 'let', 'macro', 'loop')}
+tokens = ('REGISTER', 'MAP', 'LET', 'MACRO', 'LOOP', 'LBRACE', 'RBRACE', 'LANGLE', 'RANGLE', 'LBRACKET', 'RBRACKET', 'COLON', 'EOL', 'LINECOMMENT', 'BLOCKCOMMENT', 'INTEGER', 'FLOAT', 'IDENTIFIER', 'SEMICOLON', 'PIPE')
+reserved = {s: s.upper() for s in ('register', 'map', 'let', 'macro', 'loop')}
 
 def t_LINECOMMENT(t):
 	r'//[^\n]*'

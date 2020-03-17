@@ -38,7 +38,7 @@ def generate_jaqal_program(circ):
 	return program
 
 def generate_jaqal_reg(register):
-	return "reg " + register.name + "[" + generate_jaqal_value(register.size) + "]\n"
+	return "register " + register.name + "[" + generate_jaqal_value(register.size) + "]\n"
 
 def generate_jaqal_let(const):
 	return "let " + const.name + " " + generate_jaqal_value(const.value) + "\n"

@@ -19,118 +19,117 @@ Rule 8     header_statement -> let_statement
 Rule 9     register_statement -> REG array_declaration
 Rule 10    map_statement -> MAP map_target map_source
 Rule 11    map_target -> IDENTIFIER
-Rule 12    map_target -> array_declaration
-Rule 13    map_source -> IDENTIFIER
-Rule 14    map_target -> array_slice
-Rule 15    let_statement -> LET IDENTIFIER number
-Rule 16    body_statements -> body_statement seq_sep body_statements
-Rule 17    body_statements -> body_statement
-Rule 18    body_statements -> body_statement seq_sep
-Rule 19    body_statement -> gate_statement
-Rule 20    body_statement -> macro_definition
-Rule 21    body_statement -> loop_statement
-Rule 22    body_statement -> gate_block
-Rule 23    gate_statement -> IDENTIFIER gate_arg_list
-Rule 24    gate_arg_list -> gate_arg gate_arg_list
-Rule 25    gate_arg_list -> <empty>
-Rule 26    gate_arg -> array_element
-Rule 27    gate_arg -> IDENTIFIER
-Rule 28    gate_arg -> number
-Rule 29    macro_definition -> MACRO IDENTIFIER gate_def_list gate_block
-Rule 30    gate_def_list -> IDENTIFIER gate_def_list
-Rule 31    gate_def_list -> <empty>
-Rule 32    loop_statement -> LOOP let_or_integer gate_block
-Rule 33    gate_block -> sequential_gate_block
-Rule 34    gate_block -> parallel_gate_block
-Rule 35    sequential_gate_block -> LBRACE sequential_statements RBRACE
-Rule 36    sequential_gate_block -> LBRACE EOL sequential_statements RBRACE
-Rule 37    parallel_gate_block -> LANGLE parallel_statements RANGLE
-Rule 38    parallel_gate_block -> LANGLE EOL parallel_statements RANGLE
-Rule 39    sequential_statements -> sequential_statement seq_sep sequential_statements
-Rule 40    sequential_statements -> sequential_statement
-Rule 41    sequential_statements -> sequential_statement seq_sep
-Rule 42    sequential_statement -> gate_statement
-Rule 43    sequential_statement -> parallel_gate_block
-Rule 44    sequential_statement -> loop_statement
-Rule 45    parallel_statements -> parallel_statement par_sep parallel_statements
-Rule 46    parallel_statements -> parallel_statement
-Rule 47    parallel_statements -> parallel_statement par_sep
-Rule 48    parallel_statement -> gate_statement
-Rule 49    parallel_statement -> sequential_gate_block
-Rule 50    array_declaration -> IDENTIFIER LBRACKET let_or_integer RBRACKET
-Rule 51    array_element -> IDENTIFIER LBRACKET let_or_integer RBRACKET
-Rule 52    array_slice -> IDENTIFIER LBRACKET slice_indexing RBRACKET
-Rule 53    slice_indexing -> let_or_integer
-Rule 54    slice_indexing -> let_or_integer COLON let_or_integer
-Rule 55    slice_indexing -> let_or_integer COLON let_or_integer COLON let_or_integer
-Rule 56    let_or_integer -> IDENTIFIER
-Rule 57    let_or_integer -> INTEGER
-Rule 58    seq_sep -> SEMICOLON
-Rule 59    seq_sep -> EOL
-Rule 60    seq_sep -> seq_sep EOL
-Rule 61    par_sep -> PIPE
-Rule 62    par_sep -> EOL
-Rule 63    par_sep -> par_sep EOL
-Rule 64    number -> INTEGER
-Rule 65    number -> FLOAT
+Rule 12    map_source -> IDENTIFIER
+Rule 13    map_source -> array_slice
+Rule 14    let_statement -> LET IDENTIFIER number
+Rule 15    body_statements -> body_statement seq_sep body_statements
+Rule 16    body_statements -> body_statement
+Rule 17    body_statements -> body_statement seq_sep
+Rule 18    body_statement -> gate_statement
+Rule 19    body_statement -> macro_definition
+Rule 20    body_statement -> loop_statement
+Rule 21    body_statement -> gate_block
+Rule 22    gate_statement -> IDENTIFIER gate_arg_list
+Rule 23    gate_arg_list -> gate_arg gate_arg_list
+Rule 24    gate_arg_list -> <empty>
+Rule 25    gate_arg -> array_element
+Rule 26    gate_arg -> IDENTIFIER
+Rule 27    gate_arg -> number
+Rule 28    macro_definition -> MACRO IDENTIFIER gate_def_list gate_block
+Rule 29    gate_def_list -> IDENTIFIER gate_def_list
+Rule 30    gate_def_list -> <empty>
+Rule 31    loop_statement -> LOOP let_or_integer gate_block
+Rule 32    gate_block -> sequential_gate_block
+Rule 33    gate_block -> parallel_gate_block
+Rule 34    sequential_gate_block -> LBRACE sequential_statements RBRACE
+Rule 35    sequential_gate_block -> LBRACE EOL sequential_statements RBRACE
+Rule 36    parallel_gate_block -> LANGLE parallel_statements RANGLE
+Rule 37    parallel_gate_block -> LANGLE EOL parallel_statements RANGLE
+Rule 38    sequential_statements -> sequential_statement seq_sep sequential_statements
+Rule 39    sequential_statements -> sequential_statement
+Rule 40    sequential_statements -> sequential_statement seq_sep
+Rule 41    sequential_statement -> gate_statement
+Rule 42    sequential_statement -> parallel_gate_block
+Rule 43    sequential_statement -> loop_statement
+Rule 44    parallel_statements -> parallel_statement par_sep parallel_statements
+Rule 45    parallel_statements -> parallel_statement
+Rule 46    parallel_statements -> parallel_statement par_sep
+Rule 47    parallel_statement -> gate_statement
+Rule 48    parallel_statement -> sequential_gate_block
+Rule 49    array_declaration -> IDENTIFIER LBRACKET let_or_integer RBRACKET
+Rule 50    array_element -> IDENTIFIER LBRACKET let_or_integer RBRACKET
+Rule 51    array_slice -> IDENTIFIER LBRACKET slice_indexing RBRACKET
+Rule 52    slice_indexing -> let_or_integer
+Rule 53    slice_indexing -> let_or_integer COLON let_or_integer
+Rule 54    slice_indexing -> let_or_integer COLON let_or_integer COLON let_or_integer
+Rule 55    let_or_integer -> IDENTIFIER
+Rule 56    let_or_integer -> INTEGER
+Rule 57    seq_sep -> SEMICOLON
+Rule 58    seq_sep -> EOL
+Rule 59    seq_sep -> seq_sep EOL
+Rule 60    par_sep -> PIPE
+Rule 61    par_sep -> EOL
+Rule 62    par_sep -> par_sep EOL
+Rule 63    number -> INTEGER
+Rule 64    number -> FLOAT
 
 Terminals, with rules where they appear
 
 BLOCKCOMMENT         : 
-COLON                : 54 55 55
-EOL                  : 2 36 38 59 60 62 63
-FLOAT                : 65
-IDENTIFIER           : 11 13 15 23 27 29 30 50 51 52 56
-INTEGER              : 57 64
-LANGLE               : 37 38
-LBRACE               : 35 36
-LBRACKET             : 50 51 52
-LET                  : 15
+COLON                : 53 54 54
+EOL                  : 2 35 37 58 59 61 62
+FLOAT                : 64
+IDENTIFIER           : 11 12 14 22 26 28 29 49 50 51 55
+INTEGER              : 56 63
+LANGLE               : 36 37
+LBRACE               : 34 35
+LBRACKET             : 49 50 51
+LET                  : 14
 LINECOMMENT          : 
-LOOP                 : 32
-MACRO                : 29
+LOOP                 : 31
+MACRO                : 28
 MAP                  : 10
-PIPE                 : 61
-RANGLE               : 37 38
-RBRACE               : 35 36
-RBRACKET             : 50 51 52
+PIPE                 : 60
+RANGLE               : 36 37
+RBRACE               : 34 35
+RBRACKET             : 49 50 51
 REG                  : 9
-SEMICOLON            : 58
+SEMICOLON            : 57
 error                : 
 
 Nonterminals, with rules where they appear
 
-array_declaration    : 9 12
-array_element        : 26
-array_slice          : 14
-body_statement       : 16 17 18
-body_statements      : 1 16
-gate_arg             : 24
-gate_arg_list        : 23 24
-gate_block           : 22 29 32
-gate_def_list        : 29 30
-gate_statement       : 19 42 48
+array_declaration    : 9
+array_element        : 25
+array_slice          : 13
+body_statement       : 15 16 17
+body_statements      : 1 15
+gate_arg             : 23
+gate_arg_list        : 22 23
+gate_block           : 21 28 31
+gate_def_list        : 28 29
+gate_statement       : 18 41 47
 header_statement     : 3 4 5
 header_statements    : 1 3
-let_or_integer       : 32 50 51 53 54 54 55 55 55
+let_or_integer       : 31 49 50 52 53 53 54 54 54
 let_statement        : 8
-loop_statement       : 21 44
-macro_definition     : 20
+loop_statement       : 20 43
+macro_definition     : 19
 map_source           : 10
 map_statement        : 7
 map_target           : 10
-number               : 15 28
-par_sep              : 45 47 63
-parallel_gate_block  : 34 43
-parallel_statement   : 45 46 47
-parallel_statements  : 37 38 45
+number               : 14 27
+par_sep              : 44 46 62
+parallel_gate_block  : 33 42
+parallel_statement   : 44 45 46
+parallel_statements  : 36 37 44
 program              : 2 0
 register_statement   : 6
-seq_sep              : 3 5 16 18 39 41 60
-sequential_gate_block : 33 49
-sequential_statement : 39 40 41
-sequential_statements : 35 36 39
-slice_indexing       : 52
+seq_sep              : 3 5 15 17 38 40 59
+sequential_gate_block : 32 48
+sequential_statement : 38 39 40
+sequential_statements : 34 35 38
+slice_indexing       : 51
 
 Parsing method: LALR
 
@@ -147,7 +146,7 @@ state 0
     (8) header_statement -> . let_statement
     (9) register_statement -> . REG array_declaration
     (10) map_statement -> . MAP map_target map_source
-    (15) let_statement -> . LET IDENTIFIER number
+    (14) let_statement -> . LET IDENTIFIER number
 
     EOL             shift and go to state 3
     REG             shift and go to state 8
@@ -170,22 +169,22 @@ state 1
 state 2
 
     (1) program -> header_statements . body_statements
-    (16) body_statements -> . body_statement seq_sep body_statements
-    (17) body_statements -> . body_statement
-    (18) body_statements -> . body_statement seq_sep
-    (19) body_statement -> . gate_statement
-    (20) body_statement -> . macro_definition
-    (21) body_statement -> . loop_statement
-    (22) body_statement -> . gate_block
-    (23) gate_statement -> . IDENTIFIER gate_arg_list
-    (29) macro_definition -> . MACRO IDENTIFIER gate_def_list gate_block
-    (32) loop_statement -> . LOOP let_or_integer gate_block
-    (33) gate_block -> . sequential_gate_block
-    (34) gate_block -> . parallel_gate_block
-    (35) sequential_gate_block -> . LBRACE sequential_statements RBRACE
-    (36) sequential_gate_block -> . LBRACE EOL sequential_statements RBRACE
-    (37) parallel_gate_block -> . LANGLE parallel_statements RANGLE
-    (38) parallel_gate_block -> . LANGLE EOL parallel_statements RANGLE
+    (15) body_statements -> . body_statement seq_sep body_statements
+    (16) body_statements -> . body_statement
+    (17) body_statements -> . body_statement seq_sep
+    (18) body_statement -> . gate_statement
+    (19) body_statement -> . macro_definition
+    (20) body_statement -> . loop_statement
+    (21) body_statement -> . gate_block
+    (22) gate_statement -> . IDENTIFIER gate_arg_list
+    (28) macro_definition -> . MACRO IDENTIFIER gate_def_list gate_block
+    (31) loop_statement -> . LOOP let_or_integer gate_block
+    (32) gate_block -> . sequential_gate_block
+    (33) gate_block -> . parallel_gate_block
+    (34) sequential_gate_block -> . LBRACE sequential_statements RBRACE
+    (35) sequential_gate_block -> . LBRACE EOL sequential_statements RBRACE
+    (36) parallel_gate_block -> . LANGLE parallel_statements RANGLE
+    (37) parallel_gate_block -> . LANGLE EOL parallel_statements RANGLE
 
     IDENTIFIER      shift and go to state 17
     MACRO           shift and go to state 18
@@ -215,7 +214,7 @@ state 3
     (8) header_statement -> . let_statement
     (9) register_statement -> . REG array_declaration
     (10) map_statement -> . MAP map_target map_source
-    (15) let_statement -> . LET IDENTIFIER number
+    (14) let_statement -> . LET IDENTIFIER number
 
     EOL             shift and go to state 3
     REG             shift and go to state 8
@@ -234,9 +233,9 @@ state 4
     (3) header_statements -> header_statement . seq_sep header_statements
     (4) header_statements -> header_statement .
     (5) header_statements -> header_statement . seq_sep
-    (58) seq_sep -> . SEMICOLON
-    (59) seq_sep -> . EOL
-    (60) seq_sep -> . seq_sep EOL
+    (57) seq_sep -> . SEMICOLON
+    (58) seq_sep -> . EOL
+    (59) seq_sep -> . seq_sep EOL
 
     IDENTIFIER      reduce using rule 4 (header_statements -> header_statement .)
     MACRO           reduce using rule 4 (header_statements -> header_statement .)
@@ -290,7 +289,7 @@ state 7
 state 8
 
     (9) register_statement -> REG . array_declaration
-    (50) array_declaration -> . IDENTIFIER LBRACKET let_or_integer RBRACKET
+    (49) array_declaration -> . IDENTIFIER LBRACKET let_or_integer RBRACKET
 
     IDENTIFIER      shift and go to state 29
 
@@ -300,22 +299,16 @@ state 9
 
     (10) map_statement -> MAP . map_target map_source
     (11) map_target -> . IDENTIFIER
-    (12) map_target -> . array_declaration
-    (14) map_target -> . array_slice
-    (50) array_declaration -> . IDENTIFIER LBRACKET let_or_integer RBRACKET
-    (52) array_slice -> . IDENTIFIER LBRACKET slice_indexing RBRACKET
 
     IDENTIFIER      shift and go to state 31
 
     map_target                     shift and go to state 30
-    array_declaration              shift and go to state 32
-    array_slice                    shift and go to state 33
 
 state 10
 
-    (15) let_statement -> LET . IDENTIFIER number
+    (14) let_statement -> LET . IDENTIFIER number
 
-    IDENTIFIER      shift and go to state 34
+    IDENTIFIER      shift and go to state 32
 
 
 state 11
@@ -327,167 +320,167 @@ state 11
 
 state 12
 
-    (16) body_statements -> body_statement . seq_sep body_statements
-    (17) body_statements -> body_statement .
-    (18) body_statements -> body_statement . seq_sep
-    (58) seq_sep -> . SEMICOLON
-    (59) seq_sep -> . EOL
-    (60) seq_sep -> . seq_sep EOL
+    (15) body_statements -> body_statement . seq_sep body_statements
+    (16) body_statements -> body_statement .
+    (17) body_statements -> body_statement . seq_sep
+    (57) seq_sep -> . SEMICOLON
+    (58) seq_sep -> . EOL
+    (59) seq_sep -> . seq_sep EOL
 
-    $end            reduce using rule 17 (body_statements -> body_statement .)
+    $end            reduce using rule 16 (body_statements -> body_statement .)
     SEMICOLON       shift and go to state 26
     EOL             shift and go to state 27
 
-    seq_sep                        shift and go to state 35
+    seq_sep                        shift and go to state 33
 
 state 13
 
-    (19) body_statement -> gate_statement .
+    (18) body_statement -> gate_statement .
 
-    SEMICOLON       reduce using rule 19 (body_statement -> gate_statement .)
-    EOL             reduce using rule 19 (body_statement -> gate_statement .)
-    $end            reduce using rule 19 (body_statement -> gate_statement .)
+    SEMICOLON       reduce using rule 18 (body_statement -> gate_statement .)
+    EOL             reduce using rule 18 (body_statement -> gate_statement .)
+    $end            reduce using rule 18 (body_statement -> gate_statement .)
 
 
 state 14
 
-    (20) body_statement -> macro_definition .
+    (19) body_statement -> macro_definition .
 
-    SEMICOLON       reduce using rule 20 (body_statement -> macro_definition .)
-    EOL             reduce using rule 20 (body_statement -> macro_definition .)
-    $end            reduce using rule 20 (body_statement -> macro_definition .)
+    SEMICOLON       reduce using rule 19 (body_statement -> macro_definition .)
+    EOL             reduce using rule 19 (body_statement -> macro_definition .)
+    $end            reduce using rule 19 (body_statement -> macro_definition .)
 
 
 state 15
 
-    (21) body_statement -> loop_statement .
+    (20) body_statement -> loop_statement .
 
-    SEMICOLON       reduce using rule 21 (body_statement -> loop_statement .)
-    EOL             reduce using rule 21 (body_statement -> loop_statement .)
-    $end            reduce using rule 21 (body_statement -> loop_statement .)
+    SEMICOLON       reduce using rule 20 (body_statement -> loop_statement .)
+    EOL             reduce using rule 20 (body_statement -> loop_statement .)
+    $end            reduce using rule 20 (body_statement -> loop_statement .)
 
 
 state 16
 
-    (22) body_statement -> gate_block .
+    (21) body_statement -> gate_block .
 
-    SEMICOLON       reduce using rule 22 (body_statement -> gate_block .)
-    EOL             reduce using rule 22 (body_statement -> gate_block .)
-    $end            reduce using rule 22 (body_statement -> gate_block .)
+    SEMICOLON       reduce using rule 21 (body_statement -> gate_block .)
+    EOL             reduce using rule 21 (body_statement -> gate_block .)
+    $end            reduce using rule 21 (body_statement -> gate_block .)
 
 
 state 17
 
-    (23) gate_statement -> IDENTIFIER . gate_arg_list
-    (24) gate_arg_list -> . gate_arg gate_arg_list
-    (25) gate_arg_list -> .
-    (26) gate_arg -> . array_element
-    (27) gate_arg -> . IDENTIFIER
-    (28) gate_arg -> . number
-    (51) array_element -> . IDENTIFIER LBRACKET let_or_integer RBRACKET
-    (64) number -> . INTEGER
-    (65) number -> . FLOAT
+    (22) gate_statement -> IDENTIFIER . gate_arg_list
+    (23) gate_arg_list -> . gate_arg gate_arg_list
+    (24) gate_arg_list -> .
+    (25) gate_arg -> . array_element
+    (26) gate_arg -> . IDENTIFIER
+    (27) gate_arg -> . number
+    (50) array_element -> . IDENTIFIER LBRACKET let_or_integer RBRACKET
+    (63) number -> . INTEGER
+    (64) number -> . FLOAT
 
-    SEMICOLON       reduce using rule 25 (gate_arg_list -> .)
-    EOL             reduce using rule 25 (gate_arg_list -> .)
-    $end            reduce using rule 25 (gate_arg_list -> .)
-    RBRACE          reduce using rule 25 (gate_arg_list -> .)
-    PIPE            reduce using rule 25 (gate_arg_list -> .)
-    RANGLE          reduce using rule 25 (gate_arg_list -> .)
-    IDENTIFIER      shift and go to state 36
-    INTEGER         shift and go to state 41
-    FLOAT           shift and go to state 42
+    SEMICOLON       reduce using rule 24 (gate_arg_list -> .)
+    EOL             reduce using rule 24 (gate_arg_list -> .)
+    $end            reduce using rule 24 (gate_arg_list -> .)
+    RBRACE          reduce using rule 24 (gate_arg_list -> .)
+    PIPE            reduce using rule 24 (gate_arg_list -> .)
+    RANGLE          reduce using rule 24 (gate_arg_list -> .)
+    IDENTIFIER      shift and go to state 34
+    INTEGER         shift and go to state 39
+    FLOAT           shift and go to state 40
 
-    gate_arg_list                  shift and go to state 37
-    gate_arg                       shift and go to state 38
-    array_element                  shift and go to state 39
-    number                         shift and go to state 40
+    gate_arg_list                  shift and go to state 35
+    gate_arg                       shift and go to state 36
+    array_element                  shift and go to state 37
+    number                         shift and go to state 38
 
 state 18
 
-    (29) macro_definition -> MACRO . IDENTIFIER gate_def_list gate_block
+    (28) macro_definition -> MACRO . IDENTIFIER gate_def_list gate_block
 
-    IDENTIFIER      shift and go to state 43
+    IDENTIFIER      shift and go to state 41
 
 
 state 19
 
-    (32) loop_statement -> LOOP . let_or_integer gate_block
-    (56) let_or_integer -> . IDENTIFIER
-    (57) let_or_integer -> . INTEGER
+    (31) loop_statement -> LOOP . let_or_integer gate_block
+    (55) let_or_integer -> . IDENTIFIER
+    (56) let_or_integer -> . INTEGER
 
-    IDENTIFIER      shift and go to state 45
-    INTEGER         shift and go to state 46
+    IDENTIFIER      shift and go to state 43
+    INTEGER         shift and go to state 44
 
-    let_or_integer                 shift and go to state 44
+    let_or_integer                 shift and go to state 42
 
 state 20
 
-    (33) gate_block -> sequential_gate_block .
+    (32) gate_block -> sequential_gate_block .
 
-    SEMICOLON       reduce using rule 33 (gate_block -> sequential_gate_block .)
-    EOL             reduce using rule 33 (gate_block -> sequential_gate_block .)
-    $end            reduce using rule 33 (gate_block -> sequential_gate_block .)
-    RBRACE          reduce using rule 33 (gate_block -> sequential_gate_block .)
+    SEMICOLON       reduce using rule 32 (gate_block -> sequential_gate_block .)
+    EOL             reduce using rule 32 (gate_block -> sequential_gate_block .)
+    $end            reduce using rule 32 (gate_block -> sequential_gate_block .)
+    RBRACE          reduce using rule 32 (gate_block -> sequential_gate_block .)
 
 
 state 21
 
-    (34) gate_block -> parallel_gate_block .
+    (33) gate_block -> parallel_gate_block .
 
-    SEMICOLON       reduce using rule 34 (gate_block -> parallel_gate_block .)
-    EOL             reduce using rule 34 (gate_block -> parallel_gate_block .)
-    $end            reduce using rule 34 (gate_block -> parallel_gate_block .)
-    RBRACE          reduce using rule 34 (gate_block -> parallel_gate_block .)
+    SEMICOLON       reduce using rule 33 (gate_block -> parallel_gate_block .)
+    EOL             reduce using rule 33 (gate_block -> parallel_gate_block .)
+    $end            reduce using rule 33 (gate_block -> parallel_gate_block .)
+    RBRACE          reduce using rule 33 (gate_block -> parallel_gate_block .)
 
 
 state 22
 
-    (35) sequential_gate_block -> LBRACE . sequential_statements RBRACE
-    (36) sequential_gate_block -> LBRACE . EOL sequential_statements RBRACE
-    (39) sequential_statements -> . sequential_statement seq_sep sequential_statements
-    (40) sequential_statements -> . sequential_statement
-    (41) sequential_statements -> . sequential_statement seq_sep
-    (42) sequential_statement -> . gate_statement
-    (43) sequential_statement -> . parallel_gate_block
-    (44) sequential_statement -> . loop_statement
-    (23) gate_statement -> . IDENTIFIER gate_arg_list
-    (37) parallel_gate_block -> . LANGLE parallel_statements RANGLE
-    (38) parallel_gate_block -> . LANGLE EOL parallel_statements RANGLE
-    (32) loop_statement -> . LOOP let_or_integer gate_block
+    (34) sequential_gate_block -> LBRACE . sequential_statements RBRACE
+    (35) sequential_gate_block -> LBRACE . EOL sequential_statements RBRACE
+    (38) sequential_statements -> . sequential_statement seq_sep sequential_statements
+    (39) sequential_statements -> . sequential_statement
+    (40) sequential_statements -> . sequential_statement seq_sep
+    (41) sequential_statement -> . gate_statement
+    (42) sequential_statement -> . parallel_gate_block
+    (43) sequential_statement -> . loop_statement
+    (22) gate_statement -> . IDENTIFIER gate_arg_list
+    (36) parallel_gate_block -> . LANGLE parallel_statements RANGLE
+    (37) parallel_gate_block -> . LANGLE EOL parallel_statements RANGLE
+    (31) loop_statement -> . LOOP let_or_integer gate_block
 
-    EOL             shift and go to state 48
+    EOL             shift and go to state 46
     IDENTIFIER      shift and go to state 17
     LANGLE          shift and go to state 23
     LOOP            shift and go to state 19
 
-    sequential_statements          shift and go to state 47
-    sequential_statement           shift and go to state 49
-    gate_statement                 shift and go to state 50
-    parallel_gate_block            shift and go to state 51
-    loop_statement                 shift and go to state 52
+    sequential_statements          shift and go to state 45
+    sequential_statement           shift and go to state 47
+    gate_statement                 shift and go to state 48
+    parallel_gate_block            shift and go to state 49
+    loop_statement                 shift and go to state 50
 
 state 23
 
-    (37) parallel_gate_block -> LANGLE . parallel_statements RANGLE
-    (38) parallel_gate_block -> LANGLE . EOL parallel_statements RANGLE
-    (45) parallel_statements -> . parallel_statement par_sep parallel_statements
-    (46) parallel_statements -> . parallel_statement
-    (47) parallel_statements -> . parallel_statement par_sep
-    (48) parallel_statement -> . gate_statement
-    (49) parallel_statement -> . sequential_gate_block
-    (23) gate_statement -> . IDENTIFIER gate_arg_list
-    (35) sequential_gate_block -> . LBRACE sequential_statements RBRACE
-    (36) sequential_gate_block -> . LBRACE EOL sequential_statements RBRACE
+    (36) parallel_gate_block -> LANGLE . parallel_statements RANGLE
+    (37) parallel_gate_block -> LANGLE . EOL parallel_statements RANGLE
+    (44) parallel_statements -> . parallel_statement par_sep parallel_statements
+    (45) parallel_statements -> . parallel_statement
+    (46) parallel_statements -> . parallel_statement par_sep
+    (47) parallel_statement -> . gate_statement
+    (48) parallel_statement -> . sequential_gate_block
+    (22) gate_statement -> . IDENTIFIER gate_arg_list
+    (34) sequential_gate_block -> . LBRACE sequential_statements RBRACE
+    (35) sequential_gate_block -> . LBRACE EOL sequential_statements RBRACE
 
-    EOL             shift and go to state 54
+    EOL             shift and go to state 52
     IDENTIFIER      shift and go to state 17
     LBRACE          shift and go to state 22
 
-    parallel_statements            shift and go to state 53
-    parallel_statement             shift and go to state 55
-    gate_statement                 shift and go to state 56
-    sequential_gate_block          shift and go to state 57
+    parallel_statements            shift and go to state 51
+    parallel_statement             shift and go to state 53
+    gate_statement                 shift and go to state 54
+    sequential_gate_block          shift and go to state 55
 
 state 24
 
@@ -500,7 +493,7 @@ state 25
 
     (3) header_statements -> header_statement seq_sep . header_statements
     (5) header_statements -> header_statement seq_sep .
-    (60) seq_sep -> seq_sep . EOL
+    (59) seq_sep -> seq_sep . EOL
     (3) header_statements -> . header_statement seq_sep header_statements
     (4) header_statements -> . header_statement
     (5) header_statements -> . header_statement seq_sep
@@ -509,56 +502,56 @@ state 25
     (8) header_statement -> . let_statement
     (9) register_statement -> . REG array_declaration
     (10) map_statement -> . MAP map_target map_source
-    (15) let_statement -> . LET IDENTIFIER number
+    (14) let_statement -> . LET IDENTIFIER number
 
     IDENTIFIER      reduce using rule 5 (header_statements -> header_statement seq_sep .)
     MACRO           reduce using rule 5 (header_statements -> header_statement seq_sep .)
     LOOP            reduce using rule 5 (header_statements -> header_statement seq_sep .)
     LBRACE          reduce using rule 5 (header_statements -> header_statement seq_sep .)
     LANGLE          reduce using rule 5 (header_statements -> header_statement seq_sep .)
-    EOL             shift and go to state 59
+    EOL             shift and go to state 57
     REG             shift and go to state 8
     MAP             shift and go to state 9
     LET             shift and go to state 10
 
     header_statement               shift and go to state 4
-    header_statements              shift and go to state 58
+    header_statements              shift and go to state 56
     register_statement             shift and go to state 5
     map_statement                  shift and go to state 6
     let_statement                  shift and go to state 7
 
 state 26
 
-    (58) seq_sep -> SEMICOLON .
+    (57) seq_sep -> SEMICOLON .
 
-    EOL             reduce using rule 58 (seq_sep -> SEMICOLON .)
-    REG             reduce using rule 58 (seq_sep -> SEMICOLON .)
-    MAP             reduce using rule 58 (seq_sep -> SEMICOLON .)
-    LET             reduce using rule 58 (seq_sep -> SEMICOLON .)
-    IDENTIFIER      reduce using rule 58 (seq_sep -> SEMICOLON .)
-    MACRO           reduce using rule 58 (seq_sep -> SEMICOLON .)
-    LOOP            reduce using rule 58 (seq_sep -> SEMICOLON .)
-    LBRACE          reduce using rule 58 (seq_sep -> SEMICOLON .)
-    LANGLE          reduce using rule 58 (seq_sep -> SEMICOLON .)
-    $end            reduce using rule 58 (seq_sep -> SEMICOLON .)
-    RBRACE          reduce using rule 58 (seq_sep -> SEMICOLON .)
+    EOL             reduce using rule 57 (seq_sep -> SEMICOLON .)
+    REG             reduce using rule 57 (seq_sep -> SEMICOLON .)
+    MAP             reduce using rule 57 (seq_sep -> SEMICOLON .)
+    LET             reduce using rule 57 (seq_sep -> SEMICOLON .)
+    IDENTIFIER      reduce using rule 57 (seq_sep -> SEMICOLON .)
+    MACRO           reduce using rule 57 (seq_sep -> SEMICOLON .)
+    LOOP            reduce using rule 57 (seq_sep -> SEMICOLON .)
+    LBRACE          reduce using rule 57 (seq_sep -> SEMICOLON .)
+    LANGLE          reduce using rule 57 (seq_sep -> SEMICOLON .)
+    $end            reduce using rule 57 (seq_sep -> SEMICOLON .)
+    RBRACE          reduce using rule 57 (seq_sep -> SEMICOLON .)
 
 
 state 27
 
-    (59) seq_sep -> EOL .
+    (58) seq_sep -> EOL .
 
-    EOL             reduce using rule 59 (seq_sep -> EOL .)
-    REG             reduce using rule 59 (seq_sep -> EOL .)
-    MAP             reduce using rule 59 (seq_sep -> EOL .)
-    LET             reduce using rule 59 (seq_sep -> EOL .)
-    IDENTIFIER      reduce using rule 59 (seq_sep -> EOL .)
-    MACRO           reduce using rule 59 (seq_sep -> EOL .)
-    LOOP            reduce using rule 59 (seq_sep -> EOL .)
-    LBRACE          reduce using rule 59 (seq_sep -> EOL .)
-    LANGLE          reduce using rule 59 (seq_sep -> EOL .)
-    $end            reduce using rule 59 (seq_sep -> EOL .)
-    RBRACE          reduce using rule 59 (seq_sep -> EOL .)
+    EOL             reduce using rule 58 (seq_sep -> EOL .)
+    REG             reduce using rule 58 (seq_sep -> EOL .)
+    MAP             reduce using rule 58 (seq_sep -> EOL .)
+    LET             reduce using rule 58 (seq_sep -> EOL .)
+    IDENTIFIER      reduce using rule 58 (seq_sep -> EOL .)
+    MACRO           reduce using rule 58 (seq_sep -> EOL .)
+    LOOP            reduce using rule 58 (seq_sep -> EOL .)
+    LBRACE          reduce using rule 58 (seq_sep -> EOL .)
+    LANGLE          reduce using rule 58 (seq_sep -> EOL .)
+    $end            reduce using rule 58 (seq_sep -> EOL .)
+    RBRACE          reduce using rule 58 (seq_sep -> EOL .)
 
 
 state 28
@@ -576,79 +569,65 @@ state 28
 
 state 29
 
-    (50) array_declaration -> IDENTIFIER . LBRACKET let_or_integer RBRACKET
+    (49) array_declaration -> IDENTIFIER . LBRACKET let_or_integer RBRACKET
 
-    LBRACKET        shift and go to state 60
+    LBRACKET        shift and go to state 58
 
 
 state 30
 
     (10) map_statement -> MAP map_target . map_source
-    (13) map_source -> . IDENTIFIER
+    (12) map_source -> . IDENTIFIER
+    (13) map_source -> . array_slice
+    (51) array_slice -> . IDENTIFIER LBRACKET slice_indexing RBRACKET
 
-    IDENTIFIER      shift and go to state 62
+    IDENTIFIER      shift and go to state 60
 
-    map_source                     shift and go to state 61
+    map_source                     shift and go to state 59
+    array_slice                    shift and go to state 61
 
 state 31
 
     (11) map_target -> IDENTIFIER .
-    (50) array_declaration -> IDENTIFIER . LBRACKET let_or_integer RBRACKET
-    (52) array_slice -> IDENTIFIER . LBRACKET slice_indexing RBRACKET
 
     IDENTIFIER      reduce using rule 11 (map_target -> IDENTIFIER .)
-    LBRACKET        shift and go to state 63
 
 
 state 32
 
-    (12) map_target -> array_declaration .
+    (14) let_statement -> LET IDENTIFIER . number
+    (63) number -> . INTEGER
+    (64) number -> . FLOAT
 
-    IDENTIFIER      reduce using rule 12 (map_target -> array_declaration .)
+    INTEGER         shift and go to state 39
+    FLOAT           shift and go to state 40
 
+    number                         shift and go to state 62
 
 state 33
 
-    (14) map_target -> array_slice .
+    (15) body_statements -> body_statement seq_sep . body_statements
+    (17) body_statements -> body_statement seq_sep .
+    (59) seq_sep -> seq_sep . EOL
+    (15) body_statements -> . body_statement seq_sep body_statements
+    (16) body_statements -> . body_statement
+    (17) body_statements -> . body_statement seq_sep
+    (18) body_statement -> . gate_statement
+    (19) body_statement -> . macro_definition
+    (20) body_statement -> . loop_statement
+    (21) body_statement -> . gate_block
+    (22) gate_statement -> . IDENTIFIER gate_arg_list
+    (28) macro_definition -> . MACRO IDENTIFIER gate_def_list gate_block
+    (31) loop_statement -> . LOOP let_or_integer gate_block
+    (32) gate_block -> . sequential_gate_block
+    (33) gate_block -> . parallel_gate_block
+    (34) sequential_gate_block -> . LBRACE sequential_statements RBRACE
+    (35) sequential_gate_block -> . LBRACE EOL sequential_statements RBRACE
+    (36) parallel_gate_block -> . LANGLE parallel_statements RANGLE
+    (37) parallel_gate_block -> . LANGLE EOL parallel_statements RANGLE
 
-    IDENTIFIER      reduce using rule 14 (map_target -> array_slice .)
-
-
-state 34
-
-    (15) let_statement -> LET IDENTIFIER . number
-    (64) number -> . INTEGER
-    (65) number -> . FLOAT
-
-    INTEGER         shift and go to state 41
-    FLOAT           shift and go to state 42
-
-    number                         shift and go to state 64
-
-state 35
-
-    (16) body_statements -> body_statement seq_sep . body_statements
-    (18) body_statements -> body_statement seq_sep .
-    (60) seq_sep -> seq_sep . EOL
-    (16) body_statements -> . body_statement seq_sep body_statements
-    (17) body_statements -> . body_statement
-    (18) body_statements -> . body_statement seq_sep
-    (19) body_statement -> . gate_statement
-    (20) body_statement -> . macro_definition
-    (21) body_statement -> . loop_statement
-    (22) body_statement -> . gate_block
-    (23) gate_statement -> . IDENTIFIER gate_arg_list
-    (29) macro_definition -> . MACRO IDENTIFIER gate_def_list gate_block
-    (32) loop_statement -> . LOOP let_or_integer gate_block
-    (33) gate_block -> . sequential_gate_block
-    (34) gate_block -> . parallel_gate_block
-    (35) sequential_gate_block -> . LBRACE sequential_statements RBRACE
-    (36) sequential_gate_block -> . LBRACE EOL sequential_statements RBRACE
-    (37) parallel_gate_block -> . LANGLE parallel_statements RANGLE
-    (38) parallel_gate_block -> . LANGLE EOL parallel_statements RANGLE
-
-    $end            reduce using rule 18 (body_statements -> body_statement seq_sep .)
-    EOL             shift and go to state 59
+    $end            reduce using rule 17 (body_statements -> body_statement seq_sep .)
+    EOL             shift and go to state 57
     IDENTIFIER      shift and go to state 17
     MACRO           shift and go to state 18
     LOOP            shift and go to state 19
@@ -656,7 +635,7 @@ state 35
     LANGLE          shift and go to state 23
 
     body_statement                 shift and go to state 12
-    body_statements                shift and go to state 65
+    body_statements                shift and go to state 63
     gate_statement                 shift and go to state 13
     macro_definition               shift and go to state 14
     loop_statement                 shift and go to state 15
@@ -664,313 +643,313 @@ state 35
     sequential_gate_block          shift and go to state 20
     parallel_gate_block            shift and go to state 21
 
+state 34
+
+    (26) gate_arg -> IDENTIFIER .
+    (50) array_element -> IDENTIFIER . LBRACKET let_or_integer RBRACKET
+
+    IDENTIFIER      reduce using rule 26 (gate_arg -> IDENTIFIER .)
+    INTEGER         reduce using rule 26 (gate_arg -> IDENTIFIER .)
+    FLOAT           reduce using rule 26 (gate_arg -> IDENTIFIER .)
+    SEMICOLON       reduce using rule 26 (gate_arg -> IDENTIFIER .)
+    EOL             reduce using rule 26 (gate_arg -> IDENTIFIER .)
+    $end            reduce using rule 26 (gate_arg -> IDENTIFIER .)
+    RBRACE          reduce using rule 26 (gate_arg -> IDENTIFIER .)
+    PIPE            reduce using rule 26 (gate_arg -> IDENTIFIER .)
+    RANGLE          reduce using rule 26 (gate_arg -> IDENTIFIER .)
+    LBRACKET        shift and go to state 64
+
+
+state 35
+
+    (22) gate_statement -> IDENTIFIER gate_arg_list .
+
+    SEMICOLON       reduce using rule 22 (gate_statement -> IDENTIFIER gate_arg_list .)
+    EOL             reduce using rule 22 (gate_statement -> IDENTIFIER gate_arg_list .)
+    $end            reduce using rule 22 (gate_statement -> IDENTIFIER gate_arg_list .)
+    RBRACE          reduce using rule 22 (gate_statement -> IDENTIFIER gate_arg_list .)
+    PIPE            reduce using rule 22 (gate_statement -> IDENTIFIER gate_arg_list .)
+    RANGLE          reduce using rule 22 (gate_statement -> IDENTIFIER gate_arg_list .)
+
+
 state 36
 
-    (27) gate_arg -> IDENTIFIER .
-    (51) array_element -> IDENTIFIER . LBRACKET let_or_integer RBRACKET
+    (23) gate_arg_list -> gate_arg . gate_arg_list
+    (23) gate_arg_list -> . gate_arg gate_arg_list
+    (24) gate_arg_list -> .
+    (25) gate_arg -> . array_element
+    (26) gate_arg -> . IDENTIFIER
+    (27) gate_arg -> . number
+    (50) array_element -> . IDENTIFIER LBRACKET let_or_integer RBRACKET
+    (63) number -> . INTEGER
+    (64) number -> . FLOAT
 
-    IDENTIFIER      reduce using rule 27 (gate_arg -> IDENTIFIER .)
-    INTEGER         reduce using rule 27 (gate_arg -> IDENTIFIER .)
-    FLOAT           reduce using rule 27 (gate_arg -> IDENTIFIER .)
-    SEMICOLON       reduce using rule 27 (gate_arg -> IDENTIFIER .)
-    EOL             reduce using rule 27 (gate_arg -> IDENTIFIER .)
-    $end            reduce using rule 27 (gate_arg -> IDENTIFIER .)
-    RBRACE          reduce using rule 27 (gate_arg -> IDENTIFIER .)
-    PIPE            reduce using rule 27 (gate_arg -> IDENTIFIER .)
-    RANGLE          reduce using rule 27 (gate_arg -> IDENTIFIER .)
-    LBRACKET        shift and go to state 66
+    SEMICOLON       reduce using rule 24 (gate_arg_list -> .)
+    EOL             reduce using rule 24 (gate_arg_list -> .)
+    $end            reduce using rule 24 (gate_arg_list -> .)
+    RBRACE          reduce using rule 24 (gate_arg_list -> .)
+    PIPE            reduce using rule 24 (gate_arg_list -> .)
+    RANGLE          reduce using rule 24 (gate_arg_list -> .)
+    IDENTIFIER      shift and go to state 34
+    INTEGER         shift and go to state 39
+    FLOAT           shift and go to state 40
 
+    gate_arg                       shift and go to state 36
+    gate_arg_list                  shift and go to state 65
+    array_element                  shift and go to state 37
+    number                         shift and go to state 38
 
 state 37
 
-    (23) gate_statement -> IDENTIFIER gate_arg_list .
+    (25) gate_arg -> array_element .
 
-    SEMICOLON       reduce using rule 23 (gate_statement -> IDENTIFIER gate_arg_list .)
-    EOL             reduce using rule 23 (gate_statement -> IDENTIFIER gate_arg_list .)
-    $end            reduce using rule 23 (gate_statement -> IDENTIFIER gate_arg_list .)
-    RBRACE          reduce using rule 23 (gate_statement -> IDENTIFIER gate_arg_list .)
-    PIPE            reduce using rule 23 (gate_statement -> IDENTIFIER gate_arg_list .)
-    RANGLE          reduce using rule 23 (gate_statement -> IDENTIFIER gate_arg_list .)
+    IDENTIFIER      reduce using rule 25 (gate_arg -> array_element .)
+    INTEGER         reduce using rule 25 (gate_arg -> array_element .)
+    FLOAT           reduce using rule 25 (gate_arg -> array_element .)
+    SEMICOLON       reduce using rule 25 (gate_arg -> array_element .)
+    EOL             reduce using rule 25 (gate_arg -> array_element .)
+    $end            reduce using rule 25 (gate_arg -> array_element .)
+    RBRACE          reduce using rule 25 (gate_arg -> array_element .)
+    PIPE            reduce using rule 25 (gate_arg -> array_element .)
+    RANGLE          reduce using rule 25 (gate_arg -> array_element .)
 
 
 state 38
 
-    (24) gate_arg_list -> gate_arg . gate_arg_list
-    (24) gate_arg_list -> . gate_arg gate_arg_list
-    (25) gate_arg_list -> .
-    (26) gate_arg -> . array_element
-    (27) gate_arg -> . IDENTIFIER
-    (28) gate_arg -> . number
-    (51) array_element -> . IDENTIFIER LBRACKET let_or_integer RBRACKET
-    (64) number -> . INTEGER
-    (65) number -> . FLOAT
+    (27) gate_arg -> number .
 
-    SEMICOLON       reduce using rule 25 (gate_arg_list -> .)
-    EOL             reduce using rule 25 (gate_arg_list -> .)
-    $end            reduce using rule 25 (gate_arg_list -> .)
-    RBRACE          reduce using rule 25 (gate_arg_list -> .)
-    PIPE            reduce using rule 25 (gate_arg_list -> .)
-    RANGLE          reduce using rule 25 (gate_arg_list -> .)
-    IDENTIFIER      shift and go to state 36
-    INTEGER         shift and go to state 41
-    FLOAT           shift and go to state 42
+    IDENTIFIER      reduce using rule 27 (gate_arg -> number .)
+    INTEGER         reduce using rule 27 (gate_arg -> number .)
+    FLOAT           reduce using rule 27 (gate_arg -> number .)
+    SEMICOLON       reduce using rule 27 (gate_arg -> number .)
+    EOL             reduce using rule 27 (gate_arg -> number .)
+    $end            reduce using rule 27 (gate_arg -> number .)
+    RBRACE          reduce using rule 27 (gate_arg -> number .)
+    PIPE            reduce using rule 27 (gate_arg -> number .)
+    RANGLE          reduce using rule 27 (gate_arg -> number .)
 
-    gate_arg                       shift and go to state 38
-    gate_arg_list                  shift and go to state 67
-    array_element                  shift and go to state 39
-    number                         shift and go to state 40
 
 state 39
 
-    (26) gate_arg -> array_element .
+    (63) number -> INTEGER .
 
-    IDENTIFIER      reduce using rule 26 (gate_arg -> array_element .)
-    INTEGER         reduce using rule 26 (gate_arg -> array_element .)
-    FLOAT           reduce using rule 26 (gate_arg -> array_element .)
-    SEMICOLON       reduce using rule 26 (gate_arg -> array_element .)
-    EOL             reduce using rule 26 (gate_arg -> array_element .)
-    $end            reduce using rule 26 (gate_arg -> array_element .)
-    RBRACE          reduce using rule 26 (gate_arg -> array_element .)
-    PIPE            reduce using rule 26 (gate_arg -> array_element .)
-    RANGLE          reduce using rule 26 (gate_arg -> array_element .)
+    IDENTIFIER      reduce using rule 63 (number -> INTEGER .)
+    INTEGER         reduce using rule 63 (number -> INTEGER .)
+    FLOAT           reduce using rule 63 (number -> INTEGER .)
+    SEMICOLON       reduce using rule 63 (number -> INTEGER .)
+    EOL             reduce using rule 63 (number -> INTEGER .)
+    $end            reduce using rule 63 (number -> INTEGER .)
+    RBRACE          reduce using rule 63 (number -> INTEGER .)
+    PIPE            reduce using rule 63 (number -> INTEGER .)
+    RANGLE          reduce using rule 63 (number -> INTEGER .)
+    MACRO           reduce using rule 63 (number -> INTEGER .)
+    LOOP            reduce using rule 63 (number -> INTEGER .)
+    LBRACE          reduce using rule 63 (number -> INTEGER .)
+    LANGLE          reduce using rule 63 (number -> INTEGER .)
 
 
 state 40
 
-    (28) gate_arg -> number .
+    (64) number -> FLOAT .
 
-    IDENTIFIER      reduce using rule 28 (gate_arg -> number .)
-    INTEGER         reduce using rule 28 (gate_arg -> number .)
-    FLOAT           reduce using rule 28 (gate_arg -> number .)
-    SEMICOLON       reduce using rule 28 (gate_arg -> number .)
-    EOL             reduce using rule 28 (gate_arg -> number .)
-    $end            reduce using rule 28 (gate_arg -> number .)
-    RBRACE          reduce using rule 28 (gate_arg -> number .)
-    PIPE            reduce using rule 28 (gate_arg -> number .)
-    RANGLE          reduce using rule 28 (gate_arg -> number .)
+    IDENTIFIER      reduce using rule 64 (number -> FLOAT .)
+    INTEGER         reduce using rule 64 (number -> FLOAT .)
+    FLOAT           reduce using rule 64 (number -> FLOAT .)
+    SEMICOLON       reduce using rule 64 (number -> FLOAT .)
+    EOL             reduce using rule 64 (number -> FLOAT .)
+    $end            reduce using rule 64 (number -> FLOAT .)
+    RBRACE          reduce using rule 64 (number -> FLOAT .)
+    PIPE            reduce using rule 64 (number -> FLOAT .)
+    RANGLE          reduce using rule 64 (number -> FLOAT .)
+    MACRO           reduce using rule 64 (number -> FLOAT .)
+    LOOP            reduce using rule 64 (number -> FLOAT .)
+    LBRACE          reduce using rule 64 (number -> FLOAT .)
+    LANGLE          reduce using rule 64 (number -> FLOAT .)
 
 
 state 41
 
-    (64) number -> INTEGER .
+    (28) macro_definition -> MACRO IDENTIFIER . gate_def_list gate_block
+    (29) gate_def_list -> . IDENTIFIER gate_def_list
+    (30) gate_def_list -> .
 
-    IDENTIFIER      reduce using rule 64 (number -> INTEGER .)
-    INTEGER         reduce using rule 64 (number -> INTEGER .)
-    FLOAT           reduce using rule 64 (number -> INTEGER .)
-    SEMICOLON       reduce using rule 64 (number -> INTEGER .)
-    EOL             reduce using rule 64 (number -> INTEGER .)
-    $end            reduce using rule 64 (number -> INTEGER .)
-    RBRACE          reduce using rule 64 (number -> INTEGER .)
-    PIPE            reduce using rule 64 (number -> INTEGER .)
-    RANGLE          reduce using rule 64 (number -> INTEGER .)
-    MACRO           reduce using rule 64 (number -> INTEGER .)
-    LOOP            reduce using rule 64 (number -> INTEGER .)
-    LBRACE          reduce using rule 64 (number -> INTEGER .)
-    LANGLE          reduce using rule 64 (number -> INTEGER .)
+    IDENTIFIER      shift and go to state 66
+    LBRACE          reduce using rule 30 (gate_def_list -> .)
+    LANGLE          reduce using rule 30 (gate_def_list -> .)
 
+    gate_def_list                  shift and go to state 67
 
 state 42
 
-    (65) number -> FLOAT .
-
-    IDENTIFIER      reduce using rule 65 (number -> FLOAT .)
-    INTEGER         reduce using rule 65 (number -> FLOAT .)
-    FLOAT           reduce using rule 65 (number -> FLOAT .)
-    SEMICOLON       reduce using rule 65 (number -> FLOAT .)
-    EOL             reduce using rule 65 (number -> FLOAT .)
-    $end            reduce using rule 65 (number -> FLOAT .)
-    RBRACE          reduce using rule 65 (number -> FLOAT .)
-    PIPE            reduce using rule 65 (number -> FLOAT .)
-    RANGLE          reduce using rule 65 (number -> FLOAT .)
-    MACRO           reduce using rule 65 (number -> FLOAT .)
-    LOOP            reduce using rule 65 (number -> FLOAT .)
-    LBRACE          reduce using rule 65 (number -> FLOAT .)
-    LANGLE          reduce using rule 65 (number -> FLOAT .)
-
-
-state 43
-
-    (29) macro_definition -> MACRO IDENTIFIER . gate_def_list gate_block
-    (30) gate_def_list -> . IDENTIFIER gate_def_list
-    (31) gate_def_list -> .
-
-    IDENTIFIER      shift and go to state 68
-    LBRACE          reduce using rule 31 (gate_def_list -> .)
-    LANGLE          reduce using rule 31 (gate_def_list -> .)
-
-    gate_def_list                  shift and go to state 69
-
-state 44
-
-    (32) loop_statement -> LOOP let_or_integer . gate_block
-    (33) gate_block -> . sequential_gate_block
-    (34) gate_block -> . parallel_gate_block
-    (35) sequential_gate_block -> . LBRACE sequential_statements RBRACE
-    (36) sequential_gate_block -> . LBRACE EOL sequential_statements RBRACE
-    (37) parallel_gate_block -> . LANGLE parallel_statements RANGLE
-    (38) parallel_gate_block -> . LANGLE EOL parallel_statements RANGLE
+    (31) loop_statement -> LOOP let_or_integer . gate_block
+    (32) gate_block -> . sequential_gate_block
+    (33) gate_block -> . parallel_gate_block
+    (34) sequential_gate_block -> . LBRACE sequential_statements RBRACE
+    (35) sequential_gate_block -> . LBRACE EOL sequential_statements RBRACE
+    (36) parallel_gate_block -> . LANGLE parallel_statements RANGLE
+    (37) parallel_gate_block -> . LANGLE EOL parallel_statements RANGLE
 
     LBRACE          shift and go to state 22
     LANGLE          shift and go to state 23
 
-    gate_block                     shift and go to state 70
+    gate_block                     shift and go to state 68
     sequential_gate_block          shift and go to state 20
     parallel_gate_block            shift and go to state 21
 
+state 43
+
+    (55) let_or_integer -> IDENTIFIER .
+
+    LBRACE          reduce using rule 55 (let_or_integer -> IDENTIFIER .)
+    LANGLE          reduce using rule 55 (let_or_integer -> IDENTIFIER .)
+    RBRACKET        reduce using rule 55 (let_or_integer -> IDENTIFIER .)
+    COLON           reduce using rule 55 (let_or_integer -> IDENTIFIER .)
+
+
+state 44
+
+    (56) let_or_integer -> INTEGER .
+
+    LBRACE          reduce using rule 56 (let_or_integer -> INTEGER .)
+    LANGLE          reduce using rule 56 (let_or_integer -> INTEGER .)
+    RBRACKET        reduce using rule 56 (let_or_integer -> INTEGER .)
+    COLON           reduce using rule 56 (let_or_integer -> INTEGER .)
+
+
 state 45
 
-    (56) let_or_integer -> IDENTIFIER .
+    (34) sequential_gate_block -> LBRACE sequential_statements . RBRACE
 
-    LBRACE          reduce using rule 56 (let_or_integer -> IDENTIFIER .)
-    LANGLE          reduce using rule 56 (let_or_integer -> IDENTIFIER .)
-    RBRACKET        reduce using rule 56 (let_or_integer -> IDENTIFIER .)
-    COLON           reduce using rule 56 (let_or_integer -> IDENTIFIER .)
+    RBRACE          shift and go to state 69
 
 
 state 46
 
-    (57) let_or_integer -> INTEGER .
-
-    LBRACE          reduce using rule 57 (let_or_integer -> INTEGER .)
-    LANGLE          reduce using rule 57 (let_or_integer -> INTEGER .)
-    RBRACKET        reduce using rule 57 (let_or_integer -> INTEGER .)
-    COLON           reduce using rule 57 (let_or_integer -> INTEGER .)
-
-
-state 47
-
-    (35) sequential_gate_block -> LBRACE sequential_statements . RBRACE
-
-    RBRACE          shift and go to state 71
-
-
-state 48
-
-    (36) sequential_gate_block -> LBRACE EOL . sequential_statements RBRACE
-    (39) sequential_statements -> . sequential_statement seq_sep sequential_statements
-    (40) sequential_statements -> . sequential_statement
-    (41) sequential_statements -> . sequential_statement seq_sep
-    (42) sequential_statement -> . gate_statement
-    (43) sequential_statement -> . parallel_gate_block
-    (44) sequential_statement -> . loop_statement
-    (23) gate_statement -> . IDENTIFIER gate_arg_list
-    (37) parallel_gate_block -> . LANGLE parallel_statements RANGLE
-    (38) parallel_gate_block -> . LANGLE EOL parallel_statements RANGLE
-    (32) loop_statement -> . LOOP let_or_integer gate_block
+    (35) sequential_gate_block -> LBRACE EOL . sequential_statements RBRACE
+    (38) sequential_statements -> . sequential_statement seq_sep sequential_statements
+    (39) sequential_statements -> . sequential_statement
+    (40) sequential_statements -> . sequential_statement seq_sep
+    (41) sequential_statement -> . gate_statement
+    (42) sequential_statement -> . parallel_gate_block
+    (43) sequential_statement -> . loop_statement
+    (22) gate_statement -> . IDENTIFIER gate_arg_list
+    (36) parallel_gate_block -> . LANGLE parallel_statements RANGLE
+    (37) parallel_gate_block -> . LANGLE EOL parallel_statements RANGLE
+    (31) loop_statement -> . LOOP let_or_integer gate_block
 
     IDENTIFIER      shift and go to state 17
     LANGLE          shift and go to state 23
     LOOP            shift and go to state 19
 
-    sequential_statements          shift and go to state 72
-    sequential_statement           shift and go to state 49
-    gate_statement                 shift and go to state 50
-    parallel_gate_block            shift and go to state 51
-    loop_statement                 shift and go to state 52
+    sequential_statements          shift and go to state 70
+    sequential_statement           shift and go to state 47
+    gate_statement                 shift and go to state 48
+    parallel_gate_block            shift and go to state 49
+    loop_statement                 shift and go to state 50
 
-state 49
+state 47
 
-    (39) sequential_statements -> sequential_statement . seq_sep sequential_statements
-    (40) sequential_statements -> sequential_statement .
-    (41) sequential_statements -> sequential_statement . seq_sep
-    (58) seq_sep -> . SEMICOLON
-    (59) seq_sep -> . EOL
-    (60) seq_sep -> . seq_sep EOL
+    (38) sequential_statements -> sequential_statement . seq_sep sequential_statements
+    (39) sequential_statements -> sequential_statement .
+    (40) sequential_statements -> sequential_statement . seq_sep
+    (57) seq_sep -> . SEMICOLON
+    (58) seq_sep -> . EOL
+    (59) seq_sep -> . seq_sep EOL
 
-    RBRACE          reduce using rule 40 (sequential_statements -> sequential_statement .)
+    RBRACE          reduce using rule 39 (sequential_statements -> sequential_statement .)
     SEMICOLON       shift and go to state 26
     EOL             shift and go to state 27
 
-    seq_sep                        shift and go to state 73
+    seq_sep                        shift and go to state 71
+
+state 48
+
+    (41) sequential_statement -> gate_statement .
+
+    SEMICOLON       reduce using rule 41 (sequential_statement -> gate_statement .)
+    EOL             reduce using rule 41 (sequential_statement -> gate_statement .)
+    RBRACE          reduce using rule 41 (sequential_statement -> gate_statement .)
+
+
+state 49
+
+    (42) sequential_statement -> parallel_gate_block .
+
+    SEMICOLON       reduce using rule 42 (sequential_statement -> parallel_gate_block .)
+    EOL             reduce using rule 42 (sequential_statement -> parallel_gate_block .)
+    RBRACE          reduce using rule 42 (sequential_statement -> parallel_gate_block .)
+
 
 state 50
 
-    (42) sequential_statement -> gate_statement .
+    (43) sequential_statement -> loop_statement .
 
-    SEMICOLON       reduce using rule 42 (sequential_statement -> gate_statement .)
-    EOL             reduce using rule 42 (sequential_statement -> gate_statement .)
-    RBRACE          reduce using rule 42 (sequential_statement -> gate_statement .)
+    SEMICOLON       reduce using rule 43 (sequential_statement -> loop_statement .)
+    EOL             reduce using rule 43 (sequential_statement -> loop_statement .)
+    RBRACE          reduce using rule 43 (sequential_statement -> loop_statement .)
 
 
 state 51
 
-    (43) sequential_statement -> parallel_gate_block .
+    (36) parallel_gate_block -> LANGLE parallel_statements . RANGLE
 
-    SEMICOLON       reduce using rule 43 (sequential_statement -> parallel_gate_block .)
-    EOL             reduce using rule 43 (sequential_statement -> parallel_gate_block .)
-    RBRACE          reduce using rule 43 (sequential_statement -> parallel_gate_block .)
+    RANGLE          shift and go to state 72
 
 
 state 52
 
-    (44) sequential_statement -> loop_statement .
-
-    SEMICOLON       reduce using rule 44 (sequential_statement -> loop_statement .)
-    EOL             reduce using rule 44 (sequential_statement -> loop_statement .)
-    RBRACE          reduce using rule 44 (sequential_statement -> loop_statement .)
-
-
-state 53
-
-    (37) parallel_gate_block -> LANGLE parallel_statements . RANGLE
-
-    RANGLE          shift and go to state 74
-
-
-state 54
-
-    (38) parallel_gate_block -> LANGLE EOL . parallel_statements RANGLE
-    (45) parallel_statements -> . parallel_statement par_sep parallel_statements
-    (46) parallel_statements -> . parallel_statement
-    (47) parallel_statements -> . parallel_statement par_sep
-    (48) parallel_statement -> . gate_statement
-    (49) parallel_statement -> . sequential_gate_block
-    (23) gate_statement -> . IDENTIFIER gate_arg_list
-    (35) sequential_gate_block -> . LBRACE sequential_statements RBRACE
-    (36) sequential_gate_block -> . LBRACE EOL sequential_statements RBRACE
+    (37) parallel_gate_block -> LANGLE EOL . parallel_statements RANGLE
+    (44) parallel_statements -> . parallel_statement par_sep parallel_statements
+    (45) parallel_statements -> . parallel_statement
+    (46) parallel_statements -> . parallel_statement par_sep
+    (47) parallel_statement -> . gate_statement
+    (48) parallel_statement -> . sequential_gate_block
+    (22) gate_statement -> . IDENTIFIER gate_arg_list
+    (34) sequential_gate_block -> . LBRACE sequential_statements RBRACE
+    (35) sequential_gate_block -> . LBRACE EOL sequential_statements RBRACE
 
     IDENTIFIER      shift and go to state 17
     LBRACE          shift and go to state 22
 
-    parallel_statements            shift and go to state 75
-    parallel_statement             shift and go to state 55
-    gate_statement                 shift and go to state 56
-    sequential_gate_block          shift and go to state 57
+    parallel_statements            shift and go to state 73
+    parallel_statement             shift and go to state 53
+    gate_statement                 shift and go to state 54
+    sequential_gate_block          shift and go to state 55
+
+state 53
+
+    (44) parallel_statements -> parallel_statement . par_sep parallel_statements
+    (45) parallel_statements -> parallel_statement .
+    (46) parallel_statements -> parallel_statement . par_sep
+    (60) par_sep -> . PIPE
+    (61) par_sep -> . EOL
+    (62) par_sep -> . par_sep EOL
+
+    RANGLE          reduce using rule 45 (parallel_statements -> parallel_statement .)
+    PIPE            shift and go to state 75
+    EOL             shift and go to state 76
+
+    par_sep                        shift and go to state 74
+
+state 54
+
+    (47) parallel_statement -> gate_statement .
+
+    PIPE            reduce using rule 47 (parallel_statement -> gate_statement .)
+    EOL             reduce using rule 47 (parallel_statement -> gate_statement .)
+    RANGLE          reduce using rule 47 (parallel_statement -> gate_statement .)
+
 
 state 55
 
-    (45) parallel_statements -> parallel_statement . par_sep parallel_statements
-    (46) parallel_statements -> parallel_statement .
-    (47) parallel_statements -> parallel_statement . par_sep
-    (61) par_sep -> . PIPE
-    (62) par_sep -> . EOL
-    (63) par_sep -> . par_sep EOL
+    (48) parallel_statement -> sequential_gate_block .
 
-    RANGLE          reduce using rule 46 (parallel_statements -> parallel_statement .)
-    PIPE            shift and go to state 77
-    EOL             shift and go to state 78
+    PIPE            reduce using rule 48 (parallel_statement -> sequential_gate_block .)
+    EOL             reduce using rule 48 (parallel_statement -> sequential_gate_block .)
+    RANGLE          reduce using rule 48 (parallel_statement -> sequential_gate_block .)
 
-    par_sep                        shift and go to state 76
 
 state 56
-
-    (48) parallel_statement -> gate_statement .
-
-    PIPE            reduce using rule 48 (parallel_statement -> gate_statement .)
-    EOL             reduce using rule 48 (parallel_statement -> gate_statement .)
-    RANGLE          reduce using rule 48 (parallel_statement -> gate_statement .)
-
-
-state 57
-
-    (49) parallel_statement -> sequential_gate_block .
-
-    PIPE            reduce using rule 49 (parallel_statement -> sequential_gate_block .)
-    EOL             reduce using rule 49 (parallel_statement -> sequential_gate_block .)
-    RANGLE          reduce using rule 49 (parallel_statement -> sequential_gate_block .)
-
-
-state 58
 
     (3) header_statements -> header_statement seq_sep header_statements .
 
@@ -981,35 +960,35 @@ state 58
     LANGLE          reduce using rule 3 (header_statements -> header_statement seq_sep header_statements .)
 
 
+state 57
+
+    (59) seq_sep -> seq_sep EOL .
+
+    EOL             reduce using rule 59 (seq_sep -> seq_sep EOL .)
+    REG             reduce using rule 59 (seq_sep -> seq_sep EOL .)
+    MAP             reduce using rule 59 (seq_sep -> seq_sep EOL .)
+    LET             reduce using rule 59 (seq_sep -> seq_sep EOL .)
+    IDENTIFIER      reduce using rule 59 (seq_sep -> seq_sep EOL .)
+    MACRO           reduce using rule 59 (seq_sep -> seq_sep EOL .)
+    LOOP            reduce using rule 59 (seq_sep -> seq_sep EOL .)
+    LBRACE          reduce using rule 59 (seq_sep -> seq_sep EOL .)
+    LANGLE          reduce using rule 59 (seq_sep -> seq_sep EOL .)
+    $end            reduce using rule 59 (seq_sep -> seq_sep EOL .)
+    RBRACE          reduce using rule 59 (seq_sep -> seq_sep EOL .)
+
+
+state 58
+
+    (49) array_declaration -> IDENTIFIER LBRACKET . let_or_integer RBRACKET
+    (55) let_or_integer -> . IDENTIFIER
+    (56) let_or_integer -> . INTEGER
+
+    IDENTIFIER      shift and go to state 43
+    INTEGER         shift and go to state 44
+
+    let_or_integer                 shift and go to state 77
+
 state 59
-
-    (60) seq_sep -> seq_sep EOL .
-
-    EOL             reduce using rule 60 (seq_sep -> seq_sep EOL .)
-    REG             reduce using rule 60 (seq_sep -> seq_sep EOL .)
-    MAP             reduce using rule 60 (seq_sep -> seq_sep EOL .)
-    LET             reduce using rule 60 (seq_sep -> seq_sep EOL .)
-    IDENTIFIER      reduce using rule 60 (seq_sep -> seq_sep EOL .)
-    MACRO           reduce using rule 60 (seq_sep -> seq_sep EOL .)
-    LOOP            reduce using rule 60 (seq_sep -> seq_sep EOL .)
-    LBRACE          reduce using rule 60 (seq_sep -> seq_sep EOL .)
-    LANGLE          reduce using rule 60 (seq_sep -> seq_sep EOL .)
-    $end            reduce using rule 60 (seq_sep -> seq_sep EOL .)
-    RBRACE          reduce using rule 60 (seq_sep -> seq_sep EOL .)
-
-
-state 60
-
-    (50) array_declaration -> IDENTIFIER LBRACKET . let_or_integer RBRACKET
-    (56) let_or_integer -> . IDENTIFIER
-    (57) let_or_integer -> . INTEGER
-
-    IDENTIFIER      shift and go to state 45
-    INTEGER         shift and go to state 46
-
-    let_or_integer                 shift and go to state 79
-
-state 61
 
     (10) map_statement -> MAP map_target map_source .
 
@@ -1022,397 +1001,409 @@ state 61
     LANGLE          reduce using rule 10 (map_statement -> MAP map_target map_source .)
 
 
+state 60
+
+    (12) map_source -> IDENTIFIER .
+    (51) array_slice -> IDENTIFIER . LBRACKET slice_indexing RBRACKET
+
+    SEMICOLON       reduce using rule 12 (map_source -> IDENTIFIER .)
+    EOL             reduce using rule 12 (map_source -> IDENTIFIER .)
+    IDENTIFIER      reduce using rule 12 (map_source -> IDENTIFIER .)
+    MACRO           reduce using rule 12 (map_source -> IDENTIFIER .)
+    LOOP            reduce using rule 12 (map_source -> IDENTIFIER .)
+    LBRACE          reduce using rule 12 (map_source -> IDENTIFIER .)
+    LANGLE          reduce using rule 12 (map_source -> IDENTIFIER .)
+    LBRACKET        shift and go to state 78
+
+
+state 61
+
+    (13) map_source -> array_slice .
+
+    SEMICOLON       reduce using rule 13 (map_source -> array_slice .)
+    EOL             reduce using rule 13 (map_source -> array_slice .)
+    IDENTIFIER      reduce using rule 13 (map_source -> array_slice .)
+    MACRO           reduce using rule 13 (map_source -> array_slice .)
+    LOOP            reduce using rule 13 (map_source -> array_slice .)
+    LBRACE          reduce using rule 13 (map_source -> array_slice .)
+    LANGLE          reduce using rule 13 (map_source -> array_slice .)
+
+
 state 62
 
-    (13) map_source -> IDENTIFIER .
+    (14) let_statement -> LET IDENTIFIER number .
 
-    SEMICOLON       reduce using rule 13 (map_source -> IDENTIFIER .)
-    EOL             reduce using rule 13 (map_source -> IDENTIFIER .)
-    IDENTIFIER      reduce using rule 13 (map_source -> IDENTIFIER .)
-    MACRO           reduce using rule 13 (map_source -> IDENTIFIER .)
-    LOOP            reduce using rule 13 (map_source -> IDENTIFIER .)
-    LBRACE          reduce using rule 13 (map_source -> IDENTIFIER .)
-    LANGLE          reduce using rule 13 (map_source -> IDENTIFIER .)
+    SEMICOLON       reduce using rule 14 (let_statement -> LET IDENTIFIER number .)
+    EOL             reduce using rule 14 (let_statement -> LET IDENTIFIER number .)
+    IDENTIFIER      reduce using rule 14 (let_statement -> LET IDENTIFIER number .)
+    MACRO           reduce using rule 14 (let_statement -> LET IDENTIFIER number .)
+    LOOP            reduce using rule 14 (let_statement -> LET IDENTIFIER number .)
+    LBRACE          reduce using rule 14 (let_statement -> LET IDENTIFIER number .)
+    LANGLE          reduce using rule 14 (let_statement -> LET IDENTIFIER number .)
 
 
 state 63
 
-    (50) array_declaration -> IDENTIFIER LBRACKET . let_or_integer RBRACKET
-    (52) array_slice -> IDENTIFIER LBRACKET . slice_indexing RBRACKET
-    (56) let_or_integer -> . IDENTIFIER
-    (57) let_or_integer -> . INTEGER
-    (53) slice_indexing -> . let_or_integer
-    (54) slice_indexing -> . let_or_integer COLON let_or_integer
-    (55) slice_indexing -> . let_or_integer COLON let_or_integer COLON let_or_integer
+    (15) body_statements -> body_statement seq_sep body_statements .
 
-    IDENTIFIER      shift and go to state 45
-    INTEGER         shift and go to state 46
+    $end            reduce using rule 15 (body_statements -> body_statement seq_sep body_statements .)
 
-    let_or_integer                 shift and go to state 80
-    slice_indexing                 shift and go to state 81
 
 state 64
 
-    (15) let_statement -> LET IDENTIFIER number .
+    (50) array_element -> IDENTIFIER LBRACKET . let_or_integer RBRACKET
+    (55) let_or_integer -> . IDENTIFIER
+    (56) let_or_integer -> . INTEGER
 
-    SEMICOLON       reduce using rule 15 (let_statement -> LET IDENTIFIER number .)
-    EOL             reduce using rule 15 (let_statement -> LET IDENTIFIER number .)
-    IDENTIFIER      reduce using rule 15 (let_statement -> LET IDENTIFIER number .)
-    MACRO           reduce using rule 15 (let_statement -> LET IDENTIFIER number .)
-    LOOP            reduce using rule 15 (let_statement -> LET IDENTIFIER number .)
-    LBRACE          reduce using rule 15 (let_statement -> LET IDENTIFIER number .)
-    LANGLE          reduce using rule 15 (let_statement -> LET IDENTIFIER number .)
+    IDENTIFIER      shift and go to state 43
+    INTEGER         shift and go to state 44
 
+    let_or_integer                 shift and go to state 79
 
 state 65
 
-    (16) body_statements -> body_statement seq_sep body_statements .
+    (23) gate_arg_list -> gate_arg gate_arg_list .
 
-    $end            reduce using rule 16 (body_statements -> body_statement seq_sep body_statements .)
+    SEMICOLON       reduce using rule 23 (gate_arg_list -> gate_arg gate_arg_list .)
+    EOL             reduce using rule 23 (gate_arg_list -> gate_arg gate_arg_list .)
+    $end            reduce using rule 23 (gate_arg_list -> gate_arg gate_arg_list .)
+    RBRACE          reduce using rule 23 (gate_arg_list -> gate_arg gate_arg_list .)
+    PIPE            reduce using rule 23 (gate_arg_list -> gate_arg gate_arg_list .)
+    RANGLE          reduce using rule 23 (gate_arg_list -> gate_arg gate_arg_list .)
 
 
 state 66
 
-    (51) array_element -> IDENTIFIER LBRACKET . let_or_integer RBRACKET
-    (56) let_or_integer -> . IDENTIFIER
-    (57) let_or_integer -> . INTEGER
+    (29) gate_def_list -> IDENTIFIER . gate_def_list
+    (29) gate_def_list -> . IDENTIFIER gate_def_list
+    (30) gate_def_list -> .
 
-    IDENTIFIER      shift and go to state 45
-    INTEGER         shift and go to state 46
+    IDENTIFIER      shift and go to state 66
+    LBRACE          reduce using rule 30 (gate_def_list -> .)
+    LANGLE          reduce using rule 30 (gate_def_list -> .)
 
-    let_or_integer                 shift and go to state 82
+    gate_def_list                  shift and go to state 80
 
 state 67
 
-    (24) gate_arg_list -> gate_arg gate_arg_list .
-
-    SEMICOLON       reduce using rule 24 (gate_arg_list -> gate_arg gate_arg_list .)
-    EOL             reduce using rule 24 (gate_arg_list -> gate_arg gate_arg_list .)
-    $end            reduce using rule 24 (gate_arg_list -> gate_arg gate_arg_list .)
-    RBRACE          reduce using rule 24 (gate_arg_list -> gate_arg gate_arg_list .)
-    PIPE            reduce using rule 24 (gate_arg_list -> gate_arg gate_arg_list .)
-    RANGLE          reduce using rule 24 (gate_arg_list -> gate_arg gate_arg_list .)
-
-
-state 68
-
-    (30) gate_def_list -> IDENTIFIER . gate_def_list
-    (30) gate_def_list -> . IDENTIFIER gate_def_list
-    (31) gate_def_list -> .
-
-    IDENTIFIER      shift and go to state 68
-    LBRACE          reduce using rule 31 (gate_def_list -> .)
-    LANGLE          reduce using rule 31 (gate_def_list -> .)
-
-    gate_def_list                  shift and go to state 83
-
-state 69
-
-    (29) macro_definition -> MACRO IDENTIFIER gate_def_list . gate_block
-    (33) gate_block -> . sequential_gate_block
-    (34) gate_block -> . parallel_gate_block
-    (35) sequential_gate_block -> . LBRACE sequential_statements RBRACE
-    (36) sequential_gate_block -> . LBRACE EOL sequential_statements RBRACE
-    (37) parallel_gate_block -> . LANGLE parallel_statements RANGLE
-    (38) parallel_gate_block -> . LANGLE EOL parallel_statements RANGLE
+    (28) macro_definition -> MACRO IDENTIFIER gate_def_list . gate_block
+    (32) gate_block -> . sequential_gate_block
+    (33) gate_block -> . parallel_gate_block
+    (34) sequential_gate_block -> . LBRACE sequential_statements RBRACE
+    (35) sequential_gate_block -> . LBRACE EOL sequential_statements RBRACE
+    (36) parallel_gate_block -> . LANGLE parallel_statements RANGLE
+    (37) parallel_gate_block -> . LANGLE EOL parallel_statements RANGLE
 
     LBRACE          shift and go to state 22
     LANGLE          shift and go to state 23
 
-    gate_block                     shift and go to state 84
+    gate_block                     shift and go to state 81
     sequential_gate_block          shift and go to state 20
     parallel_gate_block            shift and go to state 21
 
+state 68
+
+    (31) loop_statement -> LOOP let_or_integer gate_block .
+
+    SEMICOLON       reduce using rule 31 (loop_statement -> LOOP let_or_integer gate_block .)
+    EOL             reduce using rule 31 (loop_statement -> LOOP let_or_integer gate_block .)
+    $end            reduce using rule 31 (loop_statement -> LOOP let_or_integer gate_block .)
+    RBRACE          reduce using rule 31 (loop_statement -> LOOP let_or_integer gate_block .)
+
+
+state 69
+
+    (34) sequential_gate_block -> LBRACE sequential_statements RBRACE .
+
+    SEMICOLON       reduce using rule 34 (sequential_gate_block -> LBRACE sequential_statements RBRACE .)
+    EOL             reduce using rule 34 (sequential_gate_block -> LBRACE sequential_statements RBRACE .)
+    $end            reduce using rule 34 (sequential_gate_block -> LBRACE sequential_statements RBRACE .)
+    PIPE            reduce using rule 34 (sequential_gate_block -> LBRACE sequential_statements RBRACE .)
+    RANGLE          reduce using rule 34 (sequential_gate_block -> LBRACE sequential_statements RBRACE .)
+    RBRACE          reduce using rule 34 (sequential_gate_block -> LBRACE sequential_statements RBRACE .)
+
+
 state 70
 
-    (32) loop_statement -> LOOP let_or_integer gate_block .
+    (35) sequential_gate_block -> LBRACE EOL sequential_statements . RBRACE
 
-    SEMICOLON       reduce using rule 32 (loop_statement -> LOOP let_or_integer gate_block .)
-    EOL             reduce using rule 32 (loop_statement -> LOOP let_or_integer gate_block .)
-    $end            reduce using rule 32 (loop_statement -> LOOP let_or_integer gate_block .)
-    RBRACE          reduce using rule 32 (loop_statement -> LOOP let_or_integer gate_block .)
+    RBRACE          shift and go to state 82
 
 
 state 71
 
-    (35) sequential_gate_block -> LBRACE sequential_statements RBRACE .
+    (38) sequential_statements -> sequential_statement seq_sep . sequential_statements
+    (40) sequential_statements -> sequential_statement seq_sep .
+    (59) seq_sep -> seq_sep . EOL
+    (38) sequential_statements -> . sequential_statement seq_sep sequential_statements
+    (39) sequential_statements -> . sequential_statement
+    (40) sequential_statements -> . sequential_statement seq_sep
+    (41) sequential_statement -> . gate_statement
+    (42) sequential_statement -> . parallel_gate_block
+    (43) sequential_statement -> . loop_statement
+    (22) gate_statement -> . IDENTIFIER gate_arg_list
+    (36) parallel_gate_block -> . LANGLE parallel_statements RANGLE
+    (37) parallel_gate_block -> . LANGLE EOL parallel_statements RANGLE
+    (31) loop_statement -> . LOOP let_or_integer gate_block
 
-    SEMICOLON       reduce using rule 35 (sequential_gate_block -> LBRACE sequential_statements RBRACE .)
-    EOL             reduce using rule 35 (sequential_gate_block -> LBRACE sequential_statements RBRACE .)
-    $end            reduce using rule 35 (sequential_gate_block -> LBRACE sequential_statements RBRACE .)
-    PIPE            reduce using rule 35 (sequential_gate_block -> LBRACE sequential_statements RBRACE .)
-    RANGLE          reduce using rule 35 (sequential_gate_block -> LBRACE sequential_statements RBRACE .)
-    RBRACE          reduce using rule 35 (sequential_gate_block -> LBRACE sequential_statements RBRACE .)
-
-
-state 72
-
-    (36) sequential_gate_block -> LBRACE EOL sequential_statements . RBRACE
-
-    RBRACE          shift and go to state 85
-
-
-state 73
-
-    (39) sequential_statements -> sequential_statement seq_sep . sequential_statements
-    (41) sequential_statements -> sequential_statement seq_sep .
-    (60) seq_sep -> seq_sep . EOL
-    (39) sequential_statements -> . sequential_statement seq_sep sequential_statements
-    (40) sequential_statements -> . sequential_statement
-    (41) sequential_statements -> . sequential_statement seq_sep
-    (42) sequential_statement -> . gate_statement
-    (43) sequential_statement -> . parallel_gate_block
-    (44) sequential_statement -> . loop_statement
-    (23) gate_statement -> . IDENTIFIER gate_arg_list
-    (37) parallel_gate_block -> . LANGLE parallel_statements RANGLE
-    (38) parallel_gate_block -> . LANGLE EOL parallel_statements RANGLE
-    (32) loop_statement -> . LOOP let_or_integer gate_block
-
-    RBRACE          reduce using rule 41 (sequential_statements -> sequential_statement seq_sep .)
-    EOL             shift and go to state 59
+    RBRACE          reduce using rule 40 (sequential_statements -> sequential_statement seq_sep .)
+    EOL             shift and go to state 57
     IDENTIFIER      shift and go to state 17
     LANGLE          shift and go to state 23
     LOOP            shift and go to state 19
 
-    sequential_statement           shift and go to state 49
-    sequential_statements          shift and go to state 86
-    gate_statement                 shift and go to state 50
-    parallel_gate_block            shift and go to state 51
-    loop_statement                 shift and go to state 52
+    sequential_statement           shift and go to state 47
+    sequential_statements          shift and go to state 83
+    gate_statement                 shift and go to state 48
+    parallel_gate_block            shift and go to state 49
+    loop_statement                 shift and go to state 50
+
+state 72
+
+    (36) parallel_gate_block -> LANGLE parallel_statements RANGLE .
+
+    SEMICOLON       reduce using rule 36 (parallel_gate_block -> LANGLE parallel_statements RANGLE .)
+    EOL             reduce using rule 36 (parallel_gate_block -> LANGLE parallel_statements RANGLE .)
+    $end            reduce using rule 36 (parallel_gate_block -> LANGLE parallel_statements RANGLE .)
+    RBRACE          reduce using rule 36 (parallel_gate_block -> LANGLE parallel_statements RANGLE .)
+
+
+state 73
+
+    (37) parallel_gate_block -> LANGLE EOL parallel_statements . RANGLE
+
+    RANGLE          shift and go to state 84
+
 
 state 74
 
-    (37) parallel_gate_block -> LANGLE parallel_statements RANGLE .
+    (44) parallel_statements -> parallel_statement par_sep . parallel_statements
+    (46) parallel_statements -> parallel_statement par_sep .
+    (62) par_sep -> par_sep . EOL
+    (44) parallel_statements -> . parallel_statement par_sep parallel_statements
+    (45) parallel_statements -> . parallel_statement
+    (46) parallel_statements -> . parallel_statement par_sep
+    (47) parallel_statement -> . gate_statement
+    (48) parallel_statement -> . sequential_gate_block
+    (22) gate_statement -> . IDENTIFIER gate_arg_list
+    (34) sequential_gate_block -> . LBRACE sequential_statements RBRACE
+    (35) sequential_gate_block -> . LBRACE EOL sequential_statements RBRACE
 
-    SEMICOLON       reduce using rule 37 (parallel_gate_block -> LANGLE parallel_statements RANGLE .)
-    EOL             reduce using rule 37 (parallel_gate_block -> LANGLE parallel_statements RANGLE .)
-    $end            reduce using rule 37 (parallel_gate_block -> LANGLE parallel_statements RANGLE .)
-    RBRACE          reduce using rule 37 (parallel_gate_block -> LANGLE parallel_statements RANGLE .)
+    RANGLE          reduce using rule 46 (parallel_statements -> parallel_statement par_sep .)
+    EOL             shift and go to state 86
+    IDENTIFIER      shift and go to state 17
+    LBRACE          shift and go to state 22
 
+    parallel_statement             shift and go to state 53
+    parallel_statements            shift and go to state 85
+    gate_statement                 shift and go to state 54
+    sequential_gate_block          shift and go to state 55
 
 state 75
 
-    (38) parallel_gate_block -> LANGLE EOL parallel_statements . RANGLE
+    (60) par_sep -> PIPE .
 
-    RANGLE          shift and go to state 87
+    EOL             reduce using rule 60 (par_sep -> PIPE .)
+    IDENTIFIER      reduce using rule 60 (par_sep -> PIPE .)
+    LBRACE          reduce using rule 60 (par_sep -> PIPE .)
+    RANGLE          reduce using rule 60 (par_sep -> PIPE .)
 
 
 state 76
 
-    (45) parallel_statements -> parallel_statement par_sep . parallel_statements
-    (47) parallel_statements -> parallel_statement par_sep .
-    (63) par_sep -> par_sep . EOL
-    (45) parallel_statements -> . parallel_statement par_sep parallel_statements
-    (46) parallel_statements -> . parallel_statement
-    (47) parallel_statements -> . parallel_statement par_sep
-    (48) parallel_statement -> . gate_statement
-    (49) parallel_statement -> . sequential_gate_block
-    (23) gate_statement -> . IDENTIFIER gate_arg_list
-    (35) sequential_gate_block -> . LBRACE sequential_statements RBRACE
-    (36) sequential_gate_block -> . LBRACE EOL sequential_statements RBRACE
+    (61) par_sep -> EOL .
 
-    RANGLE          reduce using rule 47 (parallel_statements -> parallel_statement par_sep .)
-    EOL             shift and go to state 89
-    IDENTIFIER      shift and go to state 17
-    LBRACE          shift and go to state 22
+    EOL             reduce using rule 61 (par_sep -> EOL .)
+    IDENTIFIER      reduce using rule 61 (par_sep -> EOL .)
+    LBRACE          reduce using rule 61 (par_sep -> EOL .)
+    RANGLE          reduce using rule 61 (par_sep -> EOL .)
 
-    parallel_statement             shift and go to state 55
-    parallel_statements            shift and go to state 88
-    gate_statement                 shift and go to state 56
-    sequential_gate_block          shift and go to state 57
 
 state 77
 
-    (61) par_sep -> PIPE .
+    (49) array_declaration -> IDENTIFIER LBRACKET let_or_integer . RBRACKET
 
-    EOL             reduce using rule 61 (par_sep -> PIPE .)
-    IDENTIFIER      reduce using rule 61 (par_sep -> PIPE .)
-    LBRACE          reduce using rule 61 (par_sep -> PIPE .)
-    RANGLE          reduce using rule 61 (par_sep -> PIPE .)
+    RBRACKET        shift and go to state 87
 
 
 state 78
 
-    (62) par_sep -> EOL .
+    (51) array_slice -> IDENTIFIER LBRACKET . slice_indexing RBRACKET
+    (52) slice_indexing -> . let_or_integer
+    (53) slice_indexing -> . let_or_integer COLON let_or_integer
+    (54) slice_indexing -> . let_or_integer COLON let_or_integer COLON let_or_integer
+    (55) let_or_integer -> . IDENTIFIER
+    (56) let_or_integer -> . INTEGER
 
-    EOL             reduce using rule 62 (par_sep -> EOL .)
-    IDENTIFIER      reduce using rule 62 (par_sep -> EOL .)
-    LBRACE          reduce using rule 62 (par_sep -> EOL .)
-    RANGLE          reduce using rule 62 (par_sep -> EOL .)
+    IDENTIFIER      shift and go to state 43
+    INTEGER         shift and go to state 44
 
+    slice_indexing                 shift and go to state 88
+    let_or_integer                 shift and go to state 89
 
 state 79
 
-    (50) array_declaration -> IDENTIFIER LBRACKET let_or_integer . RBRACKET
+    (50) array_element -> IDENTIFIER LBRACKET let_or_integer . RBRACKET
 
     RBRACKET        shift and go to state 90
 
 
 state 80
 
-    (50) array_declaration -> IDENTIFIER LBRACKET let_or_integer . RBRACKET
-    (53) slice_indexing -> let_or_integer .
-    (54) slice_indexing -> let_or_integer . COLON let_or_integer
-    (55) slice_indexing -> let_or_integer . COLON let_or_integer COLON let_or_integer
+    (29) gate_def_list -> IDENTIFIER gate_def_list .
 
-  ! shift/reduce conflict for RBRACKET resolved as shift
-    RBRACKET        shift and go to state 90
-    COLON           shift and go to state 91
-
-  ! RBRACKET        [ reduce using rule 53 (slice_indexing -> let_or_integer .) ]
+    LBRACE          reduce using rule 29 (gate_def_list -> IDENTIFIER gate_def_list .)
+    LANGLE          reduce using rule 29 (gate_def_list -> IDENTIFIER gate_def_list .)
 
 
 state 81
 
-    (52) array_slice -> IDENTIFIER LBRACKET slice_indexing . RBRACKET
+    (28) macro_definition -> MACRO IDENTIFIER gate_def_list gate_block .
 
-    RBRACKET        shift and go to state 92
+    SEMICOLON       reduce using rule 28 (macro_definition -> MACRO IDENTIFIER gate_def_list gate_block .)
+    EOL             reduce using rule 28 (macro_definition -> MACRO IDENTIFIER gate_def_list gate_block .)
+    $end            reduce using rule 28 (macro_definition -> MACRO IDENTIFIER gate_def_list gate_block .)
 
 
 state 82
 
-    (51) array_element -> IDENTIFIER LBRACKET let_or_integer . RBRACKET
+    (35) sequential_gate_block -> LBRACE EOL sequential_statements RBRACE .
 
-    RBRACKET        shift and go to state 93
+    SEMICOLON       reduce using rule 35 (sequential_gate_block -> LBRACE EOL sequential_statements RBRACE .)
+    EOL             reduce using rule 35 (sequential_gate_block -> LBRACE EOL sequential_statements RBRACE .)
+    $end            reduce using rule 35 (sequential_gate_block -> LBRACE EOL sequential_statements RBRACE .)
+    PIPE            reduce using rule 35 (sequential_gate_block -> LBRACE EOL sequential_statements RBRACE .)
+    RANGLE          reduce using rule 35 (sequential_gate_block -> LBRACE EOL sequential_statements RBRACE .)
+    RBRACE          reduce using rule 35 (sequential_gate_block -> LBRACE EOL sequential_statements RBRACE .)
 
 
 state 83
 
-    (30) gate_def_list -> IDENTIFIER gate_def_list .
+    (38) sequential_statements -> sequential_statement seq_sep sequential_statements .
 
-    LBRACE          reduce using rule 30 (gate_def_list -> IDENTIFIER gate_def_list .)
-    LANGLE          reduce using rule 30 (gate_def_list -> IDENTIFIER gate_def_list .)
+    RBRACE          reduce using rule 38 (sequential_statements -> sequential_statement seq_sep sequential_statements .)
 
 
 state 84
 
-    (29) macro_definition -> MACRO IDENTIFIER gate_def_list gate_block .
+    (37) parallel_gate_block -> LANGLE EOL parallel_statements RANGLE .
 
-    SEMICOLON       reduce using rule 29 (macro_definition -> MACRO IDENTIFIER gate_def_list gate_block .)
-    EOL             reduce using rule 29 (macro_definition -> MACRO IDENTIFIER gate_def_list gate_block .)
-    $end            reduce using rule 29 (macro_definition -> MACRO IDENTIFIER gate_def_list gate_block .)
+    SEMICOLON       reduce using rule 37 (parallel_gate_block -> LANGLE EOL parallel_statements RANGLE .)
+    EOL             reduce using rule 37 (parallel_gate_block -> LANGLE EOL parallel_statements RANGLE .)
+    $end            reduce using rule 37 (parallel_gate_block -> LANGLE EOL parallel_statements RANGLE .)
+    RBRACE          reduce using rule 37 (parallel_gate_block -> LANGLE EOL parallel_statements RANGLE .)
 
 
 state 85
 
-    (36) sequential_gate_block -> LBRACE EOL sequential_statements RBRACE .
+    (44) parallel_statements -> parallel_statement par_sep parallel_statements .
 
-    SEMICOLON       reduce using rule 36 (sequential_gate_block -> LBRACE EOL sequential_statements RBRACE .)
-    EOL             reduce using rule 36 (sequential_gate_block -> LBRACE EOL sequential_statements RBRACE .)
-    $end            reduce using rule 36 (sequential_gate_block -> LBRACE EOL sequential_statements RBRACE .)
-    PIPE            reduce using rule 36 (sequential_gate_block -> LBRACE EOL sequential_statements RBRACE .)
-    RANGLE          reduce using rule 36 (sequential_gate_block -> LBRACE EOL sequential_statements RBRACE .)
-    RBRACE          reduce using rule 36 (sequential_gate_block -> LBRACE EOL sequential_statements RBRACE .)
+    RANGLE          reduce using rule 44 (parallel_statements -> parallel_statement par_sep parallel_statements .)
 
 
 state 86
 
-    (39) sequential_statements -> sequential_statement seq_sep sequential_statements .
+    (62) par_sep -> par_sep EOL .
 
-    RBRACE          reduce using rule 39 (sequential_statements -> sequential_statement seq_sep sequential_statements .)
+    EOL             reduce using rule 62 (par_sep -> par_sep EOL .)
+    IDENTIFIER      reduce using rule 62 (par_sep -> par_sep EOL .)
+    LBRACE          reduce using rule 62 (par_sep -> par_sep EOL .)
+    RANGLE          reduce using rule 62 (par_sep -> par_sep EOL .)
 
 
 state 87
 
-    (38) parallel_gate_block -> LANGLE EOL parallel_statements RANGLE .
+    (49) array_declaration -> IDENTIFIER LBRACKET let_or_integer RBRACKET .
 
-    SEMICOLON       reduce using rule 38 (parallel_gate_block -> LANGLE EOL parallel_statements RANGLE .)
-    EOL             reduce using rule 38 (parallel_gate_block -> LANGLE EOL parallel_statements RANGLE .)
-    $end            reduce using rule 38 (parallel_gate_block -> LANGLE EOL parallel_statements RANGLE .)
-    RBRACE          reduce using rule 38 (parallel_gate_block -> LANGLE EOL parallel_statements RANGLE .)
+    SEMICOLON       reduce using rule 49 (array_declaration -> IDENTIFIER LBRACKET let_or_integer RBRACKET .)
+    EOL             reduce using rule 49 (array_declaration -> IDENTIFIER LBRACKET let_or_integer RBRACKET .)
+    IDENTIFIER      reduce using rule 49 (array_declaration -> IDENTIFIER LBRACKET let_or_integer RBRACKET .)
+    MACRO           reduce using rule 49 (array_declaration -> IDENTIFIER LBRACKET let_or_integer RBRACKET .)
+    LOOP            reduce using rule 49 (array_declaration -> IDENTIFIER LBRACKET let_or_integer RBRACKET .)
+    LBRACE          reduce using rule 49 (array_declaration -> IDENTIFIER LBRACKET let_or_integer RBRACKET .)
+    LANGLE          reduce using rule 49 (array_declaration -> IDENTIFIER LBRACKET let_or_integer RBRACKET .)
 
 
 state 88
 
-    (45) parallel_statements -> parallel_statement par_sep parallel_statements .
+    (51) array_slice -> IDENTIFIER LBRACKET slice_indexing . RBRACKET
 
-    RANGLE          reduce using rule 45 (parallel_statements -> parallel_statement par_sep parallel_statements .)
+    RBRACKET        shift and go to state 91
 
 
 state 89
 
-    (63) par_sep -> par_sep EOL .
+    (52) slice_indexing -> let_or_integer .
+    (53) slice_indexing -> let_or_integer . COLON let_or_integer
+    (54) slice_indexing -> let_or_integer . COLON let_or_integer COLON let_or_integer
 
-    EOL             reduce using rule 63 (par_sep -> par_sep EOL .)
-    IDENTIFIER      reduce using rule 63 (par_sep -> par_sep EOL .)
-    LBRACE          reduce using rule 63 (par_sep -> par_sep EOL .)
-    RANGLE          reduce using rule 63 (par_sep -> par_sep EOL .)
+    RBRACKET        reduce using rule 52 (slice_indexing -> let_or_integer .)
+    COLON           shift and go to state 92
 
 
 state 90
 
-    (50) array_declaration -> IDENTIFIER LBRACKET let_or_integer RBRACKET .
+    (50) array_element -> IDENTIFIER LBRACKET let_or_integer RBRACKET .
 
-    SEMICOLON       reduce using rule 50 (array_declaration -> IDENTIFIER LBRACKET let_or_integer RBRACKET .)
-    EOL             reduce using rule 50 (array_declaration -> IDENTIFIER LBRACKET let_or_integer RBRACKET .)
-    IDENTIFIER      reduce using rule 50 (array_declaration -> IDENTIFIER LBRACKET let_or_integer RBRACKET .)
-    MACRO           reduce using rule 50 (array_declaration -> IDENTIFIER LBRACKET let_or_integer RBRACKET .)
-    LOOP            reduce using rule 50 (array_declaration -> IDENTIFIER LBRACKET let_or_integer RBRACKET .)
-    LBRACE          reduce using rule 50 (array_declaration -> IDENTIFIER LBRACKET let_or_integer RBRACKET .)
-    LANGLE          reduce using rule 50 (array_declaration -> IDENTIFIER LBRACKET let_or_integer RBRACKET .)
+    IDENTIFIER      reduce using rule 50 (array_element -> IDENTIFIER LBRACKET let_or_integer RBRACKET .)
+    INTEGER         reduce using rule 50 (array_element -> IDENTIFIER LBRACKET let_or_integer RBRACKET .)
+    FLOAT           reduce using rule 50 (array_element -> IDENTIFIER LBRACKET let_or_integer RBRACKET .)
+    SEMICOLON       reduce using rule 50 (array_element -> IDENTIFIER LBRACKET let_or_integer RBRACKET .)
+    EOL             reduce using rule 50 (array_element -> IDENTIFIER LBRACKET let_or_integer RBRACKET .)
+    $end            reduce using rule 50 (array_element -> IDENTIFIER LBRACKET let_or_integer RBRACKET .)
+    RBRACE          reduce using rule 50 (array_element -> IDENTIFIER LBRACKET let_or_integer RBRACKET .)
+    PIPE            reduce using rule 50 (array_element -> IDENTIFIER LBRACKET let_or_integer RBRACKET .)
+    RANGLE          reduce using rule 50 (array_element -> IDENTIFIER LBRACKET let_or_integer RBRACKET .)
 
 
 state 91
 
-    (54) slice_indexing -> let_or_integer COLON . let_or_integer
-    (55) slice_indexing -> let_or_integer COLON . let_or_integer COLON let_or_integer
-    (56) let_or_integer -> . IDENTIFIER
-    (57) let_or_integer -> . INTEGER
+    (51) array_slice -> IDENTIFIER LBRACKET slice_indexing RBRACKET .
 
-    IDENTIFIER      shift and go to state 45
-    INTEGER         shift and go to state 46
+    SEMICOLON       reduce using rule 51 (array_slice -> IDENTIFIER LBRACKET slice_indexing RBRACKET .)
+    EOL             reduce using rule 51 (array_slice -> IDENTIFIER LBRACKET slice_indexing RBRACKET .)
+    IDENTIFIER      reduce using rule 51 (array_slice -> IDENTIFIER LBRACKET slice_indexing RBRACKET .)
+    MACRO           reduce using rule 51 (array_slice -> IDENTIFIER LBRACKET slice_indexing RBRACKET .)
+    LOOP            reduce using rule 51 (array_slice -> IDENTIFIER LBRACKET slice_indexing RBRACKET .)
+    LBRACE          reduce using rule 51 (array_slice -> IDENTIFIER LBRACKET slice_indexing RBRACKET .)
+    LANGLE          reduce using rule 51 (array_slice -> IDENTIFIER LBRACKET slice_indexing RBRACKET .)
 
-    let_or_integer                 shift and go to state 94
 
 state 92
 
-    (52) array_slice -> IDENTIFIER LBRACKET slice_indexing RBRACKET .
+    (53) slice_indexing -> let_or_integer COLON . let_or_integer
+    (54) slice_indexing -> let_or_integer COLON . let_or_integer COLON let_or_integer
+    (55) let_or_integer -> . IDENTIFIER
+    (56) let_or_integer -> . INTEGER
 
-    IDENTIFIER      reduce using rule 52 (array_slice -> IDENTIFIER LBRACKET slice_indexing RBRACKET .)
+    IDENTIFIER      shift and go to state 43
+    INTEGER         shift and go to state 44
 
+    let_or_integer                 shift and go to state 93
 
 state 93
 
-    (51) array_element -> IDENTIFIER LBRACKET let_or_integer RBRACKET .
+    (53) slice_indexing -> let_or_integer COLON let_or_integer .
+    (54) slice_indexing -> let_or_integer COLON let_or_integer . COLON let_or_integer
 
-    IDENTIFIER      reduce using rule 51 (array_element -> IDENTIFIER LBRACKET let_or_integer RBRACKET .)
-    INTEGER         reduce using rule 51 (array_element -> IDENTIFIER LBRACKET let_or_integer RBRACKET .)
-    FLOAT           reduce using rule 51 (array_element -> IDENTIFIER LBRACKET let_or_integer RBRACKET .)
-    SEMICOLON       reduce using rule 51 (array_element -> IDENTIFIER LBRACKET let_or_integer RBRACKET .)
-    EOL             reduce using rule 51 (array_element -> IDENTIFIER LBRACKET let_or_integer RBRACKET .)
-    $end            reduce using rule 51 (array_element -> IDENTIFIER LBRACKET let_or_integer RBRACKET .)
-    RBRACE          reduce using rule 51 (array_element -> IDENTIFIER LBRACKET let_or_integer RBRACKET .)
-    PIPE            reduce using rule 51 (array_element -> IDENTIFIER LBRACKET let_or_integer RBRACKET .)
-    RANGLE          reduce using rule 51 (array_element -> IDENTIFIER LBRACKET let_or_integer RBRACKET .)
+    RBRACKET        reduce using rule 53 (slice_indexing -> let_or_integer COLON let_or_integer .)
+    COLON           shift and go to state 94
 
 
 state 94
 
-    (54) slice_indexing -> let_or_integer COLON let_or_integer .
-    (55) slice_indexing -> let_or_integer COLON let_or_integer . COLON let_or_integer
+    (54) slice_indexing -> let_or_integer COLON let_or_integer COLON . let_or_integer
+    (55) let_or_integer -> . IDENTIFIER
+    (56) let_or_integer -> . INTEGER
 
-    RBRACKET        reduce using rule 54 (slice_indexing -> let_or_integer COLON let_or_integer .)
-    COLON           shift and go to state 95
+    IDENTIFIER      shift and go to state 43
+    INTEGER         shift and go to state 44
 
+    let_or_integer                 shift and go to state 95
 
 state 95
 
-    (55) slice_indexing -> let_or_integer COLON let_or_integer COLON . let_or_integer
-    (56) let_or_integer -> . IDENTIFIER
-    (57) let_or_integer -> . INTEGER
+    (54) slice_indexing -> let_or_integer COLON let_or_integer COLON let_or_integer .
 
-    IDENTIFIER      shift and go to state 45
-    INTEGER         shift and go to state 46
+    RBRACKET        reduce using rule 54 (slice_indexing -> let_or_integer COLON let_or_integer COLON let_or_integer .)
 
-    let_or_integer                 shift and go to state 96
-
-state 96
-
-    (55) slice_indexing -> let_or_integer COLON let_or_integer COLON let_or_integer .
-
-    RBRACKET        reduce using rule 55 (slice_indexing -> let_or_integer COLON let_or_integer COLON let_or_integer .)
-
-WARNING: 
-WARNING: Conflicts:
-WARNING: 
-WARNING: shift/reduce conflict for RBRACKET in state 80 resolved as shift
