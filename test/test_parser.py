@@ -147,44 +147,44 @@ class ParserTester(ParserTesterMixin, unittest.TestCase):
         act_tree = self.simplify_tree(tree)
         self.assertEqual(exp_tree, act_tree)
 
-    def test_require_statement(self):
-        """Test parsing an require statement."""
-        text = "require foo"
-        parser = make_lark_parser(start='require_statement')
+    def test_usepulses_statement(self):
+        """Test parsing an usepulses statement."""
+        text = "usepulses foo"
+        parser = make_lark_parser(start='usepulses_statement')
         tree = parser.parse(text)
-        exp_tree = self.make_require_statement(None, [self.make_as_clause('foo')])
+        exp_tree = self.make_usepulses_statement(None, [self.make_as_clause('foo')])
         act_tree = self.simplify_tree(tree)
         self.assertEqual(exp_tree, act_tree)
 
-    def test_require_as_statement(self):
-        text = "require foo as bar"
-        parser = make_lark_parser(start='require_statement')
+    def test_usepulses_as_statement(self):
+        text = "usepulses foo as bar"
+        parser = make_lark_parser(start='usepulses_statement')
         tree = parser.parse(text)
-        exp_tree = self.make_require_statement(None, [self.make_as_clause('foo', 'bar')])
+        exp_tree = self.make_usepulses_statement(None, [self.make_as_clause('foo', 'bar')])
         act_tree = self.simplify_tree(tree)
         self.assertEqual(exp_tree, act_tree)
 
-    def test_require_from_statement(self):
-        text = "from foo require bar"
-        parser = make_lark_parser(start='require_statement')
+    def test_usepulses_from_statement(self):
+        text = "from foo usepulses bar"
+        parser = make_lark_parser(start='usepulses_statement')
         tree = parser.parse(text)
-        exp_tree = self.make_require_statement(self.make_from_clause('foo'), [self.make_as_clause('bar')])
+        exp_tree = self.make_usepulses_statement(self.make_from_clause('foo'), [self.make_as_clause('bar')])
         act_tree = self.simplify_tree(tree)
         self.assertEqual(exp_tree, act_tree)
 
-    def test_require_from_as_statement(self):
-        text = "from foo require bar0 as bar1"
-        parser = make_lark_parser(start='require_statement')
+    def test_usepulses_from_as_statement(self):
+        text = "from foo usepulses bar0 as bar1"
+        parser = make_lark_parser(start='usepulses_statement')
         tree = parser.parse(text)
-        exp_tree = self.make_require_statement(self.make_from_clause('foo'), [self.make_as_clause('bar0', 'bar1')])
+        exp_tree = self.make_usepulses_statement(self.make_from_clause('foo'), [self.make_as_clause('bar0', 'bar1')])
         act_tree = self.simplify_tree(tree)
         self.assertEqual(exp_tree, act_tree)
 
-    def test_require_all(self):
-        text = "from foo require *"
-        parser = make_lark_parser(start='require_statement')
+    def test_usepulses_all(self):
+        text = "from foo usepulses *"
+        parser = make_lark_parser(start='usepulses_statement')
         tree = parser.parse(text)
-        exp_tree = self.make_require_statement(self.make_from_clause('foo'), [self.make_all_module()])
+        exp_tree = self.make_usepulses_statement(self.make_from_clause('foo'), [self.make_all_module()])
         act_tree = self.simplify_tree(tree)
         self.assertEqual(exp_tree, act_tree)
 

@@ -82,6 +82,18 @@ class VisitTransformer(Transformer):
         identifier, number = args
         return self._visitor.visit_let_statement(identifier, number)
 
+    def usepulses_statement(self, args):
+        if len(args) != 2:
+            raise NotImplementedError("Only from foo usepulses * implemented")
+        if args[0].data == 'from_clause':
+            if args[1].data != 'all_module':
+                raise NotImplementedError("Only from foo usepulses * implemented")
+            identifier = args[0].children[0]
+            objects = all
+        else:
+            raise NotImplementedError("Only from foo usepulses * implemented")
+        return self._visitor.visit_usepulses_statement(identifier, objects)
+
     def body_statements(self, args):
         return [stmt for stmt in args if stmt is not None]
 
@@ -257,6 +269,16 @@ class ParseTreeVisitor(ABC):
         pass
 
     @abstractmethod
+    def visit_usepulses_statement(self, identifier, objects):
+        """Visit a usepulses statement. The identifier is the name of the
+        module to import (possibly with namespaces). objects is either None, all,
+        or a list of identifiers. None means the usepulses was imported with its
+        namespace. all (the Python built-in function) means all objects in that
+        namespace were imported into the global namespace. Finally, a list of
+        identifiers means those identifiers are pulled into the global namespace."""
+        pass
+
+    @abstractmethod
     def visit_gate_statement(self, gate_name, gate_args):
         """Visit a gate. The args are gathered into a list or identifiers, numbers, and array elements."""
         pass
@@ -356,6 +378,14 @@ class TreeManipulators:
     @staticmethod
     def make_let_statement(identifier, number):
         return Tree('let_statement', [identifier, number])
+
+    @staticmethod
+    def make_usepulses_statement(identifier, objects):
+        if objects is not all:
+            raise NotImplementedError("Only from foo usepulses * implemented")
+        from_clause = Tree('from_clause', [identifier])
+        all_module = Tree('all_module', [])
+        return Tree('usepulses_statement', [from_clause, all_module])
 
     @staticmethod
     def make_gate_statement(gate_name, gate_args):
@@ -734,6 +764,9 @@ class TreeRewriteVisitor(ParseTreeVisitor, TreeManipulators):
 
     def visit_let_statement(self, identifier, number):
         return self.make_let_statement(identifier, number)
+
+    def visit_usepulses_statement(self, identifier, objects):
+        return self.make_usepulses_statement(identifier, objects)
 
     def visit_gate_statement(self, gate_name, gate_args):
         return self.make_gate_statement(gate_name, gate_args)
