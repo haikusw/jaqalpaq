@@ -76,14 +76,14 @@ class ScheduledCircuit:
 		:returns: A dict mapping fundamental register names to sets of the indices within those registers which are used by the instruction.
 		"""
 		if isinstance(instr, LoopStatement):
-			return self.used_qubit_indices(self, instr.gates)
+			return self.used_qubit_indices(instr.gates)
 		
-		indices = {r.name: set() for r in self.fundamental_registers}
+		indices = {r.name: set() for r in self.fundamental_registers()}
 		if instr is None: instr = self.gates
 		
 		if isinstance(instr, GateBlock):
 			for sub_instr in instr:
-				new_indices = self.used_qubit_indices(self, sub_instr)
+				new_indices = self.used_qubit_indices(sub_instr)
 				for k in new_indices:
 					indices[k] |= new_indices[k]
 		elif isinstance(instr, GateStatement):

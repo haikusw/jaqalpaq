@@ -63,11 +63,15 @@ class AbstractGate:
 			raise QSCOUTError("Cannot mix named and positional parameters in call to gate.")
 		else:
 			if not self.parameters:
-				params = None
+				params = {}
 			else:
 				raise QSCOUTError("Insufficient parameters for gate %s." % self.name)
 		for name in params:
-			self.parameters[name].validate(params[name])
+			for param in self.parameters:
+				if param.name == name:
+					param.validate(params[name])
+					continue
+			#raise QSCOUTError("Parameters %s do not match required parameters %s." % (str(kwargs.keys()), str([param.name for param in self.parameters])))
 		return GateStatement(self.name, params)
 	
 	def __call__(self, *args, **kwargs):

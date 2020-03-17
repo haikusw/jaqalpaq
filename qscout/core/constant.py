@@ -13,11 +13,11 @@ class Constant(AnnotatedValue):
 	"""
 	def __init__(self, name, value):
 		if isinstance(value, Constant):
-			super().__init__(self, name, value.kind)
+			super().__init__(name, value.kind)
 		elif isinstance(value, float):
-			super().__init__(self, name, FLOAT_TYPE)
+			super().__init__(name, FLOAT_TYPE)
 		elif isinstance(value, int):
-			super().__init__(self, name, INT_TYPE)
+			super().__init__(name, INT_TYPE)
 		else:
 			raise QSCOUTError("Invalid/non-numeric value %s for constant %s!" % (value, name))
 		self._value = value

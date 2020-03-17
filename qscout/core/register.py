@@ -155,6 +155,9 @@ class Register:
 			# return Register(self.name + '[' + str(key) + ']', alias_from=self, alias_slice=key)
 		else:
 			return NamedQubit(self.name + '[' + str(key) + ']', self, key)
+	
+	def __len__(self):
+		return self.size
 
 class NamedQubit:
 	"""
