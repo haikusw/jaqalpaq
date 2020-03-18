@@ -1,6 +1,8 @@
 """Provide an interface to the parsing functions that also caches computation and allows for re-evaluation with
 different constant values."""
 
+from functools import lru_cache
+
 from .parse import parse_with_lark, TreeRewriteVisitor
 from .extract_let import extract_let
 from .extract_map import extract_map
@@ -148,6 +150,39 @@ class Interface:
 
         tree = resolve_macro(tree, {})  # The extra argument may be used for imported macros
         self._initial_tree = strip_headers_and_macro_definitions(tree)
+
+
+class HashDict(dict):
+    def __hash__(self):
+        return hash(tuple(sorted(self.items())))
+
+
+def make_hashable(value):
+    if isinstance(value, dict):
+        return HashDict(value)
+    else:
+        return value
+
+
+memo_maxsize = 32
+
+
+def memoize_method(func):
+    memo_func = lru_cache(maxsize=memo_maxsize)(func)
+
+    def inner(self, *args, **kwargs):
+        args = tuple(make_hashable(arg) for arg in args)
+        kwargs = {key: make_hashable(value) for key, value in sorted(kwargs.items())}
+        return memo_func(self, *args, **kwargs)
+    return inner
+
+
+class MemoizedInterface(Interface):
+    """An interface that is identical but memoizes certain calls."""
+
+    @memoize_method
+    def get_uniformly_timed_gates_and_registers(self, override_dict=None):
+        return super().get_uniformly_timed_gates_and_registers(override_dict=override_dict)
 
 
 def convert_to_int(token):

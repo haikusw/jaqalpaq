@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from jaqal.interface import Interface
+from jaqal.interface import Interface, MemoizedInterface
 from jaqal.iter_gates import Gate, Loop, ParallelGateBlock, SequentialGateBlock
 from jaqal.identifier import Identifier
 
@@ -167,6 +167,34 @@ class InterfaceTester(TestCase):
         exp_result = {Identifier.parse('foo.bar'): all}
         iface = Interface(text, allow_no_usepulses=True)
         act_result = iface.usepulses
+        self.assertEqual(exp_result, act_result)
+
+    def test_memoize(self):
+        """Test that a memoized interface saves its entries."""
+        text = "let a 7; register r[10]; foo r[a]"
+        iface = MemoizedInterface(text, allow_no_usepulses=True)
+        let_dict = {'a': 2}
+        exp_result = [Gate('foo', [('r', 2)])]
+        act_result, _ = iface.get_uniformly_timed_gates_and_registers(let_dict)
+        self.assertEqual(exp_result, act_result)
+        iface._initial_tree = None  # This uses guilty knowledge to break the invariants
+        with self.assertRaises(Exception):
+            iface.get_uniformly_timed_gates_and_registers({'a': 11})
+        # But since the result is cached, this computation should still work
+        act_result, _ = iface.get_uniformly_timed_gates_and_registers(let_dict)
+        self.assertEqual(exp_result, act_result)
+
+    def test_memoize_key_order_independence(self):
+        """Test that a memoized interface is independent of its key ordering."""
+        text = "let a 7; let b 5; register r[10]; foo r[a]; bar r[b]"
+        iface = MemoizedInterface(text, allow_no_usepulses=True)
+        let_dict = {'a': 2, 'b': 3}
+        exp_result = [Gate('foo', [('r', 2)]), Gate('bar', [('r', 3)])]
+        act_result, _ = iface.get_uniformly_timed_gates_and_registers(let_dict)
+        self.assertEqual(exp_result, act_result)
+        iface._initial_tree = None  # Break things
+        tel_dict = {'b': 3, 'a': 2}
+        act_result, _ = iface.get_uniformly_timed_gates_and_registers(tel_dict)
         self.assertEqual(exp_result, act_result)
 
     ##
