@@ -119,10 +119,12 @@ class Interface:
         unresolved let constants in the map definitions, therefore it is best to run after resolve_let.
 
         tree -- A parse tree. If not provided, will use the one stored internally. This tree is not modified. You must
-        use a tree that is based on transformations of the tree stored in this Interface.
+        use a tree that is based on transformations of the tree stored in this Interface. If any map statements in this
+        tree use let constants still, an error will result.
 
         let_dict -- A dictionary mapping identifiers to parse trees. Use make_let_dict() to create this.
         """
+        tree = tree or self._initial_tree
         let_dict = let_dict or self.make_let_dict()
         map_dict = {key: resolve_let(value, let_dict) for key, value in self._map_dict.items()}
         return resolve_map(tree, map_dict, self._registers)
