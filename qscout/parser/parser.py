@@ -1,5 +1,5 @@
 import ply.yacc as yacc
-from qscout.core import GateBlock, LoopStatement, ScheduledCircuit, Constant, GateStatement, GateDefinition, Macro, Parameter, Register, NamedQubit
+from qscout.core import BlockStatement, LoopStatement, ScheduledCircuit, Constant, GateStatement, GateDefinition, Macro, Parameter, Register, NamedQubit
 from qscout import QSCOUTError
 from qscout.parser.lexer import get_lexer, tokens # IMPORTANT: PLY has a bad time if this is a relative import, for some reason.
 
@@ -33,9 +33,9 @@ def p_program(p):
 		if s[0] == 'loop':
 			return LoopStatement(resolve_id(s[1], params, False), process_statement(s[2], params))
 		elif s[0] == 'par':
-			return GateBlock(True, [process_statement(x, params) for x in s[1]])
+			return BlockStatement(True, [process_statement(x, params) for x in s[1]])
 		elif s[0] == 'seq':
-			return GateBlock(False, [process_statement(x, params) for x in s[1]])
+			return BlockStatement(False, [process_statement(x, params) for x in s[1]])
 		elif s[0] == 'gate':
 			raw_args = s[2]
 			args = []
@@ -58,7 +58,7 @@ def p_program(p):
 			print(b)
 			c.macro(b[1], b[2], process_statement(b[3], {param.name: param for param in b[2]}))
 		else:
-			c.gates.append(process_statement(b))
+			c.body.append(process_statement(b))
 	p[0] = c
 
 def p_program_blanks(p):

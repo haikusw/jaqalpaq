@@ -1,8 +1,8 @@
-from qscout.core import GateBlock, LoopStatement, GateStatement, QUBIT_TYPE
+from qscout.core import BlockStatement, LoopStatement, GateStatement, QUBIT_TYPE
 
 def schedule_circuit(circ):
 	"""
-	Takes every :class:`qscout.core.GateBlock` in a circuit with ``parallel=None``, and
+	Takes every :class:`qscout.core.BlockStatement` in a circuit with ``parallel=None``, and
 	replaces it with a block that is functionally identical (contains the same gates,
 	without reordering any non-commuting operations); complies with the restrictions of
 	the QSCOUT hardware and low-level software stack; and reorders gates to act in
@@ -27,24 +27,24 @@ def schedule_circuit(circ):
 	
 	:param ScheduledCircuit circ: The circuit to parallelize (in-place).
 	"""
-	schedule_block(circ, circ.gates)
+	schedule_block(circ, circ.body)
 
 def schedule_block(circ, block):
 	force_flatten = False
 	for instr in block:
-		if isinstance(instr, GateBlock):
+		if isinstance(instr, BlockStatement):
 			schedule_block(circ, instr)
 			if not (instr.parallel or block.parallel):
 				force_flatten = True
 		elif isinstance(instr, LoopStatement):
-			schedule_block(circ, instr.gates)
+			schedule_block(circ, instr.statements)
 	if block.parallel is None:
-		new_block = GateBlock()
+		new_block = BlockStatement()
 		used_qubits = circ.used_qubit_indices(block)
 		freeze_timestamps = {regname: {idx: -1 for idx in used_qubits[regname]} for regname in used_qubits}
 		for instr in block:
 			schedule_instr(circ, instr, new_block, freeze_timestamps)
-		block._gates = new_block.gates # TODO: Make this cleaner
+		block._statements = new_block.statements # TODO: Make this cleaner
 		block.parallel = False
 	elif force_flatten:
 		# The block we're trying to schedule is locked to sequential order, but one of the
@@ -53,17 +53,17 @@ def schedule_block(circ, block):
 		# into a sequential block.) Nesting blocks of the same type is forbidden by Jaqal,
 		# so we need to flatten the inner block.
 		i = 0
-		while i < len(block): # We can't do this with a for loop since block.gates
+		while i < len(block): # We can't do this with a for loop since block.statements
 			# will get longer as we're iterating over it.
 			inc = 1
-			if isinstance(block[i], GateBlock) and not block[i].parallel:
+			if isinstance(block[i], BlockStatement) and not block[i].parallel:
 				inc = len(block[i]) - 1
-				block[i:i+1] = block[i].gates
+				block[i:i+1] = block[i].statements
 			i += inc			
 
 def schedule_instr(circ, instr, target, freeze_timestamps, after=-1):
 	used_qubits = circ.used_qubit_indices(instr)
-	is_block = isinstance(instr, GateBlock)
+	is_block = isinstance(instr, BlockStatement)
 	is_gate = isinstance(instr, GateStatement)
 	is_loop = isinstance(instr, LoopStatement)
 	if (is_block and instr.parallel) or is_gate:
@@ -76,16 +76,16 @@ def schedule_instr(circ, instr, target, freeze_timestamps, after=-1):
 		if defrost >= len(target):
 			target.append(instr)
 		elif is_block:
-			if isinstance(target[defrost], GateBlock):
-				target[defrost].gates.extend(instr.gates)
+			if isinstance(target[defrost], BlockStatement):
+				target[defrost].statements.extend(instr.statements)
 			else:
-				instr.gates.append(target[defrost])
+				instr.statements.append(target[defrost])
 				target[defrost] = instr
 		else:
-			if isinstance(target[defrost], GateBlock):
-				target[defrost].gates.append(instr)
+			if isinstance(target[defrost], BlockStatement):
+				target[defrost].statements.append(instr)
 			else:
-				target[defrost] = GateBlock(True, [instr, target[defrost]])
+				target[defrost] = BlockStatement(True, [instr, target[defrost]])
 	elif is_block:
 		# You can't nest two sequential blocks, so we flatten the block.
 		for sub_instr in instr:
@@ -103,7 +103,7 @@ def schedule_instr(circ, instr, target, freeze_timestamps, after=-1):
 	return defrost
 
 def can_parallelize(circ, block, instr, qubits):
-	if isinstance(block, GateBlock) and block.parallel:
+	if isinstance(block, BlockStatement) and block.parallel:
 		block_used_qubits = circ.used_qubit_indices(block)
 		for reg in block_used_qubits:
 			if reg in qubits and not block_used_qubits[reg].isdisjoint(qubits[reg]):
@@ -111,7 +111,7 @@ def can_parallelize(circ, block, instr, qubits):
 		for sub_instr in block:
 			if not can_parallelize_subinstr(circ, sub_instr):
 				return False
-		if isinstance(instr, GateBlock):
+		if isinstance(instr, BlockStatement):
 			for sub_instr in instr:
 				if not can_parallelize_gate(circ, block, sub_instr, qubits):
 					return False # If we can parallelize all the components, we can parallelize the block.
@@ -121,8 +121,8 @@ def can_parallelize(circ, block, instr, qubits):
 			return False # We don't know what this is, so we can't parallelize it.
 	elif isinstance(block, GateStatement):
 		if isinstance(instr, GateStatement):
-			return can_parallelize_subinstr(circ, block) and can_parallelize_gate(circ, GateBlock(True, [block]), instr, qubits)
-		elif isinstance(instr, GateBlock):
+			return can_parallelize_subinstr(circ, block) and can_parallelize_gate(circ, BlockStatement(True, [block]), instr, qubits)
+		elif isinstance(instr, BlockStatement):
 			return can_parallelize_subinstr(circ, block) and can_parallelize_gate(circ, instr, block, qubits)
 		else:
 			return False # We don't know what this is, so we can't parallelize it.

@@ -38,7 +38,7 @@ def qscout_circuit_from_tket_circuit(tkc, native_gates = None, names = None):
 	measure_accumulator = set()
 	for command in tkc:
 		block, measure_accumulator = convert_command(command, qsc, block, names, measure_accumulator, n)
-	if qsc.gates[-1][-1].name != 'measure_all':
+	if qsc.body[-1][-1].name != 'measure_all':
 		qsc.gate('measure_all')
 	return qsc
 
