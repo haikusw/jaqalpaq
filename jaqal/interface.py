@@ -118,7 +118,7 @@ def memoize_method(func):
 
     def inner(self, *args, **kwargs):
         args = tuple(make_hashable(arg) for arg in args)
-        kwargs = {key: make_hashable(value) for key, value in kwargs.items()}
+        kwargs = {key: make_hashable(value) for key, value in sorted(kwargs.items())}
         return memo_func(self, *args, **kwargs)
     return inner
 
