@@ -4,7 +4,7 @@ from jaqal import Interface, TreeRewriteVisitor, TreeManipulators
 
 from qscout.core import (
     ScheduledCircuit, Register, NamedQubit, GateDefinition,
-    Parameter
+    Parameter, GateBlock, LoopStatement
 )
 
 
@@ -58,7 +58,19 @@ class CoreTypesVisitor(TreeRewriteVisitor, TreeManipulators):
         circuit = ScheduledCircuit()
         for stmt in body_statements:
             circuit.gates.append(stmt)
+        circuit.registers.update(self.registers)
+        circuit.native_gates.update(self.gate_definitions)
         return circuit
+
+    def visit_parallel_gate_block(self, statements):
+        return GateBlock(parallel=True, gates=statements)
+
+    def visit_sequential_gate_block(self, statements):
+        return GateBlock(parallel=False, gates=statements)
+
+    def visit_loop_statement(self, repetition_count, block):
+        repetition_count = self.extract_integer(repetition_count)
+        return LoopStatement(iterations=repetition_count, gates=block)
 
     def visit_gate_statement(self, gate_name, gate_args):
         gate_name = str(self.extract_qualified_identifier(gate_name))
