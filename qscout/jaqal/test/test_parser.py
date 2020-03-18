@@ -1,7 +1,7 @@
 from unittest import TestCase
 from numbers import Number
 
-from qscout.core import GateDefinition, Register, ScheduledCircuit
+from qscout.core import GateDefinition, Register, ScheduledCircuit, Parameter
 from qscout.jaqal.parser import parse_jaqal_string
 
 class ParserTester(TestCase):
@@ -13,6 +13,20 @@ class ParserTester(TestCase):
     def test_gate_statement_no_args(self):
         text = "foo"
         exp_result = self.make_circuit(gates=[self.make_gate('foo')])
+        self.run_test(text, exp_result)
+
+    def test_gate_statement_numeric_arg(self):
+        text = "foo 3.14"
+        exp_result = self.make_circuit(gates=[self.make_gate('foo', 3.14)])
+        self.run_test(text, exp_result)
+
+    def test_gate_statement_qubit_arg(self):
+        text = "register r[3]; foo r[1]"
+        exp_result = self.make_circuit(
+            gates=[
+                self.make_gate('foo', ('r', 1))
+            ]
+        )
         self.run_test(text, exp_result)
 
     ##
@@ -31,17 +45,18 @@ class ParserTester(TestCase):
         return circuit
 
     def make_gate(self, name, *args):
+        arg_objects = [self.make_argument_object(arg) for arg in args]
         if name not in self.gate_definitions:
-            params = [self.make_parameter(arg) for arg in args]
+            params = [self.make_parameter(idx, arg) for idx, arg in enumerate(args)]
             gate_def = GateDefinition(name, params)
             self.gate_definitions[name] = gate_def
         else:
             gate_def = self.gate_definitions[name]
-        return gate_def(*args)
+        return gate_def(*arg_objects)
 
-    def make_parameter(self, arg):
+    def make_argument_object(self, arg):
         if isinstance(arg, Number):
-            return 'float'
+            return arg
         elif isinstance(arg, tuple):
             return self.make_qubit(*arg)
 
@@ -52,3 +67,9 @@ class ParserTester(TestCase):
             return reg[index]
         else:
             return self.registers[name][index]
+
+    def make_parameter(self, index, arg):
+        if isinstance(arg, Number):
+            return Parameter(str(index), 'float')
+        elif isinstance(arg, tuple):
+            return Parameter(str(index), 'qubit')

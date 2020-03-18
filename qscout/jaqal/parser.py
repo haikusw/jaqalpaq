@@ -69,6 +69,7 @@ class CoreTypesVisitor(TreeRewriteVisitor, TreeManipulators):
 
     def visit_array_element_qual(self, identifier, index):
         index = int(index)
+        identifier = self.extract_qualified_identifier(identifier)
         reg = self.registers[str(identifier)][index]
         return reg
 
