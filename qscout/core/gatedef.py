@@ -16,7 +16,16 @@ class AbstractGate:
 			self._parameters = []
 		else:
 			self._parameters = parameters
-	
+
+	def __repr__(self):
+		return f"{type(self).__name__}({self.name}, {self.parameters})"
+
+	def __eq__(self, other):
+		try:
+			return self.name == other.name and self.parameters == other.parameters
+		except AttributeError:
+			return False
+
 	@property
 	def name(self):
 		"""
