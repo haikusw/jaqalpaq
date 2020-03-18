@@ -100,7 +100,7 @@ class Interface:
 
 class HashDict(dict):
     def __hash__(self):
-        return hash(tuple(self.items()))
+        return hash(tuple(sorted(self.items())))
 
 
 def make_hashable(value):
