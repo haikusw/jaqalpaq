@@ -16,9 +16,9 @@ Key components that we should provide:
 
 To make the software stack as modular as possible, and incidentally also decrease the risk of circular dependencies, we should follow the following philosophy of dependencies:
 * Any file at the top-level of the module should depend on only other files at the top-level.
-* Any file in the `qscout.core` submodule can depend on top-level files and other files in `qscout.core`.
-* Any file in another submodule can depend on top-level files, files from `qscout.core`, and other files in the same submodule.
-* Each submodule should function correctly even if every submodule other than that one and `qscout.core` were removed.
-* External dependencies may be required by the `qscout` package as a whole, or be required by only a single submodule.
-For example, each external toolchain's Python API, if one exists, should be required only by the compatibility module for that toolchain; but `numpy` is a reasonable requirement for the module as a whole.
+* Any file in the `jaqal.core` submodule can depend on top-level files and other files in `jaqal.core`.
+* Any file in another submodule can depend on top-level files, files from `jaqal.core`, and other files in the same submodule.
+* Each submodule should function correctly even if every submodule other than that one and `jaqal.core` were removed.
+* External dependencies may be required by the `jaqal` package as a whole, or be required by only a single submodule.
+For example, each external toolchain's Python API, if one exists, should be required only by the compatibility module for that toolchain; but `numpy` is a reasonable requirement for the package as a whole.
 If an external toolchain's Python API is missing, the function of the rest of the software stack should be unaffected.

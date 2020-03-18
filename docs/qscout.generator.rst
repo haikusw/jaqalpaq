@@ -1,7 +1,7 @@
-qscout.generator package
+jaqal.generator package
 ========================
 
-.. automodule:: qscout.generator
+.. automodule:: jaqal.generator
    :members:
    :undoc-members:
    :show-inheritance:

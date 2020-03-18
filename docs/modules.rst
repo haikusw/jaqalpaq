@@ -1,7 +1,7 @@
-qscout
+jaqal
 ======
 
 .. toctree::
    :maxdepth: 4
 
-   qscout
+   jaqal

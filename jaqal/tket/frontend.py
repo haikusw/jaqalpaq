@@ -1,10 +1,10 @@
 from pytket.circuit import OpType
 
-from qscout.core import ScheduledCircuit
+from jaqal.core import ScheduledCircuit
 
 import numpy as np
 
-from qscout import QSCOUTError
+from jaqal import QSCOUTError
 
 TKET_NAMES = {OpType.PhasedX: lambda q, alpha, beta: ('R', q, alpha, -beta), OpType.Rz: lambda q, theta: ('Rz', q, theta), OpType.XXPhase: lambda q1, q2, theta: ('MS', q1, q2, 0, theta)}
 

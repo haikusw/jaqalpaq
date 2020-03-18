@@ -1,5 +1,5 @@
-from qscout.core import ScheduledCircuit
-from qscout import QSCOUTError
+from jaqal.core import ScheduledCircuit
+from jaqal import QSCOUTError
 import networkx as nx
 from pyquil.device import NxDevice
 from pyquil.api import QuantumComputer

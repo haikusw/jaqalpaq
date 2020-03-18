@@ -1,4 +1,4 @@
-from qscout.core import BlockStatement, LoopStatement, GateStatement, QUBIT_TYPE
+from jaqal.core import BlockStatement, LoopStatement, GateStatement, QUBIT_TYPE
 
 def schedule_circuit(circ):
 	"""

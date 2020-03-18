@@ -1,6 +1,6 @@
-qscout.core package
+jaqal.core package
 ===================
 
-.. automodule:: qscout.core
+.. automodule:: jaqal.core
 	:undoc-members:
 	:members:

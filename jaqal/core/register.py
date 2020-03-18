@@ -1,4 +1,4 @@
-from qscout import QSCOUTError
+from jaqal import QSCOUTError
 from .parameter import AnnotatedValue, Parameter, INT_TYPE, REGISTER_TYPE
 from .constant import Constant
 

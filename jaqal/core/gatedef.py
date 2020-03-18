@@ -1,5 +1,5 @@
 from .parameter import Parameter, QUBIT_TYPE, FLOAT_TYPE, REGISTER_TYPE
-from qscout import QSCOUTError
+from jaqal import QSCOUTError
 from .gate import GateStatement
 
 class AbstractGate:

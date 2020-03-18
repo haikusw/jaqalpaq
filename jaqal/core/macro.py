@@ -1,7 +1,7 @@
 from .block import BlockStatement
 from .gate import GateStatement
 from .gatedef import AbstractGate
-from qscout import QSCOUTError
+from jaqal import QSCOUTError
 
 class Macro(AbstractGate):
 	"""
