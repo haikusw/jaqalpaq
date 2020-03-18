@@ -25,6 +25,6 @@ class Macro(AbstractGate):
 	@property
 	def body(self):
 		"""
-		A :class:`GateBlock` that implements the macro.
+		A :class:`BlockStatement` that implements the macro.
 		"""
 		return self._body

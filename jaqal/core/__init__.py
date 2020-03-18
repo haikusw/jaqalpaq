@@ -1,4 +1,4 @@
-from .block import GateBlock, LoopStatement
+from .block import BlockStatement, LoopStatement
 from .circuit import ScheduledCircuit
 from .constant import Constant
 from .gate import GateStatement
@@ -7,7 +7,7 @@ from .macro import Macro
 from .parameter import QUBIT_TYPE, FLOAT_TYPE, REGISTER_TYPE, INT_TYPE, PARAMETER_TYPES, AnnotatedValue, Parameter
 from .register import Register, NamedQubit
 __all__ = [
-	'GateBlock', 'LoopStatement', 
+	'BlockStatement', 'LoopStatement', 
 	'ScheduledCircuit', 
 	'Constant', 
 	'GateStatement', 

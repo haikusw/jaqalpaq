@@ -70,7 +70,7 @@ def convert_command(command, qsc, block, names, measure_accumulator, n, remaps =
 		block = qsc.block(parallel = None) # Use barriers to inform the scheduler, as explained above.
 	elif op_type in (OpType.CircBox, OpType.ExpBox, OpType.PauliExpBox):
 		new_remaps = [remaps[qb.index[0]] for qb in command.qubits]
-		macro_block = GateBlock()
+		macro_block = BlockStatement()
 		subcirq = command.op.get_circuit()
 		for cmd in subcirq:
 			convert_command(cmd, qsc, macro_block, names, set(), n, new_remaps)
