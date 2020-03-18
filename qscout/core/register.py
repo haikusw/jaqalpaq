@@ -48,7 +48,24 @@ class Register:
 			elif alias_from.size is not None and not isinstance(alias_from.size, AnnotatedValue):
 				if alias_slice.stop > alias_from.size:
 					raise QSCOUTError("Index out of range.")
-	
+
+	def __repr__(self):
+		if self.fundamental:
+			return f"Register({repr(self.name)}, {self.size})"
+		else:
+			return f"Register({repr(self.name)}, {self.alias_from}, {self.alias_slice})"
+
+	def __eq__(self, other):
+		try:
+			if self.name != other.name:
+				return False
+			if self.fundamental:
+				return self.size == other.size
+			else:
+				return self.alias_from == other.alias_from and self.alias_slice == other.alias_slice
+		except AttributeError:
+			return False
+
 	@property
 	def name(self):
 		"""

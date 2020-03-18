@@ -13,7 +13,17 @@ class GateStatement:
 			self._parameters = {}
 		else:
 			self._parameters = parameters
-	
+
+	def __repr__(self):
+		params = ', '.join([repr(self.name)] + [repr(param) for param in self.parameters])
+		return f"GateStatement({params})"
+
+	def __eq__(self, other):
+		try:
+			return self.name == other.name and all(sparam == oparam for sparam, oparam in zip(self.parameters, other.parameters))
+		except AttributeError:
+			return False
+
 	@property
 	def parameters(self):
 		"""

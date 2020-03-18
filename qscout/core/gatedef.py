@@ -75,7 +75,7 @@ class AbstractGate:
 		return GateStatement(self.name, params)
 	
 	def __call__(self, *args, **kwargs):
-		self.call(*args, **kwargs)
+		return self.call(*args, **kwargs)
 
 class GateDefinition(AbstractGate):
 	"""

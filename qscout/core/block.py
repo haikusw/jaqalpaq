@@ -14,7 +14,16 @@ class GateBlock:
 			self._gates = []
 		else:
 			self._gates = gates
-	
+
+	def __repr__(self):
+		return f"GateBlock(parallel={self.parallel}, {self.gates})"
+
+	def __eq__(self, other):
+		try:
+			return self.parallel == other.parallel and self.gates == other.gates
+		except AttributeError:
+			return False
+
 	@property
 	def gates(self):
 		"""

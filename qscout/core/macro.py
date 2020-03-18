@@ -21,7 +21,13 @@ class Macro(AbstractGate):
 			self._body = GateBlock()
 		else:
 			self._body = body
-	
+
+	def __repr__(self):
+		return f"Macro({repr(self.name)}, {self.parameters}, {self.body})"
+
+	def __eq__(self, other):
+		return self.name == other.name and self.parameters == other.parameters and self.body == other.body
+
 	@property
 	def body(self):
 		"""
