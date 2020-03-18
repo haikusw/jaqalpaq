@@ -70,7 +70,16 @@ class LoopStatement:
 			self._gates = GateBlock()
 		else:
 			self._gates = gates
+
+	def __repr__(self):
+		return f"LoopStatement({self.iterations}, {self.gates})"
 	
+	def __eq__(self, other):
+		try:
+			return self.iterations == other.iterations and self.gates == other.gates
+		except AttributeError:
+			return False
+
 	@property
 	def gates(self):
 		"""
