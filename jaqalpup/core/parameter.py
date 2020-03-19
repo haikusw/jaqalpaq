@@ -59,6 +59,12 @@ class AnnotatedValue:
 			return context[self.name]
 		else:
 			raise QSCOUTError("Unbound identifier %s." % self.name)
+	
+	@property
+	def classical(self):
+		if self._kind is None:
+			raise QSCOUTError(f'No type defined for parameter {self.name}.')
+		return self._kind not in (QUBIT_TYPE, REGISTER_TYPE)
 
 class Parameter(AnnotatedValue):
 	"""
