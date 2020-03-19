@@ -1,7 +1,7 @@
-jaqal package
-==============
+jaqalpup package
+================
 
-.. automodule:: jaqal
+.. automodule:: jaqalpup
    :members: QSCOUTError
    :undoc-members:
    :show-inheritance:
@@ -15,10 +15,10 @@ Subpackages
 
 .. toctree::
 
-   jaqal.cirq
-   jaqal.core
-   jaqal.generator
-   jaqal.parser
-   jaqal.qiskit
-   jaqal.quil
-   jaqal.scheduler
+   jaqalpup.cirq
+   jaqalpup.core
+   jaqalpup.generator
+   jaqalpup.parser
+   jaqalpup.qiskit
+   jaqalpup.quil
+   jaqalpup.scheduler

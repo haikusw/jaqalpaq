@@ -1,7 +1,7 @@
-jaqal
-======
+jaqalpup
+========
 
 .. toctree::
    :maxdepth: 4
 
-   jaqal
+   jaqalpup
