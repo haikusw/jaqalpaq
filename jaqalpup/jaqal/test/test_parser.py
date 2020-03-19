@@ -1,10 +1,10 @@
 from unittest import TestCase
 from numbers import Number
 
-from jaqal.core import (
+from jaqalpup.core import (
     GateDefinition, Register, ScheduledCircuit, Parameter, BlockStatement, LoopStatement
 )
-from jaqal.jaqal.parser import parse_jaqal_string
+from jaqalpup.jaqal.parser import parse_jaqal_string
 
 class ParserTester(TestCase):
 
@@ -112,7 +112,7 @@ class ParserTester(TestCase):
                  override_dict=None):
         act_result = parse_jaqal_string(text, override_dict=override_dict)
         if exp_result is not None:
-            self.assertEqual(exp_result.gates, act_result.gates)
+            self.assertEqual(exp_result.body, act_result.body)
         if exp_registers is not None:
             self.assertEqual(exp_registers, act_result.registers)
         if exp_native_gates is not None:
@@ -122,7 +122,7 @@ class ParserTester(TestCase):
     def make_circuit(*, gates):
         circuit = ScheduledCircuit()
         for gate in gates:
-            circuit.gates.append(gate)
+            circuit.body.append(gate)
         return circuit
 
     def make_gate(self, name, *args):
