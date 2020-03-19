@@ -1,13 +1,13 @@
-jaqal.parser package
-=====================
+jaqalpup.parser package
+=======================
 
 ..
 	To avoid confusing the PLY library, which inspects docstrings to build a grammar, we
 	cannot autodoc this module.
 
-.. module:: jaqal.parser
+.. module:: jaqalpup.parser
 
-.. function:: jaqal.parser.parse_jaqal_string(jaqal)
+.. function:: jaqalpup.parser.parse_jaqal_string(jaqal)
 	
 	Loads a Jaqal program into a :class:`ScheduledCircuit` object that represents it.
 	

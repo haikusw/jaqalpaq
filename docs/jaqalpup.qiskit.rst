@@ -1,15 +1,15 @@
-jaqal.qiskit package
-=====================
+jaqalpup.qiskit package
+=======================
 
-.. automodule:: jaqal.qiskit
+.. automodule:: jaqalpup.qiskit
    :members:
    :undoc-members:
    :show-inheritance:
 
-jaqal.circuit.QuantumCircuit extensions
-----------------------------------------
+qiskit.circuit.QuantumCircuit extensions
+------------------------------------------
 
-Importing the jaqal.qiskit package also patches the :class:`qiskit.circuit.QuantumCircuit` object,
+Importing the jaqalpup.qiskit package also patches the :class:`qiskit.circuit.QuantumCircuit` object,
 adding the following four methods. This follows the standard Qiskit API, allowing
 users to add trapped-ion gates to circuits using the same syntax as gates from the Qiskit
 standard extension.
