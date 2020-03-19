@@ -53,9 +53,9 @@ class LoopStatement:
 	Represents a Jaqal loop statement.
 	
 	:param int iterations: The number of times to repeat the loop.
-	:param BlockStatement gates: The block to repeat. If omitted, a new sequential block will be created.
+	:param BlockStatement statements: The block to repeat. If omitted, a new sequential block will be created.
 	"""
-	def __init__(self, iterations, gates=None):
+	def __init__(self, iterations, statements=None):
 		self.iterations = iterations
 		if statements is None:
 			self._statements = BlockStatement()

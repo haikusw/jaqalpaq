@@ -271,7 +271,7 @@ class ScheduledCircuit:
 			if constructing the :class:`GateStatement` fails.
 		"""
 		g = self.build_gate(name, *args, **kwargs)
-		self.gates.append(g)
+		self.body.append(g)
 		return g
 	
 	def block(self, parallel=False, statements=None):
@@ -315,7 +315,7 @@ class ScheduledCircuit:
 		"""
 		# Parallel is ignored if a BlockStatement is passed in; it's only used if building a BlockStatement at the same time as the LoopStatement.
 		# This is intentional, but may or may not be wise.
-		if isinstance(gates, BlockStatement):
+		if isinstance(statements, BlockStatement):
 			l = LoopStatement(iterations, statements)
 		else:
 			l = LoopStatement(iterations, BlockStatement(parallel, statements))

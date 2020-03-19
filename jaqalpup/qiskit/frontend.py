@@ -37,7 +37,7 @@ def qscout_circuit_from_qiskit_circuit(circuit, names = None, native_gates = Non
 	that larger register that correspond to each of the original registers will be mapped
 	with the appropriate names.
 	
-	:param qiskit.circuit.QuantumCircuit dag: The circuit to convert.
+	:param qiskit.circuit.QuantumCircuit circuit: The circuit to convert.
 	:param names: A mapping from names of Qiskit gates to the corresponding native Jaqal gate names.
 		If omitted, maps i, r (:class:`qscout.qiskit.RGate`), sx (:class:`qscout.qiskit.SXGate`),
 		sy (:class:`qscout.qiskit.SYGate`), x, y, rz, and ms2 (:class:`qscout.qiskit.MSGate`)

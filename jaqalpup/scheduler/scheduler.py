@@ -1,4 +1,5 @@
 from jaqalpup.core import BlockStatement, LoopStatement, GateStatement, QUBIT_TYPE
+from jaqalpup import QSCOUTError
 
 def schedule_circuit(circ):
 	"""

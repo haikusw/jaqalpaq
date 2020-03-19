@@ -58,7 +58,7 @@ class AnnotatedValue:
 		if self.name in context:
 			return context[self.name]
 		else:
-			raise QSCOUTError("Unbound identifier %s." % alias_index.name)
+			raise QSCOUTError("Unbound identifier %s." % self.name)
 
 class Parameter(AnnotatedValue):
 	"""
@@ -116,7 +116,7 @@ class Parameter(AnnotatedValue):
 			# ability to add type annotations in the Jaqal.
 			pass
 		else:
-			raise QSCOUTError("Type-checking failed: unknown parameter type %s." + str(kind))
+			raise QSCOUTError("Type-checking failed: unknown parameter type %s." + str(self.kind))
 	
 	def __getitem__(self, key):
 		# Only makes sense for register parameters, but we'll let Register and NamedQubit do the typechecking.

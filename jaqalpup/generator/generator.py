@@ -28,7 +28,7 @@ def generate_jaqal_program(circ):
 	if len(circ.registers) > 1: program += "\n"
 	for macro in circ.macros.values():
 		program += generate_jaqal_macro(macro)
-	for statement in circ.gates:
+	for statement in circ.body:
 		if isinstance(statement, GateStatement):
 			program += generate_jaqal_gate(statement, 0)
 		elif isinstance(statement, LoopStatement):
@@ -58,7 +58,7 @@ def generate_jaqal_gate(statement, depth):
 	return "\t" * depth + statement.name + " " + " ".join([generate_jaqal_value(val) for val in statement.parameters.values()]) + "\n"
 
 def generate_jaqal_loop(statement, depth):
-	return "\t" * depth + "loop " + generate_jaqal_value(statement.iterations) + " " + generate_jaqal_block(statement.gates, depth, False)
+	return "\t" * depth + "loop " + generate_jaqal_value(statement.iterations) + " " + generate_jaqal_block(statement.statements, depth, False)
 
 def generate_jaqal_block(statement, depth, indent_first_line):
 	output = ""

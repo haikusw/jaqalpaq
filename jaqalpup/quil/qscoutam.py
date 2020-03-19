@@ -1,5 +1,7 @@
 from pyquil.api import QAM
 
+from jaqalpup import QSCOUTError
+
 class QSCOUTAM(QAM):
 	"""
 	Quantum Abstract Machine representing the QSCOUT hardware. It will refuse to load or
