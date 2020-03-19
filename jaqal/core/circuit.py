@@ -1,10 +1,10 @@
-from .block import GateBlock, LoopStatement
+from .block import BlockStatement, LoopStatement
 from .constant import Constant
 from .gate import GateStatement
 from .gatedef import GateDefinition, NATIVE_GATES
 from .macro import Macro
 from .register import Register, NamedQubit
-from qscout import RESERVED_WORDS, QSCOUTError
+from jaqal import RESERVED_WORDS, QSCOUTError
 import re
 
 class ScheduledCircuit:
@@ -27,10 +27,10 @@ class ScheduledCircuit:
 			for gate in NATIVE_GATES:
 				self._native_gates[gate.name] = gate
 		self._registers = {}
-		self._gates = GateBlock()
+		self._body = BlockStatement()
 
 	def __repr__(self):
-		return f"ScheduledCircuit(constants={self._constants}, macros={self._macros}, native_gates={self._native_gates}, registers={self._registers}, gates={self._gates})"
+		return f"ScheduledCircuit(constants={self._constants}, macros={self._macros}, native_gates={self._native_gates}, registers={self._registers}, body={self._body})"
 
 	def __eq__(self, other):
 		try:
@@ -66,10 +66,10 @@ class ScheduledCircuit:
 		return self._registers
 	
 	@property
-	def gates(self):
-		"""Read-only access to a :class:`GateBlock` object that contains the main body of
+	def body(self):
+		"""Read-only access to a :class:`BlockStatement` object that contains the main body of
 		the program."""
-		return self._gates
+		return self._body
 	
 	def fundamental_registers(self):
 		"""
@@ -81,18 +81,18 @@ class ScheduledCircuit:
 	def used_qubit_indices(self, instr = None, context = {}):
 		"""
 		:param instr: The instruction to query; defaults to the entire circuit.
-		:type instr: GateBlock or None
+		:type instr: BlockStatement or None
 		:param context: If using this method to inspect an instruction in a macro call, provides information about the current scope. Unless you know precisely what you're doing, you should most likely omit this.
 		:type context: dict
 		:returns: A dict mapping fundamental register names to sets of the indices within those registers which are used by the instruction.
 		"""
 		if isinstance(instr, LoopStatement):
-			return self.used_qubit_indices(instr.gates)
+			return self.used_qubit_indices(instr.statements)
 		
 		indices = {r.name: set() for r in self.fundamental_registers()}
-		if instr is None: instr = self.gates
+		if instr is None: instr = self.body
 		
-		if isinstance(instr, GateBlock):
+		if isinstance(instr, BlockStatement):
 			for sub_instr in instr:
 				new_indices = self.used_qubit_indices(sub_instr)
 				for k in new_indices:
@@ -112,7 +112,7 @@ class ScheduledCircuit:
 						for reg, idx in [param[i].resolve_qubit(context) for i in range(size)]:
 							indices[reg.name].add(idx)
 			elif instr.name in self.macros:
-				return self.used_qubit_indices(self.macros[instr.name].gates, context + instr.parameters)
+				return self.used_qubit_indices(self.macros[instr.name].body, context + instr.parameters)
 			else:
 				raise QSCOUTError("Unknown gate %s." % instr.name)
 		
@@ -231,7 +231,7 @@ class ScheduledCircuit:
 		:param parameters: What arguments (numbers, qubits, etc) the macro should be
 			called with. If None, the macro takes no parameters.
 		:type parameters: list(Parameter) or None
-		:param GateBlock body: What statements the macro expands to when called.
+		:param BlockStatement body: What statements the macro expands to when called.
 		:returns: The new macro.
 		:rtype: Macro
 		:raises QSCOUTError: if the name of the macro or any of its parameters is invalid (see :meth:`validate_identifier`).
@@ -282,38 +282,38 @@ class ScheduledCircuit:
 			if constructing the :class:`GateStatement` fails.
 		"""
 		g = self.build_gate(name, *args, **kwargs)
-		self.gates.append(g)
+		self.body.append(g)
 		return g
 	
-	def block(self, parallel=False, gates=None):
+	def block(self, parallel=False, statements=None):
 		"""
-		Creates a new :class:`GateBlock` object, and adds it to the end of the circuit.
-		All parameters are passed through to the :class:`GateBlock` constructor.
+		Creates a new :class:`BlockStatement` object, and adds it to the end of the circuit.
+		All parameters are passed through to the :class:`BlockStatement` constructor.
 		
 		:param parallel: Set to False (default) for a sequential block, True for a
 			parallel block, or None for an unscheduled block, which is treated as a
 			sequential block except by the :mod:`qscout.scheduler` submodule.
 		:type parallel: bool or None
-		:param gates: The contents of the block.
-		:type gates: list(GateStatement, LoopStatement, GateBlock)
+		:param statements: The contents of the block.
+		:type statements: list(GateStatement, LoopStatement, BlockStatement)
 		:returns: The new block.
-		:rtype: GateBlock
+		:rtype: BlockStatement
 		"""
-		b = GateBlock(parallel, gates)
-		self.gates.append(b)
+		b = BlockStatement(parallel, statements)
+		self.body.append(b)
 		return b
 	
-	def loop(self, iterations, gates=None, parallel=False):
+	def loop(self, iterations, statements=None, parallel=False):
 		"""
-		Creates a new :class:`GateBlock` object, and adds it to the end of the circuit.
-		All parameters are passed through to the :class:`GateBlock` constructor.
+		Creates a new :class:`BlockStatement` object, and adds it to the end of the circuit.
+		All parameters are passed through to the :class:`BlockStatement` constructor.
 		
 		:param int iterations: How many times to repeat the loop.
-		:param gates: The contents of the loop. If a :class:`GateBlock` is passed, it will
-			be used as the loop's gates; otherwise, a new :class:`GateBlock` will be
+		:param statements: The contents of the loop. If a :class:`BlockStatement` is passed, it will
+			be used as the loop's body; otherwise, a new :class:`BlockStatement` will be
 			created with the list of instructions passed.
-		:type gates: GateBlock or list(GateStatement, LoopStatement, GateBlock)
-		:param parallel: If a new :class:`GateBlock` is created, this will be passed to
+		:type statements: BlockStatement or list(GateStatement, LoopStatement, BlockStatement)
+		:param parallel: If a new :class:`BlockStatement` is created, this will be passed to
 			its constructor. Set to False (default) for a sequential block, True for a
 			parallel block, or None for an unscheduled block, which is treated as a
 			sequential block except by the :mod:`qscout.scheduler` submodule.
@@ -322,13 +322,13 @@ class ScheduledCircuit:
 		:rtype: LoopStatement
 		
 		.. warning::
-			If a :class:`GateBlock` is passed for ``gates``, then ``parallel`` will be ignored!
+			If a :class:`BlockStatement` is passed for ``gates``, then ``parallel`` will be ignored!
 		"""
-		# Parallel is ignored if a GateBlock is passed in; it's only used if building a GateBlock at the same time as the LoopStatement.
+		# Parallel is ignored if a BlockStatement is passed in; it's only used if building a BlockStatement at the same time as the LoopStatement.
 		# This is intentional, but may or may not be wise.
-		if isinstance(gates, GateBlock):
-			l = LoopStatement(iterations, gates)
+		if isinstance(statements, BlockStatement):
+			l = LoopStatement(iterations, statements)
 		else:
-			l = LoopStatement(iterations, GateBlock(parallel, gates))
-		self.gates.append(l)
+			l = LoopStatement(iterations, BlockStatement(parallel, statements))
+		self.body.append(l)
 		return l

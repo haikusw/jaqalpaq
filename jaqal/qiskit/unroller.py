@@ -57,14 +57,14 @@ class IonUnroller(TransformationPass):
 			# gate cx a,b
 			# {
 			# ry(pi/2) a;
-			# ms(pi/2, pi/4) a,b;
+			# ms(pi/2, 0) a,b;
 			# rx(-pi/2) a;
 			# rx(-pi/2) b;
 			# ry(-pi/2) a;
 			# }
 			rule = [
 				(SYGate(), [q[0]], []),
-				(MSGate(pi/2, pi/4), [q[0], q[1]], []),
+				(MSGate(pi/2, 0), [q[0], q[1]], []),
 				(RXGate(-pi/2), [q[0]], []),
 				(RXGate(-pi/2), [q[1]], []),
 				(RYGate(-pi/2), [q[0]], []),

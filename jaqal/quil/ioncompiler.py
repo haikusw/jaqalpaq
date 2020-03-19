@@ -2,8 +2,8 @@ from pyquil.api._qac import AbstractCompiler
 from typing import Optional
 from pyquil.quil import Program, Gate
 from pyquil.quilbase import Measurement, ResetQubit, Reset
-from qscout.core import ScheduledCircuit
-from qscout import QSCOUTError
+from jaqal.core import ScheduledCircuit
+from jaqal import QSCOUTError
 import numpy as np
 
 QUIL_NAMES = {'I': 'I', 'R': 'R', 'SX': 'Sx', 'SY': 'Sy', 'X': 'Px', 'Y': 'Py', 'RZ': 'Rz', 'MS': 'MS'}
@@ -67,7 +67,7 @@ class IonCompiler(AbstractCompiler):
 		qsc = ScheduledCircuit(self.native_gates is None)
 		if self.native_gates is not None:
 			qsc.native_gates.update(self.native_gates)
-		qsc.gates.parallel = None # Quil doesn't support barriers, so either the user
+		qsc.body.parallel = None # Quil doesn't support barriers, so either the user
 								  # won't run the the scheduler and everything will happen
 								  # sequentially, or the user will and everything can be
 								  # rescheduled as needed.
@@ -102,15 +102,15 @@ class IonCompiler(AbstractCompiler):
 				else:
 					raise QSCOUTError("Gate %s not in native gate set." % instr.name)
 			elif isinstance(instr, Reset):
-				if len(qsc.gates) > 1:
+				if len(qsc.body) > 1:
 					qsc.gate('prepare_all')
 			elif isinstance(instr, ResetQubit):
-				if len(qsc.gates) > 1:
+				if len(qsc.body) > 1:
 					reset_accumulator = {instr.qubit.index}
 			elif isinstance(instr, Measurement):
 				measure_accumulator = {instr.qubit.index} # We ignore the classical register.
 			else:
 				raise QSCOUTError("Instruction %s not supported." % instr.out())
-		if qsc.gates[-1].name != 'measure_all':
+		if qsc.body[-1].name != 'measure_all':
 			qsc.gate('measure_all')
 		return qsc

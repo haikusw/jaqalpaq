@@ -1,7 +1,7 @@
-qscout.scheduler package
+jaqal.scheduler package
 ========================
 
-.. automodule:: qscout.scheduler
+.. automodule:: jaqal.scheduler
    :members:
    :undoc-members:
    :show-inheritance:

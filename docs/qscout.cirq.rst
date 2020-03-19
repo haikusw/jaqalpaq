@@ -1,7 +1,7 @@
-qscout.cirq package
+jaqal.cirq package
 ===================
 
-.. automodule:: qscout.cirq
+.. automodule:: jaqal.cirq
    :members:
    :undoc-members:
    :show-inheritance:

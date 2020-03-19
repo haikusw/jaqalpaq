@@ -1,10 +1,10 @@
 from pytket.circuit import OpType
 
-from qscout.core import ScheduledCircuit
+from jaqal.core import ScheduledCircuit
 
 import numpy as np
 
-from qscout import QSCOUTError
+from jaqal import QSCOUTError
 
 TKET_NAMES = {OpType.PhasedX: lambda q, alpha, beta: ('R', q, alpha, -beta), OpType.Rz: lambda q, theta: ('Rz', q, theta), OpType.XXPhase: lambda q1, q2, theta: ('MS', q1, q2, 0, theta)}
 
@@ -38,7 +38,7 @@ def qscout_circuit_from_tket_circuit(tkc, native_gates = None, names = None):
 	measure_accumulator = set()
 	for command in tkc:
 		block, measure_accumulator = convert_command(command, qsc, block, names, measure_accumulator, n)
-	if qsc.gates[-1][-1].name != 'measure_all':
+	if qsc.body[-1][-1].name != 'measure_all':
 		qsc.gate('measure_all')
 	return qsc
 
@@ -70,7 +70,7 @@ def convert_command(command, qsc, block, names, measure_accumulator, n, remaps =
 		block = qsc.block(parallel = None) # Use barriers to inform the scheduler, as explained above.
 	elif op_type in (OpType.CircBox, OpType.ExpBox, OpType.PauliExpBox):
 		new_remaps = [remaps[qb.index[0]] for qb in command.qubits]
-		macro_block = GateBlock()
+		macro_block = BlockStatement()
 		subcirq = command.op.get_circuit()
 		for cmd in subcirq:
 			convert_command(cmd, qsc, macro_block, names, set(), n, new_remaps)

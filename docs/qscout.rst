@@ -1,7 +1,7 @@
-qscout package
+jaqal package
 ==============
 
-.. automodule:: qscout
+.. automodule:: jaqal
    :members: QSCOUTError
    :undoc-members:
    :show-inheritance:
@@ -15,10 +15,10 @@ Subpackages
 
 .. toctree::
 
-   qscout.cirq
-   qscout.core
-   qscout.generator
-   qscout.parser
-   qscout.qiskit
-   qscout.quil
-   qscout.scheduler
+   jaqal.cirq
+   jaqal.core
+   jaqal.generator
+   jaqal.parser
+   jaqal.qiskit
+   jaqal.quil
+   jaqal.scheduler

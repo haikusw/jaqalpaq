@@ -1,16 +1,16 @@
-qscout.quil package
+jaqal.quil package
 ===================
 
-.. automodule:: qscout.quil
+.. automodule:: jaqal.quil
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. data:: qscout.quil.SX
+.. data:: jaqal.quil.SX
 
 	The unitary matrix that describes the QSCOUT native SX, or sqrt(X), gate.
 
-.. data:: qscout.quil.SY
+.. data:: jaqal.quil.SY
 
 	The unitary matrix that describes the QSCOUT native SY, or sqrt(Y), gate.
 

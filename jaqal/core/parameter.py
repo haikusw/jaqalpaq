@@ -1,4 +1,4 @@
-from qscout import QSCOUTError
+from jaqal import QSCOUTError
 
 QUBIT_TYPE = 'qubit'
 FLOAT_TYPE = 'float'

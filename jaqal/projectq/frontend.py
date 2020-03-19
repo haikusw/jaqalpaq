@@ -5,8 +5,8 @@ from projectq.cengines import BasicEngine
 from projectq.meta import get_control_count
 from projectq.types import WeakQubitRef
 
-from qscout.core import ScheduledCircuit
-from qscout import QSCOUTError
+from jaqal.core import ScheduledCircuit
+from jaqal import QSCOUTError
 
 import numpy as np
 

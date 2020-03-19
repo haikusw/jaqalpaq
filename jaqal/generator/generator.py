@@ -1,4 +1,4 @@
-from qscout.core import GateStatement, GateBlock, LoopStatement, Register, NamedQubit, Constant, Parameter, AnnotatedValue
+from jaqal.core import GateStatement, BlockStatement, LoopStatement, Register, NamedQubit, Constant, Parameter, AnnotatedValue
 
 def notate_slice(s):
 	if s.step:
@@ -33,7 +33,7 @@ def generate_jaqal_program(circ):
 			program += generate_jaqal_gate(statement, 0)
 		elif isinstance(statement, LoopStatement):
 			program += generate_jaqal_loop(statement, 0)
-		elif isinstance(statement, GateBlock):
+		elif isinstance(statement, BlockStatement):
 			program += generate_jaqal_block(statement, 0, True)
 	return program
 
@@ -73,7 +73,7 @@ def generate_jaqal_block(statement, depth, indent_first_line):
 			output += generate_jaqal_gate(gate, depth+1)
 		elif isinstance(gate, LoopStatement):
 			output += generate_jaqal_loop(gate, depth+1)
-		elif isinstance(gate, GateBlock):
+		elif isinstance(gate, BlockStatement):
 			output += generate_jaqal_block(gate, depth+1, True)
 	output += "\t" * depth
 	if statement.parallel:

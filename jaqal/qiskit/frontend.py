@@ -1,7 +1,7 @@
-from qscout.core import ScheduledCircuit, GateStatement
+from jaqal.core import ScheduledCircuit, GateStatement
 # from qscoutlib import MSGate, QasmGate, IonUnroller
 from qiskit.converters import dag_to_circuit
-from qscout import QSCOUTError
+from jaqal import QSCOUTError
 #from sympy.core.evalf import N
 import numpy as np
 
@@ -108,7 +108,7 @@ def qscout_circuit_from_qiskit_circuit(circuit, names = None, native_gates = Non
 			else:
 				raise QSCOUTError("Register %s invalid!" % target.register.name)
 		elif instr[0].name == 'reset':
-			if len(qsc.gates) > 1:
+			if len(qsc.body) > 1:
 				target = instr[1][0]
 				if target.register.name in qsc.registers:
 					reset_accumulator = {target.resolve_qubit(target.index)[1]}
@@ -126,6 +126,6 @@ def qscout_circuit_from_qiskit_circuit(circuit, names = None, native_gates = Non
 			block.append(qsc.build_gate(names[instr[0].name], *[qsc.registers[target.register.name][target.index] for target in targets], *[float(param) for param in instr[0].params]))
 		else:
 			raise QSCOUTError("Instruction %s not available on trapped ion hardware; try unrolling first." % instr[0].name)
-	if not (isinstance(qsc.gates[-1], GateStatement) and qsc.gates[-1].name == 'measure_all'):
+	if not (isinstance(qsc.body[-1], GateStatement) and qsc.body[-1].name == 'measure_all'):
 		qsc.gate('measure_all')
 	return qsc

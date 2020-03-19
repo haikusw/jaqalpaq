@@ -1,4 +1,4 @@
-from qscout import QSCOUTError
+from jaqal import QSCOUTError
 
 class GateStatement:
 	"""
