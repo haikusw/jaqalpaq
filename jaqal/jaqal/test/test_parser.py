@@ -1,10 +1,10 @@
 from unittest import TestCase
 from numbers import Number
 
-from qscout.core import (
-    GateDefinition, Register, ScheduledCircuit, Parameter, GateBlock, LoopStatement
+from jaqal.core import (
+    GateDefinition, Register, ScheduledCircuit, Parameter, BlockStatement, LoopStatement
 )
-from qscout.jaqal.parser import parse_jaqal_string
+from jaqal.jaqal.parser import parse_jaqal_string
 
 class ParserTester(TestCase):
 
@@ -168,10 +168,10 @@ class ParserTester(TestCase):
         return Parameter(str(index), kind)
 
     def make_parallel_gate_block(self, *gates):
-        return GateBlock(parallel=True, gates=list(gates))
+        return BlockStatement(parallel=True, statements=list(gates))
 
     def make_sequential_gate_block(self, *gates):
-        return GateBlock(parallel=False, gates=list(gates))
+        return BlockStatement(parallel=False, statements=list(gates))
 
     def make_loop(self, *gates, count):
         return LoopStatement(count, self.make_sequential_gate_block(*gates))
