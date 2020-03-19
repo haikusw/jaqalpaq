@@ -1,7 +1,7 @@
 import ply.yacc as yacc
-from jaqal.core import BlockStatement, LoopStatement, ScheduledCircuit, Constant, GateStatement, GateDefinition, Macro, Parameter, Register, NamedQubit
-from jaqal import QSCOUTError
-from jaqal.parser.lexer import get_lexer, tokens # IMPORTANT: PLY has a bad time if this is a relative import, for some reason.
+from jaqalpup.core import BlockStatement, LoopStatement, ScheduledCircuit, Constant, GateStatement, GateDefinition, Macro, Parameter, Register, NamedQubit
+from jaqalpup import QSCOUTError
+from jaqalpup.parser.lexer import get_lexer, tokens # IMPORTANT: PLY has a bad time if this is a relative import, for some reason.
 
 def p_program(p):
 	'program : header_statements body_statements'

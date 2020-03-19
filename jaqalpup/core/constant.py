@@ -1,5 +1,5 @@
 from .parameter import AnnotatedValue, INT_TYPE, FLOAT_TYPE
-from jaqal import QSCOUTError
+from jaqalpup import QSCOUTError
 
 class Constant(AnnotatedValue):
 	"""

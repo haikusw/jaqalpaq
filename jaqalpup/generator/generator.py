@@ -1,4 +1,4 @@
-from jaqal.core import GateStatement, BlockStatement, LoopStatement, Register, NamedQubit, Constant, Parameter, AnnotatedValue
+from jaqalpup.core import GateStatement, BlockStatement, LoopStatement, Register, NamedQubit, Constant, Parameter, AnnotatedValue
 
 def notate_slice(s):
 	if s.step:

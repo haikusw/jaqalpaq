@@ -1,5 +1,5 @@
-from jaqal.core.circuit import ScheduledCircuit
-from jaqal import QSCOUTError
+from jaqalpup.core.circuit import ScheduledCircuit
+from jaqalpup import QSCOUTError
 from cirq import XXPowGate, XPowGate, YPowGate, ZPowGate, PhasedXPowGate, MeasurementGate
 import numpy as np
 
