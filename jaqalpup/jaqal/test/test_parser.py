@@ -6,6 +6,7 @@ from jaqalpup.core import (
 )
 from jaqalpup.jaqal.parser import parse_jaqal_string
 
+
 class ParserTester(TestCase):
 
     def setUp(self):

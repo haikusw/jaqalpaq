@@ -8,7 +8,7 @@ from jaqalpup.core import (
 )
 
 
-def parse_jaqal_file(filename, override_dict=None):
+def parse_jaqal_file(filename, override_dict=None, use_qscout_native_gates=False):
     """Parse a file written in Jaqal into core types.
 
     filename -- The name of the Jaqal file.
@@ -17,10 +17,11 @@ def parse_jaqal_file(filename, override_dict=None):
     Note: all keys in this dictionary must exist as let statements or an error will be raised.
     """
     with open(filename) as fd:
-        return parse_jaqal_string(fd.read(), override_dict=override_dict)
+        return parse_jaqal_string(fd.read(), override_dict=override_dict,
+                                  use_qscout_native_gates=use_qscout_native_gates)
 
 
-def parse_jaqal_string(jaqal, override_dict=None):
+def parse_jaqal_string(jaqal, override_dict=None, use_qscout_native_gates=False):
     """Parse a string written in Jaqal into core types.
 
     jaqal -- The Jaqal code as a string.
@@ -36,7 +37,8 @@ def parse_jaqal_string(jaqal, override_dict=None):
     let_dict = iface.make_let_dict(override_dict)
     tree = iface.resolve_let(let_dict=let_dict)
     tree = iface.resolve_map(tree)
-    visitor = CoreTypesVisitor(iface.make_register_dict(let_dict))
+    visitor = CoreTypesVisitor(iface.make_register_dict(let_dict),
+                               use_qscout_native_gates=use_qscout_native_gates)
     circuit = visitor.visit(tree)
     # Note: we also have metadata about register sizes and imported files that we could output here as well.
     return circuit
@@ -45,17 +47,18 @@ def parse_jaqal_string(jaqal, override_dict=None):
 class CoreTypesVisitor(TreeRewriteVisitor, TreeManipulators):
     """Define a visitor that will rewrite a Jaqal parse tree into objects from the core library."""
 
-    def __init__(self, register_dict):
+    def __init__(self, register_dict, use_qscout_native_gates=False):
         super().__init__()
         self.registers = {name: Register(name, size) for name, size in register_dict.items()}
         self.gate_definitions = {}
+        self.use_qscout_native_gates = bool(use_qscout_native_gates)
 
     ##
     # Visitor Methods
     #
 
     def visit_program(self, header_statements, body_statements):
-        circuit = ScheduledCircuit()
+        circuit = ScheduledCircuit(qscout_native_gates=self.use_qscout_native_gates)
         for stmt in body_statements:
             circuit.body.append(stmt)
         circuit.registers.update(self.registers)
