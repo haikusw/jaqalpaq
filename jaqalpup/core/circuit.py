@@ -4,7 +4,7 @@ from .gate import GateStatement
 from .gatedef import GateDefinition, NATIVE_GATES
 from .macro import Macro
 from .register import Register, NamedQubit
-from jaqal import RESERVED_WORDS, QSCOUTError
+from jaqalpup import RESERVED_WORDS, QSCOUTError
 import re
 
 class ScheduledCircuit:
