@@ -90,7 +90,7 @@ def schedule_instr(circ, instr, target, freeze_timestamps, after=-1):
 	elif is_block:
 		# You can't nest two sequential blocks, so we flatten the block.
 		for sub_instr in instr:
-			after = schedule_instr(circ, sub_instr, new_block, freeze_timestamps, after)
+			after = schedule_instr(circ, sub_instr, target, freeze_timestamps, after)
 		return after # We've frozen all the relevant qubits already.
 	elif is_loop:
 		# Loop statements can't be parallelized with anything; just stick it at the end

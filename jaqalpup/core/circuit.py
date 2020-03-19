@@ -101,7 +101,7 @@ class ScheduledCircuit:
 						for reg, idx in [param[i].resolve_qubit(context) for i in range(size)]:
 							indices[reg.name].add(idx)
 			elif instr.name in self.macros:
-				return self.used_qubit_indices(self.macros[instr.name].body, context + instr.parameters)
+				return self.used_qubit_indices(self.macros[instr.name].body, {**context, **instr.parameters})
 			else:
 				raise QSCOUTError("Unknown gate %s." % instr.name)
 		
