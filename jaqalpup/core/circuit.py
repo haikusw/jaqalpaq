@@ -101,7 +101,7 @@ class ScheduledCircuit:
 						for reg, idx in [param[i].resolve_qubit(context) for i in range(size)]:
 							indices[reg.name].add(idx)
 			elif instr.name in self.macros:
-				return self.used_qubit_indices(self.macros[instr.name].body, context + instr.parameters)
+				return self.used_qubit_indices(self.macros[instr.name].body, {**context, **instr.parameters})
 			else:
 				raise QSCOUTError("Unknown gate %s." % instr.name)
 		
@@ -271,7 +271,7 @@ class ScheduledCircuit:
 			if constructing the :class:`GateStatement` fails.
 		"""
 		g = self.build_gate(name, *args, **kwargs)
-		self.gates.append(g)
+		self.body.append(g)
 		return g
 	
 	def block(self, parallel=False, statements=None):
@@ -315,7 +315,7 @@ class ScheduledCircuit:
 		"""
 		# Parallel is ignored if a BlockStatement is passed in; it's only used if building a BlockStatement at the same time as the LoopStatement.
 		# This is intentional, but may or may not be wise.
-		if isinstance(gates, BlockStatement):
+		if isinstance(statements, BlockStatement):
 			l = LoopStatement(iterations, statements)
 		else:
 			l = LoopStatement(iterations, BlockStatement(parallel, statements))

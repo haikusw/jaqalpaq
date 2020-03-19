@@ -46,7 +46,7 @@ def qscout_circuit_from_cirq_circuit(ccirc, names = None, native_gates = None):
 		if len(moment) > 1:
 			block = qcirc.block(parallel=True) # Note: If you tell Cirq you want MS gates in parallel, we'll generate a Jaqal file with exactly that, never mind that QSCOUT can't execute it.
 		else:
-			block = qcirc.gates
+			block = qcirc.body
 		for op in moment:
 			if op.gate:
 				if type(op.gate) in names:

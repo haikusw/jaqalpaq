@@ -1,6 +1,6 @@
 from pytket.circuit import OpType
 
-from jaqalpup.core import ScheduledCircuit
+from jaqalpup.core import ScheduledCircuit, BlockStatement
 
 import numpy as np
 
@@ -74,7 +74,7 @@ def convert_command(command, qsc, block, names, measure_accumulator, n, remaps =
 		subcirq = command.op.get_circuit()
 		for cmd in subcirq:
 			convert_command(cmd, qsc, macro_block, names, set(), n, new_remaps)
-		macro_name = 'macro_' + len(qsc.macros)
+		macro_name = f'macro_{len(qsc.macros)}'
 		qsc.macro(macro_name, [], macro_block)
 		block.append(qsc.build_gate(macro_name))
 		# TODO: Re-use macros when the same circuit block appears in multiple places.
