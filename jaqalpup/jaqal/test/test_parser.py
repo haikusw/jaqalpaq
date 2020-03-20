@@ -2,7 +2,8 @@ from unittest import TestCase
 from numbers import Number
 
 from jaqalpup.core import (
-    GateDefinition, Register, ScheduledCircuit, Parameter, BlockStatement, LoopStatement
+    GateDefinition, Register, ScheduledCircuit, Parameter, BlockStatement, LoopStatement,
+    NATIVE_GATES
 )
 from jaqalpup.jaqal.parser import parse_jaqal_string
 
@@ -88,7 +89,7 @@ class ParserTester(TestCase):
         exp_registers = {'r': Register('r', 7)}
         self.run_test(text, exp_registers=exp_registers)
 
-    def test_native_gates(self):
+    def test_deduce_native_gates(self):
         """Test that the native gates are properly deduced from the text."""
         # Note: This behavior is possibly not what we want long term
         text = "register r[3]; foo 1 r[0]; bar 3.14"
@@ -105,13 +106,34 @@ class ParserTester(TestCase):
         }
         self.run_test(text, exp_native_gates=exp_native_gates)
 
+    def test_use_native_gates(self):
+        """Test that we can use the native gates in the QSCOUT native gate set."""
+        text = "register r[3]; Rx r[0] 1.5"
+        exp_result = self.make_circuit(
+            gates=[
+                self.make_native_gate('Rx', ('r', 0), 1.5)
+            ]
+        )
+        self.run_test(text, exp_result, use_qscout_native_gates=True)
+
+    def test_fail_on_missing_native_gate(self):
+        """Test that we fail when the using qscout native gates and the user uses a gate
+        that does not exist."""
+        text = "register r[3]; foo r[0] 1.5"
+        # Make sure things we aren't doing something stupid and things will parse
+        # without native gates on.
+        parse_jaqal_string(text)
+        with self.assertRaises(Exception):
+            parse_jaqal_string(text, use_qscout_native_gates=True)
+
     ##
     # Helper methods
     #
 
     def run_test(self, text, exp_result=None, exp_registers=None, exp_native_gates=None,
-                 override_dict=None):
-        act_result = parse_jaqal_string(text, override_dict=override_dict)
+                 override_dict=None, use_qscout_native_gates=False):
+        act_result = parse_jaqal_string(text, override_dict=override_dict,
+                                        use_qscout_native_gates=use_qscout_native_gates)
         if exp_result is not None:
             self.assertEqual(exp_result.body, act_result.body)
         if exp_registers is not None:
@@ -127,9 +149,18 @@ class ParserTester(TestCase):
         return circuit
 
     def make_gate(self, name, *args):
+        return self.make_gate_conditional(name, args, is_native=False)
+
+    def make_native_gate(self, name, *args):
+        return self.make_gate_conditional(name, args, is_native=True)
+
+    def make_gate_conditional(self, name, args, is_native):
         arg_objects = [self.make_argument_object(arg) for arg in args]
-        params = [self.make_parameter_from_arg(idx, arg) for idx, arg in enumerate(args)]
-        gate_def = self.get_gate_definition(name, params)
+        if is_native:
+            gate_def = self.get_native_gate_definition(name)
+        else:
+            params = [self.make_parameter_from_arg(idx, arg) for idx, arg in enumerate(args)]
+            gate_def = self.get_gate_definition(name, params)
         return gate_def(*arg_objects)
 
     def get_gate_definition(self, name, params):
@@ -139,6 +170,12 @@ class ParserTester(TestCase):
         else:
             gate_def = self.gate_definitions[name]
         return gate_def
+
+    def get_native_gate_definition(self, name):
+        for gate in NATIVE_GATES:
+            if gate.name == name:
+                return gate
+        raise ValueError(f"Native gate {name} not found")
 
     def make_argument_object(self, arg):
         if isinstance(arg, Number):

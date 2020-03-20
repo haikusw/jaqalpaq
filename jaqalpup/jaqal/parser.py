@@ -4,8 +4,9 @@ from jaqal import Interface, TreeRewriteVisitor, TreeManipulators
 
 from jaqalpup.core import (
     ScheduledCircuit, Register, NamedQubit, GateDefinition,
-    Parameter, LoopStatement, BlockStatement
+    Parameter, LoopStatement, BlockStatement, NATIVE_GATES
 )
+from jaqalpup import QSCOUTError
 
 
 def parse_jaqal_file(filename, override_dict=None, use_qscout_native_gates=False):
@@ -50,7 +51,10 @@ class CoreTypesVisitor(TreeRewriteVisitor, TreeManipulators):
     def __init__(self, register_dict, use_qscout_native_gates=False):
         super().__init__()
         self.registers = {name: Register(name, size) for name, size in register_dict.items()}
-        self.gate_definitions = {}
+        if use_qscout_native_gates:
+            self.gate_definitions = {gate.name: gate for gate in NATIVE_GATES}
+        else:
+            self.gate_definitions = {}
         self.use_qscout_native_gates = bool(use_qscout_native_gates)
 
     ##
@@ -62,7 +66,8 @@ class CoreTypesVisitor(TreeRewriteVisitor, TreeManipulators):
         for stmt in body_statements:
             circuit.body.append(stmt)
         circuit.registers.update(self.registers)
-        circuit.native_gates.update(self.gate_definitions)
+        if not self.use_qscout_native_gates:
+            circuit.native_gates.update(self.gate_definitions)
         return circuit
 
     def visit_parallel_gate_block(self, statements):
@@ -108,12 +113,14 @@ class CoreTypesVisitor(TreeRewriteVisitor, TreeManipulators):
         given name and arguments."""
         if gate_name in self.gate_definitions:
             return self.gate_definitions[gate_name]
-        else:
+        elif not self.use_qscout_native_gates:
             params = [self.make_parameter_from_argument(index, arg)
                       for index, arg in enumerate(gate_args)]
             gate_def = GateDefinition(gate_name, params)
             self.gate_definitions[gate_name] = gate_def
             return gate_def
+        else:
+            raise QSCOUTError(f"Gate {gate_name} not a QSCOUT native gate")
 
     @staticmethod
     def make_parameter_from_argument(index, arg):
