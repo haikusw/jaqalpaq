@@ -47,7 +47,10 @@ class ResolveMapVisitor(MacroContextRewriteVisitor):
     def map_gate_arg(self, arg):
         """Given an argument to a gate, either resolve any mappings or return the original argument unchanged."""
         if self.is_let_or_map_identifier(arg):
-            return self.resolve_map_identifier(self.deconstruct_let_or_map_identifier(arg))
+            identifier = self.deconstruct_let_or_map_identifier(arg)
+            if self.is_macro_argument(identifier):
+                return arg
+            return self.resolve_map_identifier(identifier)
         else:
             return arg
 
