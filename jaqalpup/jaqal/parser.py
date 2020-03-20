@@ -12,10 +12,12 @@ from jaqalpup import QSCOUTError
 def parse_jaqal_file(filename, override_dict=None, use_qscout_native_gates=False):
     """Parse a file written in Jaqal into core types.
 
-    filename -- The name of the Jaqal file.
-
-    override_dict -- An optional dictionary of string: number mappings that overrides let statements in the Jaqal code.
+    :param str filename: The name of the Jaqal file.
+    :param dict[str, float] override_dict:  An optional dictionary that overrides let statements in the Jaqal code.
     Note: all keys in this dictionary must exist as let statements or an error will be raised.
+    :param bool use_qscout_native_gates: Only allow pre-determined gates from the QSCOUT gate set.
+    :return: A list of the gates, blocks, and loops to be run.
+
     """
     with open(filename) as fd:
         return parse_jaqal_string(fd.read(), override_dict=override_dict,
@@ -25,10 +27,12 @@ def parse_jaqal_file(filename, override_dict=None, use_qscout_native_gates=False
 def parse_jaqal_string(jaqal, override_dict=None, use_qscout_native_gates=False):
     """Parse a string written in Jaqal into core types.
 
-    jaqal -- The Jaqal code as a string.
-
-    override_dict -- An optional dictionary of string: number mappings that overrides let statements in the Jaqal code.
+    :param str jaqal: The Jaqal code.
+    :param dict[str, float] override_dict:  An optional dictionary that overrides let statements in the Jaqal code.
     Note: all keys in this dictionary must exist as let statements or an error will be raised.
+    :param bool use_qscout_native_gates: Only allow pre-determined gates from the QSCOUT gate set.
+    :return: A list of the gates, blocks, and loops to be run.
+
     """
 
     # The interface will automatically expand macros and scrape let, map, and register metadata.
@@ -46,7 +50,11 @@ def parse_jaqal_string(jaqal, override_dict=None, use_qscout_native_gates=False)
 
 
 class CoreTypesVisitor(TreeRewriteVisitor, TreeManipulators):
-    """Define a visitor that will rewrite a Jaqal parse tree into objects from the core library."""
+    """Define a visitor that will rewrite a Jaqal parse tree into objects from the core library.
+
+    This class should not be used directly. Use the parse_jaqal_string or
+    parse_jaqal_file functions instead.
+    """
 
     def __init__(self, register_dict, use_qscout_native_gates=False):
         super().__init__()
