@@ -57,10 +57,8 @@ class Interface:
         the let override dict."""
         assert self._initial_tree is not None, "Do not call before setting up the initial tree"
         if self._preprocessed_tree is None:
-            # Note: This should be a member variable set in the constructor once we allow importing macros.
-            imported_macros = {}
-            tree = resolve_macro(self._initial_tree, imported_macros)
-            self._preprocessed_tree = strip_headers_and_macro_definitions(tree)
+            tree = self.resolve_macro(self._initial_tree)
+            self._preprocessed_tree = self.strip_metadata(tree)
         return self._preprocessed_tree
 
     @property
@@ -107,6 +105,24 @@ class Interface:
         else:
             full_let_dict = combine_let_dicts(self._let_dict, override_dict)
             return full_let_dict
+
+    @staticmethod
+    def resolve_macro(tree, macro_dict=None):
+        """Return a parse tree with all macros expanded. The macro definitions will still be present.
+
+        tree -- A parse tree.
+
+        macro_dict -- A dictionary with any additional macros not defined in the tree.
+        """
+        # Note: This should be a member variable set in the constructor once we allow importing macros.
+        macro_dict = macro_dict or {}
+        tree = resolve_macro(tree, macro_dict)
+        return tree
+
+    @staticmethod
+    def strip_metadata(tree):
+        """Remove all macro definitions and header statements from this tree."""
+        return strip_headers_and_macro_definitions(tree)
 
     def resolve_let(self, tree, let_dict=None):
         """Resolve all the let statements in the tree and return the new tree.
