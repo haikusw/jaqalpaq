@@ -1,3 +1,5 @@
+from itertools import zip_longest
+
 from jaqalpup import QSCOUTError
 
 class GateStatement:
@@ -20,7 +22,7 @@ class GateStatement:
 
 	def __eq__(self, other):
 		try:
-			return self.name == other.name and all(sparam == oparam for sparam, oparam in zip(self.parameters, other.parameters))
+			return self.name == other.name and all(sparam == oparam for sparam, oparam in zip_longest(self.parameters.values(), other.parameters.values()))
 		except AttributeError:
 			return False
 

@@ -5,7 +5,7 @@ from jaqal import Interface, TreeRewriteVisitor, TreeManipulators
 
 from jaqalpup.core import (
     ScheduledCircuit, Register, NamedQubit, GateDefinition, Macro,
-    Parameter, LoopStatement, BlockStatement, NATIVE_GATES
+    Parameter, LoopStatement, BlockStatement, NATIVE_GATES, Constant
 )
 from jaqalpup import QSCOUTError
 
@@ -122,6 +122,7 @@ class CoreTypesVisitor(TreeRewriteVisitor, TreeManipulators):
             self.gate_definitions = {}
         self.use_qscout_native_gates = bool(use_qscout_native_gates)
         self.macro_definitions = {}
+        self.let_constants = {}
 
     ##
     # Visitor Methods
@@ -133,6 +134,7 @@ class CoreTypesVisitor(TreeRewriteVisitor, TreeManipulators):
             circuit.body.append(stmt)
         circuit.registers.update(self.registers)
         circuit.macros.update(self.macro_definitions)
+        circuit.constants.update(self.let_constants)
         if not self.use_qscout_native_gates:
             circuit.native_gates.update(self.gate_definitions)
         return circuit
@@ -146,8 +148,17 @@ class CoreTypesVisitor(TreeRewriteVisitor, TreeManipulators):
                       for arg in arguments]
         block = self.deconstruct_macro_gate_block(block)
 
-        macro = Macro(name, parameters, block)
-        self.macro_definitions[name] = macro
+        self.macro_definitions[name] = Macro(name, parameters, block)
+
+        return None
+
+    def visit_let_statement(self, identifier, number):
+        """Process a let statement by storing the definition and removing it from the header
+        statements."""
+        name = str(self.extract_identifier(identifier))
+        value = self.extract_signed_integer(number)
+
+        self.let_constants[name] = Constant(name, value)
 
         return None
 

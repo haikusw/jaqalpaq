@@ -208,7 +208,19 @@ class NamedQubit:
 				return
 			if alias_index >= from_size:
 				raise QSCOUTError("Index out of range.")
-	
+
+	def __repr__(self):
+		return f"NamedQubit({self.name}, {self.alias_from}, {self.alias_index})"
+
+	def __eq__(self, other):
+		try:
+			# Note: With map aliases it's actually non-trivial to know if this qubit is the same as another.
+			# So this heuristic is good enough for unit testing, but if this were ever used in the main logic
+			# things might break down.
+			return self.name == other.name and self.alias_from.name == other.alias_from.name and self.alias_index == other.alias_index
+		except AttributeError:
+			return False
+
 	@property
 	def name(self):
 		"""

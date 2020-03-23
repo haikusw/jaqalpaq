@@ -3,7 +3,7 @@ from numbers import Number
 
 from jaqalpup.core import (
     GateDefinition, Register, ScheduledCircuit, Parameter, BlockStatement, LoopStatement,
-    NATIVE_GATES, Macro
+    NATIVE_GATES, Macro, Constant
 )
 from jaqalpup.jaqal.parser import parse_jaqal_string, Option
 
@@ -42,7 +42,7 @@ class ParserTester(TestCase):
         )
         override_dict = {'a': 0, 'b': 1.41}
         self.run_test(text, exp_result, override_dict=override_dict,
-                      option=Option.expand_let)
+                      option=Option.expand_let|Option.strip_metadata)
 
     def test_parallel_block(self):
         text = "<foo | bar>"
@@ -147,15 +147,47 @@ class ParserTester(TestCase):
 
     def test_macro_definition_expand(self):
         """Test parsing macro definitions and expanding them."""
-        self.fail()
+        text = "macro foo a { g a }; foo 1.5"
+        exp_result = self.make_circuit(
+            gates=[
+                self.make_gate('g', 1.5)
+            ],
+            # Even though we expand macros, we are not stripping the metadata,
+            # so the definition will still be there.
+            macros={
+                'foo': self.make_macro(
+                    'foo',
+                    ['a'],
+                    self.make_gate('g', 'a')
+                )
+            }
+        )
+        self.run_test(text, exp_result, use_qscout_native_gates=False,
+                      option=Option.expand_macro)
 
     def test_let_no_resolve(self):
         """Test parsing a let statement"""
-        self.fail()
+        text = "let a 2; foo a"
+        exp_result = self.make_circuit(
+            gates=[
+                self.make_gate('foo', 'a')
+            ],
+            constants={'a': self.make_constant('a', 2)}
+        )
+        self.run_test(text, exp_result, use_qscout_native_gates=False,
+                      option=Option.none)
 
     def test_let_resolve(self):
         """Test parsing a let statement and resolving it."""
-        self.fail()
+        text = "let a 2; foo a"
+        exp_result = self.make_circuit(
+            gates=[
+                self.make_gate('foo', 2)
+            ],
+            constants={'a': self.make_constant('a', 2)}
+        )
+        self.run_test(text, exp_result, use_qscout_native_gates=False,
+                      option=Option.expand_let)
 
     def test_map_no_resolve(self):
         """Test parsing a map statement."""
@@ -189,18 +221,21 @@ class ParserTester(TestCase):
         if exp_result is not None:
             self.assertEqual(exp_result.body, act_result.body)
             self.assertEqual(exp_result.macros, act_result.macros)
+            self.assertEqual(exp_result.constants, act_result.constants)
         if exp_registers is not None:
             self.assertEqual(exp_registers, act_result.registers)
         if exp_native_gates is not None:
             self.assertEqual(exp_native_gates, act_result.native_gates)
 
     @staticmethod
-    def make_circuit(*, gates, macros=None):
+    def make_circuit(*, gates, macros=None, constants=None):
         circuit = ScheduledCircuit()
         for gate in gates:
             circuit.body.append(gate)
         if macros:
             circuit.macros.update(macros)
+        if constants:
+            circuit.constants.update(constants)
         return circuit
 
     def make_gate(self, name, *args):
@@ -244,6 +279,10 @@ class ParserTester(TestCase):
             return arg
         elif isinstance(arg, tuple):
             return self.make_qubit(*arg)
+        elif isinstance(arg, str):
+            return Parameter(arg, None)
+        else:
+            raise TypeError(f"Cannot make an argument out of {arg}")
 
     def make_qubit(self, name, index):
         """Return a NamedQubit object, possibly creating a register object in the process."""
@@ -256,20 +295,8 @@ class ParserTester(TestCase):
 
     def make_parameter_from_arg(self, index, arg):
         """Define a Parameter from the argument to a gate. Used to define a new GateDefinition."""
-        kind = self.make_kind_from_arg(arg)
-        param = self.make_parameter(index=index, kind=kind)
+        param = self.make_parameter(index=index, kind=None)
         return param
-
-    def make_kind_from_arg(self, arg):
-        """Return the kind (type) of an argument.
-
-        The tester can either use a tuple for a register element or a number for a float. We
-        don't distinguish int from float here.
-        """
-        if isinstance(arg, Number):
-            return 'float'
-        elif isinstance(arg, tuple):
-            return 'qubit'
 
     def make_parameter(self, name=None, index=None, kind=None):
         if name is None:
@@ -294,6 +321,9 @@ class ParserTester(TestCase):
         return Macro(name,
                      parameters=[self.make_parameter(pname) for pname in parameter_names],
                      body=self.make_sequential_gate_block(*statements))
+
+    def make_constant(self, name, value):
+        return Constant(name, value)
 
 
 class TestOption(TestCase):
