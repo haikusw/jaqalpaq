@@ -187,6 +187,11 @@ class Register:
 		:rtype: bool
 		:raises QSCOUTError: If this register is not fundamental.
 		"""
+	
+	def __iter__(self):
+		for key in range(self.size):
+			yield self[key]
+
 
 class NamedQubit:
 	"""
