@@ -6,11 +6,11 @@ class GateStatement:
 	"""
 	Represents a Jaqal gate statement.
 	
-	:param str name: The name of the gate to call.
+	:param GateDefinition gate_def: The gate to call.
 	:param dict parameters: A map from gate parameter names to the values to pass for those parameters. Can be omitted for gates that have no parameters.
 	"""
-	def __init__(self, name, parameters = None):
-		self.name = name
+	def __init__(self, gate_def, parameters = None):
+		self._gate_def = gate_def
 		if parameters is None:
 			self._parameters = {}
 		else:
@@ -26,6 +26,14 @@ class GateStatement:
 		except AttributeError:
 			return False
 
+	@property
+	def name(self):
+		return self._gate_def.name
+	
+	@property
+	def gate_def(self):
+		return self._gate_def
+	
 	@property
 	def parameters(self):
 		"""

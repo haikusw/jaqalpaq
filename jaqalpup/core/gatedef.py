@@ -80,7 +80,7 @@ class AbstractGate:
 			raise QSCOUTError("Cannot mix named and positional parameters in call to gate.")
 		for param in self.parameters:
 			param.validate(params[param.name])
-		return GateStatement(self.name, params)
+		return GateStatement(self, params)
 	
 	def __call__(self, *args, **kwargs):
 		return self.call(*args, **kwargs)
