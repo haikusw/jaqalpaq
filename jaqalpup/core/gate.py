@@ -40,3 +40,6 @@ class GateStatement:
 		Read-only access to the dictionary mapping gate parameter names to the associated values.
 		"""
 		return self._parameters
+	
+	def moment_iter(self, parameters=None):
+		yield [self]
