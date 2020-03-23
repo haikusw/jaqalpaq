@@ -15,7 +15,7 @@ class GateStatement:
 			self._parameters = parameters
 
 	def __repr__(self):
-		params = ', '.join([repr(self.name)] + [repr(param) for param in self.parameters])
+		params = ', '.join([repr(self.name)] + [repr(param) for param in self.parameters.values()])
 		return f"GateStatement({params})"
 
 	def __eq__(self, other):
