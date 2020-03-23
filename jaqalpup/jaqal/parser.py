@@ -4,57 +4,10 @@ from enum import Enum
 from jaqal import Interface, TreeRewriteVisitor, TreeManipulators
 
 from jaqalpup.core import (
-    ScheduledCircuit, Register, NamedQubit, GateDefinition,
+    ScheduledCircuit, Register, NamedQubit, GateDefinition, Macro,
     Parameter, LoopStatement, BlockStatement, NATIVE_GATES
 )
 from jaqalpup import QSCOUTError
-
-
-def parse_jaqal_file(filename, override_dict=None, use_qscout_native_gates=False,
-                     processing_option=None):
-    """Parse a file written in Jaqal into core types.
-
-    :param str filename: The name of the Jaqal file.
-    :param dict[str, float] override_dict:  An optional dictionary that overrides let statements in the Jaqal code.
-    Note: all keys in this dictionary must exist as let statements or an error will be raised.
-    :param bool use_qscout_native_gates: Only allow pre-determined gates from the QSCOUT gate set.
-    :param processing_option: What kind of processing, if any, to perform on the tree.
-    :type processing_option: Option or OptionSet
-    :return: A list of the gates, blocks, and loops to be run.
-
-    """
-    with open(filename) as fd:
-        return parse_jaqal_string(fd.read(), override_dict=override_dict,
-                                  use_qscout_native_gates=use_qscout_native_gates,
-                                  processing_option=processing_option)
-
-
-def parse_jaqal_string(jaqal, override_dict=None, use_qscout_native_gates=False,
-                       processing_option=None):
-    """Parse a string written in Jaqal into core types.
-
-    :param str jaqal: The Jaqal code.
-    :param dict[str, float] override_dict:  An optional dictionary that overrides let statements in the Jaqal code.
-    Note: all keys in this dictionary must exist as let statements or an error will be raised.
-    :param bool use_qscout_native_gates: Only allow pre-determined gates from the QSCOUT gate set.
-    :param processing_option: What kind of processing, if any, to perform on the tree.
-    :type processing_option: Option or OptionSet
-    :return: A list of the gates, blocks, and loops to be run.
-
-    """
-
-    # The interface will automatically expand macros and scrape let, map, and register metadata.
-    iface = Interface(jaqal, allow_no_usepulses=True)
-    # Do some minimal processing to fill in all let and map values. The interface does not automatically do this
-    # as they may rely on values from override_dict.
-    let_dict = iface.make_let_dict(override_dict)
-    tree = iface.resolve_let(iface.preprocessed_tree, let_dict=let_dict)
-    tree = iface.resolve_map(tree)
-    register_dict = iface.make_register_dict(let_dict)
-    circuit = convert_to_circuit(tree, register_dict=register_dict,
-                                 use_qscout_native_gates=use_qscout_native_gates)
-    # Note: we also have metadata about register sizes and imported files that we could output here as well.
-    return circuit
 
 
 class Option(Enum):
@@ -86,6 +39,60 @@ class OptionSet(set):
         return any(other in item for item in self)
 
 
+def parse_jaqal_file(filename, override_dict=None, use_qscout_native_gates=False,
+                     processing_option=None):
+    """Parse a file written in Jaqal into core types.
+
+    :param str filename: The name of the Jaqal file.
+    :param dict[str, float] override_dict:  An optional dictionary that overrides let statements in the Jaqal code.
+    Note: all keys in this dictionary must exist as let statements or an error will be raised.
+    :param bool use_qscout_native_gates: Only allow pre-determined gates from the QSCOUT gate set.
+    :param processing_option: What kind of processing, if any, to perform on the tree.
+    :type processing_option: Option or OptionSet
+    :return: A list of the gates, blocks, and loops to be run.
+
+    """
+    with open(filename) as fd:
+        return parse_jaqal_string(fd.read(), override_dict=override_dict,
+                                  use_qscout_native_gates=use_qscout_native_gates,
+                                  processing_option=processing_option)
+
+
+def parse_jaqal_string(jaqal, override_dict=None, use_qscout_native_gates=False,
+                       processing_option=Option.none):
+    """Parse a string written in Jaqal into core types.
+
+    :param str jaqal: The Jaqal code.
+    :param dict[str, float] override_dict:  An optional dictionary that overrides let statements in the Jaqal code.
+    Note: all keys in this dictionary must exist as let statements or an error will be raised.
+    :param bool use_qscout_native_gates: Only allow pre-determined gates from the QSCOUT gate set.
+    :param processing_option: What kind of processing, if any, to perform on the tree.
+    :type processing_option: Option or OptionSet
+    :return: A list of the gates, blocks, and loops to be run.
+
+    """
+
+    # The interface will automatically expand macros and scrape let, map, and register metadata.
+    iface = Interface(jaqal, allow_no_usepulses=True)
+    # Do some minimal processing to fill in all let and map values. The interface does not automatically do this
+    # as they may rely on values from override_dict.
+    let_dict = iface.make_let_dict(override_dict)
+    register_dict = iface.make_register_dict(let_dict)
+    tree = iface.tree
+    if Option.expand_macro in processing_option:
+        tree = iface.resolve_macro(tree)
+    if Option.expand_let in processing_option:
+        tree = iface.resolve_let(tree, let_dict=let_dict)
+    if Option.expand_let_map in processing_option:
+        tree = iface.resolve_map(tree)
+    if Option.strip_metadata in processing_option:
+        tree = iface.strip_metadata(tree)
+    circuit = convert_to_circuit(tree, register_dict=register_dict,
+                                 use_qscout_native_gates=use_qscout_native_gates)
+    # Note: we also have metadata about imported files that we could output here as well.
+    return circuit
+
+
 def convert_to_circuit(tree, register_dict=None, use_qscout_native_gates=False):
     """Convert a tree into a scheduled circuit.
 
@@ -114,6 +121,7 @@ class CoreTypesVisitor(TreeRewriteVisitor, TreeManipulators):
         else:
             self.gate_definitions = {}
         self.use_qscout_native_gates = bool(use_qscout_native_gates)
+        self.macro_definitions = {}
 
     ##
     # Visitor Methods
@@ -124,9 +132,24 @@ class CoreTypesVisitor(TreeRewriteVisitor, TreeManipulators):
         for stmt in body_statements:
             circuit.body.append(stmt)
         circuit.registers.update(self.registers)
+        circuit.macros.update(self.macro_definitions)
         if not self.use_qscout_native_gates:
             circuit.native_gates.update(self.gate_definitions)
         return circuit
+
+    def visit_macro_definition(self, name, arguments, block):
+        """Process a macro definition, storing the definition and removing it from the
+        body statements."""
+
+        name = str(self.extract_identifier(name))
+        parameters = [Parameter(str(self.extract_identifier(arg)), None)
+                      for arg in arguments]
+        block = self.deconstruct_macro_gate_block(block)
+
+        macro = Macro(name, parameters, block)
+        self.macro_definitions[name] = macro
+
+        return None
 
     def visit_parallel_gate_block(self, statements):
         return BlockStatement(parallel=True, statements=statements)
@@ -146,7 +169,12 @@ class CoreTypesVisitor(TreeRewriteVisitor, TreeManipulators):
         return gate
 
     def visit_array_element_qual(self, identifier, index):
-        index = int(index)
+        if self.is_signed_integer(index):
+            index = int(index)
+        elif self.is_let_identifier(index):
+            index = Parameter(str(self.deconstruct_let_identifier(index)), None)
+        else:
+            raise QSCOUTError(f"Unknown index type {index}")
         identifier = self.extract_qualified_identifier(identifier)
         reg = self.registers[str(identifier)][index]
         return reg
@@ -163,6 +191,9 @@ class CoreTypesVisitor(TreeRewriteVisitor, TreeManipulators):
             return float(arg)
         elif isinstance(arg, NamedQubit):
             return arg
+        elif self.is_let_or_map_identifier(arg):
+            name = str(self.deconstruct_let_or_map_identifier(arg))
+            return Parameter(name, None)
         else:
             raise TypeError(f"Unrecognized gate argument {arg}")
 
@@ -189,6 +220,9 @@ class CoreTypesVisitor(TreeRewriteVisitor, TreeManipulators):
             kind = 'float'
         elif isinstance(arg, NamedQubit):
             kind = 'qubit'
+        elif isinstance(arg, Parameter):
+            # This is usually an unresolved let constant
+            kind = None
         else:
             raise TypeError("Unrecognized argument type to gate")
         return Parameter(name, kind)

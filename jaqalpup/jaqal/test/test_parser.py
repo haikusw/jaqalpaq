@@ -3,7 +3,7 @@ from numbers import Number
 
 from jaqalpup.core import (
     GateDefinition, Register, ScheduledCircuit, Parameter, BlockStatement, LoopStatement,
-    NATIVE_GATES
+    NATIVE_GATES, Macro
 )
 from jaqalpup.jaqal.parser import parse_jaqal_string, Option
 
@@ -41,7 +41,8 @@ class ParserTester(TestCase):
             ]
         )
         override_dict = {'a': 0, 'b': 1.41}
-        self.run_test(text, exp_result, override_dict=override_dict)
+        self.run_test(text, exp_result, override_dict=override_dict,
+                      option=Option.expand_let)
 
     def test_parallel_block(self):
         text = "<foo | bar>"
@@ -96,11 +97,12 @@ class ParserTester(TestCase):
         exp_native_gates = {
             'foo': self.get_gate_definition(
                 'foo',
-                [self.make_parameter(0, 'float'), self.make_parameter(1, 'qubit')]
+                [self.make_parameter(index=0, kind='float'),
+                 self.make_parameter(index=1, kind='qubit')]
             ),
             'bar': self.get_gate_definition(
                 'bar',
-                [self.make_parameter(0, 'float')]
+                [self.make_parameter(index=0, kind='float')]
             )
 
         }
@@ -126,6 +128,55 @@ class ParserTester(TestCase):
         with self.assertRaises(Exception):
             parse_jaqal_string(text, use_qscout_native_gates=True)
 
+    def test_macro_definition_no_expand(self):
+        """Test parsing macro definitions without expanding them."""
+        text = "macro foo a { g a }; foo 1.5"
+        exp_result = self.make_circuit(
+            gates=[
+                self.make_gate('foo', 1.5)
+            ],
+            macros={
+                'foo': self.make_macro(
+                    'foo',
+                    ['a'],
+                    self.make_gate('g', 'a')
+                )
+            }
+        )
+        self.run_test(text, exp_result, use_qscout_native_gates=False)
+
+    def test_macro_definition_expand(self):
+        """Test parsing macro definitions and expanding them."""
+        self.fail()
+
+    def test_let_no_resolve(self):
+        """Test parsing a let statement"""
+        self.fail()
+
+    def test_let_resolve(self):
+        """Test parsing a let statement and resolving it."""
+        self.fail()
+
+    def test_map_no_resolve(self):
+        """Test parsing a map statement."""
+        self.fail()
+
+    def test_map_resolve(self):
+        """Test parsing a map statement and resolving it."""
+        self.fail()
+
+    def test_strip_metadata(self):
+        """Test stripping metadata from the parse tree before creating the ScheduledCircuit."""
+        self.fail()
+
+    def test_expand_macro_let_map_strip_metadata(self):
+        """Test an example that exercises all available options."""
+        self.fail()
+
+    def test_no_expand_macro_let_map_leave_metadata(self):
+        """Test an example that does not exercise all available options but involves features that could be."""
+        self.fail()
+
     ##
     # Helper methods
     #
@@ -137,25 +188,31 @@ class ParserTester(TestCase):
                                         processing_option=option)
         if exp_result is not None:
             self.assertEqual(exp_result.body, act_result.body)
+            self.assertEqual(exp_result.macros, act_result.macros)
         if exp_registers is not None:
             self.assertEqual(exp_registers, act_result.registers)
         if exp_native_gates is not None:
             self.assertEqual(exp_native_gates, act_result.native_gates)
 
     @staticmethod
-    def make_circuit(*, gates):
+    def make_circuit(*, gates, macros=None):
         circuit = ScheduledCircuit()
         for gate in gates:
             circuit.body.append(gate)
+        if macros:
+            circuit.macros.update(macros)
         return circuit
 
     def make_gate(self, name, *args):
+        """Return a GateStatement, possibly creating a definition in the process."""
         return self.make_gate_conditional(name, args, is_native=False)
 
     def make_native_gate(self, name, *args):
+        """Return a GateStatement that must be a native gate."""
         return self.make_gate_conditional(name, args, is_native=True)
 
     def make_gate_conditional(self, name, args, is_native):
+        """Make a gate that is either native or not. Don't call directly."""
         arg_objects = [self.make_argument_object(arg) for arg in args]
         if is_native:
             gate_def = self.get_native_gate_definition(name)
@@ -165,6 +222,7 @@ class ParserTester(TestCase):
         return gate_def(*arg_objects)
 
     def get_gate_definition(self, name, params):
+        """Return an existing or create a new GateDefinition."""
         if name not in self.gate_definitions:
             gate_def = GateDefinition(name, params)
             self.gate_definitions[name] = gate_def
@@ -172,19 +230,23 @@ class ParserTester(TestCase):
             gate_def = self.gate_definitions[name]
         return gate_def
 
-    def get_native_gate_definition(self, name):
+    @staticmethod
+    def get_native_gate_definition(name):
+        """Return an existing GateDefinition for a native gate or raise an exception."""
         for gate in NATIVE_GATES:
             if gate.name == name:
                 return gate
         raise ValueError(f"Native gate {name} not found")
 
     def make_argument_object(self, arg):
+        """Format an argument as the GateStatement constructor expects it."""
         if isinstance(arg, Number):
             return arg
         elif isinstance(arg, tuple):
             return self.make_qubit(*arg)
 
     def make_qubit(self, name, index):
+        """Return a NamedQubit object, possibly creating a register object in the process."""
         if name not in self.registers:
             reg = Register(name, 1000)
             self.registers[name] = reg
@@ -193,18 +255,28 @@ class ParserTester(TestCase):
             return self.registers[name][index]
 
     def make_parameter_from_arg(self, index, arg):
+        """Define a Parameter from the argument to a gate. Used to define a new GateDefinition."""
         kind = self.make_kind_from_arg(arg)
-        param = self.make_parameter(index, kind)
+        param = self.make_parameter(index=index, kind=kind)
         return param
 
     def make_kind_from_arg(self, arg):
+        """Return the kind (type) of an argument.
+
+        The tester can either use a tuple for a register element or a number for a float. We
+        don't distinguish int from float here.
+        """
         if isinstance(arg, Number):
             return 'float'
         elif isinstance(arg, tuple):
             return 'qubit'
 
-    def make_parameter(self, index, kind):
-        return Parameter(str(index), kind)
+    def make_parameter(self, name=None, index=None, kind=None):
+        if name is None:
+            if index is None:
+                raise ValueError("Provide either name or index to Parameter")
+            name = str(index)
+        return Parameter(name, kind)
 
     def make_parallel_gate_block(self, *gates):
         return BlockStatement(parallel=True, statements=list(gates))
@@ -214,6 +286,14 @@ class ParserTester(TestCase):
 
     def make_loop(self, *gates, count):
         return LoopStatement(count, self.make_sequential_gate_block(*gates))
+
+    def make_macro(self, name, parameter_names, *statements):
+        """Create a new Macro object for a macro definition."""
+        # Note That this only creates macros with sequential gate blocks while those with
+        # parallel gate blocks are also possible.
+        return Macro(name,
+                     parameters=[self.make_parameter(pname) for pname in parameter_names],
+                     body=self.make_sequential_gate_block(*statements))
 
 
 class TestOption(TestCase):
