@@ -47,6 +47,31 @@ class BlockStatement:
 		:type instr: GateStatement, LoopStatement, or BlockStatement
 		"""
 		self.statements.append(instr)
+	
+	def moment_iter(self):
+		if self.parallel:
+			par_channels = set(statement.moment_iter() for statement in self._statements)
+			while par_channels:
+				moment = None
+				for par_channel in list(par_channels):
+					try:
+						moment_more = next(par_channel)
+					except StopIteration:
+						par_channels.remove(par_channel)
+						continue
+					# XXX: Validate duration of statement and actual compatibility
+					# of statements within the group
+					if moment is None:
+						moment = moment_more
+					else:
+						moment.extend(moment_more)
+				if moment:
+					yield moment
+				else:
+					assert len(par_channels) == 0
+		else:
+			for gate in self._statements:
+				yield from gate.moment_iter()
 
 class LoopStatement:
 	"""
@@ -95,3 +120,7 @@ class LoopStatement:
 		:type instr: GateStatement, LoopStatement, or BlockStatement
 		"""
 		self.statements.append(instr)
+	
+	def moment_iter(self):
+		for i in range(self.iterations):
+			yield from self._statements.moment_iter()
