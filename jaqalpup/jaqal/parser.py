@@ -1,4 +1,5 @@
 from numbers import Number
+from enum import Enum
 
 from jaqal import Interface, TreeRewriteVisitor, TreeManipulators
 
@@ -9,28 +10,35 @@ from jaqalpup.core import (
 from jaqalpup import QSCOUTError
 
 
-def parse_jaqal_file(filename, override_dict=None, use_qscout_native_gates=False):
+def parse_jaqal_file(filename, override_dict=None, use_qscout_native_gates=False,
+                     processing_option=None):
     """Parse a file written in Jaqal into core types.
 
     :param str filename: The name of the Jaqal file.
     :param dict[str, float] override_dict:  An optional dictionary that overrides let statements in the Jaqal code.
     Note: all keys in this dictionary must exist as let statements or an error will be raised.
     :param bool use_qscout_native_gates: Only allow pre-determined gates from the QSCOUT gate set.
+    :param processing_option: What kind of processing, if any, to perform on the tree.
+    :type processing_option: Option or OptionSet
     :return: A list of the gates, blocks, and loops to be run.
 
     """
     with open(filename) as fd:
         return parse_jaqal_string(fd.read(), override_dict=override_dict,
-                                  use_qscout_native_gates=use_qscout_native_gates)
+                                  use_qscout_native_gates=use_qscout_native_gates,
+                                  processing_option=processing_option)
 
 
-def parse_jaqal_string(jaqal, override_dict=None, use_qscout_native_gates=False):
+def parse_jaqal_string(jaqal, override_dict=None, use_qscout_native_gates=False,
+                       processing_option=None):
     """Parse a string written in Jaqal into core types.
 
     :param str jaqal: The Jaqal code.
     :param dict[str, float] override_dict:  An optional dictionary that overrides let statements in the Jaqal code.
     Note: all keys in this dictionary must exist as let statements or an error will be raised.
     :param bool use_qscout_native_gates: Only allow pre-determined gates from the QSCOUT gate set.
+    :param processing_option: What kind of processing, if any, to perform on the tree.
+    :type processing_option: Option or OptionSet
     :return: A list of the gates, blocks, and loops to be run.
 
     """
@@ -40,20 +48,62 @@ def parse_jaqal_string(jaqal, override_dict=None, use_qscout_native_gates=False)
     # Do some minimal processing to fill in all let and map values. The interface does not automatically do this
     # as they may rely on values from override_dict.
     let_dict = iface.make_let_dict(override_dict)
-    tree = iface.resolve_let(let_dict=let_dict)
+    tree = iface.resolve_let(iface.preprocessed_tree, let_dict=let_dict)
     tree = iface.resolve_map(tree)
-    visitor = CoreTypesVisitor(iface.make_register_dict(let_dict),
-                               use_qscout_native_gates=use_qscout_native_gates)
-    circuit = visitor.visit(tree)
+    register_dict = iface.make_register_dict(let_dict)
+    circuit = convert_to_circuit(tree, register_dict=register_dict,
+                                 use_qscout_native_gates=use_qscout_native_gates)
     # Note: we also have metadata about register sizes and imported files that we could output here as well.
     return circuit
+
+
+class Option(Enum):
+    """Control how and whether the parser expands certain constructs."""
+    none = 0
+    expand_macro = 0x1
+    expand_let = 0x2
+    expand_let_map = 0x6
+    strip_metadata = 0x8
+    full = 0xf
+
+    def __contains__(self, item):
+        return (self.value & item.value) == item.value
+
+    def __or__(self, other):
+        if isinstance(other, OptionSet):
+            result = OptionSet([self]) | other
+        else:
+            result = OptionSet([self, other])
+        return result
+
+    def __ror__(self, other):
+        return self | other
+
+
+class OptionSet(set):
+    """Represent multiple parser options. Acts like a bitmask"""
+    def __contains__(self, other):
+        return any(other in item for item in self)
+
+
+def convert_to_circuit(tree, register_dict=None, use_qscout_native_gates=False):
+    """Convert a tree into a scheduled circuit.
+
+    :param tree: A parse tree.
+    :param dict[str, int] register_dict: A dictionary register names to their allocated sizes.
+    :param bool use_qscout_native_gates: Only allow pre-determined gates from the QSCOUT gate set.
+    :return: A ScheduledCircuit object that faithfully represents the input.
+    """
+    register_dict = register_dict or {}
+    visitor = CoreTypesVisitor(register_dict, use_qscout_native_gates=use_qscout_native_gates)
+    return visitor.visit(tree)
 
 
 class CoreTypesVisitor(TreeRewriteVisitor, TreeManipulators):
     """Define a visitor that will rewrite a Jaqal parse tree into objects from the core library.
 
-    This class should not be used directly. Use the parse_jaqal_string or
-    parse_jaqal_file functions instead.
+    This class should not be used directly. Use the parse_jaqal_string,
+    parse_jaqal_file, or convert_to_core_types functions instead.
     """
 
     def __init__(self, register_dict, use_qscout_native_gates=False):

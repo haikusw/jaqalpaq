@@ -5,7 +5,7 @@ from jaqalpup.core import (
     GateDefinition, Register, ScheduledCircuit, Parameter, BlockStatement, LoopStatement,
     NATIVE_GATES
 )
-from jaqalpup.jaqal.parser import parse_jaqal_string
+from jaqalpup.jaqal.parser import parse_jaqal_string, Option
 
 
 class ParserTester(TestCase):
@@ -131,9 +131,10 @@ class ParserTester(TestCase):
     #
 
     def run_test(self, text, exp_result=None, exp_registers=None, exp_native_gates=None,
-                 override_dict=None, use_qscout_native_gates=False):
+                 override_dict=None, use_qscout_native_gates=False, option=Option.none):
         act_result = parse_jaqal_string(text, override_dict=override_dict,
-                                        use_qscout_native_gates=use_qscout_native_gates)
+                                        use_qscout_native_gates=use_qscout_native_gates,
+                                        processing_option=option)
         if exp_result is not None:
             self.assertEqual(exp_result.body, act_result.body)
         if exp_registers is not None:
@@ -213,3 +214,41 @@ class ParserTester(TestCase):
 
     def make_loop(self, *gates, count):
         return LoopStatement(count, self.make_sequential_gate_block(*gates))
+
+
+class TestOption(TestCase):
+    """Test the Option and OptionSet classes."""
+
+    def test_contains_self(self):
+        """Test that all options contain themselves."""
+        for opt in Option:
+            self.assertIn(opt, opt)
+
+    def test_contains_bitmask(self):
+        """Test that element containment acts like a bitmask."""
+        for opt0 in Option:
+            for opt1 in Option:
+                self.assertEqual(opt0.value & opt1.value == opt1.value,
+                                 opt1 in opt0)
+
+    def test_in_option_set(self):
+        """Test that options are in an option set containing them."""
+        for opt0 in Option:
+            for opt1 in Option:
+                optset = opt0 | opt1
+                self.assertIn(opt0, optset)
+                self.assertIn(opt1, optset)
+
+    def test_combine_opt_set_with_option(self):
+        """Test that an option set combines with an option"""
+        for opt0 in Option:
+            for opt1 in Option:
+                for opt2 in Option:
+                    optset = opt0 | opt1
+                    self.assertIn(opt2, optset | opt2)
+                    self.assertIn(opt2, opt2 | optset)
+
+    def test_let_in_optionset_with_let_map(self):
+        """Test that extract_let is in an OptionSet that was created with extract_let_map but not extract_let"""
+        optset = Option.expand_macro | Option.expand_let_map
+        self.assertIn(Option.expand_let_map, optset)
