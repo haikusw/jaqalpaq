@@ -158,6 +158,11 @@ class Register:
 	
 	def __len__(self):
 		return self.size
+	
+	def __iter__(self):
+		for key in range(self.size):
+			yield self[key]
+
 
 class NamedQubit:
 	"""
