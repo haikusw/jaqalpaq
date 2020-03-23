@@ -1,4 +1,5 @@
 from collections import OrderedDict
+import numpy as np
 
 from .parameter import Parameter, QUBIT_TYPE, FLOAT_TYPE, REGISTER_TYPE
 from jaqalpup import QSCOUTError
