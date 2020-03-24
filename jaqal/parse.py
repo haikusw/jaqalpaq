@@ -687,6 +687,12 @@ class TreeManipulators:
         assert len(tree.children) == 1
         return cls.extract_qualified_identifier(tree.children[0])
 
+    @classmethod
+    def deconstruct_let_identifier(cls, tree):
+        """Return a qualified identifier from a let identifier."""
+        assert len(tree.children) == 1
+        return cls.extract_qualified_identifier(tree.children[0])
+
     @staticmethod
     def extract_qualified_identifier(tree):
         """Return a qualified identifier as a tuple of strings."""
