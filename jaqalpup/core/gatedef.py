@@ -121,7 +121,7 @@ def RX_unitary(phi):
 
 def RY_unitary(phi):
 	return np.array([[np.cos(phi/2), -np.sin(phi/2)],
-					[-np.sin(phi/2), np.cos(phi/2)]])
+					[np.sin(phi/2), np.cos(phi/2)]])
 
 def RZ_unitary(phi):
 	return np.array([[1, 0],
