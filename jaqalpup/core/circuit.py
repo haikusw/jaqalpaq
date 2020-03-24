@@ -12,8 +12,8 @@ class ScheduledCircuit:
 	Represents an entire quantum program.
 	
 	:param bool qscout_native_gates: If True, include the QSCOUT native gate set
-		(currently Mølmer-Sørensen, X, Y, and Z rotations, Pauli X and Y, the square roots of
-		Pauli X and Y, rotation around an arbitrary axis in the X-Y plane, the identity, and
+		(currently Mølmer-Sørensen, X, Y, and Z rotations, Pauli X, Y and Z, the square roots of
+		Pauli X, Y, and Z, rotation around an arbitrary axis in the X-Y plane, identity operations, and
 		state preparation and measurement in the computational basis of all qubits at once) as
 		the native gate set of the circuit. If False, leave the native gate set of the circuit
 		empty for the user to fill in.
