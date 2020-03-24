@@ -162,6 +162,53 @@ class CoreTypesVisitor(TreeRewriteVisitor, TreeManipulators):
 
         return None
 
+    def visit_map_statement(self, target, source):
+        """Process a map statement by storing its definition and removing it from the header
+        statements."""
+        # Target is the map being defined. source is the register or map we are basing it on.
+        tgt_name = str(self.extract_identifier(target))
+        if tgt_name in self.registers:
+            raise QSCOUTError(f"Redefinition of map or register {tgt_name}")
+
+        if self.is_array_slice(source):
+            src_name, src_slice = self.deconstruct_array_slice(source)
+            src_name = str(self.extract_identifier(src_name))
+            if src_name not in self.registers:
+                raise QSCOUTError(f"map {tgt_name} based on non-existent source {src_name}")
+            src_reg = self.registers[src_name]
+            src_start, src_stop, src_step = src_slice
+            src_start = self.resolve_slice_element(src_start, lambda: 0)
+
+            def get_default_stop():
+                try:
+                    return src_reg.size
+                except QSCOUTError as exc:
+                    raise QSCOUTError(f"Cannot determine size of {src_name}: {exc}")
+            src_stop = self.resolve_slice_element(src_stop, get_default_stop)
+            src_step = self.resolve_slice_element(src_step, lambda: 1)
+            src_slice = slice(src_start, src_stop, src_step)
+            self.registers[tgt_name] = Register(tgt_name, alias_from=src_reg,
+                                                alias_slice=src_slice)
+        elif self.is_array_element(source):
+            src_name, src_index = self.deconstruct_array_element(source)
+            src_name = str(self.extract_identifier(src_name))
+            if src_name not in self.registers:
+                raise QSCOUTError(f"map {tgt_name} based on non-existent source {src_name}")
+            src_reg = self.registers[src_name]
+            src_index = self.extract_signed_integer(src_index)
+            self.registers[tgt_name] = NamedQubit(tgt_name, alias_from=src_reg,
+                                                  alias_index=src_index)
+        return None
+
+    def resolve_slice_element(self, element, default_func):
+        if element is None:
+            return default_func()
+        if self.is_signed_integer(element):
+            return self.extract_signed_integer(element)
+        if self.is_let_identifier(element):
+            id_name = str(self.deconstruct_let_identifier(element))
+            return Parameter(id_name, None)
+
     def visit_parallel_gate_block(self, statements):
         return BlockStatement(parallel=True, statements=statements)
 
@@ -187,6 +234,9 @@ class CoreTypesVisitor(TreeRewriteVisitor, TreeManipulators):
         else:
             raise QSCOUTError(f"Unknown index type {index}")
         identifier = self.extract_qualified_identifier(identifier)
+        ident_str = str(identifier)
+        if ident_str not in self.registers:
+            raise QSCOUTError(f"No register or map named {ident_str}")
         reg = self.registers[str(identifier)][index]
         return reg
 
@@ -204,6 +254,13 @@ class CoreTypesVisitor(TreeRewriteVisitor, TreeManipulators):
             return arg
         elif self.is_let_or_map_identifier(arg):
             name = str(self.deconstruct_let_or_map_identifier(arg))
+            if name in self.registers:
+                # This happens when a map statement maps a single qubit to
+                # a name.
+                named_qubit = self.registers[name]
+                if not isinstance(named_qubit, NamedQubit):
+                    raise ValueError(f"Gate argument {name} is a register")
+                return named_qubit
             return Parameter(name, None)
         else:
             raise TypeError(f"Unrecognized gate argument {arg}")
