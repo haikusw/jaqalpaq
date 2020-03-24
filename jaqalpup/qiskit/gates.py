@@ -117,7 +117,7 @@ class SXGate(Gate):
 		}
 		"""
 		definition = []
-		q = QuantumRegister(2, "q")
+		q = QuantumRegister(1, "q")
 		rule = [
 			(RXGate(pi/2), [q[0]], []),
 		]
@@ -148,7 +148,7 @@ class SYGate(Gate):
 		}
 		"""
 		definition = []
-		q = QuantumRegister(2, "q")
+		q = QuantumRegister(1, "q")
 		rule = [
 			(RYGate(pi/2), [q[0]], []),
 		]
@@ -191,7 +191,7 @@ class RGate(Gate):
 		}
 		"""
 		definition = []
-		q = QuantumRegister(2, "q")
+		q = QuantumRegister(1, "q")
 		theta, phi = tuple(self.params)
 		rule = [
 			(RZGate(-theta), [q[0]], []),
