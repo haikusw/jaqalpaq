@@ -222,19 +222,91 @@ class ParserTester(TestCase):
 
     def test_map_resolve(self):
         """Test parsing a map statement and resolving it."""
-        self.fail()
+        text = "register r[3]; map q r[1:]; foo q[0]"
+        exp_result = self.make_circuit(
+            registers={'r': self.make_register('r', 3)},
+            maps={'q': self.make_map('q', 'r', (1, 3, 1))},
+            gates=[
+                self.make_gate('foo', ('r', 1))
+            ]
+        )
+        self.run_test(text, exp_result, use_qscout_native_gates=False,
+                      option=Option.expand_let_map)
+
+    def test_map_single_qubit_resolve(self):
+        text = "register r[3]; map q r[1]; foo q"
+        exp_result = self.make_circuit(
+            registers={'r': self.make_register('r', 3)},
+            maps={'q': self.make_map('q', 'r', 1)},
+            gates=[
+                self.make_gate('foo', ('r', 1))
+            ]
+        )
+        self.run_test(text, exp_result, use_qscout_native_gates=False,
+                      option=Option.expand_let_map)
+
+    def test_map_whole_register(self):
+        text = "register r[3]; map q r; foo q[1]"
+        exp_result = self.make_circuit(
+            registers={'r': self.make_register('r', 3)},
+            maps={'q': self.make_map('q', 'r', None)},
+            gates=[self.make_gate('foo', ('q', 1))]
+        )
+        self.run_test(text, exp_result, use_qscout_native_gates=False,
+                      option=Option.none)
 
     def test_strip_metadata(self):
         """Test stripping metadata from the parse tree before creating the ScheduledCircuit."""
-        self.fail()
+        text = "register r[3]; map q r; let a 5; macro foo x y { g x y }; gate 1 2 3"
+        exp_result = self.make_circuit(
+            # Register metadata is never stripped.
+            registers={
+                'r': self.make_register('r', 3)
+            },
+            gates=[
+                self.make_gate('gate', 1, 2, 3)
+            ]
+        )
+        self.run_test(text, exp_result, use_qscout_native_gates=False,
+                      option=Option.strip_metadata)
 
     def test_expand_macro_let_map_strip_metadata(self):
         """Test an example that exercises all available options."""
-        self.fail()
+        text = "register r[3]; map q r; let a 2; macro foo x y { g x y }; foo q[a] 3.14"
+        exp_result = self.make_circuit(
+            # Register metadata is never stripped.
+            registers={
+                'r': self.make_register('r', 3)
+            },
+            gates=[
+                self.make_gate('g', ('r', 2), 3.14)
+            ]
+        )
+        self.run_test(text, exp_result, use_qscout_native_gates=False,
+                      option=Option.full)
 
     def test_no_expand_macro_let_map_leave_metadata(self):
         """Test an example that does not exercise all available options but involves features that could be."""
-        self.fail()
+        text = "register r[3]; map q r; let a 2; macro foo x y { g x y }; foo q[a] 3.14"
+        exp_result = self.make_circuit(
+            registers={
+                'r': self.make_register('r', 3)
+            },
+            maps={'q': self.make_map('q', 'r', None)},
+            constants={'a': self.make_constant('a', 2)},
+            macros={
+                'foo': self.make_macro(
+                    'foo',
+                    ['x', 'y'],
+                    self.make_gate('g', 'x', 'y')
+                )
+            },
+            gates=[
+                self.make_gate('foo', ('q', self.make_parameter('a')), 3.14)
+            ]
+        )
+        self.run_test(text, exp_result, use_qscout_native_gates=False,
+                      option=Option.none)
 
     ##
     # Helper methods
@@ -319,10 +391,7 @@ class ParserTester(TestCase):
     def make_qubit(self, name, index):
         """Return a NamedQubit object, possibly creating a register object in the process."""
         if name not in self.registers:
-            # TODO: We can probably replace this with actual registers.
-            reg = Register(name, 1000)
-            self.registers[name] = reg
-            return reg[index]
+            raise ValueError(f"Please define register {name}")
         else:
             return self.registers[name][index]
 
@@ -382,6 +451,10 @@ class ParserTester(TestCase):
                             alias_index=reg_indexing)
             self.registers[name] = nq
             return nq
+        elif reg_indexing is None:
+            reg = Register(name, alias_from=self.registers[reg_name])
+            self.registers[name] = reg
+            return reg
         else:
             raise ValueError(f"Bad register indexing {reg_indexing}")
 

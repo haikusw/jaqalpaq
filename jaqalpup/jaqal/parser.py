@@ -198,6 +198,14 @@ class CoreTypesVisitor(TreeRewriteVisitor, TreeManipulators):
             src_index = self.extract_signed_integer(src_index)
             self.registers[tgt_name] = NamedQubit(tgt_name, alias_from=src_reg,
                                                   alias_index=src_index)
+        elif self.is_identifier(source):
+            # Basically renaming a whole register.
+            src_name = str(self.extract_identifier(source))
+            if src_name not in self.registers:
+                raise QSCOUTError(f"map {tgt_name} based on non-existent source {src_name}")
+            src_reg = self.registers[src_name]
+            self.registers[tgt_name] = Register(tgt_name, alias_from=src_reg)
+
         return None
 
     def resolve_slice_element(self, element, default_func):
