@@ -17,7 +17,6 @@ class Option(Enum):
     expand_macro = 0x1
     expand_let = 0x2
     expand_let_map = 0x6
-    strip_metadata = 0x8
     full = 0xf
 
     def __contains__(self, item):
@@ -86,24 +85,20 @@ def parse_jaqal_string(jaqal, override_dict=None, use_qscout_native_gates=False,
         tree = iface.resolve_let(tree, let_dict=let_dict)
     if Option.expand_let_map in processing_option:
         tree = iface.resolve_map(tree)
-    if Option.strip_metadata in processing_option:
-        tree = iface.strip_metadata(tree)
-    circuit = convert_to_circuit(tree, register_dict=register_dict,
+    circuit = convert_to_circuit(tree,
                                  use_qscout_native_gates=use_qscout_native_gates)
     # Note: we also have metadata about imported files that we could output here as well.
     return circuit
 
 
-def convert_to_circuit(tree, register_dict=None, use_qscout_native_gates=False):
+def convert_to_circuit(tree, use_qscout_native_gates=False):
     """Convert a tree into a scheduled circuit.
 
     :param tree: A parse tree.
-    :param dict[str, int] register_dict: A dictionary register names to their allocated sizes.
     :param bool use_qscout_native_gates: Only allow pre-determined gates from the QSCOUT gate set.
     :return: A ScheduledCircuit object that faithfully represents the input.
     """
-    register_dict = register_dict or {}
-    visitor = CoreTypesVisitor(register_dict, use_qscout_native_gates=use_qscout_native_gates)
+    visitor = CoreTypesVisitor(use_qscout_native_gates=use_qscout_native_gates)
     return visitor.visit(tree)
 
 
@@ -114,14 +109,14 @@ class CoreTypesVisitor(MacroContextRewriteVisitor, TreeManipulators):
     parse_jaqal_file, or convert_to_core_types functions instead.
     """
 
-    def __init__(self, register_dict, use_qscout_native_gates=False):
+    def __init__(self, use_qscout_native_gates=False):
         super().__init__()
-        self.registers = {name: Register(name, size) for name, size in register_dict.items()}
         if use_qscout_native_gates:
             self.gate_definitions = {gate.name: gate for gate in NATIVE_GATES}
         else:
             self.gate_definitions = {}
         self.use_qscout_native_gates = bool(use_qscout_native_gates)
+        self.registers = {}  # This will also contain map aliases.
         self.macro_definitions = {}
         self.let_constants = {}
 
@@ -140,6 +135,22 @@ class CoreTypesVisitor(MacroContextRewriteVisitor, TreeManipulators):
             circuit.native_gates.update(self.gate_definitions)
         return circuit
 
+    def visit_register_statement(self, array_declaration):
+        identifier_token, size_tree = self.deconstruct_array_declaration(array_declaration)
+        name = str(self.extract_identifier(identifier_token))
+        if name in self.registers:
+            raise QSCOUTError(f"Redefinition of register {name}")
+        if self.is_integer(size_tree):
+            size = self.extract_integer(size_tree)
+        elif self.is_let_identifier(size_tree):
+            assert not self.in_macro, "Someone created an invalid parse tree"
+            size_var_name = str(self.deconstruct_let_identifier(size_tree))
+            size = self.resolve_scalar_identifier(size_var_name)
+        else:
+            raise QSCOUTError(f"Unknown object used as register size: {size_tree}")
+        reg = Register(name, size)
+        self.registers[name] = reg
+
     def visit_macro_definition(self, name, arguments, block):
         """Process a macro definition, storing the definition and removing it from the
         body statements."""
@@ -157,7 +168,10 @@ class CoreTypesVisitor(MacroContextRewriteVisitor, TreeManipulators):
         """Process a let statement by storing the definition and removing it from the header
         statements."""
         name = str(self.extract_identifier(identifier))
-        value = self.extract_signed_integer(number)
+        value = self.extract_signed_number(number)
+        int_value = int(value)
+        if value == int_value:
+            value = int_value
 
         self.let_constants[name] = Constant(name, value)
 

@@ -34,9 +34,24 @@ class ParserTester(TestCase):
         )
         self.run_test(text, exp_result)
 
+    def test_let_float(self):
+        """Test a let constant that is a floating point value."""
+        text = "let a 3.14; foo a"
+        exp_result = self.make_circuit(
+            constants={'a': self.make_constant('a', 3.14)},
+            gates=[
+                self.make_gate('foo', self.make_constant('a', 3.14))
+            ]
+        )
+        self.run_test(text, exp_result)
+
     def test_let_override(self):
         text = "register r[3]; let a 1; let b 3.14; foo r[a] b"
         exp_result = self.make_circuit(
+            constants={
+                'a': self.make_constant('a', 1),
+                'b': self.make_constant('b', 3.14)
+            },
             registers={'r': self.make_register('r', 3)},
             gates=[
                 self.make_gate('foo', ('r', 0), 1.41)
@@ -44,7 +59,7 @@ class ParserTester(TestCase):
         )
         override_dict = {'a': 0, 'b': 1.41}
         self.run_test(text, exp_result, override_dict=override_dict,
-                      option=Option.expand_let | Option.strip_metadata)
+                      option=Option.expand_let)
 
     def test_let_as_register_index(self):
         """Test a let-constant used as a register index and not expanded."""
@@ -318,28 +333,21 @@ class ParserTester(TestCase):
         self.run_test(text, exp_result, use_qscout_native_gates=False,
                       option=Option.none)
 
-    def test_strip_metadata(self):
-        """Test stripping metadata from the parse tree before creating the ScheduledCircuit."""
-        text = "register r[3]; map q r; let a 5; macro foo x y { g x y }; gate 1 2 3"
-        exp_result = self.make_circuit(
-            # Register metadata is never stripped.
-            registers={
-                'r': self.make_register('r', 3)
-            },
-            gates=[
-                self.make_gate('gate', 1, 2, 3)
-            ]
-        )
-        self.run_test(text, exp_result, use_qscout_native_gates=False,
-                      option=Option.strip_metadata)
-
     def test_expand_macro_let_map_strip_metadata(self):
         """Test an example that exercises all available options."""
         text = "register r[3]; map q r; let a 2; macro foo x y { g x y }; foo q[a] 3.14"
         exp_result = self.make_circuit(
-            # Register metadata is never stripped.
             registers={
                 'r': self.make_register('r', 3)
+            },
+            constants={'a': self.make_constant('a', 2)},
+            maps={'q': self.make_map('q', 'r', None)},
+            macros={
+                'foo': self.make_macro(
+                    'foo',
+                    ['x', 'y'],
+                    self.make_gate('g', 'x', 'y')
+                )
             },
             gates=[
                 self.make_gate('g', ('r', 2), 3.14)
