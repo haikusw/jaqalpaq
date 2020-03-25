@@ -3,7 +3,7 @@ from numbers import Number
 
 from jaqalpup.core import (
     GateDefinition, Register, ScheduledCircuit, Parameter, BlockStatement, LoopStatement,
-    NATIVE_GATES, Macro, Constant, NamedQubit
+    NATIVE_GATES, Macro, Constant, NamedQubit, AnnotatedValue
 )
 from jaqalpup.jaqal.parser import parse_jaqal_string, Option
 
@@ -44,7 +44,47 @@ class ParserTester(TestCase):
         )
         override_dict = {'a': 0, 'b': 1.41}
         self.run_test(text, exp_result, override_dict=override_dict,
-                      option=Option.expand_let|Option.strip_metadata)
+                      option=Option.expand_let | Option.strip_metadata)
+
+    def test_let_as_register_index(self):
+        """Test a let-constant used as a register index and not expanded."""
+        text = "register r[3]; let a 1; foo r[a]"
+        exp_result = self.make_circuit(
+            registers={'r': self.make_register('r', 3)},
+            constants={'a': self.make_constant('a', 1)},
+            gates=[
+                self.make_gate('foo', ('r', self.make_constant('a', 1)))
+            ]
+        )
+        self.run_test(text, exp_result, option=Option.none)
+
+    def test_let_as_map_range(self):
+        """Test a let-constant used as an element in the slice defining a map that is not expanded."""
+        text = "register r[3]; let a 1; map q r[a:]"
+        exp_result = self.make_circuit(
+            registers={'r': self.make_register('r', 3)},
+            constants={'a': self.make_constant('a', 1)},
+            maps={'q': self.make_map('q', 'r', (self.make_constant('a', 1), 3, 1))},
+            gates=[],
+        )
+        self.run_test(text, exp_result)
+
+    def test_macro_param_shadowing_let_constant(self):
+        """Test a let-constant with the same name as a macro parameter. No expansion."""
+        text = "register r[3]; let a 1; macro foo a { g a }"
+        exp_result = self.make_circuit(
+            registers={'r': self.make_register('r', 3)},
+            constants={'a': self.make_constant('a', 1)},
+            macros={
+                'foo': self.make_macro(
+                    'foo',
+                    ['a'],
+                    self.make_gate('g', 'a')
+                )
+            },
+            gates=[]
+        )
+        self.run_test(text, exp_result)
 
     def test_parallel_block(self):
         text = "<foo | bar>"
@@ -176,7 +216,7 @@ class ParserTester(TestCase):
         text = "let a 2; foo a"
         exp_result = self.make_circuit(
             gates=[
-                self.make_gate('foo', 'a')
+                self.make_gate('foo', self.make_constant('a', 2))
             ],
             constants={'a': self.make_constant('a', 2)}
         )
@@ -302,7 +342,7 @@ class ParserTester(TestCase):
                 )
             },
             gates=[
-                self.make_gate('foo', ('q', self.make_parameter('a')), 3.14)
+                self.make_gate('foo', ('q', self.make_constant('a')), 3.14)
             ]
         )
         self.run_test(text, exp_result, use_qscout_native_gates=False,
@@ -465,6 +505,8 @@ class ParserTester(TestCase):
             return Parameter(arg, None)
         elif arg is None:
             return None
+        elif isinstance(arg, AnnotatedValue):
+            return arg
         else:
             raise ValueError(f"Cannot make slice component from {arg}")
 
