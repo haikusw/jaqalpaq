@@ -7,3 +7,4 @@ from .interface import Interface
 # methods of TreeManipulators to extract useful information from the input arguments and reconstruct
 # the trees.
 from .parse import TreeManipulators, TreeRewriteVisitor
+from .macro_context_visitor import MacroContextRewriteVisitor
