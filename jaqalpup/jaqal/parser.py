@@ -1,11 +1,12 @@
 from numbers import Number
 from enum import Enum
 
-from jaqal import Interface, TreeRewriteVisitor, TreeManipulators
+from jaqal import Interface, MacroContextRewriteVisitor, TreeManipulators
 
 from jaqalpup.core import (
     ScheduledCircuit, Register, NamedQubit, GateDefinition, Macro,
-    Parameter, LoopStatement, BlockStatement, NATIVE_GATES, Constant
+    Parameter, LoopStatement, BlockStatement, NATIVE_GATES, Constant,
+    AnnotatedValue
 )
 from jaqalpup import QSCOUTError
 
@@ -106,7 +107,7 @@ def convert_to_circuit(tree, register_dict=None, use_qscout_native_gates=False):
     return visitor.visit(tree)
 
 
-class CoreTypesVisitor(TreeRewriteVisitor, TreeManipulators):
+class CoreTypesVisitor(MacroContextRewriteVisitor, TreeManipulators):
     """Define a visitor that will rewrite a Jaqal parse tree into objects from the core library.
 
     This class should not be used directly. Use the parse_jaqal_string,
@@ -215,7 +216,7 @@ class CoreTypesVisitor(TreeRewriteVisitor, TreeManipulators):
             return self.extract_signed_integer(element)
         if self.is_let_identifier(element):
             id_name = str(self.deconstruct_let_identifier(element))
-            return Parameter(id_name, None)
+            return self.resolve_scalar_identifier(id_name)
 
     def visit_parallel_gate_block(self, statements):
         return BlockStatement(parallel=True, statements=statements)
@@ -238,7 +239,8 @@ class CoreTypesVisitor(TreeRewriteVisitor, TreeManipulators):
         if self.is_signed_integer(index):
             index = int(index)
         elif self.is_let_identifier(index):
-            index = Parameter(str(self.deconstruct_let_identifier(index)), None)
+            index_name = str(self.deconstruct_let_identifier(index))
+            index = self.resolve_scalar_identifier(index_name)
         else:
             raise QSCOUTError(f"Unknown index type {index}")
         identifier = self.extract_qualified_identifier(identifier)
@@ -262,14 +264,7 @@ class CoreTypesVisitor(TreeRewriteVisitor, TreeManipulators):
             return arg
         elif self.is_let_or_map_identifier(arg):
             name = str(self.deconstruct_let_or_map_identifier(arg))
-            if name in self.registers:
-                # This happens when a map statement maps a single qubit to
-                # a name.
-                named_qubit = self.registers[name]
-                if not isinstance(named_qubit, NamedQubit):
-                    raise ValueError(f"Gate argument {name} is a register")
-                return named_qubit
-            return Parameter(name, None)
+            return self.resolve_scalar_identifier(name, can_be_qubit=True)
         else:
             raise TypeError(f"Unrecognized gate argument {arg}")
 
@@ -296,9 +291,24 @@ class CoreTypesVisitor(TreeRewriteVisitor, TreeManipulators):
             kind = 'float'
         elif isinstance(arg, NamedQubit):
             kind = 'qubit'
-        elif isinstance(arg, Parameter):
-            # This is usually an unresolved let constant
-            kind = None
+        elif isinstance(arg, AnnotatedValue):
+            # This is either an unresolved macro parameter or unresolved let constant.
+            # Either way we treat it the same.
+            kind = arg.kind
         else:
             raise TypeError("Unrecognized argument type to gate")
         return Parameter(name, kind)
+
+    def resolve_scalar_identifier(self, name, can_be_qubit=False):
+        """Figure out if an identifier is a mapped single qubit, a macro parameter, or let constant."""
+        if self.in_macro:
+            if any(str(arg) == name for arg in self.macro_args):
+                return Parameter(name, None)
+        if can_be_qubit and name in self.registers:
+            named_qubit = self.registers[name]
+            if not isinstance(named_qubit, NamedQubit):
+                raise ValueError(f"Scalar variable {name} is a register")
+            return named_qubit
+        if name in self.let_constants:
+            return self.let_constants[name]
+        raise QSCOUTError(f"Unknown variable {name}")

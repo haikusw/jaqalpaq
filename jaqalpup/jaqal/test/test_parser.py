@@ -58,6 +58,19 @@ class ParserTester(TestCase):
         )
         self.run_test(text, exp_result, option=Option.none)
 
+    def test_let_as_map_index(self):
+        """Test a let-constant used as a map index and not expanded."""
+        text = "register r[3]; map q r; let a 1; foo q[a]"
+        exp_result = self.make_circuit(
+            registers={'r': self.make_register('r', 3)},
+            maps={'q': self.make_map('q', 'r', None)},
+            constants={'a': self.make_constant('a', 1)},
+            gates=[
+                self.make_gate('foo', ('q', self.make_constant('a', 1)))
+            ]
+        )
+        self.run_test(text, exp_result, option=Option.none)
+
     def test_let_as_map_range(self):
         """Test a let-constant used as an element in the slice defining a map that is not expanded."""
         text = "register r[3]; let a 1; map q r[a:]"
@@ -342,7 +355,7 @@ class ParserTester(TestCase):
                 )
             },
             gates=[
-                self.make_gate('foo', ('q', self.make_constant('a')), 3.14)
+                self.make_gate('foo', ('q', self.make_constant('a', 2)), 3.14)
             ]
         )
         self.run_test(text, exp_result, use_qscout_native_gates=False,
@@ -424,6 +437,8 @@ class ParserTester(TestCase):
         elif isinstance(arg, str):
             return Parameter(arg, None)
         elif isinstance(arg, NamedQubit):
+            return arg
+        elif isinstance(arg, AnnotatedValue):
             return arg
         else:
             raise TypeError(f"Cannot make an argument out of {arg}")
