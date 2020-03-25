@@ -91,8 +91,8 @@ class JaqalBackend(BasicEngine):
 			self._block.append(self.circuit.build_gate('prepare_all'))
 		
 		if gate == Allocate:
-			qid = self._mapped_qubit_id(cmd.qubits[0][0]) # TODO: Design a cleaner way of doing the below.
-			self.q._size = max(self.q.size, qid + 1)
+			qid = self._mapped_qubit_id(cmd.qubits[0][0])
+			self.q.stretch(qid + 1)
 		
 		elif gate == Deallocate:
 			pass # The user might stop caring about the qubit, but we need to keep it around.

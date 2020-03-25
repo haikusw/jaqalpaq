@@ -175,6 +175,18 @@ class Register:
 	
 	def __len__(self):
 		return self.size
+	
+	def stretch(self, new_size):
+		"""
+		If this register is fundamental and smaller than ``new_size``, increase its size
+		to ``new_size``.
+		
+		:param int new_size: How large the register should be come.
+		:returns: True if the register now contains exactly ``new_size`` qubits, False if
+			the register previously contained and still contains more than that.
+		:rtype: bool
+		:raises QSCOUTError: If this register is not fundamental.
+		"""
 
 class NamedQubit:
 	"""
