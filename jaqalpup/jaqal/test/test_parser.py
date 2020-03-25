@@ -82,6 +82,16 @@ class ParserTester(TestCase):
         )
         self.run_test(text, exp_result)
 
+    def test_let_in_register_size(self):
+        """Test a let-constant used as the size of a register."""
+        text = "let a 5; register r[a]"
+        exp_result = self.make_circuit(
+            constants={'a': self.make_constant('a', 5)},
+            registers={'r': self.make_register('r', self.make_constant('a', 5))},
+            gates=[]
+        )
+        self.run_test(text, exp_result)
+
     def test_macro_param_shadowing_let_constant(self):
         """Test a let-constant with the same name as a macro parameter. No expansion."""
         text = "register r[3]; let a 1; macro foo a { g a }"
