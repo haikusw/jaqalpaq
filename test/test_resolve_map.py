@@ -86,6 +86,49 @@ class ResolveMapTester(ParserTesterMixin, TestCase):
             map_dict, register_dict = extract_map(parser.parse(setup_text))
             resolve_map(parser.parse(gate_text), map_dict, register_dict)
 
+    def test_inside_macro_definition(self):
+        """Check that a map value inside a macro definition is properly expanded."""
+        setup_text = "register r[7]; map a r"
+        text = "macro foo { g a[2] }"
+        exp_result = self.make_program(
+            self.make_header_statements(),
+            self.make_body_statements(
+                self.make_macro_statement(
+                    'foo',
+                    self.make_serial_gate_block(
+                        self.make_gate_statement(
+                            'g',
+                            self.make_array_element_qual('r', 2)
+                        )
+                    )
+                )
+            )
+        )
+        self.run_test(setup_text, text, exp_result)
+
+    def test_inside_macro_definition_shadowed(self):
+        """Test that a map value does not expand inside a macro definition if it shadows a macro
+        parameter."""
+        setup_text = "register r[7]; map a r[0]"
+        text = "macro foo a { g a }"
+        exp_result = self.make_program(
+            self.make_header_statements(),
+            self.make_body_statements(
+                self.make_macro_statement(
+                    'foo',
+                    'a',
+                    self.make_serial_gate_block(
+                        self.make_gate_statement(
+                            'g',
+                            self.make_gate_arg('a')
+                        )
+                    )
+                )
+            )
+        )
+        self.run_test(setup_text, text, exp_result)
+
+
     def run_test(self, setup_text, gate_text, exp_result):
         parser = make_lark_parser()
         map_dict, register_dict = extract_map(parser.parse(setup_text))
