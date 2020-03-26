@@ -34,6 +34,17 @@ class ParserTester(TestCase):
         )
         self.run_test(text, exp_result)
 
+    def test_top_level_sequential_gate_block(self):
+        text = "{foo}"
+        exp_result = self.make_circuit(
+            gates=[
+                self.make_sequential_gate_block(
+                    self.make_gate('foo')
+                )
+            ]
+        )
+        self.run_test(text, exp_result)
+
     def test_let_float(self):
         """Test a let constant that is a floating point value."""
         text = "let a 3.14; foo a"
