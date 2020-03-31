@@ -17,7 +17,16 @@ class AbstractGate:
 		else:
 			self._parameters = parameters
 		self._ideal_action = ideal_action
-	
+
+	def __repr__(self):
+		return f"{type(self).__name__}({self.name}, {self.parameters})"
+
+	def __eq__(self, other):
+		try:
+			return self.name == other.name and self.parameters == other.parameters
+		except AttributeError:
+			return False
+
 	@property
 	def name(self):
 		"""
@@ -76,7 +85,7 @@ class AbstractGate:
 		return GateStatement(self.name, params)
 	
 	def __call__(self, *args, **kwargs):
-		self.call(*args, **kwargs)
+		return self.call(*args, **kwargs)
 
 class GateDefinition(AbstractGate):
 	"""
@@ -90,7 +99,7 @@ def R_unitary(theta, phi):
 	"""
 	Generates the unitary matrix that describes the QSCOUT native R gate, which performs
 	an arbitrary rotation around an axis in the X-Y plane.
-	
+
 	:param float theta: The angle that sets the planar axis to rotate around.
 	:param float phi: The angle by which the gate rotates the state.
 	:returns: The unitary gate matrix.
@@ -103,9 +112,9 @@ def MS_unitary(theta, phi):
 	"""
 	Generates the unitary matrix that describes the QSCOUT native Mølmer-Sørensen gate.
 	This matrix is equivalent to ::
-	
+
 		exp(-i theta/2 (cos(phi) XI + sin(phi) YI) (cos(phi) IX + sin(phi) IY))
-		
+
 	:param float theta: The angle by which the gate rotates the state.
 	:param float phi: The phase angle determining the mix of XX and YY rotation.
 	:returns: The unitary gate matrix.

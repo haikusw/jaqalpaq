@@ -25,7 +25,16 @@ class AnnotatedValue:
 		if kind not in PARAMETER_TYPES:
 			raise QSCOUTError("Invalid parameter type specifier %s." % kind)
 		self._kind = kind
-	
+
+	def __repr__(self):
+		return f"Parameter({repr(self.name)}, {self.kind})"
+
+	def __eq__(self, other):
+		try:
+			return self.name == other.name and self.kind == other.kind
+		except AttributeError:
+			return False
+
 	@property
 	def name(self):
 		"""
