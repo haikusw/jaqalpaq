@@ -1,9 +1,32 @@
-from jaqalpup.core import Register, Constant, NamedQubit
-from .randomize import random_identifier, random_whole, random_integer
+import random
+
+from jaqalpup.core import (
+    Register, Constant, NamedQubit, PARAMETER_TYPES, Parameter, QUBIT_TYPE, FLOAT_TYPE,
+    REGISTER_TYPE, INT_TYPE
+)
+from .randomize import (
+    random_identifier, random_whole, random_integer, random_float, resolve_random_instance
+)
 
 
-class RegisterQubitCommon:
-    """Testing functions common to both the regiser and named qubit tests."""
+class CommonBase:
+    """Testing functions common to various core type tests."""
+
+    @classmethod
+    def make_random_parameter(cls, allowed_types=None, rand=None, return_params=False):
+        """Return a parameter with a random type and name."""
+        rand = resolve_random_instance(rand)
+        name = random_identifier(rand=rand)
+        if allowed_types is None:
+            allowed_types = PARAMETER_TYPES
+        param_type = rand.choice(allowed_types)
+        if param_type not in PARAMETER_TYPES:
+            raise ValueError(f"Unknown parameter type {param_type}")
+        param = Parameter(name, param_type)
+        if not return_params:
+            return param
+        else:
+            return param, name, param_type
 
     @staticmethod
     def make_random_register(name=None, size=None, rand=None, return_params=False):

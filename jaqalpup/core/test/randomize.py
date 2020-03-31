@@ -1,4 +1,5 @@
 import random
+import sys
 
 
 def make_char_range(start_char, end_char):
@@ -40,6 +41,11 @@ def random_integer(*, lower=-100, upper=100, rand=None):
     """Return a random integer."""
     rand = resolve_random_instance(rand)
     return rand.randint(lower, upper)
+
+
+def random_float(*, lower=-sys.float_info.max, upper=sys.float_info.max, rand=None):
+    """Return a random floating point number."""
+    return rand.uniform(lower, upper)
 
 
 def resolve_random_instance(rand):

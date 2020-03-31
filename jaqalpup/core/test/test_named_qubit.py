@@ -1,11 +1,10 @@
 import unittest
 
-from jaqalpup.core import Register, NamedQubit
-from .randomize import random_identifier, random_whole, random_integer
-from .register_qubit_common import RegisterQubitCommon
+from jaqalpup.core.test.randomize import random_identifier, random_whole, random_integer
+from jaqalpup.core.test.common import CommonBase
 
 
-class NamedQubitTester(unittest.TestCase, RegisterQubitCommon):
+class NamedQubitTester(unittest.TestCase, CommonBase):
 
     def test_create_directly_with_register(self):
         """Create a named qubit using its constructor from a register."""

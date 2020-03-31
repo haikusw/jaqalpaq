@@ -1,11 +1,11 @@
 import unittest
 
 from jaqalpup.core import Register, Constant
-from .randomize import random_identifier, random_whole, random_integer
-from .register_qubit_common import RegisterQubitCommon
+from jaqalpup.core.test.randomize import random_identifier, random_whole, random_integer
+from jaqalpup.core.test.common import CommonBase
 
 
-class RegisterTester(unittest.TestCase, RegisterQubitCommon):
+class RegisterTester(unittest.TestCase, CommonBase):
 
     # Note: We may wish to create additional Register constructors to reduce the
     # number of possible illegal ways to create a Register.
