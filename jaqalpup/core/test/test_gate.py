@@ -3,10 +3,10 @@ import unittest
 from jaqalpup.core import GateStatement
 
 from jaqalpup.core.test.randomize import random_identifier, random_whole
-from jaqalpup.core.test.common import CommonBase
+import jaqalpup.core.test.common as common
 
 
-class GateTester(unittest.TestCase, CommonBase):
+class GateTester(unittest.TestCase):
 
     def test_create_gate_no_parameters(self):
         """Test creating a gate without parameters."""
@@ -23,7 +23,7 @@ class GateTester(unittest.TestCase, CommonBase):
         name = random_identifier()
         param_count = random_whole()
         parameters = {param_name: param for param, param_name, _
-                      in (self.make_random_parameter(return_params=True) for _ in range(param_count))}
+                      in (common.make_random_parameter(return_params=True) for _ in range(param_count))}
         gate = GateStatement(name, parameters)
         self.assertEqual(name, gate.name)
         self.assertEqual(parameters, gate.parameters)
