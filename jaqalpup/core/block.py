@@ -14,7 +14,16 @@ class BlockStatement:
 			self._statements = []
 		else:
 			self._statements = statements
-	
+
+	def __repr__(self):
+		return f"BlockStatement(parallel={self.parallel}, {self.statements})"
+
+	def __eq__(self, other):
+		try:
+			return self.parallel == other.parallel and self.statements == other.statements
+		except AttributeError:
+			return False
+
 	@property
 	def statements(self):
 		"""
@@ -86,7 +95,16 @@ class LoopStatement:
 			self._statements = BlockStatement()
 		else:
 			self._statements = statements
-	
+
+	def __repr__(self):
+		return f"LoopStatement({self.iterations}, {self.statements})"
+
+	def __eq__(self, other):
+		try:
+			return self.iterations == other.iterations and self.statements == other.statements
+		except AttributeError:
+			return False
+
 	@property
 	def statements(self):
 		"""
