@@ -2,9 +2,10 @@ import unittest
 
 from jaqalpup.core import Register, Constant
 from .randomize import random_identifier, random_whole, random_integer
+from .register_qubit_common import RegisterQubitCommon
 
 
-class RegisterTester(unittest.TestCase):
+class RegisterTester(unittest.TestCase, RegisterQubitCommon):
 
     # Note: We may wish to create additional Register constructors to reduce the
     # number of possible illegal ways to create a Register.
@@ -37,7 +38,7 @@ class RegisterTester(unittest.TestCase):
     def test_fundamental_register_resolve_valid_qubit(self):
         """Test creating a fundamental register and resolving a qubit."""
         reg = self.make_random_register()
-        qubit, index = self.choose_random_qubit(reg, return_params=True)
+        qubit, index = self.choose_random_qubit_getitem(reg, return_params=True)
         self.assertEqual(reg, qubit.alias_from)
         self.assertEqual(index, qubit.alias_index)
         self.assertEqual(self.make_qubit_name(reg, index), qubit.name)
@@ -56,7 +57,7 @@ class RegisterTester(unittest.TestCase):
         const, const_name, exp_size = self.make_random_size_constant(return_params=True)
         # Note: The documentation does not list Constant as an acceptable type for size.
         reg, exp_name, _ = self.make_random_register(size=const, return_params=True)
-        qubit, index = self.choose_random_qubit(reg, return_params=True)
+        qubit, index = self.choose_random_qubit_getitem(reg, return_params=True)
         self.assertEqual(reg, qubit.alias_from)
         self.assertEqual(index, qubit.alias_index)
         self.assertEqual(self.make_qubit_name(reg, index), qubit.name)
@@ -129,7 +130,7 @@ class RegisterTester(unittest.TestCase):
     def test_full_map_resolve_qubit(self):
         reg = self.make_random_register()
         map_reg, map_name = self.make_map_full(reg, return_params=True)
-        qubit, index = self.choose_random_qubit(map_reg, return_params=True)
+        qubit, index = self.choose_random_qubit_getitem(map_reg, return_params=True)
         # Resolve directly through the map
         res_reg, res_index = map_reg.resolve_qubit(index)
         self.assertEqual(index, res_index)
@@ -142,7 +143,7 @@ class RegisterTester(unittest.TestCase):
     def test_slice_map_resolve_qubit(self):
         reg = self.make_random_register()
         map_reg, map_name, map_slice = self.make_map_slice(reg, return_params=True)
-        qubit, index = self.choose_random_qubit(map_reg, return_params=True)
+        qubit, index = self.choose_random_qubit_getitem(map_reg, return_params=True)
         # Resolve directly through the map
         res_reg, res_index = map_reg.resolve_qubit(index)
         orig_index = map_slice.start + map_slice.step * index
@@ -162,7 +163,7 @@ class RegisterTester(unittest.TestCase):
               for v in [map_slice.start, map_slice.stop, map_slice.step]]
         )
         map_reg, map_name, _ = self.make_map_slice(reg, map_slice=map_const_slice, return_params=True)
-        qubit, index = self.choose_random_qubit(map_reg, return_params=True)
+        qubit, index = self.choose_random_qubit_getitem(map_reg, return_params=True)
         # Resolve directly through the map
         res_reg, res_index = map_reg.resolve_qubit(index)
         orig_index = map_slice.start + map_slice.step * index
@@ -188,80 +189,3 @@ class RegisterTester(unittest.TestCase):
         with self.assertRaises(Exception):
             # alias register and size
             Register(random_identifier(), size=random_whole(), alias_from=reg)
-
-    ##
-    # Helper functions
-    #
-
-    @staticmethod
-    def make_random_register(name=None, size=None, rand=None, return_params=False):
-        """Make a random register"""
-        if name is None:
-            name = random_identifier(rand=rand)
-        if size is None:
-            size = random_whole(rand=rand)
-        reg = Register(name, size)
-        if not return_params:
-            return reg
-        else:
-            return reg, name, size
-
-    @staticmethod
-    def make_random_size_constant(name=None, value=None, rand=None, return_params=False):
-        """Make a random Constant that can represent a size"""
-        if name is None:
-            name = random_identifier(rand=rand)
-        if value is None:
-            value = random_whole(rand=rand)
-        const = Constant(name, value)
-        if not return_params:
-            return const
-        else:
-            return const, name, value
-
-    @staticmethod
-    def choose_random_qubit(reg, index=None, rand=None, return_params=False):
-        if index is None:
-            index = random_integer(lower=0, upper=reg.size - 1, rand=rand)
-        qubit = reg[index]
-        if not return_params:
-            return qubit
-        else:
-            return qubit, index
-
-    @staticmethod
-    def make_qubit_name(reg, index):
-        return f"{reg.name}[{index}]"
-
-    @staticmethod
-    def make_map_full(reg, name=None, rand=None, return_params=False):
-        """Make a map alias to the given register."""
-        if name is None:
-            name = random_identifier(rand=rand)
-        map_reg = Register(name, alias_from=reg)
-        if not return_params:
-            return map_reg
-        else:
-            return map_reg, name
-
-    @classmethod
-    def make_map_slice(cls, reg, name=None, map_slice=None, rand=None, return_params=False):
-        """Make a map alias to a slice of the given register."""
-        if name is None:
-            name = random_identifier(rand=rand)
-        if map_slice is None:
-            map_slice = cls.make_random_slice(reg.size, rand=rand)
-        map_reg = Register(name, alias_from=reg, alias_slice=map_slice)
-        if not return_params:
-            return map_reg
-        else:
-            return map_reg, name, map_slice
-
-    @staticmethod
-    def make_random_slice(upper, rand=None):
-        """Return a slice of an array with upper bound upper. Guaranteed to have
-        at least one element."""
-        start = random_whole(upper=upper - 1, rand=rand)
-        length = random_whole(upper=(upper - start), rand=rand)
-        step = random_whole(upper=16, rand=rand)
-        return slice(start, start + length, step)
