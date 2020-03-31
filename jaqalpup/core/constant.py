@@ -21,7 +21,16 @@ class Constant(AnnotatedValue):
 		else:
 			raise QSCOUTError("Invalid/non-numeric value %s for constant %s!" % (value, name))
 		self._value = value
-	
+
+	def __repr__(self):
+		return f"Constant({repr(self.name)}, {self.value})"
+
+	def __eq__(self, other):
+		try:
+			return self.name == other.name and self.value == other.value
+		except AttributeError:
+			return False
+
 	@property
 	def value(self):
 		"""

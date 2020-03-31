@@ -28,7 +28,18 @@ class ScheduledCircuit:
 				self._native_gates[gate.name] = gate
 		self._registers = {}
 		self._body = BlockStatement()
-	
+
+	def __repr__(self):
+		return f"ScheduledCircuit(constants={self._constants}, macros={self._macros}, native_gates={self._native_gates}, registers={self._registers}, body={self._body})"
+
+	def __eq__(self, other):
+		try:
+			return (self.constants == other.constants and self.macros == other.macros and
+					self.native_gates == other.native_gates and self.registers == other.registers and
+					self.gates == other.gates)
+		except AttributeError:
+			return False
+
 	@property
 	def constants(self):
 		"""Read-only access to a dictionary mapping names to :class:`Constant` objects,
