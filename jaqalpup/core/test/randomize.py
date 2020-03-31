@@ -40,6 +40,6 @@ def random_integer(*, lower=-100, upper=100):
     return random.randint(lower, upper)
 
 
-def random_float(*, lower=-sys.float_info.max, upper=sys.float_info.max, rand=None):
+def random_float(*, lower=-sys.float_info.max, upper=sys.float_info.max):
     """Return a random floating point number."""
-    return rand.uniform(lower, upper)
+    return random.uniform(lower, upper)

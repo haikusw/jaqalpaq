@@ -1,30 +1,33 @@
 import unittest
 
 from jaqalpup.core.parameter import (
-    Parameter,
     QUBIT_TYPE, FLOAT_TYPE, REGISTER_TYPE, INT_TYPE, PARAMETER_TYPES
 )
 from jaqalpup.core.register import Register, NamedQubit
+import jaqalpup.core.test.common as common
+from jaqalpup.core.test.randomize import random_float, random_integer
 
 
 class ParameterTester(unittest.TestCase):
 
     def setUp(self):
-        reg = Register('r', 17)
+        reg = common.make_random_register()
         self.example_values = [
             (reg, [REGISTER_TYPE, None]),
-            (reg[1], [QUBIT_TYPE, None]),
-            (3.14, [FLOAT_TYPE, None]),
-            (1.0, [FLOAT_TYPE, INT_TYPE, None]),
-            (3, [FLOAT_TYPE, INT_TYPE, None])
+            (common.choose_random_qubit_getitem(reg), [QUBIT_TYPE, None]),
+            (random_float(), [FLOAT_TYPE, None]),
+            (float(random_integer()), [FLOAT_TYPE, INT_TYPE, None]),
+            (random_integer(), [FLOAT_TYPE, INT_TYPE, None])
         ]
-        self.example_params = {kind: Parameter('test', kind) for kind in PARAMETER_TYPES}
+        self.example_params = {
+            kind: common.make_random_parameter(allowed_types=[kind])
+            for kind in PARAMETER_TYPES
+        }
 
     def test_create(self):
         """Test creating a parameter with a name and kind."""
         for kind in PARAMETER_TYPES:
-            name = 'test'
-            param = Parameter('test', kind)
+            param, name, _ = common.make_random_parameter(allowed_types=[kind], return_params=True)
             self.assertEqual(name, param.name)
             self.assertEqual(kind, param.kind)
 
@@ -46,7 +49,7 @@ class ParameterTester(unittest.TestCase):
             values = [value for value, value_types in self.example_values
                       if param_kind in value_types]
             for value in values:
-                context = {'test': value}
+                context = {param.name: value}
                 resolved_value = param.resolve_value(context)
                 self.assertEqual(value, resolved_value)
                 with self.assertRaises(Exception):
