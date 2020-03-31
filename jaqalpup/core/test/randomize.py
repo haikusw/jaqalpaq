@@ -40,6 +40,13 @@ def random_integer(*, lower=-100, upper=100):
     return random.randint(lower, upper)
 
 
-def random_float(*, lower=-sys.float_info.max, upper=sys.float_info.max):
-    """Return a random floating point number."""
-    return random.uniform(lower, upper)
+def random_float():
+    """Return a random floating point number. Will sometimes return inf or nan."""
+    if random.uniform(0, 1) < 0.1:
+        return float('inf')
+    elif random.uniform(0, 1) < 0.1:
+        return float('nan')
+    mantissa = random.uniform(0, 1)
+    exponent = random.randint(sys.float_info.min_10_exp, sys.float_info.max_10_exp)
+    sign = random.choice([-1, 1])
+    return sign * mantissa ** exponent
