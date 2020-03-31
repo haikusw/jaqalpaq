@@ -1,11 +1,22 @@
 import random
+import math
 
 from jaqalpup.core import (
     Register, Constant, NamedQubit, PARAMETER_TYPES, Parameter,
+    FLOAT_TYPE, INT_TYPE
 )
 from .randomize import (
-    random_identifier, random_whole, random_integer
+    random_identifier, random_whole, random_integer, random_float
 )
+
+
+def assert_values_same(tester, value0, value1, message=None):
+    """Return if two values, which could be a floating point nan, are the
+    same. Returns true if both are nan, unlike regular comparison."""
+    if math.isnan(value0):
+        tester.assertTrue(math.isnan(value1), message)
+    else:
+        tester.assertEqual(value0, value1, message)
 
 
 def make_random_parameter(allowed_types=None, return_params=False):
@@ -21,6 +32,25 @@ def make_random_parameter(allowed_types=None, return_params=False):
         return param
     else:
         return param, name, param_type
+
+
+def make_random_constant(name=None, value=None, return_params=False):
+    """Make a random Constant value."""
+    if name is None:
+        name = random_identifier()
+    if value is None:
+        const_type = random.choice([FLOAT_TYPE, INT_TYPE])
+        if const_type == FLOAT_TYPE:
+            value = random_float()
+        elif const_type == INT_TYPE:
+            value = random_integer()
+        else:
+            assert False
+    const = Constant(name, value)
+    if not return_params:
+        return const
+    else:
+        return const, name, value
 
 
 def make_random_register(name=None, size=None, return_params=False):

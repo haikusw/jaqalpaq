@@ -1,6 +1,6 @@
 import unittest
 
-from jaqalpup.core.test.randomize import random_identifier, random_whole, random_integer
+from jaqalpup.core.test.randomize import random_identifier, random_integer
 import jaqalpup.core.test.common as common
 
 
