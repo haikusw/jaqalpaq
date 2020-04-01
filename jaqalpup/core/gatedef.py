@@ -76,6 +76,8 @@ class AbstractGate:
 				params = {}
 			else:
 				raise QSCOUTError("Insufficient parameters for gate %s." % self.name)
+		if len(self.parameters) != len(params):
+			raise QSCOUTError(f"Bad argument count: expected {len(self.parameters)}, found {len(params)}")
 		for name in params:
 			for param in self.parameters:
 				if param.name == name:

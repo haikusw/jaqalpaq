@@ -2,8 +2,8 @@ import random
 import math
 
 from jaqalpup.core import (
-    Register, Constant, NamedQubit, PARAMETER_TYPES, Parameter,
-    FLOAT_TYPE, INT_TYPE
+    Register, Constant, NamedQubit, PARAMETER_TYPES, Parameter, GateDefinition,
+    FLOAT_TYPE, INT_TYPE, QUBIT_TYPE, REGISTER_TYPE
 )
 from .randomize import (
     random_identifier, random_whole, random_integer, random_float
@@ -12,16 +12,17 @@ from .randomize import (
 
 def assert_values_same(tester, value0, value1, message=None):
     """Return if two values, which could be a floating point nan, are the
-    same. Returns true if both are nan, unlike regular comparison."""
+    same. Invokes an appropriate assert macro on tester."""
     if math.isnan(value0):
         tester.assertTrue(math.isnan(value1), message)
     else:
         tester.assertEqual(value0, value1, message)
 
 
-def make_random_parameter(allowed_types=None, return_params=False):
+def make_random_parameter(name=None, allowed_types=None, return_params=False):
     """Return a parameter with a random type and name."""
-    name = random_identifier()
+    if name is None:
+        name = random_identifier()
     if allowed_types is None:
         allowed_types = PARAMETER_TYPES
     param_type = random.choice(allowed_types)
@@ -32,6 +33,24 @@ def make_random_parameter(allowed_types=None, return_params=False):
         return param
     else:
         return param, name, param_type
+
+
+def make_random_parameter_list(allowed_types=None, count=None):
+    """Return a list of Parameter objects."""
+    if allowed_types is None:
+        allowed_types = PARAMETER_TYPES
+    if count is None:
+        count = random_integer(lower=0, upper=16)
+    param_list = []
+    names_used = set()
+    for _ in range(count):
+        while True:
+            param = make_random_parameter(allowed_types=allowed_types)
+            if param.name not in names_used:
+                names_used.add(param.name)
+                break
+        param_list.append(param)
+    return param_list
 
 
 def make_random_constant(name=None, value=None, return_params=False):
@@ -138,3 +157,54 @@ def make_random_slice(upper):
     length = random_whole(upper=(upper - start))
     step = random_whole(upper=16)
     return slice(start, start + length, step)
+
+
+def make_random_gate_definition(name=None, parameter_count=None, return_params=False):
+    """Create a random gate definition."""
+    if name is None:
+        name = random_identifier()
+    if parameter_count is None:
+        parameter_count = random_integer(lower=0, upper=16)
+    allowed_types = [INT_TYPE, FLOAT_TYPE, QUBIT_TYPE, None]
+    parameters = make_random_parameter_list(count=parameter_count, allowed_types=allowed_types)
+    gatedef = GateDefinition(name, parameters=parameters)
+    if not return_params:
+        return gatedef
+    else:
+        return gatedef, name, parameters
+
+
+def make_random_argument_list(argument_types):
+    """Return a list of randomly produced gate arguments of the appropriate type.
+    For any value whatsoever, use the None type. Note: This will never create
+    a register since that is not a valid Jaqal gate argument."""
+    arguments = []
+    valid_types = [INT_TYPE, FLOAT_TYPE, QUBIT_TYPE]
+    for arg_type in argument_types:
+        if arg_type is None:
+            arg_type = random.choice(valid_types)
+        arg = make_random_value(arg_type)
+        arguments.append(arg)
+    return arguments
+
+
+def make_random_value(value_type):
+    """Create a random value of the given type.
+
+    Note that registers and qubits will just be their own thing and not
+    tied to any existing objects.
+
+    Note that in the case of a float, this can return nan and inf."""
+    if value_type is None:
+        value_type = random.choice([INT_TYPE, FLOAT_TYPE, REGISTER_TYPE, QUBIT_TYPE])
+    if value_type == INT_TYPE:
+        return random_integer()
+    elif value_type == FLOAT_TYPE:
+        return random_float()
+    elif value_type == REGISTER_TYPE:
+        return make_random_register()
+    elif value_type == QUBIT_TYPE:
+        reg = make_random_register()
+        return choose_random_qubit_getitem(reg)
+    else:
+        raise ValueError(f"Unknown value type {value_type}")
