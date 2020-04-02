@@ -51,7 +51,7 @@ class ParameterTester(unittest.TestCase):
             for value in values:
                 context = {param.name: value}
                 resolved_value = param.resolve_value(context)
-                self.assertEqual(value, resolved_value)
+                common.assert_values_same(self, value, resolved_value)
                 with self.assertRaises(Exception):
                     param.resolve_value()
 

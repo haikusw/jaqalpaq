@@ -4,7 +4,7 @@ import math
 from jaqalpup.core import (
     Register, Constant, NamedQubit, PARAMETER_TYPES, Parameter, GateDefinition,
     FLOAT_TYPE, INT_TYPE, QUBIT_TYPE, REGISTER_TYPE, Macro, BlockStatement,
-    GateStatement
+    GateStatement, LoopStatement
 )
 from .randomize import (
     random_identifier, random_whole, random_integer, random_float
@@ -16,8 +16,8 @@ VALID_GATE_ARG_TYPES = [FLOAT_TYPE, INT_TYPE, QUBIT_TYPE]
 def assert_values_same(tester, value0, value1, message=None):
     """Return if two values, which could be a floating point nan, are the
     same. Invokes an appropriate assert macro on tester."""
-    if math.isnan(value0):
-        tester.assertTrue(math.isnan(value1), message)
+    if isinstance(value0, float) and math.isnan(value0):
+        tester.assertTrue(isinstance(value1, float) and math.isnan(value1), message)
     else:
         tester.assertEqual(value0, value1, message)
 
@@ -257,10 +257,25 @@ def make_random_gate_statement(*, count=None):
     """Make a gate statement with random arguments. It will not be based on
     a GateDefinition."""
     if count is None:
-        count = random_whole(upper=16)
+        count = random_integer(lower=0, upper=16)
     name = random_identifier()
     arguments = {
         random_identifier(): make_random_value(random.choice(VALID_GATE_ARG_TYPES))
         for _ in range(count)
     }
     return GateStatement(name, parameters=arguments)
+
+
+def make_random_loop_statement(*, iterations=None, body_count=None, return_params=False):
+    """Make a loop statement with a random number of iterations and body
+    statements."""
+    if iterations is None:
+        iterations = random_whole()
+    if body_count is None:
+        body_count = random_integer(lower=0, upper=16)
+    block = make_random_block(count=body_count)
+    loop = LoopStatement(iterations=iterations, statements=block)
+    if not return_params:
+        return loop
+    else:
+        return loop, iterations, block
