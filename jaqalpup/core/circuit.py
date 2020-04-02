@@ -1,7 +1,7 @@
 from .block import BlockStatement, LoopStatement
 from .constant import Constant
 from .gate import GateStatement
-from .gatedef import GateDefinition, NATIVE_GATES
+from .gatedef import GateDefinition
 from .macro import Macro
 from .register import Register, NamedQubit
 from jaqalpup import RESERVED_WORDS, QSCOUTError
@@ -11,23 +11,25 @@ class ScheduledCircuit:
 	"""
 	Represents an entire quantum program.
 	
-	:param bool qscout_native_gates: If True, include the QSCOUT native gate set
-		(currently Mølmer-Sørensen, X, Y, and Z rotations, Pauli X, Y and Z, the square roots of
-		Pauli X, Y, and Z, rotation around an arbitrary axis in the X-Y plane, identity operations, and
-		state preparation and measurement in the computational basis of all qubits at once) as
-		the native gate set of the circuit. If False, leave the native gate set of the circuit
-		empty for the user to fill in.
+	:param list[GateDefinition] native_gates: Set these gates as the native gates to be used in this circuit.
 	
 	""" # TODO: Flesh this out more, explain how it's used and how it maps to the structure of a Jaqal file.
-	def __init__(self, qscout_native_gates=False):
+	def __init__(self, native_gates=None):
 		self._constants = {}
 		self._macros = {}
-		self._native_gates = {}
-		if qscout_native_gates:
-			for gate in NATIVE_GATES:
-				self._native_gates[gate.name] = gate
 		self._registers = {}
+		self._native_gates = self._init_native_gates(native_gates)
 		self._body = BlockStatement()
+
+	@staticmethod
+	def _init_native_gates(native_gates):
+		"""Take in the native_gates argument passed to the constructor and return the object to be stored in
+		this class."""
+		if native_gates is None:
+			native_gates = []
+		if any(not isinstance(gate, GateDefinition) for gate in native_gates):
+			raise TypeError("Native gates must be GateDefinition instances")
+		return {gate.name: gate for gate in native_gates}
 
 	def __repr__(self):
 		return f"ScheduledCircuit(constants={self._constants}, macros={self._macros}, native_gates={self._native_gates}, registers={self._registers}, body={self._body})"
