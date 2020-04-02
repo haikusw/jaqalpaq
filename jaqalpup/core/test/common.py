@@ -156,7 +156,7 @@ def make_map_slice(reg, name=None, map_slice=None, return_params=False):
 def make_random_slice(upper):
     """Return a slice of an array with upper bound upper. Guaranteed to have
     at least one element."""
-    start = random_whole(upper=upper - 1)
+    start = random_integer(lower=0, upper=upper - 1)
     length = random_whole(upper=(upper - start))
     step = random_whole(upper=16)
     return slice(start, start + length, step)
@@ -227,7 +227,7 @@ def make_random_macro_definition(name=None, parameter_count=None, body_count=Non
             body_count = random_whole(upper=100)
     allowed_types = [None]  # In Jaqal we don't declare types for macros
     parameters = make_random_parameter_list(count=parameter_count, allowed_types=allowed_types)
-    body = make_random_sequential_block(count=body_count)
+    body = make_random_block(count=body_count)
     gatedef = Macro(name, body=body, parameters=parameters)
     if not return_params:
         if not return_body:
@@ -241,10 +241,16 @@ def make_random_macro_definition(name=None, parameter_count=None, body_count=Non
             return gatedef, name, parameters, body
 
 
-def make_random_sequential_block(*, count=None):
+def make_random_block(*, count=None, parallel=False, return_params=False):
     """Create a BlockStatement with some number of random statements."""
+    if count is None:
+        count = random_integer(lower=0, upper=16)
     statements = [make_random_gate_statement() for _ in range(count)]
-    return BlockStatement(parallel=False, statements=statements)
+    block = BlockStatement(parallel=parallel, statements=statements)
+    if not return_params:
+        return block
+    else:
+        return block, statements
 
 
 def make_random_gate_statement(*, count=None):

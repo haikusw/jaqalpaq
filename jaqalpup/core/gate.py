@@ -1,4 +1,5 @@
 from itertools import zip_longest
+import math
 
 from jaqalpup import QSCOUTError
 
@@ -21,8 +22,13 @@ class GateStatement:
 		return f"GateStatement({params})"
 
 	def __eq__(self, other):
+		def are_equal(p0, p1):
+			if isinstance(p0, float) and math.isnan(p0):
+				return isinstance(p1, float) and math.isnan(p1)
+			return p0 == p1
+
 		try:
-			return self.name == other.name and all(sparam == oparam for sparam, oparam in zip_longest(self.parameters.values(), other.parameters.values()))
+			return self.name == other.name and all(are_equal(sparam, oparam) for sparam, oparam in zip_longest(self.parameters.values(), other.parameters.values()))
 		except AttributeError:
 			return False
 
