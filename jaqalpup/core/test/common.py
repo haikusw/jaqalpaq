@@ -3,11 +3,14 @@ import math
 
 from jaqalpup.core import (
     Register, Constant, NamedQubit, PARAMETER_TYPES, Parameter, GateDefinition,
-    FLOAT_TYPE, INT_TYPE, QUBIT_TYPE, REGISTER_TYPE
+    FLOAT_TYPE, INT_TYPE, QUBIT_TYPE, REGISTER_TYPE, Macro, BlockStatement,
+    GateStatement
 )
 from .randomize import (
     random_identifier, random_whole, random_integer, random_float
 )
+
+VALID_GATE_ARG_TYPES = [FLOAT_TYPE, INT_TYPE, QUBIT_TYPE]
 
 
 def assert_values_same(tester, value0, value1, message=None):
@@ -165,7 +168,7 @@ def make_random_gate_definition(name=None, parameter_count=None, return_params=F
         name = random_identifier()
     if parameter_count is None:
         parameter_count = random_integer(lower=0, upper=16)
-    allowed_types = [INT_TYPE, FLOAT_TYPE, QUBIT_TYPE, None]
+    allowed_types = VALID_GATE_ARG_TYPES + [None]
     parameters = make_random_parameter_list(count=parameter_count, allowed_types=allowed_types)
     gatedef = GateDefinition(name, parameters=parameters)
     if not return_params:
@@ -179,10 +182,9 @@ def make_random_argument_list(argument_types):
     For any value whatsoever, use the None type. Note: This will never create
     a register since that is not a valid Jaqal gate argument."""
     arguments = []
-    valid_types = [INT_TYPE, FLOAT_TYPE, QUBIT_TYPE]
     for arg_type in argument_types:
         if arg_type is None:
-            arg_type = random.choice(valid_types)
+            arg_type = random.choice(VALID_GATE_ARG_TYPES)
         arg = make_random_value(arg_type)
         arguments.append(arg)
     return arguments
@@ -208,3 +210,51 @@ def make_random_value(value_type):
         return choose_random_qubit_getitem(reg)
     else:
         raise ValueError(f"Unknown value type {value_type}")
+
+
+def make_random_macro_definition(name=None, parameter_count=None, body_count=None, return_params=False, return_body=False):
+    """Create a random macro definition."""
+    if name is None:
+        name = random_identifier()
+    if parameter_count is None:
+        parameter_count = random_integer(lower=0, upper=16)
+    if body_count is None:
+        # I think the most interesting difference will be between no statements and any
+        # statements, so bias this towards producing no statements
+        if random.uniform(0, 1) < 0.1:
+            body_count = 0
+        else:
+            body_count = random_whole(upper=100)
+    allowed_types = [None]  # In Jaqal we don't declare types for macros
+    parameters = make_random_parameter_list(count=parameter_count, allowed_types=allowed_types)
+    body = make_random_sequential_block(count=body_count)
+    gatedef = Macro(name, body=body, parameters=parameters)
+    if not return_params:
+        if not return_body:
+            return gatedef
+        else:
+            return gatedef, body
+    else:
+        if not return_body:
+            return gatedef, name, parameters
+        else:
+            return gatedef, name, parameters, body
+
+
+def make_random_sequential_block(*, count=None):
+    """Create a BlockStatement with some number of random statements."""
+    statements = [make_random_gate_statement() for _ in range(count)]
+    return BlockStatement(parallel=False, statements=statements)
+
+
+def make_random_gate_statement(*, count=None):
+    """Make a gate statement with random arguments. It will not be based on
+    a GateDefinition."""
+    if count is None:
+        count = random_whole(upper=16)
+    name = random_identifier()
+    arguments = {
+        random_identifier(): make_random_value(random.choice(VALID_GATE_ARG_TYPES))
+        for _ in range(count)
+    }
+    return GateStatement(name, parameters=arguments)

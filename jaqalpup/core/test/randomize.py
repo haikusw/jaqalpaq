@@ -48,9 +48,13 @@ def random_float():
         return float('nan')
     while True:
         mantissa = random.uniform(0, 1)
-        exponent = random.randint(sys.float_info.min_10_exp // 2, sys.float_info.max_10_exp // 2)
+        exponent = random.randint(sys.float_info.min_10_exp, sys.float_info.max_10_exp)
         sign = random.choice([-1, 1])
-        value = sign * mantissa ** exponent
+        try:
+            value = sign * mantissa * 10 ** exponent
+        except OverflowError:
+            print(f"Could not create float {sign}*{mantissa}**{exponent}")
+            raise
         if value != int(value):
             # The odds of this not being true are astoundingly low, but in case some
             # tests rely on this, best to be sure.
