@@ -64,7 +64,7 @@ class IonCompiler(AbstractCompiler):
 		n = max(nq_program.get_qubits()) + 1
 		if n > len(self._device.qubits()):
 			raise QSCOUTError("Program uses more qubits (%d) than device supports (%d)." % (n, len(self._device.qubits())))
-		qsc = ScheduledCircuit(native_gates=self.native_gates or None)
+		qsc = ScheduledCircuit(native_gates=self.native_gates)
 		qsc.body.parallel = None # Quil doesn't support barriers, so either the user
 								  # won't run the the scheduler and everything will happen
 								  # sequentially, or the user will and everything can be

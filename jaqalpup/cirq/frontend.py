@@ -20,7 +20,7 @@ def qscout_circuit_from_cirq_circuit(ccirc, names = None, native_gates = None):
 	:rtype: ScheduledCircuit
 	:raises QSCOUTError: if the input contains any instructions other than ``cirq.XXPowGate``, ``cirq.XPowGate``, ``cirq.YPowGate``, ``cirq.ZPowGate``, or ``cirq.PhasedXPowGate``.
 	""" # TODO: Document this better.
-	qcirc = ScheduledCircuit(native_gates=native_gates or None)
+	qcirc = ScheduledCircuit(native_gates=native_gates)
 	if names is None:
 		names = CIRQ_NAMES
 	try:

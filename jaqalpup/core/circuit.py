@@ -1,7 +1,7 @@
 from .block import BlockStatement, LoopStatement
 from .constant import Constant
 from .gate import GateStatement
-from .gatedef import GateDefinition
+from .gatedef import GateDefinition, NATIVE_GATES
 from .macro import Macro
 from .register import Register, NamedQubit
 from jaqalpup import RESERVED_WORDS, QSCOUTError
@@ -11,7 +11,8 @@ class ScheduledCircuit:
 	"""
 	Represents an entire quantum program.
 	
-	:param native_gates: Set these gates as the native gates to be used in this circuit.
+	:param native_gates: Set these gates as the native gates to be used in this circuit. If not
+	given, use the QSCOUT native gate set.
 	:type native_gates: Optional[dict] or Optional[list]
 	
 	""" # TODO: Flesh this out more, explain how it's used and how it maps to the structure of a Jaqal file.
@@ -19,7 +20,7 @@ class ScheduledCircuit:
 		self._constants = {}
 		self._macros = {}
 		self._registers = {}
-		self._native_gates = normalize_native_gates(native_gates)
+		self._native_gates = normalize_native_gates(native_gates, NATIVE_GATES)
 		self._body = BlockStatement()
 
 	def __repr__(self):
@@ -327,11 +328,16 @@ class ScheduledCircuit:
 		return l
 
 
-def normalize_native_gates(native_gates):
+def normalize_native_gates(native_gates, default_gates=None):
 	"""Takes in the different ways that native gates can be represented and
-	returns a dictionary."""
+	returns a dictionary.
+
+	:param native_gates: A list or dict of gates, or None.
+	:type native_gates: Optional[dict] or Optional[list]
+	:param default_gates: The gates to use if native_gates is None. Defaults default to {}.
+	"""
 	if native_gates is None:
-		native_gates = {}
+		native_gates = default_gates or {}
 	if not isinstance(native_gates, dict):
 		# This covers all iterables like list and tuple
 		native_gates = {gate.name: gate for gate in native_gates}
