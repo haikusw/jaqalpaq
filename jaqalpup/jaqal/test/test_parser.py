@@ -211,7 +211,7 @@ class ParserTester(TestCase):
                 self.make_native_gate('Rx', ('r', 0), 1.5)
             ]
         )
-        self.run_test(text, exp_result, use_qscout_native_gates=True)
+        self.run_test(text, exp_result, native_gates=NATIVE_GATES)
 
     def test_fail_on_missing_native_gate(self):
         """Test that we fail when the using qscout native gates and the user uses a gate
@@ -221,7 +221,7 @@ class ParserTester(TestCase):
         # without native gates on.
         parse_jaqal_string(text)
         with self.assertRaises(Exception):
-            parse_jaqal_string(text, use_qscout_native_gates=True)
+            parse_jaqal_string(text, native_gates=NATIVE_GATES)
 
     def test_macro_definition_no_expand(self):
         """Test parsing macro definitions without expanding them."""
@@ -238,7 +238,7 @@ class ParserTester(TestCase):
                 )
             }
         )
-        self.run_test(text, exp_result, use_qscout_native_gates=False)
+        self.run_test(text, exp_result)
 
     def test_macro_definition_expand(self):
         """Test parsing macro definitions and expanding them."""
@@ -257,7 +257,7 @@ class ParserTester(TestCase):
                 )
             }
         )
-        self.run_test(text, exp_result, use_qscout_native_gates=False,
+        self.run_test(text, exp_result,
                       option=Option.expand_macro)
 
     def test_let_no_resolve(self):
@@ -269,7 +269,7 @@ class ParserTester(TestCase):
             ],
             constants={'a': self.make_constant('a', 2)}
         )
-        self.run_test(text, exp_result, use_qscout_native_gates=False,
+        self.run_test(text, exp_result,
                       option=Option.none)
 
     def test_let_resolve(self):
@@ -281,7 +281,7 @@ class ParserTester(TestCase):
             ],
             constants={'a': self.make_constant('a', 2)}
         )
-        self.run_test(text, exp_result, use_qscout_native_gates=False,
+        self.run_test(text, exp_result,
                       option=Option.expand_let)
 
     def test_map_no_resolve(self):
@@ -294,7 +294,7 @@ class ParserTester(TestCase):
                 self.make_gate('foo', ('q', 0))
             ]
         )
-        self.run_test(text, exp_result, use_qscout_native_gates=False,
+        self.run_test(text, exp_result,
                       option=Option.none)
 
     def test_map_single_qubit_no_resolve(self):
@@ -306,7 +306,7 @@ class ParserTester(TestCase):
                 self.make_gate('foo', self.make_named_qubit('q'))
             ]
         )
-        self.run_test(text, exp_result, use_qscout_native_gates=False,
+        self.run_test(text, exp_result,
                       option=Option.none)
 
     def test_map_resolve(self):
@@ -319,7 +319,7 @@ class ParserTester(TestCase):
                 self.make_gate('foo', ('r', 1))
             ]
         )
-        self.run_test(text, exp_result, use_qscout_native_gates=False,
+        self.run_test(text, exp_result,
                       option=Option.expand_let_map)
 
     def test_map_single_qubit_resolve(self):
@@ -331,7 +331,7 @@ class ParserTester(TestCase):
                 self.make_gate('foo', ('r', 1))
             ]
         )
-        self.run_test(text, exp_result, use_qscout_native_gates=False,
+        self.run_test(text, exp_result,
                       option=Option.expand_let_map)
 
     def test_map_whole_register(self):
@@ -341,7 +341,7 @@ class ParserTester(TestCase):
             maps={'q': self.make_map('q', 'r', None)},
             gates=[self.make_gate('foo', ('q', 1))]
         )
-        self.run_test(text, exp_result, use_qscout_native_gates=False,
+        self.run_test(text, exp_result,
                       option=Option.none)
 
     def test_expand_macro_let_map_strip_metadata(self):
@@ -364,7 +364,7 @@ class ParserTester(TestCase):
                 self.make_gate('g', ('r', 2), 3.14)
             ]
         )
-        self.run_test(text, exp_result, use_qscout_native_gates=False,
+        self.run_test(text, exp_result,
                       option=Option.full)
 
     def test_no_expand_macro_let_map_leave_metadata(self):
@@ -387,7 +387,7 @@ class ParserTester(TestCase):
                 self.make_gate('foo', ('q', self.make_constant('a', 2)), 3.14)
             ]
         )
-        self.run_test(text, exp_result, use_qscout_native_gates=False,
+        self.run_test(text, exp_result,
                       option=Option.none)
 
     ##
@@ -395,9 +395,9 @@ class ParserTester(TestCase):
     #
 
     def run_test(self, text, exp_result=None, exp_native_gates=None,
-                 override_dict=None, use_qscout_native_gates=False, option=Option.none):
+                 override_dict=None, native_gates=None, option=Option.none):
         act_result = parse_jaqal_string(text, override_dict=override_dict,
-                                        use_qscout_native_gates=use_qscout_native_gates,
+                                        native_gates=native_gates,
                                         processing_option=option)
         if exp_result is not None:
             self.assertEqual(exp_result.body, act_result.body)

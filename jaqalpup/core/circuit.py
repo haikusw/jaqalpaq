@@ -11,25 +11,16 @@ class ScheduledCircuit:
 	"""
 	Represents an entire quantum program.
 	
-	:param list[GateDefinition] native_gates: Set these gates as the native gates to be used in this circuit.
+	:param native_gates: Set these gates as the native gates to be used in this circuit.
+	:type native_gates: Optional[dict] or Optional[list]
 	
 	""" # TODO: Flesh this out more, explain how it's used and how it maps to the structure of a Jaqal file.
 	def __init__(self, native_gates=None):
 		self._constants = {}
 		self._macros = {}
 		self._registers = {}
-		self._native_gates = self._init_native_gates(native_gates)
+		self._native_gates = normalize_native_gates(native_gates)
 		self._body = BlockStatement()
-
-	@staticmethod
-	def _init_native_gates(native_gates):
-		"""Take in the native_gates argument passed to the constructor and return the object to be stored in
-		this class."""
-		if native_gates is None:
-			native_gates = []
-		if any(not isinstance(gate, GateDefinition) for gate in native_gates):
-			raise TypeError("Native gates must be GateDefinition instances")
-		return {gate.name: gate for gate in native_gates}
 
 	def __repr__(self):
 		return f"ScheduledCircuit(constants={self._constants}, macros={self._macros}, native_gates={self._native_gates}, registers={self._registers}, body={self._body})"
@@ -334,3 +325,18 @@ class ScheduledCircuit:
 			l = LoopStatement(iterations, BlockStatement(parallel, statements))
 		self.body.append(l)
 		return l
+
+
+def normalize_native_gates(native_gates):
+	"""Takes in the different ways that native gates can be represented and
+	returns a dictionary."""
+	if native_gates is None:
+		native_gates = {}
+	if not isinstance(native_gates, dict):
+		# This covers all iterables like list and tuple
+		native_gates = {gate.name: gate for gate in native_gates}
+	if any(name != gate.name for name, gate in native_gates.items()):
+		raise ValueError(f"Native gate dictionary key did not match its name")
+	if any(not isinstance(gate, GateDefinition) for gate in native_gates.values()):
+		raise TypeError("Native gates must be GateDefinition instances")
+	return native_gates

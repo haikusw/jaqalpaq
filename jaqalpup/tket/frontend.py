@@ -18,9 +18,7 @@ def qscout_circuit_from_tket_circuit(tkc, native_gates = None, names = None):
 		else:
 			qreg_sizes[qb.reg_name] = qb.index[0] + 1
 	n = sum(qreg_sizes.values())
-	qsc = ScheduledCircuit(native_gates is None)
-	if native_gates is not None:
-		qsc.native_gates.update(native_gates)
+	qsc = ScheduledCircuit(native_gates=native_gates or None)
 	if names is None:
 		names = TKET_NAMES
 	baseregister = qsc.reg('baseregister', n)

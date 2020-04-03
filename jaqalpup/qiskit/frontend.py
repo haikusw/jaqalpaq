@@ -53,9 +53,7 @@ def qscout_circuit_from_qiskit_circuit(circuit, names = None, native_gates = Non
 	:raises QSCOUTError: If the circuit includes a gate not included in `names`.
 	"""
 	n = sum([qreg.size for qreg in circuit.qregs])
-	qsc = ScheduledCircuit(native_gates is None)
-	if native_gates is not None:
-		qsc.native_gates.update(native_gates)
+	qsc = ScheduledCircuit(native_gates=native_gates or None)
 	if names is None:
 		names = QISKIT_NAMES
 	baseregister = qsc.reg('baseregister', n)

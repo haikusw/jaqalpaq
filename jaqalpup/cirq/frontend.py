@@ -1,4 +1,5 @@
 from jaqalpup.core.circuit import ScheduledCircuit
+from jaqalpup.core.gatedef import NATIVE_GATES
 from jaqalpup import QSCOUTError
 from cirq import XXPowGate, XPowGate, YPowGate, ZPowGate, PhasedXPowGate, MeasurementGate
 import numpy as np
@@ -19,9 +20,7 @@ def qscout_circuit_from_cirq_circuit(ccirc, names = None, native_gates = None):
 	:rtype: ScheduledCircuit
 	:raises QSCOUTError: if the input contains any instructions other than ``cirq.XXPowGate``, ``cirq.XPowGate``, ``cirq.YPowGate``, ``cirq.ZPowGate``, or ``cirq.PhasedXPowGate``.
 	""" # TODO: Document this better.
-	qcirc = ScheduledCircuit(native_gates is None)
-	if native_gates is not None:
-		qcirc.native_gates.update(native_gates)
+	qcirc = ScheduledCircuit(native_gates=native_gates or None)
 	if names is None:
 		names = CIRQ_NAMES
 	try:

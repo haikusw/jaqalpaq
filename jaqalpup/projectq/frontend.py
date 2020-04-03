@@ -26,9 +26,7 @@ def normalize_angle(p):
 class JaqalBackend(BasicEngine):
 	def __init__(self, outfile=None, one_qubit_gate_map=None, two_qubit_gate_map=None, native_gates=None):
 		BasicEngine.__init__(self)
-		self._circuit = ScheduledCircuit(native_gates is None)
-		if native_gates is not None:
-			self._circuit.native_gates.update(native_gates)
+		self._circuit = ScheduledCircuit(native_gates=native_gates or None)
 		self.q = self.circuit.reg('q', 0)
 		self.circuit.gate('prepare_all')
 		self._block = self.circuit.block(parallel=None)

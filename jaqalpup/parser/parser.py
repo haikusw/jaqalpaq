@@ -1,11 +1,11 @@
 import ply.yacc as yacc
-from jaqalpup.core import BlockStatement, LoopStatement, ScheduledCircuit, Constant, GateStatement, GateDefinition, Macro, Parameter, Register, NamedQubit
+from jaqalpup.core import BlockStatement, LoopStatement, ScheduledCircuit, Constant, GateStatement, GateDefinition, Macro, Parameter, Register, NamedQubit, NATIVE_GATES
 from jaqalpup import QSCOUTError
 from jaqalpup.parser.lexer import get_lexer, tokens # IMPORTANT: PLY has a bad time if this is a relative import, for some reason.
 
 def p_program(p):
 	'program : header_statements body_statements'
-	c = ScheduledCircuit(True)
+	c = ScheduledCircuit(native_gates=NATIVE_GATES)
 	def resolve_id(name, params, allow_reg=True):
 		if name is None:
 			return None
