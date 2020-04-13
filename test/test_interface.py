@@ -96,6 +96,13 @@ class InterfaceTester(TestCase):
         let_dict = {}
         self.run_test(text, let_dict, exp_result)
 
+    def test_map_with_let_override(self):
+        """Test a map that uses a let value to determine which index is chosen."""
+        text = "register r[7]; let x 1; map a r[x]; foo a"
+        exp_result = [Gate('foo', [('r', 4)])]
+        let_dict = {'x': 4}
+        self.run_test(text, let_dict, exp_result)
+
     def test_nested_map_with_let(self):
         """Test multiple map statements that chain and use let statements to choose which qubit to access."""
         text = "register r[7]; let x 1; let y 2; map b r[x:]; map a b[::y]; foo a[1]"

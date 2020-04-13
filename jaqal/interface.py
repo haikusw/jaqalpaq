@@ -89,7 +89,7 @@ class Interface:
 
         let_dict = self.make_let_dict(override_dict)
         tree = self.resolve_let(self.preprocessed_tree, let_dict=let_dict)
-        tree = self.resolve_map(tree)
+        tree = self.resolve_map(tree, let_dict=let_dict)
         tree = normalize_blocks_with_unitary_timing(tree)
         registers = self.make_register_dict(let_dict)
         validate(tree, registers)
