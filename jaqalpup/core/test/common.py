@@ -253,18 +253,16 @@ def make_random_block(*, count=None, parallel=False, return_params=False):
         return block, statements
 
 
-def make_random_gate_statement(*, count=None):
-    """Make a gate statement with random arguments. It will not be based on
+def make_random_gate_statement(*, count=None, return_params=False):
+    """Make a gate statement with random arguments based on
     a GateDefinition."""
-    if count is None:
-        count = random_integer(lower=0, upper=16)
-    name = random_identifier()
-    arguments = {
-        random_identifier(): make_random_value(random.choice(VALID_GATE_ARG_TYPES))
-        for _ in range(count)
-    }
-    return GateStatement(name, parameters=arguments)
-
+    definition, _, parameters = make_random_gate_definition(parameter_count=count, return_params=True)
+    arguments = {param.name: make_random_value(param.kind) for param in parameters}
+    gate = GateStatement(definition, parameters=arguments)
+    if not return_params:
+        return gate
+    else:
+        return gate, definition, arguments
 
 def make_random_loop_statement(*, iterations=None, body_count=None, return_params=False):
     """Make a loop statement with a random number of iterations and body
