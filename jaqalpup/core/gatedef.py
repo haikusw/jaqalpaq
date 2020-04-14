@@ -1,3 +1,6 @@
+from collections import OrderedDict
+import numpy as np
+
 from .parameter import Parameter, QUBIT_TYPE, FLOAT_TYPE, REGISTER_TYPE
 from jaqalpup import QSCOUTError
 from .gate import GateStatement
@@ -57,32 +60,28 @@ class AbstractGate:
 		:raises QSCOUTError: If the wrong number of arguments are passed.
 		:raises QSCOUTError: If the parameter names don't match the parameters this gate takes.
 		"""
+		params = OrderedDict()
 		if args and not kwargs:
 			if len(args) > len(self.parameters):
 				raise QSCOUTError("Too many parameters for gate %s." % self.name)
 			elif len(args) > len(self.parameters):
 				raise QSCOUTError("Insufficient parameters for gate %s." % self.name)
 			else:
-				params = dict(zip([param.name for param in self.parameters], args))
+				for name,arg in zip([param.name for param in self.parameters], args):
+					params[name] = arg
 		elif kwargs and not args:
-			if set(kwargs.keys()) != set([param.name for param in self.parameters]):
-				raise QSCOUTError("Parameters %s do not match required parameters %s." % (str(kwargs.keys()), str([param.name for param in self.parameters])))
-			else:
-				params = kwargs
+			try:
+				for param in self.parameters:
+					params[param.name] = kwargs.pop(param.name)
+			except KeyError as ex:
+				raise QSCOUTError(f"Missing parameter {param.name} for gate {self.name}.") from ex
+			if kwargs:
+				raise QSCOUTError(f"Invalid parameters {', '.join(kwargs)} for gate {self.name}.")
 		elif kwargs and args:
 			raise QSCOUTError("Cannot mix named and positional parameters in call to gate.")
-		else:
-			if not self.parameters:
-				params = {}
-			else:
-				raise QSCOUTError("Insufficient parameters for gate %s." % self.name)
-		for name in params:
-			for param in self.parameters:
-				if param.name == name:
-					param.validate(params[name])
-					continue
-			#raise QSCOUTError("Parameters %s do not match required parameters %s." % (str(kwargs.keys()), str([param.name for param in self.parameters])))
-		return GateStatement(self.name, params)
+		for param in self.parameters:
+			param.validate(params[param.name])
+		return GateStatement(self, params)
 	
 	def __call__(self, *args, **kwargs):
 		return self.call(*args, **kwargs)
@@ -131,7 +130,7 @@ def RX_unitary(phi):
 
 def RY_unitary(phi):
 	return np.array([[np.cos(phi/2), -np.sin(phi/2)],
-					[-np.sin(phi/2), np.cos(phi/2)]])
+					[np.sin(phi/2), np.cos(phi/2)]])
 
 def RZ_unitary(phi):
 	return np.array([[1, 0],
