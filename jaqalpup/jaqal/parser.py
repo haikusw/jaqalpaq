@@ -5,9 +5,10 @@ from jaqal import Interface, MacroContextRewriteVisitor, TreeManipulators
 
 from jaqalpup.core import (
     ScheduledCircuit, Register, NamedQubit, GateDefinition, Macro,
-    Parameter, LoopStatement, BlockStatement, NATIVE_GATES, Constant,
+    Parameter, LoopStatement, BlockStatement, Constant,
     AnnotatedValue
 )
+from jaqalpup.qscout.native_gates import NATIVE_GATES
 from jaqalpup import QSCOUTError
 
 
