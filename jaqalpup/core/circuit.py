@@ -11,22 +11,16 @@ class ScheduledCircuit:
 	"""
 	Represents an entire quantum program.
 	
-	:param bool qscout_native_gates: If True, include the QSCOUT native gate set
-		(currently Mølmer-Sørensen, X, Y, and Z rotations, Pauli X, Y and Z, the square roots of
-		Pauli X, Y, and Z, rotation around an arbitrary axis in the X-Y plane, identity operations, and
-		state preparation and measurement in the computational basis of all qubits at once) as
-		the native gate set of the circuit. If False, leave the native gate set of the circuit
-		empty for the user to fill in.
+	:param native_gates: Set these gates as the native gates to be used in this circuit. If not
+	given, use the QSCOUT native gate set.
+	:type native_gates: Optional[dict] or Optional[list]
 	
 	""" # TODO: Flesh this out more, explain how it's used and how it maps to the structure of a Jaqal file.
-	def __init__(self, qscout_native_gates=False):
+	def __init__(self, native_gates=None):
 		self._constants = {}
 		self._macros = {}
-		self._native_gates = {}
-		if qscout_native_gates:
-			for gate in NATIVE_GATES:
-				self._native_gates[gate.name] = gate
 		self._registers = {}
+		self._native_gates = normalize_native_gates(native_gates, NATIVE_GATES)
 		self._body = BlockStatement()
 
 	def __repr__(self):
@@ -332,3 +326,23 @@ class ScheduledCircuit:
 			l = LoopStatement(iterations, BlockStatement(parallel, statements))
 		self.body.append(l)
 		return l
+
+
+def normalize_native_gates(native_gates, default_gates=None):
+	"""Takes in the different ways that native gates can be represented and
+	returns a dictionary.
+
+	:param native_gates: A list or dict of gates, or None.
+	:type native_gates: Optional[dict] or Optional[list]
+	:param default_gates: The gates to use if native_gates is None. Defaults default to {}.
+	"""
+	if native_gates is None:
+		native_gates = default_gates or {}
+	if not isinstance(native_gates, dict):
+		# This covers all iterables like list and tuple
+		native_gates = {gate.name: gate for gate in native_gates}
+	if any(name != gate.name for name, gate in native_gates.items()):
+		raise ValueError(f"Native gate dictionary key did not match its name")
+	if any(not isinstance(gate, GateDefinition) for gate in native_gates.values()):
+		raise TypeError("Native gates must be GateDefinition instances")
+	return native_gates

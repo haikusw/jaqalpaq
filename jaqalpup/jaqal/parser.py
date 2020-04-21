@@ -8,6 +8,7 @@ from jaqalpup.core import (
     Parameter, LoopStatement, BlockStatement, NATIVE_GATES, Constant,
     AnnotatedValue
 )
+from jaqalpup.core.circuit import normalize_native_gates
 from jaqalpup import QSCOUTError
 
 
@@ -39,14 +40,14 @@ class OptionSet(set):
         return any(other in item for item in self)
 
 
-def parse_jaqal_file(filename, override_dict=None, use_qscout_native_gates=False,
+def parse_jaqal_file(filename, override_dict=None, native_gates=None,
                      processing_option=None):
     """Parse a file written in Jaqal into core types.
 
     :param str filename: The name of the Jaqal file.
     :param dict[str, float] override_dict:  An optional dictionary that overrides let statements in the Jaqal code.
     Note: all keys in this dictionary must exist as let statements or an error will be raised.
-    :param bool use_qscout_native_gates: Only allow pre-determined gates from the QSCOUT gate set.
+    :param native_gates: If given, allow only these native gates.
     :param processing_option: What kind of processing, if any, to perform on the tree.
     :type processing_option: Option or OptionSet
     :return: A list of the gates, blocks, and loops to be run.
@@ -54,18 +55,18 @@ def parse_jaqal_file(filename, override_dict=None, use_qscout_native_gates=False
     """
     with open(filename) as fd:
         return parse_jaqal_string(fd.read(), override_dict=override_dict,
-                                  use_qscout_native_gates=use_qscout_native_gates,
+                                  native_gates=native_gates,
                                   processing_option=processing_option)
 
 
-def parse_jaqal_string(jaqal, override_dict=None, use_qscout_native_gates=False,
+def parse_jaqal_string(jaqal, override_dict=None, native_gates=None,
                        processing_option=Option.none):
     """Parse a string written in Jaqal into core types.
 
     :param str jaqal: The Jaqal code.
     :param dict[str, float] override_dict:  An optional dictionary that overrides let statements in the Jaqal code.
     Note: all keys in this dictionary must exist as let statements or an error will be raised.
-    :param bool use_qscout_native_gates: Only allow pre-determined gates from the QSCOUT gate set.
+    :param native_gates: If given, allow only these native gates.
     :param processing_option: What kind of processing, if any, to perform on the tree.
     :type processing_option: Option or OptionSet
     :return: A list of the gates, blocks, and loops to be run.
@@ -85,20 +86,19 @@ def parse_jaqal_string(jaqal, override_dict=None, use_qscout_native_gates=False,
         tree = iface.resolve_let(tree, let_dict=let_dict)
     if Option.expand_let_map in processing_option:
         tree = iface.resolve_map(tree)
-    circuit = convert_to_circuit(tree,
-                                 use_qscout_native_gates=use_qscout_native_gates)
+    circuit = convert_to_circuit(tree, native_gates=native_gates)
     # Note: we also have metadata about imported files that we could output here as well.
     return circuit
 
 
-def convert_to_circuit(tree, use_qscout_native_gates=False):
+def convert_to_circuit(tree, native_gates=None):
     """Convert a tree into a scheduled circuit.
 
     :param tree: A parse tree.
-    :param bool use_qscout_native_gates: Only allow pre-determined gates from the QSCOUT gate set.
+    :param native_gates: If given, allow only these native gates.
     :return: A ScheduledCircuit object that faithfully represents the input.
     """
-    visitor = CoreTypesVisitor(use_qscout_native_gates=use_qscout_native_gates)
+    visitor = CoreTypesVisitor(native_gates=native_gates)
     return visitor.visit(tree)
 
 
@@ -109,13 +109,10 @@ class CoreTypesVisitor(MacroContextRewriteVisitor, TreeManipulators):
     parse_jaqal_file, or convert_to_core_types functions instead.
     """
 
-    def __init__(self, use_qscout_native_gates=False):
+    def __init__(self, native_gates=None):
         super().__init__()
-        if use_qscout_native_gates:
-            self.gate_definitions = {gate.name: gate for gate in NATIVE_GATES}
-        else:
-            self.gate_definitions = {}
-        self.use_qscout_native_gates = bool(use_qscout_native_gates)
+        self.gate_definitions = normalize_native_gates(native_gates)
+        self.use_only_native_gates = native_gates is not None
         self.registers = {}  # This will also contain map aliases.
         self.macro_definitions = {}
         self.let_constants = {}
@@ -125,13 +122,13 @@ class CoreTypesVisitor(MacroContextRewriteVisitor, TreeManipulators):
     #
 
     def visit_program(self, header_statements, body_statements):
-        circuit = ScheduledCircuit(qscout_native_gates=self.use_qscout_native_gates)
+        circuit = ScheduledCircuit(native_gates=NATIVE_GATES if self.use_only_native_gates else None)
         for stmt in body_statements:
             circuit.body.append(stmt)
         circuit.registers.update(self.registers)
         circuit.macros.update(self.macro_definitions)
         circuit.constants.update(self.let_constants)
-        if not self.use_qscout_native_gates:
+        if not self.use_only_native_gates:
             circuit.native_gates.update(self.gate_definitions)
         return circuit
 
@@ -287,7 +284,7 @@ class CoreTypesVisitor(MacroContextRewriteVisitor, TreeManipulators):
         given name and arguments."""
         if gate_name in self.gate_definitions:
             return self.gate_definitions[gate_name]
-        elif not self.use_qscout_native_gates:
+        elif not self.use_only_native_gates:
             params = [self.make_parameter_from_argument(index, arg)
                       for index, arg in enumerate(gate_args)]
             gate_def = GateDefinition(gate_name, params)
