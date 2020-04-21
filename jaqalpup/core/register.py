@@ -135,7 +135,7 @@ class Register:
 			step.resolve_value(context)
 		while isinstance(stop, AnnotatedValue):
 			stop.resolve_value(context)
-		return ((stop - start) // step)
+		return len(range(start, stop, step))
 	
 	def resolve_qubit(self, idx, context={}):
 		"""
@@ -176,6 +176,10 @@ class Register:
 	def __len__(self):
 		return self.size
 	
+	def __iter__(self):
+		for key in range(self.size):
+			yield self[key]
+
 	def stretch(self, new_size):
 		"""
 		If this register is fundamental and smaller than ``new_size``, increase its size
@@ -187,6 +191,11 @@ class Register:
 		:rtype: bool
 		:raises QSCOUTError: If this register is not fundamental.
 		"""
+	
+	def __iter__(self):
+		for key in range(self.size):
+			yield self[key]
+
 
 class NamedQubit:
 	"""
