@@ -4,6 +4,7 @@ from .gate import GateStatement
 from .gatedef import GateDefinition, NATIVE_GATES
 from .macro import Macro
 from .register import Register, NamedQubit
+from .identifier import is_identifier_valid
 from jaqalpup import RESERVED_WORDS, QSCOUTError
 import re
 
@@ -128,10 +129,8 @@ class ScheduledCircuit:
 		if name in self.macros: return False
 		if name in self.native_gates: return False
 		if name in self.registers: return False
-		if name in RESERVED_WORDS: return False
-		if re.match('^[a-zA-Z_][a-zA-Z0-9_]*$', name): return True
-		return False
-	
+		return is_identifier_valid(name)
+
 	def let(self, name, value):
 		"""
 		Creates a new :class:`Constant`, mapping the given name to the given value, and adds it to
