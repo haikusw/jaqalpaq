@@ -79,6 +79,8 @@ class AbstractGate:
 				raise QSCOUTError(f"Invalid parameters {', '.join(kwargs)} for gate {self.name}.")
 		elif kwargs and args:
 			raise QSCOUTError("Cannot mix named and positional parameters in call to gate.")
+		if len(self.parameters) != len(params):
+			raise QSCOUTError(f"Bad argument count: expected {len(self.parameters)}, found {len(params)}")
 		for param in self.parameters:
 			param.validate(params[param.name])
 		return GateStatement(self, params)
@@ -130,7 +132,7 @@ def RX_unitary(phi):
 
 def RY_unitary(phi):
 	return np.array([[np.cos(phi/2), -np.sin(phi/2)],
-					[np.sin(phi/2), np.cos(phi/2)]])
+					[-np.sin(phi/2), np.cos(phi/2)]])
 
 def RZ_unitary(phi):
 	return np.array([[1, 0],

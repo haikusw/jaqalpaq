@@ -135,7 +135,7 @@ class Register:
 			step.resolve_value(context)
 		while isinstance(stop, AnnotatedValue):
 			stop.resolve_value(context)
-		return ((stop - start) // step)
+		return len(range(start, stop, step))
 	
 	def resolve_qubit(self, idx, context={}):
 		"""
