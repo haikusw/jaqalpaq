@@ -5,7 +5,7 @@ from jaqalpup.parser.lexer import get_lexer, tokens # IMPORTANT: PLY has a bad t
 
 def p_program(p):
 	'program : header_statements body_statements'
-	c = ScheduledCircuit(True)
+	c = ScheduledCircuit()
 	def resolve_id(name, params, allow_reg=True):
 		if name is None:
 			return None
