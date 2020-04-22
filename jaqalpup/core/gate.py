@@ -39,15 +39,7 @@ class GateStatement:
 	@property
 	def gate_def(self):
 		return self._gate_def
-	
-	@property
-	def name(self):
-		return self._gate_def.name
-	
-	@property
-	def gate_def(self):
-		return self._gate_def
-	
+
 	@property
 	def parameters(self):
 		"""

@@ -31,7 +31,7 @@ class ScheduledCircuit:
 		try:
 			return (self.constants == other.constants and self.macros == other.macros and
 					self.native_gates == other.native_gates and self.registers == other.registers and
-					self.gates == other.gates)
+					self.body == other.body)
 		except AttributeError:
 			return False
 
