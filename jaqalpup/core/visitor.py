@@ -24,7 +24,7 @@ class Visitor:
     def visit(self, obj, *args, **kwargs):
         """Find the appropriate visitor method for the argument and call it."""
         method_name = self._resolve_method_name(obj)
-        return getattr(self, method_name)(*args, **kwargs)
+        return getattr(self, method_name)(obj, *args, **kwargs)
 
     def _resolve_method_name(self, obj):
         """Find a method to call by tracing the object's MRO. If no method is found in this visitor,

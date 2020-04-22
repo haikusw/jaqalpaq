@@ -38,15 +38,25 @@ def make_random_parameter(name=None, allowed_types=None, return_params=False):
         return param, name, param_type
 
 
-def make_random_parameter_list(allowed_types=None, count=None):
+def make_random_parameter_list(*, parameter_types=None, allowed_types=None, count=None):
     """Return a list of Parameter objects."""
-    if allowed_types is None:
-        allowed_types = PARAMETER_TYPES
-    if count is None:
-        count = random_integer(lower=0, upper=16)
+    if parameter_types is not None:
+        if allowed_types is not None:
+            raise ValueError(f"allowed_types is ignored if parameter_types is given")
+        if count is not None:
+            raise ValueError("count is ignored if parameter_types is given")
+        allowed_types = None
+        count = len(parameter_types)
+    else:
+        if allowed_types is None:
+            allowed_types = PARAMETER_TYPES
+        if count is None:
+            count = random_integer(lower=0, upper=16)
     param_list = []
     names_used = set()
     for _ in range(count):
+        if parameter_types is not None:
+            allowed_types = [parameter_types.pop(0)]
         while True:
             param = make_random_parameter(allowed_types=allowed_types)
             if param.name not in names_used:
@@ -162,14 +172,17 @@ def make_random_slice(upper):
     return slice(start, start + length, step)
 
 
-def make_random_gate_definition(name=None, parameter_count=None, return_params=False):
+def make_random_gate_definition(name=None, parameter_count=None, parameter_types=None, return_params=False):
     """Create a random gate definition."""
     if name is None:
         name = random_identifier()
-    if parameter_count is None:
-        parameter_count = random_integer(lower=0, upper=16)
-    allowed_types = VALID_GATE_ARG_TYPES + [None]
-    parameters = make_random_parameter_list(count=parameter_count, allowed_types=allowed_types)
+    if parameter_types is None:
+        if parameter_count is None:
+            parameter_count = random_integer(lower=0, upper=16)
+        allowed_types = VALID_GATE_ARG_TYPES + [None]
+        parameters = make_random_parameter_list(count=parameter_count, allowed_types=allowed_types)
+    else:
+        parameters = make_random_parameter_list(parameter_types=parameter_types)
     gatedef = GateDefinition(name, parameters=parameters)
     if not return_params:
         return gatedef
@@ -212,22 +225,24 @@ def make_random_value(value_type):
         raise ValueError(f"Unknown value type {value_type}")
 
 
-def make_random_macro_definition(name=None, parameter_count=None, body_count=None, return_params=False, return_body=False):
+def make_random_macro_definition(name=None, parameter_count=None, body_count=None, body=None,
+                                 return_params=False, return_body=False):
     """Create a random macro definition."""
     if name is None:
         name = random_identifier()
     if parameter_count is None:
         parameter_count = random_integer(lower=0, upper=16)
-    if body_count is None:
-        # I think the most interesting difference will be between no statements and any
-        # statements, so bias this towards producing no statements
-        if random.uniform(0, 1) < 0.1:
-            body_count = 0
-        else:
-            body_count = random_whole(upper=100)
+    if body is None:
+        if body_count is None:
+            # I think the most interesting difference will be between no statements and any
+            # statements, so bias this towards producing no statements
+            if random.uniform(0, 1) < 0.1:
+                body_count = 0
+            else:
+                body_count = random_whole(upper=100)
+        body = make_random_block(count=body_count)
     allowed_types = [None]  # In Jaqal we don't declare types for macros
     parameters = make_random_parameter_list(count=parameter_count, allowed_types=allowed_types)
-    body = make_random_block(count=body_count)
     gatedef = Macro(name, body=body, parameters=parameters)
     if not return_params:
         if not return_body:
@@ -253,16 +268,17 @@ def make_random_block(*, count=None, parallel=False, return_params=False):
         return block, statements
 
 
-def make_random_gate_statement(*, count=None, return_params=False):
+def make_random_gate_statement(*, count=None, parameter_types=None, return_params=False):
     """Make a gate statement with random arguments based on
     a GateDefinition."""
-    definition, _, parameters = make_random_gate_definition(parameter_count=count, return_params=True)
+    definition, _, parameters = make_random_gate_definition(parameter_count=count, parameter_types=parameter_types, return_params=True)
     arguments = {param.name: make_random_value(param.kind) for param in parameters}
     gate = GateStatement(definition, parameters=arguments)
     if not return_params:
         return gate
     else:
         return gate, definition, arguments
+
 
 def make_random_loop_statement(*, iterations=None, body_count=None, return_params=False):
     """Make a loop statement with a random number of iterations and body
