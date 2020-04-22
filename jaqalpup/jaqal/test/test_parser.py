@@ -3,8 +3,9 @@ from numbers import Number
 
 from jaqalpup.core import (
     GateDefinition, Register, ScheduledCircuit, Parameter, BlockStatement, LoopStatement,
-    NATIVE_GATES, Macro, Constant, NamedQubit, AnnotatedValue
+    Macro, Constant, NamedQubit, AnnotatedValue
 )
+from jaqalpup.qscout.native_gates import NATIVE_GATES
 from jaqalpup.jaqal.parser import parse_jaqal_string, Option
 
 

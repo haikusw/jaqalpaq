@@ -1,5 +1,5 @@
 from jaqalpup.core import ScheduledCircuit
-from jaqalpup.core.gatedef import NATIVE_GATES
+from ..qscout.native_gates import NATIVE_GATES
 from jaqalpup import QSCOUTError
 import networkx as nx
 from pyquil.device import NxDevice
