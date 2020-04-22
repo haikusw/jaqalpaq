@@ -1,7 +1,7 @@
 from .block import BlockStatement, LoopStatement
 from .constant import Constant
 from .gate import GateStatement
-from .gatedef import GateDefinition, NATIVE_GATES
+from .gatedef import GateDefinition
 from .macro import Macro
 from .register import Register, NamedQubit
 from .identifier import is_identifier_valid
@@ -21,6 +21,8 @@ class ScheduledCircuit:
 		self._constants = {}
 		self._macros = {}
 		self._registers = {}
+		# Break circular dependency by putting the import here
+		from jaqalpup.qscout.native_gates import NATIVE_GATES
 		self._native_gates = normalize_native_gates(native_gates, NATIVE_GATES)
 		self._body = BlockStatement()
 
