@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from jaqal.resolve_macro import resolve_macro
-from jaqal.testing.mixin import ParserTesterMixin
+from .helpers.parser import ParserTesterMixin
 from jaqal.parse import make_lark_parser
 from jaqal.extract_macro import extract_macro
 

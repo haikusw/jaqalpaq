@@ -1,7 +1,7 @@
 import unittest
 
 from jaqal.block_normalizer import normalize_blocks_with_unitary_timing
-from jaqal.testing.mixin import ParserTesterMixin
+from .helpers.parser import ParserTesterMixin
 from jaqal.parse import make_lark_parser
 
 

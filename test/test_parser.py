@@ -3,7 +3,7 @@ import unittest
 import pathlib
 
 # Accommodate both running from the test directory (as PyCharm does) and running from the project root.
-from jaqal.testing.mixin import ParserTesterMixin
+from .helpers.parser import ParserTesterMixin
 from jaqal.parse import make_lark_parser
 
 top_grammar_filename = 'jaqal/jaqal_grammar.lark'

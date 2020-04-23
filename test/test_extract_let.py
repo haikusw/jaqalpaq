@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from jaqal.testing.mixin import ParserTesterMixin
+from .helpers.parser import ParserTesterMixin
 from jaqal.extract_let import extract_let
 from jaqal.parse import make_lark_parser
 from jaqal.identifier import Identifier

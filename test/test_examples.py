@@ -1,6 +1,6 @@
 import unittest
 from pathlib import Path
-from jaqal.testing.mixin import ParserTesterMixin
+from .helpers.parser import ParserTesterMixin
 from jaqal.parse import make_lark_parser
 
 from jaqal.interface import Interface
