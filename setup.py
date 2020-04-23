@@ -24,6 +24,7 @@ setup(
     package_dir={"": "."},
     setup_requires=["sphinx"],
     install_requires=["lark-parser"],
+    extra_requires={"tests": ["pytest"]},
     python_requires=">=3.6",
     platforms=["any"],
     url="https://qscout.sandia.gov",
