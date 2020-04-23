@@ -1,7 +1,7 @@
 from numbers import Number
 from enum import Enum
 
-from jaqal import Interface, MacroContextRewriteVisitor, TreeManipulators
+from jaqal.parser import Interface, MacroContextRewriteVisitor, TreeManipulators
 
 from jaqal.core import (
     ScheduledCircuit, Register, NamedQubit, GateDefinition, Macro,
