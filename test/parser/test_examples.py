@@ -5,8 +5,8 @@ from jaqal.parser.parse import make_lark_parser
 
 from jaqal.parser.interface import Interface
 
-top_example_dir = Path('examples')
-test_example_dir = Path('../examples')
+top_example_dir = Path('examples/jaqal')
+test_example_dir = Path('../examples/jaqal')
 
 if top_example_dir.exists():
     example_dir = top_example_dir
