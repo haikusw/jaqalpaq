@@ -15,10 +15,6 @@ Subpackages
 
 .. toctree::
 
-   jaqalpup.cirq
    jaqalpup.core
    jaqalpup.generator
    jaqalpup.parser
-   jaqalpup.qiskit
-   jaqalpup.quil
-   jaqalpup.scheduler
