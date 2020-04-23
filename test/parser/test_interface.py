@@ -1,8 +1,8 @@
 from unittest import TestCase
 
-from jaqal.interface import Interface, MemoizedInterface
-from jaqal.iter_gates import Gate, Loop, ParallelGateBlock, SequentialGateBlock
-from jaqal.identifier import Identifier
+from jaqal.parser.interface import Interface, MemoizedInterface
+from jaqal.parser.iter_gates import Gate, Loop, ParallelGateBlock, SequentialGateBlock
+from jaqal.parser.identifier import Identifier
 
 
 class InterfaceTester(TestCase):

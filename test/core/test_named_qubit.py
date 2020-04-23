@@ -1,7 +1,7 @@
 import unittest
 
-from jaqal.core.test.randomize import random_identifier, random_integer
-import jaqal.core.test.common as common
+from .randomize import random_identifier, random_integer
+from . import common
 
 
 class NamedQubitTester(unittest.TestCase):

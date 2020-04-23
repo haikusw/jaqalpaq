@@ -1,8 +1,8 @@
 import unittest
 import itertools
 
-import jaqal.core.test.common as common
-from jaqal.core.test.randomize import random_whole, random_integer
+from . import common
+from .randomize import random_whole, random_integer
 
 
 class JaqalBlockTester(unittest.TestCase):

@@ -1,8 +1,8 @@
 from unittest import TestCase
 
-from jaqal.resolve_let import resolve_let, combine_let_dicts
-from jaqal.identifier import Identifier
-from jaqal.parse import make_lark_parser, TreeManipulators
+from jaqal.parser.resolve_let import resolve_let, combine_let_dicts
+from jaqal.parser.identifier import Identifier
+from jaqal.parser.parse import make_lark_parser, TreeManipulators
 
 
 class ResolveLetTester(TestCase):

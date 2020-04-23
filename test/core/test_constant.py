@@ -4,8 +4,8 @@ from jaqal.core.parameter import (
     FLOAT_TYPE, INT_TYPE
 )
 from jaqal.core.constant import Constant
-import jaqal.core.test.randomize as randomize
-import jaqal.core.test.common as common
+from . import randomize
+from . import common
 
 
 class ConstantTester(unittest.TestCase):

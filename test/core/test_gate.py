@@ -2,8 +2,8 @@ import unittest
 
 from jaqal.core import GateStatement
 
-from jaqal.core.test.randomize import random_identifier, random_whole
-import jaqal.core.test.common as common
+from .randomize import random_identifier, random_whole
+from . import common
 
 
 class GateTester(unittest.TestCase):

@@ -2,7 +2,7 @@ import numbers
 
 from lark import Lark, Tree, Token
 
-from jaqal.parse import make_lark_parser
+from jaqal.parser.parse import make_lark_parser
 
 
 class ParserTesterMixin:

@@ -1,9 +1,9 @@
 from unittest import TestCase
 
 from .helpers.parser import ParserTesterMixin
-from jaqal.extract_let import extract_let
-from jaqal.parse import make_lark_parser
-from jaqal.identifier import Identifier
+from jaqal.parser.extract_let import extract_let
+from jaqal.parser.parse import make_lark_parser
+from jaqal.parser.identifier import Identifier
 
 
 class ExtractLetTester(ParserTesterMixin, TestCase):

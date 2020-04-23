@@ -3,8 +3,8 @@ from collections import defaultdict
 import random
 
 import jaqal.core as core
-import jaqal.core.test.common as common
-import jaqal.core.test.randomize as randomize
+from . import common
+from . import randomize
 
 
 class UsedQubitTester(unittest.TestCase):

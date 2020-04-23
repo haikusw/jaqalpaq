@@ -1,9 +1,9 @@
 from unittest import TestCase
 
-from jaqal.parse import TreeManipulators
-from jaqal.identifier import Identifier
-from jaqal.parse import make_lark_parser
-from jaqal.extract_map import extract_map
+from jaqal.parser.parse import TreeManipulators
+from jaqal.parser.identifier import Identifier
+from jaqal.parser.parse import make_lark_parser
+from jaqal.parser.extract_map import extract_map
 
 
 class ExtractMapTester(TestCase):

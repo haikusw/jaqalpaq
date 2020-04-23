@@ -3,8 +3,8 @@ from itertools import dropwhile, takewhile
 from abc import abstractmethod
 
 from jaqal.core import INT_TYPE, FLOAT_TYPE, QUBIT_TYPE
-import jaqal.core.test.common as common
-from jaqal.core.test.randomize import random_identifier, random_whole
+from . import common
+from .randomize import random_identifier, random_whole
 
 
 class AbstractGateTesterBase:

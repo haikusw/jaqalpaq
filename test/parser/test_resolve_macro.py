@@ -1,9 +1,9 @@
 from unittest import TestCase
 
-from jaqal.resolve_macro import resolve_macro
+from jaqal.parser.resolve_macro import resolve_macro
 from .helpers.parser import ParserTesterMixin
-from jaqal.parse import make_lark_parser
-from jaqal.extract_macro import extract_macro
+from jaqal.parser.parse import make_lark_parser
+from jaqal.parser.extract_macro import extract_macro
 
 
 class ResolveMacroTester(ParserTesterMixin, TestCase):

@@ -4,8 +4,8 @@ from jaqal.core.parameter import (
     QUBIT_TYPE, FLOAT_TYPE, REGISTER_TYPE, INT_TYPE, PARAMETER_TYPES
 )
 from jaqal.core.register import Register, NamedQubit
-import jaqal.core.test.common as common
-from jaqal.core.test.randomize import random_float, random_integer
+from . import common
+from .randomize import random_float, random_integer
 
 
 class ParameterTester(unittest.TestCase):

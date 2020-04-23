@@ -1,9 +1,9 @@
 import unittest
 from pathlib import Path
 from .helpers.parser import ParserTesterMixin
-from jaqal.parse import make_lark_parser
+from jaqal.parser.parse import make_lark_parser
 
-from jaqal.interface import Interface
+from jaqal.parser.interface import Interface
 
 top_example_dir = Path('examples')
 test_example_dir = Path('../examples')

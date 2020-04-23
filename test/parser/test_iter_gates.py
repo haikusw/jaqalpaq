@@ -1,8 +1,8 @@
 import unittest
 
-from jaqal.iter_gates import get_gates_and_loops
-from jaqal.iter_gates import Gate, Loop, ParallelGateBlock, SequentialGateBlock
-from jaqal.parse import parse_with_lark
+from jaqal.parser.iter_gates import get_gates_and_loops
+from jaqal.parser.iter_gates import Gate, Loop, ParallelGateBlock, SequentialGateBlock
+from jaqal.parser.parse import parse_with_lark
 
 
 class GateParserTester(unittest.TestCase):

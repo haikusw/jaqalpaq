@@ -1,8 +1,8 @@
 import unittest
 
 from jaqal.core import Register, Constant
-from jaqal.core.test.randomize import random_identifier, random_whole, random_integer
-import jaqal.core.test.common as common
+from .randomize import random_identifier, random_whole, random_integer
+from . import common
 
 
 class RegisterTester(unittest.TestCase):

@@ -1,7 +1,7 @@
 import unittest
 
-from jaqal.core.test.abstractgate import AbstractGateTesterBase
-import jaqal.core.test.common as common
+from .abstractgate import AbstractGateTesterBase
+from . import common
 from jaqal.core import GateDefinition
 
 
