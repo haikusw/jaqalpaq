@@ -30,7 +30,9 @@ class ResolveMacroVisitor(ExtractMacroVisitor):
         if gate_name_key in self.macro_mapping:
             arguments, block = self.macro_mapping[gate_name_key]
             if len(arguments) != len(gate_args):
-                raise ValueError(f"In resolving macro {gate_name_key}, expected {len(arguments)} arguments, found {len(gate_args)}")
+                raise ValueError(
+                    f"In resolving macro {gate_name_key}, expected {len(arguments)} arguments, found {len(gate_args)}"
+                )
             arg_dict = {arg: gate_arg for arg, gate_arg in zip(arguments, gate_args)}
             return substitute_macro_arguments(block, arg_dict)
         return self.make_gate_statement(gate_name, gate_args)
@@ -43,7 +45,6 @@ def substitute_macro_arguments(tree, arg_dict):
 
 
 class MacroArgumentVisitor(TreeRewriteVisitor):
-
     def __init__(self, arg_dict):
         self.arg_dict = arg_dict
 
@@ -69,7 +70,6 @@ def expand_redundant_blocks(tree):
 
 
 class RedundantBlockVisitor(TreeRewriteVisitor):
-
     def visit_program(self, header_statements, body_statements):
         expanded_body_statements = []
         for stmt in body_statements:

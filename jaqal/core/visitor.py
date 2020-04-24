@@ -33,4 +33,4 @@ class Visitor:
             method_name = f"visit_{cls.__name__}"
             if hasattr(self, method_name):
                 return method_name
-        return 'visit_default'
+        return "visit_default"

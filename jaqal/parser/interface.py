@@ -16,11 +16,10 @@ from .validate import validate
 
 
 class Interface:
-
     @classmethod
     def from_file(cls, root_filename):
         """Create a new interface from a file."""
-        with open(root_filename, 'r') as fd:
+        with open(root_filename, "r") as fd:
             return cls(fd.read())
 
     def __init__(self, root_text, allow_no_usepulses=False):
@@ -55,7 +54,9 @@ class Interface:
         """Return the parse tree created when parsing the text after expanding macros and removing
         header statements. This tree has as much processing applied as can be done without knowing
         the let override dict."""
-        assert self._initial_tree is not None, "Do not call before setting up the initial tree"
+        assert (
+            self._initial_tree is not None
+        ), "Do not call before setting up the initial tree"
         if self._preprocessed_tree is None:
             tree = self.resolve_macro(self._initial_tree)
             self._preprocessed_tree = self.strip_metadata(tree)
@@ -145,7 +146,9 @@ class Interface:
         let_dict -- A dictionary mapping identifiers to parse trees. Use make_let_dict() to create this.
         """
         let_dict = let_dict or self.make_let_dict()
-        map_dict = {key: resolve_let(value, let_dict) for key, value in self._map_dict.items()}
+        map_dict = {
+            key: resolve_let(value, let_dict) for key, value in self._map_dict.items()
+        }
         return resolve_map(tree, map_dict, self._registers)
 
     def make_register_dict(self, let_dict=None):
@@ -154,8 +157,10 @@ class Interface:
         let_dict -- A dictionary mapping identifiers to parse trees. Use make_let_dict() to create this.
         """
         let_dict = let_dict or self.make_let_dict()
-        registers = {str(name): convert_to_int(resolve_let(value, let_dict))
-                     for name, value in self._registers.items()}
+        registers = {
+            str(name): convert_to_int(resolve_let(value, let_dict))
+            for name, value in self._registers.items()
+        }
         return registers
 
     ##
@@ -173,7 +178,11 @@ class Interface:
         self._map_dict, self._registers = extract_map(tree)
 
         self._usepulses = extract_usepulses(tree)
-        if len(self._usepulses) > 1 or not self._usepulses and not self._allow_no_usepulses:
+        if (
+            len(self._usepulses) > 1
+            or not self._usepulses
+            and not self._allow_no_usepulses
+        ):
             raise NotImplementedError("At most one usepulses allowed for now")
 
 
@@ -199,6 +208,7 @@ def memoize_method(func):
         args = tuple(make_hashable(arg) for arg in args)
         kwargs = {key: make_hashable(value) for key, value in sorted(kwargs.items())}
         return memo_func(self, *args, **kwargs)
+
     return inner
 
 
@@ -207,7 +217,9 @@ class MemoizedInterface(Interface):
 
     @memoize_method
     def get_uniformly_timed_gates_and_registers(self, override_dict=None):
-        return super().get_uniformly_timed_gates_and_registers(override_dict=override_dict)
+        return super().get_uniformly_timed_gates_and_registers(
+            override_dict=override_dict
+        )
 
 
 def convert_to_int(token):
@@ -225,7 +237,6 @@ def strip_headers_and_macro_definitions(tree):
 
 
 class StripHeadersAndMacroDefinitionsVisitor(TreeRewriteVisitor):
-
     def visit_register_statement(self, array_declaration):
         return None
 

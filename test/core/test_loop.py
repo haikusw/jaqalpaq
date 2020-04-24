@@ -6,11 +6,12 @@ from .randomize import random_whole, random_integer
 
 
 class JaqalLoopTester(unittest.TestCase):
-
     def test_create_loop(self):
         """Test creating a loop."""
         # Note: The LoopStatement could do validity checking for its arguments, but doesn't.
-        loop, iterations, statements = common.make_random_loop_statement(return_params=True)
+        loop, iterations, statements = common.make_random_loop_statement(
+            return_params=True
+        )
         self.assertEqual(iterations, loop.iterations)
         self.assertEqual(statements, loop.statements)
 

@@ -7,14 +7,15 @@ from jaqal.parser.extract_map import extract_map
 
 
 class ResolveMapTester(ParserTesterMixin, TestCase):
-
     def test_map_full_register(self):
         """Test mapping a full register and accessing a single array element."""
         setup_text = "register r[7]; map a r"
         gate_text = "foo a[1]"
         exp_result = self.make_program(
             self.make_header_statements(),
-            self.make_body_statements(self.make_gate_statement('foo', self.make_array_element_qual('r', 1)))
+            self.make_body_statements(
+                self.make_gate_statement("foo", self.make_array_element_qual("r", 1))
+            ),
         )
         self.run_test(setup_text, gate_text, exp_result)
 
@@ -24,7 +25,9 @@ class ResolveMapTester(ParserTesterMixin, TestCase):
         gate_text = "foo a[1]"
         exp_result = self.make_program(
             self.make_header_statements(),
-            self.make_body_statements(self.make_gate_statement('foo', self.make_array_element_qual('r', 3)))
+            self.make_body_statements(
+                self.make_gate_statement("foo", self.make_array_element_qual("r", 3))
+            ),
         )
         self.run_test(setup_text, gate_text, exp_result)
 
@@ -34,7 +37,9 @@ class ResolveMapTester(ParserTesterMixin, TestCase):
         gate_text = "foo a"
         exp_result = self.make_program(
             self.make_header_statements(),
-            self.make_body_statements(self.make_gate_statement('foo', self.make_array_element_qual('r', 1)))
+            self.make_body_statements(
+                self.make_gate_statement("foo", self.make_array_element_qual("r", 1))
+            ),
         )
         self.run_test(setup_text, gate_text, exp_result)
 
@@ -44,7 +49,9 @@ class ResolveMapTester(ParserTesterMixin, TestCase):
         gate_text = "foo a[1]"
         exp_result = self.make_program(
             self.make_header_statements(),
-            self.make_body_statements(self.make_gate_statement('foo', self.make_array_element_qual('r', 1)))
+            self.make_body_statements(
+                self.make_gate_statement("foo", self.make_array_element_qual("r", 1))
+            ),
         )
         self.run_test(setup_text, gate_text, exp_result)
 
@@ -54,7 +61,9 @@ class ResolveMapTester(ParserTesterMixin, TestCase):
         gate_text = "foo a[1]"
         exp_result = self.make_program(
             self.make_header_statements(),
-            self.make_body_statements(self.make_gate_statement('foo', self.make_array_element_qual('r', 3)))
+            self.make_body_statements(
+                self.make_gate_statement("foo", self.make_array_element_qual("r", 3))
+            ),
         )
         self.run_test(setup_text, gate_text, exp_result)
 
@@ -64,7 +73,9 @@ class ResolveMapTester(ParserTesterMixin, TestCase):
         gate_text = "foo a"
         exp_result = self.make_program(
             self.make_header_statements(),
-            self.make_body_statements(self.make_gate_statement('foo', self.make_array_element_qual('r', 1)))
+            self.make_body_statements(
+                self.make_gate_statement("foo", self.make_array_element_qual("r", 1))
+            ),
         )
         self.run_test(setup_text, gate_text, exp_result)
 
@@ -94,15 +105,14 @@ class ResolveMapTester(ParserTesterMixin, TestCase):
             self.make_header_statements(),
             self.make_body_statements(
                 self.make_macro_statement(
-                    'foo',
+                    "foo",
                     self.make_serial_gate_block(
                         self.make_gate_statement(
-                            'g',
-                            self.make_array_element_qual('r', 2)
+                            "g", self.make_array_element_qual("r", 2)
                         )
-                    )
+                    ),
                 )
-            )
+            ),
         )
         self.run_test(setup_text, text, exp_result)
 
@@ -115,19 +125,15 @@ class ResolveMapTester(ParserTesterMixin, TestCase):
             self.make_header_statements(),
             self.make_body_statements(
                 self.make_macro_statement(
-                    'foo',
-                    'a',
+                    "foo",
+                    "a",
                     self.make_serial_gate_block(
-                        self.make_gate_statement(
-                            'g',
-                            self.make_gate_arg('a')
-                        )
-                    )
+                        self.make_gate_statement("g", self.make_gate_arg("a"))
+                    ),
                 )
-            )
+            ),
         )
         self.run_test(setup_text, text, exp_result)
-
 
     def run_test(self, setup_text, gate_text, exp_result):
         parser = make_lark_parser()

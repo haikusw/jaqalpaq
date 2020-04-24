@@ -7,25 +7,24 @@ from jaqal.parser.identifier import Identifier
 
 
 class ExtractLetTester(ParserTesterMixin, TestCase):
-
     def test_extract_integer(self):
         text = "let a 5"
-        exp_value = {Identifier('a'): 5}
+        exp_value = {Identifier("a"): 5}
         self.run_test(text, exp_value)
 
     def test_extract_negative_integer(self):
         text = "let a -5"
-        exp_value = {Identifier('a'): -5}
+        exp_value = {Identifier("a"): -5}
         self.run_test(text, exp_value)
 
     def test_extract_float(self):
         text = "let a 5.5"
-        exp_value = {Identifier('a'): 5.5}
+        exp_value = {Identifier("a"): 5.5}
         self.run_test(text, exp_value)
 
     def test_extract_negative_float(self):
         text = "let a -5.5"
-        exp_value = {Identifier('a'): -5.5}
+        exp_value = {Identifier("a"): -5.5}
         self.run_test(text, exp_value)
 
     def test_extract_duplicate(self):

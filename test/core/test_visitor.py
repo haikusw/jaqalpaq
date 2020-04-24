@@ -5,7 +5,6 @@ from jaqal.core.visitor import Visitor
 
 
 class JaqalVisitorTester(unittest.TestCase):
-
     def test_visit_type(self):
         class Foo:
             def __init__(self, x):

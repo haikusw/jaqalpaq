@@ -6,39 +6,24 @@ from jaqal.parser.parse import parse_with_lark
 
 
 class GateParserTester(unittest.TestCase):
-
     def test_one_gate_no_arg(self):
-        text = 'foo'
-        exp_result = [
-            Gate('foo', [])
-        ]
+        text = "foo"
+        exp_result = [Gate("foo", [])]
         self.run_test(text, exp_result)
 
     def test_one_gate_with_args(self):
-        text = 'register r[6]; foo 1 3.14 r[5]'
-        exp_result = [
-            Gate('foo', [1, 3.14, ('r', 5)])
-        ]
+        text = "register r[6]; foo 1 3.14 r[5]"
+        exp_result = [Gate("foo", [1, 3.14, ("r", 5)])]
         self.run_test(text, exp_result)
 
     def test_loop(self):
-        text = 'loop 2 {foo; bar}'
-        exp_result = [
-            Loop(2, SequentialGateBlock([
-                Gate('foo', []),
-                Gate('bar', [])
-            ]))
-        ]
+        text = "loop 2 {foo; bar}"
+        exp_result = [Loop(2, SequentialGateBlock([Gate("foo", []), Gate("bar", [])]))]
         self.run_test(text, exp_result)
 
     def test_parallel_block(self):
-        text = '<foo|bar>'
-        exp_result = [
-            ParallelGateBlock([
-                Gate('foo', []),
-                Gate('bar', [])
-            ])
-        ]
+        text = "<foo|bar>"
+        exp_result = [ParallelGateBlock([Gate("foo", []), Gate("bar", [])])]
         self.run_test(text, exp_result)
 
     def run_test(self, text, exp_result):

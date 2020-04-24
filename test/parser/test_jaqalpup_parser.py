@@ -2,47 +2,48 @@ from unittest import TestCase
 from numbers import Number
 
 from jaqal.core import (
-    GateDefinition, Register, ScheduledCircuit, Parameter, BlockStatement, LoopStatement,
-    Macro, Constant, NamedQubit, AnnotatedValue
+    GateDefinition,
+    Register,
+    ScheduledCircuit,
+    Parameter,
+    BlockStatement,
+    LoopStatement,
+    Macro,
+    Constant,
+    NamedQubit,
+    AnnotatedValue,
 )
 from jaqal.qscout.native_gates import NATIVE_GATES
 from jaqal.jaqal.parser import parse_jaqal_string, Option
 
 
 class ParserTester(TestCase):
-
     def setUp(self):
         self.gate_definitions = {}
         self.registers = {}
 
     def test_gate_statement_no_args(self):
         text = "foo"
-        exp_result = self.make_circuit(gates=[self.make_gate('foo')])
+        exp_result = self.make_circuit(gates=[self.make_gate("foo")])
         self.run_test(text, exp_result)
 
     def test_gate_statement_numeric_arg(self):
         text = "foo 3.14"
-        exp_result = self.make_circuit(gates=[self.make_gate('foo', 3.14)])
+        exp_result = self.make_circuit(gates=[self.make_gate("foo", 3.14)])
         self.run_test(text, exp_result)
 
     def test_gate_statement_qubit_arg(self):
         text = "register r[3]; foo r[1]"
         exp_result = self.make_circuit(
-            registers={'r': self.make_register('r', 3)},
-            gates=[
-                self.make_gate('foo', ('r', 1))
-            ]
+            registers={"r": self.make_register("r", 3)},
+            gates=[self.make_gate("foo", ("r", 1))],
         )
         self.run_test(text, exp_result)
 
     def test_top_level_sequential_gate_block(self):
         text = "{foo}"
         exp_result = self.make_circuit(
-            gates=[
-                self.make_sequential_gate_block(
-                    self.make_gate('foo')
-                )
-            ]
+            gates=[self.make_sequential_gate_block(self.make_gate("foo"))]
         )
         self.run_test(text, exp_result)
 
@@ -50,10 +51,8 @@ class ParserTester(TestCase):
         """Test a let constant that is a floating point value."""
         text = "let a 3.14; foo a"
         exp_result = self.make_circuit(
-            constants={'a': self.make_constant('a', 3.14)},
-            gates=[
-                self.make_gate('foo', self.make_constant('a', 3.14))
-            ]
+            constants={"a": self.make_constant("a", 3.14)},
+            gates=[self.make_gate("foo", self.make_constant("a", 3.14))],
         )
         self.run_test(text, exp_result)
 
@@ -61,27 +60,24 @@ class ParserTester(TestCase):
         text = "register r[3]; let a 1; let b 3.14; foo r[a] b"
         exp_result = self.make_circuit(
             constants={
-                'a': self.make_constant('a', 1),
-                'b': self.make_constant('b', 3.14)
+                "a": self.make_constant("a", 1),
+                "b": self.make_constant("b", 3.14),
             },
-            registers={'r': self.make_register('r', 3)},
-            gates=[
-                self.make_gate('foo', ('r', 0), 1.41)
-            ]
+            registers={"r": self.make_register("r", 3)},
+            gates=[self.make_gate("foo", ("r", 0), 1.41)],
         )
-        override_dict = {'a': 0, 'b': 1.41}
-        self.run_test(text, exp_result, override_dict=override_dict,
-                      option=Option.expand_let)
+        override_dict = {"a": 0, "b": 1.41}
+        self.run_test(
+            text, exp_result, override_dict=override_dict, option=Option.expand_let
+        )
 
     def test_let_as_register_index(self):
         """Test a let-constant used as a register index and not expanded."""
         text = "register r[3]; let a 1; foo r[a]"
         exp_result = self.make_circuit(
-            registers={'r': self.make_register('r', 3)},
-            constants={'a': self.make_constant('a', 1)},
-            gates=[
-                self.make_gate('foo', ('r', self.make_constant('a', 1)))
-            ]
+            registers={"r": self.make_register("r", 3)},
+            constants={"a": self.make_constant("a", 1)},
+            gates=[self.make_gate("foo", ("r", self.make_constant("a", 1)))],
         )
         self.run_test(text, exp_result, option=Option.none)
 
@@ -89,12 +85,10 @@ class ParserTester(TestCase):
         """Test a let-constant used as a map index and not expanded."""
         text = "register r[3]; map q r; let a 1; foo q[a]"
         exp_result = self.make_circuit(
-            registers={'r': self.make_register('r', 3)},
-            maps={'q': self.make_map('q', 'r', None)},
-            constants={'a': self.make_constant('a', 1)},
-            gates=[
-                self.make_gate('foo', ('q', self.make_constant('a', 1)))
-            ]
+            registers={"r": self.make_register("r", 3)},
+            maps={"q": self.make_map("q", "r", None)},
+            constants={"a": self.make_constant("a", 1)},
+            gates=[self.make_gate("foo", ("q", self.make_constant("a", 1)))],
         )
         self.run_test(text, exp_result, option=Option.none)
 
@@ -102,9 +96,9 @@ class ParserTester(TestCase):
         """Test a let-constant used as an element in the slice defining a map that is not expanded."""
         text = "register r[3]; let a 1; map q r[a:]"
         exp_result = self.make_circuit(
-            registers={'r': self.make_register('r', 3)},
-            constants={'a': self.make_constant('a', 1)},
-            maps={'q': self.make_map('q', 'r', (self.make_constant('a', 1), 3, 1))},
+            registers={"r": self.make_register("r", 3)},
+            constants={"a": self.make_constant("a", 1)},
+            maps={"q": self.make_map("q", "r", (self.make_constant("a", 1), 3, 1))},
             gates=[],
         )
         self.run_test(text, exp_result)
@@ -113,9 +107,9 @@ class ParserTester(TestCase):
         """Test a let-constant used as the size of a register."""
         text = "let a 5; register r[a]"
         exp_result = self.make_circuit(
-            constants={'a': self.make_constant('a', 5)},
-            registers={'r': self.make_register('r', self.make_constant('a', 5))},
-            gates=[]
+            constants={"a": self.make_constant("a", 5)},
+            registers={"r": self.make_register("r", self.make_constant("a", 5))},
+            gates=[],
         )
         self.run_test(text, exp_result)
 
@@ -123,16 +117,10 @@ class ParserTester(TestCase):
         """Test a let-constant with the same name as a macro parameter. No expansion."""
         text = "register r[3]; let a 1; macro foo a { g a }"
         exp_result = self.make_circuit(
-            registers={'r': self.make_register('r', 3)},
-            constants={'a': self.make_constant('a', 1)},
-            macros={
-                'foo': self.make_macro(
-                    'foo',
-                    ['a'],
-                    self.make_gate('g', 'a')
-                )
-            },
-            gates=[]
+            registers={"r": self.make_register("r", 3)},
+            constants={"a": self.make_constant("a", 1)},
+            macros={"foo": self.make_macro("foo", ["a"], self.make_gate("g", "a"))},
+            gates=[],
         )
         self.run_test(text, exp_result)
 
@@ -141,8 +129,7 @@ class ParserTester(TestCase):
         exp_result = self.make_circuit(
             gates=[
                 self.make_parallel_gate_block(
-                    self.make_gate('foo'),
-                    self.make_gate('bar')
+                    self.make_gate("foo"), self.make_gate("bar")
                 )
             ]
         )
@@ -152,11 +139,7 @@ class ParserTester(TestCase):
         text = "loop 32 { foo; bar }"
         exp_result = self.make_circuit(
             gates=[
-                self.make_loop(
-                    self.make_gate('foo'),
-                    self.make_gate('bar'),
-                    count=32
-                )
+                self.make_loop(self.make_gate("foo"), self.make_gate("bar"), count=32)
             ]
         )
         self.run_test(text, exp_result)
@@ -166,10 +149,9 @@ class ParserTester(TestCase):
         exp_result = self.make_circuit(
             gates=[
                 self.make_parallel_gate_block(
-                    self.make_gate('p'),
+                    self.make_gate("p"),
                     self.make_sequential_gate_block(
-                        self.make_gate('foo'),
-                        self.make_gate('bar')
+                        self.make_gate("foo"), self.make_gate("bar")
                     ),
                 )
             ]
@@ -180,8 +162,7 @@ class ParserTester(TestCase):
         """Test that the registers are properly read."""
         text = "register r[7]"
         exp_result = self.make_circuit(
-            gates=[],
-            registers={'r': self.make_register('r', 7)}
+            gates=[], registers={"r": self.make_register("r", 7)}
         )
         self.run_test(text, exp_result=exp_result)
 
@@ -190,16 +171,16 @@ class ParserTester(TestCase):
         # Note: This behavior is possibly not what we want long term
         text = "register r[3]; foo 1 r[0]; bar 3.14"
         exp_native_gates = {
-            'foo': self.get_gate_definition(
-                'foo',
-                [self.make_parameter(index=0, kind='float'),
-                 self.make_parameter(index=1, kind='qubit')]
+            "foo": self.get_gate_definition(
+                "foo",
+                [
+                    self.make_parameter(index=0, kind="float"),
+                    self.make_parameter(index=1, kind="qubit"),
+                ],
             ),
-            'bar': self.get_gate_definition(
-                'bar',
-                [self.make_parameter(index=0, kind='float')]
-            )
-
+            "bar": self.get_gate_definition(
+                "bar", [self.make_parameter(index=0, kind="float")]
+            ),
         }
         self.run_test(text, exp_native_gates=exp_native_gates)
 
@@ -207,10 +188,8 @@ class ParserTester(TestCase):
         """Test that we can use the native gates in the QSCOUT native gate set."""
         text = "register r[3]; Rx r[0] 1.5"
         exp_result = self.make_circuit(
-            registers={'r': self.make_register('r', 3)},
-            gates=[
-                self.make_native_gate('Rx', ('r', 0), 1.5)
-            ]
+            registers={"r": self.make_register("r", 3)},
+            gates=[self.make_native_gate("Rx", ("r", 0), 1.5)],
         )
         self.run_test(text, exp_result, native_gates=NATIVE_GATES)
 
@@ -228,16 +207,8 @@ class ParserTester(TestCase):
         """Test parsing macro definitions without expanding them."""
         text = "macro foo a { g a }; foo 1.5"
         exp_result = self.make_circuit(
-            gates=[
-                self.make_gate('foo', 1.5)
-            ],
-            macros={
-                'foo': self.make_macro(
-                    'foo',
-                    ['a'],
-                    self.make_gate('g', 'a')
-                )
-            }
+            gates=[self.make_gate("foo", 1.5)],
+            macros={"foo": self.make_macro("foo", ["a"], self.make_gate("g", "a"))},
         )
         self.run_test(text, exp_result)
 
@@ -245,161 +216,125 @@ class ParserTester(TestCase):
         """Test parsing macro definitions and expanding them."""
         text = "macro foo a { g a }; foo 1.5"
         exp_result = self.make_circuit(
-            gates=[
-                self.make_gate('g', 1.5)
-            ],
+            gates=[self.make_gate("g", 1.5)],
             # Even though we expand macros, we are not stripping the metadata,
             # so the definition will still be there.
-            macros={
-                'foo': self.make_macro(
-                    'foo',
-                    ['a'],
-                    self.make_gate('g', 'a')
-                )
-            }
+            macros={"foo": self.make_macro("foo", ["a"], self.make_gate("g", "a"))},
         )
-        self.run_test(text, exp_result,
-                      option=Option.expand_macro)
+        self.run_test(text, exp_result, option=Option.expand_macro)
 
     def test_let_no_resolve(self):
         """Test parsing a let statement"""
         text = "let a 2; foo a"
         exp_result = self.make_circuit(
-            gates=[
-                self.make_gate('foo', self.make_constant('a', 2))
-            ],
-            constants={'a': self.make_constant('a', 2)}
+            gates=[self.make_gate("foo", self.make_constant("a", 2))],
+            constants={"a": self.make_constant("a", 2)},
         )
-        self.run_test(text, exp_result,
-                      option=Option.none)
+        self.run_test(text, exp_result, option=Option.none)
 
     def test_let_resolve(self):
         """Test parsing a let statement and resolving it."""
         text = "let a 2; foo a"
         exp_result = self.make_circuit(
-            gates=[
-                self.make_gate('foo', 2)
-            ],
-            constants={'a': self.make_constant('a', 2)}
+            gates=[self.make_gate("foo", 2)],
+            constants={"a": self.make_constant("a", 2)},
         )
-        self.run_test(text, exp_result,
-                      option=Option.expand_let)
+        self.run_test(text, exp_result, option=Option.expand_let)
 
     def test_map_no_resolve(self):
         """Test parsing a map statement."""
         text = "register r[3]; map q r[1:]; foo q[0]"
         exp_result = self.make_circuit(
-            registers={'r': self.make_register('r', 3)},
-            maps={'q': self.make_map('q', 'r', (1, 3, 1))},
-            gates=[
-                self.make_gate('foo', ('q', 0))
-            ]
+            registers={"r": self.make_register("r", 3)},
+            maps={"q": self.make_map("q", "r", (1, 3, 1))},
+            gates=[self.make_gate("foo", ("q", 0))],
         )
-        self.run_test(text, exp_result,
-                      option=Option.none)
+        self.run_test(text, exp_result, option=Option.none)
 
     def test_map_single_qubit_no_resolve(self):
         text = "register r[3]; map q r[1]; foo q"
         exp_result = self.make_circuit(
-            registers={'r': self.make_register('r', 3)},
-            maps={'q': self.make_map('q', 'r', 1)},
-            gates=[
-                self.make_gate('foo', self.make_named_qubit('q'))
-            ]
+            registers={"r": self.make_register("r", 3)},
+            maps={"q": self.make_map("q", "r", 1)},
+            gates=[self.make_gate("foo", self.make_named_qubit("q"))],
         )
-        self.run_test(text, exp_result,
-                      option=Option.none)
+        self.run_test(text, exp_result, option=Option.none)
 
     def test_map_resolve(self):
         """Test parsing a map statement and resolving it."""
         text = "register r[3]; map q r[1:]; foo q[0]"
         exp_result = self.make_circuit(
-            registers={'r': self.make_register('r', 3)},
-            maps={'q': self.make_map('q', 'r', (1, 3, 1))},
-            gates=[
-                self.make_gate('foo', ('r', 1))
-            ]
+            registers={"r": self.make_register("r", 3)},
+            maps={"q": self.make_map("q", "r", (1, 3, 1))},
+            gates=[self.make_gate("foo", ("r", 1))],
         )
-        self.run_test(text, exp_result,
-                      option=Option.expand_let_map)
+        self.run_test(text, exp_result, option=Option.expand_let_map)
 
     def test_map_single_qubit_resolve(self):
         text = "register r[3]; map q r[1]; foo q"
         exp_result = self.make_circuit(
-            registers={'r': self.make_register('r', 3)},
-            maps={'q': self.make_map('q', 'r', 1)},
-            gates=[
-                self.make_gate('foo', ('r', 1))
-            ]
+            registers={"r": self.make_register("r", 3)},
+            maps={"q": self.make_map("q", "r", 1)},
+            gates=[self.make_gate("foo", ("r", 1))],
         )
-        self.run_test(text, exp_result,
-                      option=Option.expand_let_map)
+        self.run_test(text, exp_result, option=Option.expand_let_map)
 
     def test_map_whole_register(self):
         text = "register r[3]; map q r; foo q[1]"
         exp_result = self.make_circuit(
-            registers={'r': self.make_register('r', 3)},
-            maps={'q': self.make_map('q', 'r', None)},
-            gates=[self.make_gate('foo', ('q', 1))]
+            registers={"r": self.make_register("r", 3)},
+            maps={"q": self.make_map("q", "r", None)},
+            gates=[self.make_gate("foo", ("q", 1))],
         )
-        self.run_test(text, exp_result,
-                      option=Option.none)
+        self.run_test(text, exp_result, option=Option.none)
 
     def test_expand_macro_let_map_strip_metadata(self):
         """Test an example that exercises all available options."""
         text = "register r[3]; map q r; let a 2; macro foo x y { g x y }; foo q[a] 3.14"
         exp_result = self.make_circuit(
-            registers={
-                'r': self.make_register('r', 3)
-            },
-            constants={'a': self.make_constant('a', 2)},
-            maps={'q': self.make_map('q', 'r', None)},
+            registers={"r": self.make_register("r", 3)},
+            constants={"a": self.make_constant("a", 2)},
+            maps={"q": self.make_map("q", "r", None)},
             macros={
-                'foo': self.make_macro(
-                    'foo',
-                    ['x', 'y'],
-                    self.make_gate('g', 'x', 'y')
-                )
+                "foo": self.make_macro("foo", ["x", "y"], self.make_gate("g", "x", "y"))
             },
-            gates=[
-                self.make_gate('g', ('r', 2), 3.14)
-            ]
+            gates=[self.make_gate("g", ("r", 2), 3.14)],
         )
-        self.run_test(text, exp_result,
-                      option=Option.full)
+        self.run_test(text, exp_result, option=Option.full)
 
     def test_no_expand_macro_let_map_leave_metadata(self):
         """Test an example that does not exercise all available options but involves features that could be."""
         text = "register r[3]; map q r; let a 2; macro foo x y { g x y }; foo q[a] 3.14"
         exp_result = self.make_circuit(
-            registers={
-                'r': self.make_register('r', 3)
-            },
-            maps={'q': self.make_map('q', 'r', None)},
-            constants={'a': self.make_constant('a', 2)},
+            registers={"r": self.make_register("r", 3)},
+            maps={"q": self.make_map("q", "r", None)},
+            constants={"a": self.make_constant("a", 2)},
             macros={
-                'foo': self.make_macro(
-                    'foo',
-                    ['x', 'y'],
-                    self.make_gate('g', 'x', 'y')
-                )
+                "foo": self.make_macro("foo", ["x", "y"], self.make_gate("g", "x", "y"))
             },
-            gates=[
-                self.make_gate('foo', ('q', self.make_constant('a', 2)), 3.14)
-            ]
+            gates=[self.make_gate("foo", ("q", self.make_constant("a", 2)), 3.14)],
         )
-        self.run_test(text, exp_result,
-                      option=Option.none)
+        self.run_test(text, exp_result, option=Option.none)
 
     ##
     # Helper methods
     #
 
-    def run_test(self, text, exp_result=None, exp_native_gates=None,
-                 override_dict=None, native_gates=None, option=Option.none):
-        act_result = parse_jaqal_string(text, override_dict=override_dict,
-                                        native_gates=native_gates,
-                                        processing_option=option)
+    def run_test(
+        self,
+        text,
+        exp_result=None,
+        exp_native_gates=None,
+        override_dict=None,
+        native_gates=None,
+        option=Option.none,
+    ):
+        act_result = parse_jaqal_string(
+            text,
+            override_dict=override_dict,
+            native_gates=native_gates,
+            processing_option=option,
+        )
         if exp_result is not None:
             self.assertEqual(exp_result.body, act_result.body)
             self.assertEqual(exp_result.macros, act_result.macros)
@@ -437,7 +372,9 @@ class ParserTester(TestCase):
         if is_native:
             gate_def = self.get_native_gate_definition(name)
         else:
-            params = [self.make_parameter_from_arg(idx, arg) for idx, arg in enumerate(args)]
+            params = [
+                self.make_parameter_from_arg(idx, arg) for idx, arg in enumerate(args)
+            ]
             gate_def = self.get_gate_definition(name, params)
         return gate_def(*arg_objects)
 
@@ -512,9 +449,11 @@ class ParserTester(TestCase):
         """Create a new Macro object for a macro definition."""
         # Note That this only creates macros with sequential gate blocks while those with
         # parallel gate blocks are also possible.
-        return Macro(name,
-                     parameters=[self.make_parameter(pname) for pname in parameter_names],
-                     body=self.make_sequential_gate_block(*statements))
+        return Macro(
+            name,
+            parameters=[self.make_parameter(pname) for pname in parameter_names],
+            body=self.make_sequential_gate_block(*statements),
+        )
 
     def make_constant(self, name, value):
         return Constant(name, value)
@@ -524,16 +463,20 @@ class ParserTester(TestCase):
             raise ValueError(f"Please create register {reg_name} first")
         if isinstance(reg_indexing, tuple):
             if len(reg_indexing) != 3:
-                raise ValueError(f"reg_indexing must have 3 elements, found {len(reg_indexing)}")
+                raise ValueError(
+                    f"reg_indexing must have 3 elements, found {len(reg_indexing)}"
+                )
             reg_indexing = tuple(self.make_slice_component(arg) for arg in reg_indexing)
             alias_slice = slice(*reg_indexing)
-            reg = Register(name, alias_from=self.registers[reg_name],
-                           alias_slice=alias_slice)
+            reg = Register(
+                name, alias_from=self.registers[reg_name], alias_slice=alias_slice
+            )
             self.registers[name] = reg
             return reg
         elif isinstance(reg_indexing, int):
-            nq = NamedQubit(name, alias_from=self.registers[reg_name],
-                            alias_index=reg_indexing)
+            nq = NamedQubit(
+                name, alias_from=self.registers[reg_name], alias_index=reg_indexing
+            )
             self.registers[name] = nq
             return nq
         elif reg_indexing is None:
@@ -564,6 +507,7 @@ class ParserTester(TestCase):
             raise TypeError(f"Register entry {name} not a named qubit")
         return named_qubit
 
+
 class TestOption(TestCase):
     """Test the Option and OptionSet classes."""
 
@@ -576,8 +520,7 @@ class TestOption(TestCase):
         """Test that element containment acts like a bitmask."""
         for opt0 in Option:
             for opt1 in Option:
-                self.assertEqual(opt0.value & opt1.value == opt1.value,
-                                 opt1 in opt0)
+                self.assertEqual(opt0.value & opt1.value == opt1.value, opt1 in opt0)
 
     def test_in_option_set(self):
         """Test that options are in an option set containing them."""

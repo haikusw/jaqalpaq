@@ -23,7 +23,9 @@ class RegisterTester(unittest.TestCase):
     @unittest.expectedFailure
     def test_create_fundamental_unknown_size(self):
         """Test creating a fundamental register with a size determined by a let constant."""
-        const, const_name, exp_size = common.make_random_size_constant(return_params=True)
+        const, const_name, exp_size = common.make_random_size_constant(
+            return_params=True
+        )
         # Note: The documentation does not list Constant as an acceptable type for size.
         reg, exp_name, _ = common.make_random_register(size=const, return_params=True)
         self.assertEqual(exp_size, reg.size)
@@ -54,7 +56,9 @@ class RegisterTester(unittest.TestCase):
     @unittest.expectedFailure
     def test_fundamental_register_unknown_size_resolve_valid_qubit(self):
         """Test resolving a valid qubit from a register whose size is defined with a let constant."""
-        const, const_name, exp_size = common.make_random_size_constant(return_params=True)
+        const, const_name, exp_size = common.make_random_size_constant(
+            return_params=True
+        )
         # Note: The documentation does not list Constant as an acceptable type for size.
         reg, exp_name, _ = common.make_random_register(size=const, return_params=True)
         qubit, index = common.choose_random_qubit_getitem(reg, return_params=True)
@@ -64,7 +68,9 @@ class RegisterTester(unittest.TestCase):
 
     def test_fundamental_register_unknown_size_resolve_invalid_qubit(self):
         """Test resolving an invalid qubit from a register whole size is defined with a let constant."""
-        const, const_name, exp_size = common.make_random_size_constant(return_params=True)
+        const, const_name, exp_size = common.make_random_size_constant(
+            return_params=True
+        )
         # Note: The documentation does not list Constant as an acceptable type for size.
         reg, exp_name, _ = common.make_random_register(size=const, return_params=True)
         index = random_integer(lower=exp_size, upper=exp_size + 100)
@@ -115,10 +121,14 @@ class RegisterTester(unittest.TestCase):
         reg = common.make_random_register()
         map_slice = common.make_random_slice(reg.size)
         map_const_slice = slice(
-            *[common.make_random_size_constant(value=v)
-              for v in [map_slice.start, map_slice.stop, map_slice.step]]
+            *[
+                common.make_random_size_constant(value=v)
+                for v in [map_slice.start, map_slice.stop, map_slice.step]
+            ]
         )
-        map_reg, map_name, _ = common.make_map_slice(reg, map_slice=map_const_slice, return_params=True)
+        map_reg, map_name, _ = common.make_map_slice(
+            reg, map_slice=map_const_slice, return_params=True
+        )
         self.assertEqual(map_name, map_reg.name)
         self.assertGreaterEqual(reg.size, map_reg.size)
         self.assertGreaterEqual(map_reg.size, 1)
@@ -159,10 +169,14 @@ class RegisterTester(unittest.TestCase):
         reg = common.make_random_register()
         map_slice = common.make_random_slice(reg.size)
         map_const_slice = slice(
-            *[common.make_random_size_constant(value=v)
-              for v in [map_slice.start, map_slice.stop, map_slice.step]]
+            *[
+                common.make_random_size_constant(value=v)
+                for v in [map_slice.start, map_slice.stop, map_slice.step]
+            ]
         )
-        map_reg, map_name, _ = common.make_map_slice(reg, map_slice=map_const_slice, return_params=True)
+        map_reg, map_name, _ = common.make_map_slice(
+            reg, map_slice=map_const_slice, return_params=True
+        )
         qubit, index = common.choose_random_qubit_getitem(map_reg, return_params=True)
         # Resolve directly through the map
         res_reg, res_index = map_reg.resolve_qubit(index)
@@ -182,10 +196,19 @@ class RegisterTester(unittest.TestCase):
             Register(random_identifier())
         with self.assertRaises(Exception):
             # size and slice
-            Register(random_identifier(), size=random_whole(), alias_slice=common.make_random_slice(reg.size))
+            Register(
+                random_identifier(),
+                size=random_whole(),
+                alias_slice=common.make_random_slice(reg.size),
+            )
         with self.assertRaises(Exception):
             # size and slice plus an alias register
-            Register(random_identifier(), size=random_whole(), alias_from=reg, alias_slice=common.make_random_slice(reg.size))
+            Register(
+                random_identifier(),
+                size=random_whole(),
+                alias_from=reg,
+                alias_slice=common.make_random_slice(reg.size),
+            )
         with self.assertRaises(Exception):
             # alias register and size
             Register(random_identifier(), size=random_whole(), alias_from=reg)

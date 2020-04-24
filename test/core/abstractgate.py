@@ -47,7 +47,9 @@ class AbstractGateTesterBase:
         arg_types = [param.kind for param in gatedef.parameters]
         arguments = common.make_random_argument_list(arg_types)
         gate = gatedef(*arguments)
-        arg_dict = {param.name: arg for param, arg in zip(gatedef.parameters, arguments)}
+        arg_dict = {
+            param.name: arg for param, arg in zip(gatedef.parameters, arguments)
+        }
         self.assertEqual(arg_dict, gate.parameters)
         self.assertEqual(gatedef.name, gate.name)
         gate = gatedef.call(*arguments)
@@ -109,11 +111,21 @@ class AbstractGateTesterBase:
         gatedef = self.create_random_instance(parameter_count=random_whole(lower=2))
         arg_types = [param.kind for param in gatedef.parameters]
         arguments = common.make_random_argument_list(arg_types)
-        arg_dict = {param.name: arg for param, arg in zip(gatedef.parameters, arguments)}
-        args = [arg for _, arg in takewhile(lambda x: x[0] < len(arguments) // 2,
-                                            enumerate(arguments))]
-        kwargs = {key: value for _, (key, value) in dropwhile(lambda x: x[0] < len(arguments)//2,
-                                                              enumerate(arg_dict.items()))}
+        arg_dict = {
+            param.name: arg for param, arg in zip(gatedef.parameters, arguments)
+        }
+        args = [
+            arg
+            for _, arg in takewhile(
+                lambda x: x[0] < len(arguments) // 2, enumerate(arguments)
+            )
+        ]
+        kwargs = {
+            key: value
+            for _, (key, value) in dropwhile(
+                lambda x: x[0] < len(arguments) // 2, enumerate(arg_dict.items())
+            )
+        }
         assert len(args) + len(kwargs) == len(arguments)
         with self.assertRaises(Exception):
             gatedef(*args, **kwargs)

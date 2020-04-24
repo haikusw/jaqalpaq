@@ -1,8 +1,6 @@
 import unittest
 
-from jaqal.core.parameter import (
-    FLOAT_TYPE, INT_TYPE
-)
+from jaqal.core.parameter import FLOAT_TYPE, INT_TYPE
 from jaqal.core.constant import Constant
 from . import randomize
 from . import common
@@ -13,10 +11,12 @@ class ConstantTester(unittest.TestCase):
         """Test that a Constant can only be created from valid types."""
         valid_values = [
             (randomize.random_float(), FLOAT_TYPE),
-            (randomize.random_integer(), INT_TYPE)
+            (randomize.random_integer(), INT_TYPE),
         ]
         for value, kind in valid_values:
-            const, name, _ = common.make_random_constant(value=value, return_params=True)
+            const, name, _ = common.make_random_constant(
+                value=value, return_params=True
+            )
             self.assertEqual(kind, const.kind)
             self.assertEqual(name, const.name)
 
@@ -25,11 +25,7 @@ class ConstantTester(unittest.TestCase):
 
         reg = common.make_random_register()
         qubit = common.choose_random_qubit_getitem(reg)
-        invalid_values = [
-            None,
-            reg,
-            qubit
-        ]
+        invalid_values = [None, reg, qubit]
         for value in invalid_values:
             with self.assertRaises(Exception):
                 Constant(randomize.random_identifier(), value)
@@ -54,5 +50,5 @@ class ConstantTester(unittest.TestCase):
         self.assertTrue(common.make_random_constant().classical)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

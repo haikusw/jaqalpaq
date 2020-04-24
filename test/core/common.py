@@ -2,13 +2,22 @@ import random
 import math
 
 from jaqal.core import (
-    Register, Constant, NamedQubit, PARAMETER_TYPES, Parameter, GateDefinition,
-    FLOAT_TYPE, INT_TYPE, QUBIT_TYPE, REGISTER_TYPE, Macro, BlockStatement,
-    GateStatement, LoopStatement
+    Register,
+    Constant,
+    NamedQubit,
+    PARAMETER_TYPES,
+    Parameter,
+    GateDefinition,
+    FLOAT_TYPE,
+    INT_TYPE,
+    QUBIT_TYPE,
+    REGISTER_TYPE,
+    Macro,
+    BlockStatement,
+    GateStatement,
+    LoopStatement,
 )
-from .randomize import (
-    random_identifier, random_whole, random_integer, random_float
-)
+from .randomize import random_identifier, random_whole, random_integer, random_float
 
 VALID_GATE_ARG_TYPES = [FLOAT_TYPE, INT_TYPE, QUBIT_TYPE]
 
@@ -172,7 +181,9 @@ def make_random_slice(upper):
     return slice(start, start + length, step)
 
 
-def make_random_gate_definition(name=None, parameter_count=None, parameter_types=None, return_params=False):
+def make_random_gate_definition(
+    name=None, parameter_count=None, parameter_types=None, return_params=False
+):
     """Create a random gate definition."""
     if name is None:
         name = random_identifier()
@@ -180,7 +191,9 @@ def make_random_gate_definition(name=None, parameter_count=None, parameter_types
         if parameter_count is None:
             parameter_count = random_integer(lower=0, upper=16)
         allowed_types = VALID_GATE_ARG_TYPES + [None]
-        parameters = make_random_parameter_list(count=parameter_count, allowed_types=allowed_types)
+        parameters = make_random_parameter_list(
+            count=parameter_count, allowed_types=allowed_types
+        )
     else:
         parameters = make_random_parameter_list(parameter_types=parameter_types)
     gatedef = GateDefinition(name, parameters=parameters)
@@ -225,8 +238,14 @@ def make_random_value(value_type):
         raise ValueError(f"Unknown value type {value_type}")
 
 
-def make_random_macro_definition(name=None, parameter_count=None, body_count=None, body=None,
-                                 return_params=False, return_body=False):
+def make_random_macro_definition(
+    name=None,
+    parameter_count=None,
+    body_count=None,
+    body=None,
+    return_params=False,
+    return_body=False,
+):
     """Create a random macro definition."""
     if name is None:
         name = random_identifier()
@@ -242,7 +261,9 @@ def make_random_macro_definition(name=None, parameter_count=None, body_count=Non
                 body_count = random_whole(upper=100)
         body = make_random_block(count=body_count)
     allowed_types = [None]  # In Jaqal we don't declare types for macros
-    parameters = make_random_parameter_list(count=parameter_count, allowed_types=allowed_types)
+    parameters = make_random_parameter_list(
+        count=parameter_count, allowed_types=allowed_types
+    )
     gatedef = Macro(name, body=body, parameters=parameters)
     if not return_params:
         if not return_body:
@@ -268,10 +289,14 @@ def make_random_block(*, count=None, parallel=False, return_params=False):
         return block, statements
 
 
-def make_random_gate_statement(*, count=None, parameter_types=None, return_params=False):
+def make_random_gate_statement(
+    *, count=None, parameter_types=None, return_params=False
+):
     """Make a gate statement with random arguments based on
     a GateDefinition."""
-    definition, _, parameters = make_random_gate_definition(parameter_count=count, parameter_types=parameter_types, return_params=True)
+    definition, _, parameters = make_random_gate_definition(
+        parameter_count=count, parameter_types=parameter_types, return_params=True
+    )
     arguments = {param.name: make_random_value(param.kind) for param in parameters}
     gate = GateStatement(definition, parameters=arguments)
     if not return_params:
@@ -280,7 +305,9 @@ def make_random_gate_statement(*, count=None, parameter_types=None, return_param
         return gate, definition, arguments
 
 
-def make_random_loop_statement(*, iterations=None, body_count=None, return_params=False):
+def make_random_loop_statement(
+    *, iterations=None, body_count=None, return_params=False
+):
     """Make a loop statement with a random number of iterations and body
     statements."""
     if iterations is None:

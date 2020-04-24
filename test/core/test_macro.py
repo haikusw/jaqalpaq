@@ -7,7 +7,6 @@ from jaqal.core import Macro
 
 
 class JaqalpupMacroTester(AbstractGateTesterBase, unittest.TestCase):
-
     def create_random_instance(self, **kwargs):
         return common.make_random_macro_definition(**kwargs)
 

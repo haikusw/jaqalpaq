@@ -20,7 +20,6 @@ def get_used_qubit_indices(obj, context=None):
 
 
 class UsedQubitIndicesVisitor(Visitor):
-
     def visit_default(self, obj, *args, **kwargs):
         """Anything that isn't explicitly listed here can't have any qubits."""
         return {}

@@ -1,7 +1,11 @@
 import unittest
 
 from jaqal.core.parameter import (
-    QUBIT_TYPE, FLOAT_TYPE, REGISTER_TYPE, INT_TYPE, PARAMETER_TYPES
+    QUBIT_TYPE,
+    FLOAT_TYPE,
+    REGISTER_TYPE,
+    INT_TYPE,
+    PARAMETER_TYPES,
 )
 from jaqal.core.register import Register, NamedQubit
 from . import common
@@ -9,7 +13,6 @@ from .randomize import random_float, random_integer
 
 
 class ParameterTester(unittest.TestCase):
-
     def setUp(self):
         reg = common.make_random_register()
         self.example_values = [
@@ -17,7 +20,7 @@ class ParameterTester(unittest.TestCase):
             (common.choose_random_qubit_getitem(reg), [QUBIT_TYPE, None]),
             (random_float(), [FLOAT_TYPE, None]),
             (float(random_integer()), [FLOAT_TYPE, INT_TYPE, None]),
-            (random_integer(), [FLOAT_TYPE, INT_TYPE, None])
+            (random_integer(), [FLOAT_TYPE, INT_TYPE, None]),
         ]
         self.example_params = {
             kind: common.make_random_parameter(allowed_types=[kind])
@@ -27,7 +30,9 @@ class ParameterTester(unittest.TestCase):
     def test_create(self):
         """Test creating a parameter with a name and kind."""
         for kind in PARAMETER_TYPES:
-            param, name, _ = common.make_random_parameter(allowed_types=[kind], return_params=True)
+            param, name, _ = common.make_random_parameter(
+                allowed_types=[kind], return_params=True
+            )
             self.assertEqual(name, param.name)
             self.assertEqual(kind, param.kind)
 
@@ -46,8 +51,11 @@ class ParameterTester(unittest.TestCase):
         """Test resolving a value within some context."""
         for param_kind, param in self.example_params.items():
             # Note: The Parameter class could, but does not, do type checking here.
-            values = [value for value, value_types in self.example_values
-                      if param_kind in value_types]
+            values = [
+                value
+                for value, value_types in self.example_values
+                if param_kind in value_types
+            ]
             for value in values:
                 context = {param.name: value}
                 resolved_value = param.resolve_value(context)

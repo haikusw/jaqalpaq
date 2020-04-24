@@ -5,7 +5,6 @@ from . import common
 
 
 class NamedQubitTester(unittest.TestCase):
-
     def test_create_directly_with_register(self):
         """Create a named qubit using its constructor from a register."""
         reg = common.make_random_register()
@@ -28,7 +27,9 @@ class NamedQubitTester(unittest.TestCase):
         """Create a named qubit with an alias as its register."""
         reg = common.make_random_register()
         map_reg = common.make_map_full(reg)
-        qubit, name, index = common.choose_random_qubit_init(map_reg, return_params=True)
+        qubit, name, index = common.choose_random_qubit_init(
+            map_reg, return_params=True
+        )
         self.assertEqual(name, qubit.name)
         self.assertEqual(map_reg, qubit.alias_from)
         self.assertEqual(index, qubit.alias_index)
@@ -40,7 +41,9 @@ class NamedQubitTester(unittest.TestCase):
         """Resolve a named qubit created from a map."""
         reg = common.make_random_register()
         map_reg = common.make_map_full(reg)
-        qubit, name, index = common.choose_random_qubit_init(map_reg, return_params=True)
+        qubit, name, index = common.choose_random_qubit_init(
+            map_reg, return_params=True
+        )
         res_reg, res_index = qubit.resolve_qubit()
         self.assertEqual(reg, res_reg)
         self.assertEqual(index, res_index)
@@ -49,7 +52,9 @@ class NamedQubitTester(unittest.TestCase):
         """Test creating a named qubit from a map that is a register slice."""
         reg = common.make_random_register()
         map_reg, map_name, map_slice = common.make_map_slice(reg, return_params=True)
-        qubit, name, index = common.choose_random_qubit_init(map_reg, return_params=True)
+        qubit, name, index = common.choose_random_qubit_init(
+            map_reg, return_params=True
+        )
         self.assertEqual(name, qubit.name)
         self.assertEqual(map_reg, qubit.alias_from)
         self.assertEqual(index, qubit.alias_index)
@@ -60,7 +65,9 @@ class NamedQubitTester(unittest.TestCase):
         """Test resolving a named qubit created from a register slice."""
         reg = common.make_random_register()
         map_reg, map_name, map_slice = common.make_map_slice(reg, return_params=True)
-        qubit, name, index = common.choose_random_qubit_init(map_reg, return_params=True)
+        qubit, name, index = common.choose_random_qubit_init(
+            map_reg, return_params=True
+        )
         orig_index = map_slice.start + map_slice.step * index
         res_reg, res_index = qubit.resolve_qubit()
         self.assertEqual(reg, res_reg)
@@ -72,14 +79,22 @@ class NamedQubitTester(unittest.TestCase):
         reg = common.make_random_register()
         map_slice = common.make_random_slice(reg.size)
         map_const_slice = slice(
-            *[common.make_random_size_constant(value=v)
-              for v in [map_slice.start, map_slice.stop, map_slice.step]]
+            *[
+                common.make_random_size_constant(value=v)
+                for v in [map_slice.start, map_slice.stop, map_slice.step]
+            ]
         )
-        map_reg, map_name, _ = common.make_map_slice(reg, map_slice=map_const_slice, return_params=True)
+        map_reg, map_name, _ = common.make_map_slice(
+            reg, map_slice=map_const_slice, return_params=True
+        )
         # We make our own integer because there is temporarily a bug that hangs when we
         # automatically do it because reg.size has an infinite loop.
-        index = random_integer(lower=0, upper=len(range(map_slice.start, map_slice.stop, map_slice.step)))
-        qubit, name, _ = common.choose_random_qubit_init(map_reg, index=index, return_params=True)
+        index = random_integer(
+            lower=0, upper=len(range(map_slice.start, map_slice.stop, map_slice.step))
+        )
+        qubit, name, _ = common.choose_random_qubit_init(
+            map_reg, index=index, return_params=True
+        )
         self.assertEqual(name, qubit.name)
         self.assertEqual(map_reg, qubit.alias_from)
         self.assertEqual(index, qubit.alias_index)
@@ -92,14 +107,22 @@ class NamedQubitTester(unittest.TestCase):
         reg = common.make_random_register()
         map_slice = common.make_random_slice(reg.size)
         map_const_slice = slice(
-            *[common.make_random_size_constant(value=v)
-              for v in [map_slice.start, map_slice.stop, map_slice.step]]
+            *[
+                common.make_random_size_constant(value=v)
+                for v in [map_slice.start, map_slice.stop, map_slice.step]
+            ]
         )
-        map_reg, map_name, _ = common.make_map_slice(reg, map_slice=map_const_slice, return_params=True)
+        map_reg, map_name, _ = common.make_map_slice(
+            reg, map_slice=map_const_slice, return_params=True
+        )
         # We make our own integer because there is temporarily a bug that hangs when we
         # automatically do it because reg.size has an infinite loop.
-        index = random_integer(lower=0, upper=len(range(map_slice.start, map_slice.stop, map_slice.step)))
-        qubit, name, _ = common.choose_random_qubit_init(map_reg, index=index, return_params=True)
+        index = random_integer(
+            lower=0, upper=len(range(map_slice.start, map_slice.stop, map_slice.step))
+        )
+        qubit, name, _ = common.choose_random_qubit_init(
+            map_reg, index=index, return_params=True
+        )
         orig_index = map_slice.start + map_slice.step * index
         res_reg, res_index = qubit.resolve_qubit()
         self.assertEqual(reg, res_reg)

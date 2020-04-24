@@ -2,7 +2,7 @@ import re
 
 from jaqal import RESERVED_WORDS
 
-valid_identifier_regex = re.compile('^[a-zA-Z_][a-zA-Z0-9_]*$')
+valid_identifier_regex = re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 
 
 def is_identifier_valid(name):

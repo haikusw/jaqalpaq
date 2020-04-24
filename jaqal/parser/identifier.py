@@ -17,10 +17,10 @@ class Identifier(tuple):
     @classmethod
     def parse(cls, string):
         """Return an identifier formed by parsing the input string."""
-        return Identifier(string.split('.'))
+        return Identifier(string.split("."))
 
     def __repr__(self):
         return f"Identifier({'.'.join(str(v) for v in self)})"
 
     def __str__(self):
-        return '.'.join(str(v) for v in self)
+        return ".".join(str(v) for v in self)

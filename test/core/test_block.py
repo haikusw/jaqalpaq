@@ -6,7 +6,6 @@ from .randomize import random_whole, random_integer
 
 
 class JaqalBlockTester(unittest.TestCase):
-
     def test_create_sequential_block(self):
         """Test creating a sequential block."""
         block, statements = common.make_random_block(return_params=True)

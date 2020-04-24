@@ -4,9 +4,16 @@ from enum import Enum
 from jaqal.parser import Interface, MacroContextRewriteVisitor, TreeManipulators
 
 from jaqal.core import (
-    ScheduledCircuit, Register, NamedQubit, GateDefinition, Macro,
-    Parameter, LoopStatement, BlockStatement, Constant,
-    AnnotatedValue
+    ScheduledCircuit,
+    Register,
+    NamedQubit,
+    GateDefinition,
+    Macro,
+    Parameter,
+    LoopStatement,
+    BlockStatement,
+    Constant,
+    AnnotatedValue,
 )
 from jaqal.qscout.native_gates import NATIVE_GATES
 from jaqal.core.circuit import normalize_native_gates
@@ -15,11 +22,12 @@ from jaqal import QSCOUTError
 
 class Option(Enum):
     """Control how and whether the parser expands certain constructs."""
+
     none = 0
     expand_macro = 0x1
     expand_let = 0x2
     expand_let_map = 0x6
-    full = 0xf
+    full = 0xF
 
     def __contains__(self, item):
         return (self.value & item.value) == item.value
@@ -37,12 +45,14 @@ class Option(Enum):
 
 class OptionSet(set):
     """Represent multiple parser options. Acts like a bitmask"""
+
     def __contains__(self, other):
         return any(other in item for item in self)
 
 
-def parse_jaqal_file(filename, override_dict=None, native_gates=None,
-                     processing_option=None):
+def parse_jaqal_file(
+    filename, override_dict=None, native_gates=None, processing_option=None
+):
     """Parse a file written in Jaqal into core types.
 
     :param str filename: The name of the Jaqal file.
@@ -55,13 +65,17 @@ def parse_jaqal_file(filename, override_dict=None, native_gates=None,
 
     """
     with open(filename) as fd:
-        return parse_jaqal_string(fd.read(), override_dict=override_dict,
-                                  native_gates=native_gates,
-                                  processing_option=processing_option)
+        return parse_jaqal_string(
+            fd.read(),
+            override_dict=override_dict,
+            native_gates=native_gates,
+            processing_option=processing_option,
+        )
 
 
-def parse_jaqal_string(jaqal, override_dict=None, native_gates=None,
-                       processing_option=Option.none):
+def parse_jaqal_string(
+    jaqal, override_dict=None, native_gates=None, processing_option=Option.none
+):
     """Parse a string written in Jaqal into core types.
 
     :param str jaqal: The Jaqal code.
@@ -123,7 +137,9 @@ class CoreTypesVisitor(MacroContextRewriteVisitor, TreeManipulators):
     #
 
     def visit_program(self, header_statements, body_statements):
-        circuit = ScheduledCircuit(native_gates=NATIVE_GATES if self.use_only_native_gates else None)
+        circuit = ScheduledCircuit(
+            native_gates=NATIVE_GATES if self.use_only_native_gates else None
+        )
         for stmt in body_statements:
             circuit.body.append(stmt)
         circuit.registers.update(self.registers)
@@ -134,7 +150,9 @@ class CoreTypesVisitor(MacroContextRewriteVisitor, TreeManipulators):
         return circuit
 
     def visit_register_statement(self, array_declaration):
-        identifier_token, size_tree = self.deconstruct_array_declaration(array_declaration)
+        identifier_token, size_tree = self.deconstruct_array_declaration(
+            array_declaration
+        )
         name = str(self.extract_identifier(identifier_token))
         if name in self.registers:
             raise QSCOUTError(f"Redefinition of register {name}")
@@ -154,8 +172,9 @@ class CoreTypesVisitor(MacroContextRewriteVisitor, TreeManipulators):
         body statements."""
 
         name = str(self.extract_identifier(name))
-        parameters = [Parameter(str(self.extract_identifier(arg)), None)
-                      for arg in arguments]
+        parameters = [
+            Parameter(str(self.extract_identifier(arg)), None) for arg in arguments
+        ]
         block = self.deconstruct_macro_gate_block(block)
 
         self.macro_definitions[name] = Macro(name, parameters, block)
@@ -187,7 +206,9 @@ class CoreTypesVisitor(MacroContextRewriteVisitor, TreeManipulators):
             src_name, src_slice = self.deconstruct_array_slice(source)
             src_name = str(self.extract_identifier(src_name))
             if src_name not in self.registers:
-                raise QSCOUTError(f"map {tgt_name} based on non-existent source {src_name}")
+                raise QSCOUTError(
+                    f"map {tgt_name} based on non-existent source {src_name}"
+                )
             src_reg = self.registers[src_name]
             src_start, src_stop, src_step = src_slice
             src_start = self.resolve_slice_element(src_start, lambda: 0)
@@ -197,25 +218,32 @@ class CoreTypesVisitor(MacroContextRewriteVisitor, TreeManipulators):
                     return src_reg.size
                 except QSCOUTError as exc:
                     raise QSCOUTError(f"Cannot determine size of {src_name}: {exc}")
+
             src_stop = self.resolve_slice_element(src_stop, get_default_stop)
             src_step = self.resolve_slice_element(src_step, lambda: 1)
             src_slice = slice(src_start, src_stop, src_step)
-            self.registers[tgt_name] = Register(tgt_name, alias_from=src_reg,
-                                                alias_slice=src_slice)
+            self.registers[tgt_name] = Register(
+                tgt_name, alias_from=src_reg, alias_slice=src_slice
+            )
         elif self.is_array_element(source):
             src_name, src_index = self.deconstruct_array_element(source)
             src_name = str(self.extract_identifier(src_name))
             if src_name not in self.registers:
-                raise QSCOUTError(f"map {tgt_name} based on non-existent source {src_name}")
+                raise QSCOUTError(
+                    f"map {tgt_name} based on non-existent source {src_name}"
+                )
             src_reg = self.registers[src_name]
             src_index = self.extract_signed_integer(src_index)
-            self.registers[tgt_name] = NamedQubit(tgt_name, alias_from=src_reg,
-                                                  alias_index=src_index)
+            self.registers[tgt_name] = NamedQubit(
+                tgt_name, alias_from=src_reg, alias_index=src_index
+            )
         elif self.is_identifier(source):
             # Basically renaming a whole register.
             src_name = str(self.extract_identifier(source))
             if src_name not in self.registers:
-                raise QSCOUTError(f"map {tgt_name} based on non-existent source {src_name}")
+                raise QSCOUTError(
+                    f"map {tgt_name} based on non-existent source {src_name}"
+                )
             src_reg = self.registers[src_name]
             self.registers[tgt_name] = Register(tgt_name, alias_from=src_reg)
 
@@ -286,8 +314,10 @@ class CoreTypesVisitor(MacroContextRewriteVisitor, TreeManipulators):
         if gate_name in self.gate_definitions:
             return self.gate_definitions[gate_name]
         elif not self.use_only_native_gates:
-            params = [self.make_parameter_from_argument(index, arg)
-                      for index, arg in enumerate(gate_args)]
+            params = [
+                self.make_parameter_from_argument(index, arg)
+                for index, arg in enumerate(gate_args)
+            ]
             gate_def = GateDefinition(gate_name, params)
             self.gate_definitions[gate_name] = gate_def
             return gate_def
@@ -300,9 +330,9 @@ class CoreTypesVisitor(MacroContextRewriteVisitor, TreeManipulators):
         to the given argument."""
         name = f"{index}"
         if isinstance(arg, Number):
-            kind = 'float'
+            kind = "float"
         elif isinstance(arg, NamedQubit):
-            kind = 'qubit'
+            kind = "qubit"
         elif isinstance(arg, AnnotatedValue):
             # This is either an unresolved macro parameter or unresolved let constant.
             # Either way we treat it the same.

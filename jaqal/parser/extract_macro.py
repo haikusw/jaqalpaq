@@ -13,7 +13,6 @@ def extract_macro(tree):
 
 
 class ExtractMacroVisitor(TreeRewriteVisitor):
-
     def __init__(self):
         super().__init__()
         self.macro_mapping = {}
@@ -23,8 +22,10 @@ class ExtractMacroVisitor(TreeRewriteVisitor):
         arg_ids = [self.extract_identifier(arg) for arg in arguments]
         if name_id in self.macro_mapping:
             raise ValueError(f"Redefinition of {name_id} macro")
-        self.macro_mapping[name_id] = MacroRecord(arg_ids, self.deconstruct_macro_gate_block(block))
+        self.macro_mapping[name_id] = MacroRecord(
+            arg_ids, self.deconstruct_macro_gate_block(block)
+        )
         return self.make_macro_definition(name, arguments, block)
 
 
-MacroRecord = namedtuple('MacroRecord', ['arguments', 'block'])
+MacroRecord = namedtuple("MacroRecord", ["arguments", "block"])

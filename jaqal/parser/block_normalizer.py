@@ -73,7 +73,9 @@ def _sequence_gates(tree):
     gates = GateSequencingVisitor().visit(tree)
 
     if not isinstance(gates, list):
-        raise TypeError(f'Expected list returned from GateSequencingVisitor, found {gates}')
+        raise TypeError(
+            f"Expected list returned from GateSequencingVisitor, found {gates}"
+        )
 
     if not gates or isinstance(gates[0], list):
         # The visitor already formatted us into a list of lists.
@@ -92,8 +94,11 @@ class GateSequencingVisitor(TreeRewriteVisitor):
         return statements
 
     def visit_parallel_gate_block(self, statements):
-        if not all(isinstance(stmt, list) and self.is_gate_statement(stmt[0]) for stmt in statements):
-            raise TypeError('Non gate statement found in parallel block')
+        if not all(
+            isinstance(stmt, list) and self.is_gate_statement(stmt[0])
+            for stmt in statements
+        ):
+            raise TypeError("Non gate statement found in parallel block")
         return [lst[0] for lst in statements]
 
     def visit_gate_statement(self, gate_name, gate_args):

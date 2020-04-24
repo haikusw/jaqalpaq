@@ -7,7 +7,6 @@ from jaqal.parser.extract_macro import extract_macro
 
 
 class ResolveMacroTester(ParserTesterMixin, TestCase):
-
     def test_noop(self):
         """Test running macro resolution without resolving any macros."""
         setup_text = "macro foo a b { g a b }"

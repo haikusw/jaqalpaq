@@ -23,7 +23,6 @@ def validate_registers(tree, registers):
 
 
 class ValidateRegistersVisitor(TreeRewriteVisitor):
-
     def __init__(self, registers):
         super().__init__()
         self.registers = registers
@@ -31,19 +30,19 @@ class ValidateRegistersVisitor(TreeRewriteVisitor):
     def visit_let_or_map_identifier(self, identifier):
         name = str(self.extract_qualified_identifier(identifier))
         if name not in self.registers:
-            raise ValueError(f'Unresolved register {name}')
+            raise ValueError(f"Unresolved register {name}")
         return self.make_let_or_map_identifier(identifier)
 
     def visit_let_identifier(self, identifier):
         name = str(self.extract_qualified_identifier(identifier))
         if name not in self.registers:
-            raise ValueError(f'Unresolved register {name}')
+            raise ValueError(f"Unresolved register {name}")
         return self.make_let_identifier(identifier)
 
     def visit_array_element_qual(self, identifier, index):
         name = str(self.extract_qualified_identifier(identifier))
         if name not in self.registers:
-            raise ValueError(f'Unresolved register {name}')
+            raise ValueError(f"Unresolved register {name}")
         index_value = self.extract_signed_integer(index)
         if not (0 <= index_value < self.registers[name]):
             raise ValueError(f"Invalid index {index_value} for register {name}")

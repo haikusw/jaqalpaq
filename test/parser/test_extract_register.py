@@ -7,11 +7,10 @@ from jaqal.parser.identifier import Identifier
 
 
 class ExtractRegisterTester(ParserTesterMixin, TestCase):
-
     def test_single_register(self):
         text = "register q[3]"
         exp_result = {
-            Identifier.parse('q'): TreeManipulators.make_let_or_integer(
+            Identifier.parse("q"): TreeManipulators.make_let_or_integer(
                 TreeManipulators.make_integer(3)
             )
         }
@@ -19,8 +18,14 @@ class ExtractRegisterTester(ParserTesterMixin, TestCase):
 
     def test_multiple_registers(self):
         text = "register q[3]; register r[2]"
-        exp_result = {Identifier.parse('q'): TreeManipulators.make_let_or_integer(TreeManipulators.make_integer(3)),
-                      Identifier.parse('r'): TreeManipulators.make_let_or_integer(TreeManipulators.make_integer(2))}
+        exp_result = {
+            Identifier.parse("q"): TreeManipulators.make_let_or_integer(
+                TreeManipulators.make_integer(3)
+            ),
+            Identifier.parse("r"): TreeManipulators.make_let_or_integer(
+                TreeManipulators.make_integer(2)
+            ),
+        }
         self.run_test(text, exp_result)
 
     def test_duplicated_register(self):
@@ -33,9 +38,9 @@ class ExtractRegisterTester(ParserTesterMixin, TestCase):
     def test_let_constant_as_size(self):
         text = "let a 5; register q[a]"
         exp_result = {
-            Identifier.parse('q'): TreeManipulators.make_let_or_integer(
+            Identifier.parse("q"): TreeManipulators.make_let_or_integer(
                 TreeManipulators.make_let_identifier(
-                    TreeManipulators.make_qualified_identifier('a')
+                    TreeManipulators.make_qualified_identifier("a")
                 )
             )
         }

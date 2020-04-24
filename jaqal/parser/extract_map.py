@@ -14,7 +14,6 @@ def extract_map(tree):
 
 
 class ExtractMapVisitor(TreeRewriteVisitor):
-
     def __init__(self):
         # A mapping of register identifiers to their sizes, which may still be expressed in terms of let constants.
         # This visitor only uses the names, but the sizes could be used externally to validate aliases after let
@@ -54,14 +53,21 @@ class ExtractMapVisitor(TreeRewriteVisitor):
         else:
             raise ValueError(f"Unknown map source format: {source}")
 
-        if src_identifier not in self.registers and src_identifier not in self.map_mapping:
-            raise ValueError(f'Map statement references unknown source {src_identifier}')
+        if (
+            src_identifier not in self.registers
+            and src_identifier not in self.map_mapping
+        ):
+            raise ValueError(
+                f"Map statement references unknown source {src_identifier}"
+            )
         if dst_identifier in self.map_mapping:
-            raise ValueError(f'Map statement redeclares existing alias {dst_identifier}')
+            raise ValueError(
+                f"Map statement redeclares existing alias {dst_identifier}"
+            )
 
         self.map_mapping[dst_identifier] = source
 
 
 # Each map alias is stored with a reference to the source name, its size, and the alias range (or single index). In
 # general while we can resolve the source down to its register, we cannot resolve the range until let substitution.
-MapRecord = namedtuple('MapRecord', ('src_name', 'src_size', 'alias_range'))
+MapRecord = namedtuple("MapRecord", ("src_name", "src_size", "alias_range"))

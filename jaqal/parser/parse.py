@@ -16,12 +16,8 @@ def parse_with_lark(text, *args, **kwargs):
 
 def make_lark_parser(*args, **kwargs):
     """Create a lark parser with some default arguments."""
-    kwargs_with_defaults = {
-        'start': 'start',
-        'parser': 'lalr',
-        **kwargs
-    }
-    with open(get_grammar_path(), 'r') as fd:
+    kwargs_with_defaults = {"start": "start", "parser": "lalr", **kwargs}
+    with open(get_grammar_path(), "r") as fd:
         parser = PreprocessingLarkParser(fd, *args, **kwargs_with_defaults)
     return parser
 
@@ -35,7 +31,7 @@ class PreprocessingLarkParser(Lark):
         return tree
 
 
-def get_grammar_path(filename='jaqal_grammar.lark'):
+def get_grammar_path(filename="jaqal_grammar.lark"):
     """Return the path to the lark grammar file."""
     return pathlib.Path(__file__).parent / filename
 
@@ -53,7 +49,10 @@ class QualifiedIdentifierTransformer(Transformer):
 
     def QUALIFIED_IDENTIFIER(self, string):
         parts = Identifier.parse(string)
-        return Tree('qualified_identifier', children=[Token('IDENTIFIER', part) for part in parts])
+        return Tree(
+            "qualified_identifier",
+            children=[Token("IDENTIFIER", part) for part in parts],
+        )
 
 
 class VisitTransformer(Transformer):
@@ -71,7 +70,7 @@ class VisitTransformer(Transformer):
         return self._visitor.visit_program(header_statements, body_statements)
 
     def register_statement(self, args):
-        array_declaration, = args
+        (array_declaration,) = args
         return self._visitor.visit_register_statement(array_declaration)
 
     def map_statement(self, args):
@@ -85,8 +84,8 @@ class VisitTransformer(Transformer):
     def usepulses_statement(self, args):
         if len(args) != 2:
             raise NotImplementedError("Only from foo usepulses * implemented")
-        if args[0].data == 'from_clause':
-            if args[1].data != 'all_module':
+        if args[0].data == "from_clause":
+            if args[1].data != "all_module":
                 raise NotImplementedError("Only from foo usepulses * implemented")
             identifier = args[0].children[0]
             objects = all
@@ -118,7 +117,7 @@ class VisitTransformer(Transformer):
         ret = self._visitor.visit_macro_header(macro_name, macro_args)
         if ret is None:
             # This allows macro_header to be optional in the visitor
-            return Tree('macro_header', args)
+            return Tree("macro_header", args)
         else:
             return ret
 
@@ -127,7 +126,7 @@ class VisitTransformer(Transformer):
         ret = self._visitor.visit_macro_gate_block(block)
         if ret is None:
             # This allows macro_block to be optional in the visitor
-            return Tree('macro_gate_block', args)
+            return Tree("macro_gate_block", args)
         else:
             return ret
 
@@ -229,13 +228,13 @@ class ParseTreeVisitor(ABC):
         return str(identifier_string)
 
     def visit_signed_number(self, string):
-        if '.' in string or 'e' in string or 'E' in string:
+        if "." in string or "e" in string or "E" in string:
             return float(string)
         else:
             return int(string)
 
     def visit_number(self, string):
-        if '.' in string or 'e' in string or 'E' in string:
+        if "." in string or "e" in string or "E" in string:
             return float(string)
         else:
             return int(string)
@@ -365,41 +364,47 @@ class TreeManipulators:
 
     @staticmethod
     def make_program(header_statements, body_statements):
-        return Tree('start', [Tree('header_statements', header_statements), Tree('body_statements', body_statements)])
+        return Tree(
+            "start",
+            [
+                Tree("header_statements", header_statements),
+                Tree("body_statements", body_statements),
+            ],
+        )
 
     @staticmethod
     def make_register_statement(array_declaration):
-        return Tree('register_statement', [array_declaration])
+        return Tree("register_statement", [array_declaration])
 
     @staticmethod
     def make_map_statement(target, source):
-        return Tree('map_statement', [target, source])
+        return Tree("map_statement", [target, source])
 
     @staticmethod
     def make_let_statement(identifier, number):
-        return Tree('let_statement', [identifier, number])
+        return Tree("let_statement", [identifier, number])
 
     @staticmethod
     def make_usepulses_statement(identifier, objects):
         if objects is not all:
             raise NotImplementedError("Only from foo usepulses * implemented")
-        from_clause = Tree('from_clause', [identifier])
-        all_module = Tree('all_module', [])
-        return Tree('usepulses_statement', [from_clause, all_module])
+        from_clause = Tree("from_clause", [identifier])
+        all_module = Tree("all_module", [])
+        return Tree("usepulses_statement", [from_clause, all_module])
 
     @staticmethod
     def make_gate_statement(gate_name, gate_args):
-        return Tree('gate_statement', [gate_name] + gate_args)
+        return Tree("gate_statement", [gate_name] + gate_args)
 
     @classmethod
     def make_macro_definition(cls, name, arguments, block):
         macro_header = cls.make_macro_header(name, arguments)
         macro_gate_block = cls.make_macro_gate_block(block)
-        return Tree('macro_definition', [macro_header, macro_gate_block])
+        return Tree("macro_definition", [macro_header, macro_gate_block])
 
     @staticmethod
     def make_macro_header(name, arguments):
-        return Tree('macro_header', [name] + arguments)
+        return Tree("macro_header", [name] + arguments)
 
     @classmethod
     def make_macro_gate_block(cls, block):
@@ -407,57 +412,82 @@ class TreeManipulators:
             # This allows use for much more transparent uses of this method and allows other methods to ignore
             # the exact form of the gate block they receive, which in term makes them more flexible.
             return block
-        return Tree('macro_gate_block', [block])
+        return Tree("macro_gate_block", [block])
 
     @classmethod
     def make_loop_statement(cls, repetition_count, block):
-        return Tree('loop_statement', [cls.enforce_integer_if_numeric(repetition_count), block])
+        return Tree(
+            "loop_statement", [cls.enforce_integer_if_numeric(repetition_count), block]
+        )
 
     @staticmethod
     def make_sequential_gate_block(statements):
-        return Tree('sequential_gate_block', statements)
+        return Tree("sequential_gate_block", statements)
 
     @staticmethod
     def make_parallel_gate_block(statements):
-        return Tree('parallel_gate_block', statements)
+        return Tree("parallel_gate_block", statements)
 
     @classmethod
     def make_array_declaration(cls, identifier, size):
-        return Tree('array_declaration', [identifier, cls.enforce_integer_if_numeric(size)])
+        return Tree(
+            "array_declaration", [identifier, cls.enforce_integer_if_numeric(size)]
+        )
 
     @classmethod
     def make_array_element(cls, identifier, index):
-        return Tree('array_element', [identifier, cls.enforce_signed_integer_if_numeric(index)])
+        return Tree(
+            "array_element", [identifier, cls.enforce_signed_integer_if_numeric(index)]
+        )
 
     @classmethod
     def make_array_element_qual(cls, identifier, index):
-        return Tree('array_element_qual', [identifier, cls.enforce_signed_integer_if_numeric(index)])
+        return Tree(
+            "array_element_qual",
+            [identifier, cls.enforce_signed_integer_if_numeric(index)],
+        )
 
     @classmethod
     def make_array_slice(cls, identifier, index_slice):
-        index_start_children = [cls.enforce_signed_integer_if_numeric(index_slice.start)] if index_slice.start is not None else []
-        index_stop_children = [cls.enforce_signed_integer_if_numeric(index_slice.stop)] if index_slice.stop is not None else []
-        index_step_children = [cls.enforce_signed_integer_if_numeric(index_slice.step)] if index_slice.step is not None else []
+        index_start_children = (
+            [cls.enforce_signed_integer_if_numeric(index_slice.start)]
+            if index_slice.start is not None
+            else []
+        )
+        index_stop_children = (
+            [cls.enforce_signed_integer_if_numeric(index_slice.stop)]
+            if index_slice.stop is not None
+            else []
+        )
+        index_step_children = (
+            [cls.enforce_signed_integer_if_numeric(index_slice.step)]
+            if index_slice.step is not None
+            else []
+        )
 
-        index_start = Tree('array_slice_start', index_start_children)
-        index_stop = Tree('array_slice_stop', index_stop_children)
-        index_step = Tree('array_slice_step', index_step_children)
+        index_start = Tree("array_slice_start", index_start_children)
+        index_stop = Tree("array_slice_stop", index_stop_children)
+        index_step = Tree("array_slice_step", index_step_children)
 
-        indices = [index for index in [index_start, index_stop, index_step] if index is not None]
+        indices = [
+            index
+            for index in [index_start, index_stop, index_step]
+            if index is not None
+        ]
 
-        return Tree('array_slice', [identifier] + indices)
+        return Tree("array_slice", [identifier] + indices)
 
     @staticmethod
     def make_let_identifier(identifier):
-        return Tree('let_identifier', [identifier])
+        return Tree("let_identifier", [identifier])
 
     @staticmethod
     def make_let_or_map_identifier(identifier):
-        return Tree('let_or_map_identifier', [identifier])
+        return Tree("let_or_map_identifier", [identifier])
 
     @staticmethod
     def make_let_or_integer(identifier):
-        return Tree('let_or_integer', [identifier])
+        return Tree("let_or_integer", [identifier])
 
     @classmethod
     def make_qualified_identifier(cls, names):
@@ -467,44 +497,50 @@ class TreeManipulators:
                 children.append(name)
             else:
                 children.append(cls.make_identifier(name))
-        return Tree('qualified_identifier', children)
+        return Tree("qualified_identifier", children)
 
     @staticmethod
     def make_identifier(identifier_string):
-        return Token('IDENTIFIER', identifier_string)
+        return Token("IDENTIFIER", identifier_string)
 
     @staticmethod
     def make_signed_number(number):
         if not isinstance(number, float) and not isinstance(number, int):
             raise TypeError(f"Expected number, found {number}")
-        return Token('SIGNED_NUMBER', str(number))
+        return Token("SIGNED_NUMBER", str(number))
 
     @staticmethod
     def make_number(number):
-        if (not isinstance(number, float) and not isinstance(number, int)) or number < 0:
+        if (
+            not isinstance(number, float) and not isinstance(number, int)
+        ) or number < 0:
             raise TypeError(f"Expected non-negative number, found {number}")
-        return Token('NUMBER', str(number))
+        return Token("NUMBER", str(number))
 
     @staticmethod
     def make_integer(number):
         if not isinstance(number, int) or number < 0:
             raise TypeError(f"Expected non-negative integer, found {number}")
-        return Token('INTEGER', str(number))
+        return Token("INTEGER", str(number))
 
     @staticmethod
     def make_signed_integer(number):
         if not isinstance(number, int):
             raise TypeError(f"Expected integer, found {number}")
-        return Token('SIGNED_INTEGER', str(number))
+        return Token("SIGNED_INTEGER", str(number))
 
     @classmethod
     def enforce_integer_if_numeric(cls, number):
         if cls.is_integer(number):
             return number
-        elif cls.is_signed_integer(number) or cls.is_number(number) or cls.is_signed_number(number):
+        elif (
+            cls.is_signed_integer(number)
+            or cls.is_number(number)
+            or cls.is_signed_number(number)
+        ):
             # A signed number token can be converted to a float but not an int, so we have a workaround here.
             if float(number) < 0 or float(number) != int(float(number)):
-                raise ValueError(f'Expected integer, found {number}')
+                raise ValueError(f"Expected integer, found {number}")
             return cls.make_integer(int(float(number)))
         else:
             # Likely an identifier
@@ -530,100 +566,100 @@ class TreeManipulators:
 
     @classmethod
     def is_program(cls, tree):
-        return cls._is_tree(tree, 'start')
+        return cls._is_tree(tree, "start")
 
     @classmethod
     def is_register_statement(cls, tree):
-        return cls._is_tree(tree, 'register_statement')
+        return cls._is_tree(tree, "register_statement")
 
     @classmethod
     def is_map_statement(cls, tree):
-        return cls._is_tree(tree, 'map_statement')
+        return cls._is_tree(tree, "map_statement")
 
     @classmethod
     def is_let_statement(cls, tree):
-        return cls._is_tree(tree, 'let_statement')
+        return cls._is_tree(tree, "let_statement")
 
     @classmethod
     def is_body_statements(cls, tree):
         # Note: The visitor would not visit this directly but as part of visiting the whole program
-        return cls._is_tree(tree, 'body_statements')
+        return cls._is_tree(tree, "body_statements")
 
     @classmethod
     def is_header_statements(cls, tree):
-        return cls._is_tree(tree, 'header_statements')
+        return cls._is_tree(tree, "header_statements")
 
     @classmethod
     def is_gate_statement(cls, tree):
-        return cls._is_tree(tree, 'gate_statement')
+        return cls._is_tree(tree, "gate_statement")
 
     @classmethod
     def is_macro_definition(cls, tree):
-        return cls._is_tree(tree, 'macro_definition')
+        return cls._is_tree(tree, "macro_definition")
 
     @classmethod
     def is_macro_header(cls, tree):
-        return cls._is_tree(tree, 'macro_header')
+        return cls._is_tree(tree, "macro_header")
 
     @classmethod
     def is_macro_gate_block(cls, tree):
-        return cls._is_tree(tree, 'macro_gate_block')
+        return cls._is_tree(tree, "macro_gate_block")
 
     @classmethod
     def is_loop_statement(cls, tree):
-        return cls._is_tree(tree, 'loop_statement')
+        return cls._is_tree(tree, "loop_statement")
 
     @classmethod
     def is_sequential_gate_block(cls, tree):
-        return cls._is_tree(tree, 'sequential_gate_block')
+        return cls._is_tree(tree, "sequential_gate_block")
 
     @classmethod
     def is_parallel_gate_block(cls, tree):
-        return cls._is_tree(tree, 'parallel_gate_block')
+        return cls._is_tree(tree, "parallel_gate_block")
 
     @classmethod
     def is_array_declaration(cls, tree):
-        return cls._is_tree(tree, 'array_declaration')
+        return cls._is_tree(tree, "array_declaration")
 
     @classmethod
     def is_array_element(cls, tree):
-        return cls._is_tree(tree, 'array_element')
+        return cls._is_tree(tree, "array_element")
 
     @classmethod
     def is_array_slice(cls, tree):
-        return cls._is_tree(tree, 'array_slice')
+        return cls._is_tree(tree, "array_slice")
 
     @classmethod
     def is_let_identifier(cls, tree):
-        return cls._is_tree(tree, 'let_identifier')
+        return cls._is_tree(tree, "let_identifier")
 
     @classmethod
     def is_let_or_map_identifier(cls, tree):
-        return cls._is_tree(tree, 'let_or_map_identifier')
+        return cls._is_tree(tree, "let_or_map_identifier")
 
     @classmethod
     def is_identifier(cls, token):
-        return cls._is_token(token, 'IDENTIFIER')
+        return cls._is_token(token, "IDENTIFIER")
 
     @classmethod
     def is_qualified_identifier(cls, tree):
-        return cls._is_tree(tree, 'qualified_identifier')
+        return cls._is_tree(tree, "qualified_identifier")
 
     @classmethod
     def is_signed_number(cls, token):
-        return cls._is_token(token, 'SIGNED_NUMBER')
+        return cls._is_token(token, "SIGNED_NUMBER")
 
     @classmethod
     def is_number(cls, token):
-        return cls._is_token(token, 'NUMBER')
+        return cls._is_token(token, "NUMBER")
 
     @classmethod
     def is_integer(cls, token):
-        return cls._is_token(token, 'INTEGER')
+        return cls._is_token(token, "INTEGER")
 
     @classmethod
     def is_signed_integer(cls, token):
-        return cls._is_token(token, 'SIGNED_INTEGER')
+        return cls._is_token(token, "SIGNED_INTEGER")
 
     @classmethod
     def _is_tree(cls, tree, data):
@@ -809,5 +845,3 @@ class TreeRewriteVisitor(ParseTreeVisitor, TreeManipulators):
 
     def visit_qualified_identifier(self, names):
         return self.make_qualified_identifier(names)
-
-

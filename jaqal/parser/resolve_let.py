@@ -30,7 +30,9 @@ def combine_let_dicts(let_dict, *additional_dicts):
     one after another, stopping at first match. In other words, the first additional dict is of highest priority."""
 
     # Normalize the additional dictionaries.
-    additional_dicts = [{str(key): float(value) for key, value in ad.items()} for ad in additional_dicts]
+    additional_dicts = [
+        {str(key): float(value) for key, value in ad.items()} for ad in additional_dicts
+    ]
     let_str_dict = {str(key): value for key, value in let_dict.items()}
 
     # Make sure every value in each additional dict occurred in the let dict
@@ -51,7 +53,6 @@ def combine_let_dicts(let_dict, *additional_dicts):
 
 
 class ResolveLetVisitor(MacroContextRewriteVisitor):
-
     def __init__(self, let_dict):
         super().__init__()
         self.let_dict = let_dict
@@ -64,14 +65,18 @@ class ResolveLetVisitor(MacroContextRewriteVisitor):
 
     def visit_let_identifier(self, identifier):
         identifier_value = self.extract_qualified_identifier(identifier)
-        if self.has_let(identifier_value) and not self.is_macro_argument(identifier_value):
+        if self.has_let(identifier_value) and not self.is_macro_argument(
+            identifier_value
+        ):
             return self.make_signed_number(self.lookup_let(identifier_value))
         else:
             return self.make_let_identifier(identifier)
 
     def visit_let_or_map_identifier(self, identifier):
         identifier_value = self.extract_qualified_identifier(identifier)
-        if self.has_let(identifier_value) and not self.is_macro_argument(identifier_value):
+        if self.has_let(identifier_value) and not self.is_macro_argument(
+            identifier_value
+        ):
             return self.make_signed_number(self.lookup_let(identifier_value))
         else:
             return self.make_let_or_map_identifier(identifier)
@@ -80,28 +85,32 @@ class ResolveLetVisitor(MacroContextRewriteVisitor):
         """Validate the repetition count is a non-negative integer."""
         num = self.extract_signed_number(repetition_count)
         if not is_non_negative_integer(num):
-            raise ValueError(f'While resolving let values: illegal loop statement count: {num}')
+            raise ValueError(
+                f"While resolving let values: illegal loop statement count: {num}"
+            )
         return self.make_loop_statement(repetition_count, block)
 
     def visit_array_declaration(self, identifier, size):
         """Validate the size is a non-negative integer."""
         num = self.extract_signed_number(size)
         if not is_non_negative_integer(num):
-            raise ValueError(f'While resolving let values: illegal array declaration size: {num}')
+            raise ValueError(
+                f"While resolving let values: illegal array declaration size: {num}"
+            )
         return self.make_array_declaration(identifier, size)
 
     def visit_array_element(self, identifier, index):
         """Validate the index is an integer."""
         num = self.extract_signed_number(index)
         if not is_integer(num):
-            raise ValueError(f'While resolving let values: illegal array index {num}')
+            raise ValueError(f"While resolving let values: illegal array index {num}")
         return self.make_array_element(identifier, index)
 
     def visit_array_element_qual(self, identifier, index):
         """Validate the index is an integer."""
         num = self.extract_signed_number(index)
         if not is_integer(num):
-            raise ValueError(f'While resolving let values: illegal array index {num}')
+            raise ValueError(f"While resolving let values: illegal array index {num}")
         return self.make_array_element_qual(identifier, index)
 
     def visit_array_slice(self, identifier, index_slice):
@@ -110,7 +119,9 @@ class ResolveLetVisitor(MacroContextRewriteVisitor):
             if value is not None:
                 num = self.extract_signed_number(value)
                 if not is_integer(num):
-                    raise ValueError(f'While resolving let values: illegal array slice value {num}')
+                    raise ValueError(
+                        f"While resolving let values: illegal array slice value {num}"
+                    )
         return self.make_array_slice(identifier, index_slice)
 
     def is_macro_argument(self, identifier):

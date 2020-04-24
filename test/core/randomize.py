@@ -6,8 +6,8 @@ def make_char_range(start_char, end_char):
     return [chr(v) for v in range(ord(start_char), ord(end_char) + 1)]
 
 
-start_chars = make_char_range('a', 'z') + make_char_range('A', 'Z') + ['_']
-continue_chars = start_chars + make_char_range('0', '9')
+start_chars = make_char_range("a", "z") + make_char_range("A", "Z") + ["_"]
+continue_chars = start_chars + make_char_range("0", "9")
 
 
 def random_identifier(count=None):
@@ -25,7 +25,7 @@ def random_identifier(count=None):
     else:
         assert count > 1, f"Bad count: {count}"
         rest_chars = random.choices(continue_chars, k=count - 1)
-    return ''.join(first_chars + rest_chars)
+    return "".join(first_chars + rest_chars)
 
 
 def random_whole(*, lower=1, upper=100):
@@ -43,9 +43,9 @@ def random_integer(*, lower=-100, upper=100):
 def random_float():
     """Return a random floating point number. Will sometimes return inf or nan."""
     if random.uniform(0, 1) < 0.1:
-        return float('inf')
+        return float("inf")
     elif random.uniform(0, 1) < 0.1:
-        return float('nan')
+        return float("nan")
     while True:
         mantissa = random.uniform(0, 1)
         exponent = random.randint(sys.float_info.min_10_exp, sys.float_info.max_10_exp)
@@ -59,4 +59,3 @@ def random_float():
             # The odds of this not being true are astoundingly low, but in case some
             # tests rely on this, best to be sure.
             return value
-

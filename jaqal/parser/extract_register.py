@@ -15,7 +15,6 @@ def extract_register(tree):
 
 
 class ExtractRegisterVisitor(TreeRewriteVisitor):
-
     def __init__(self):
         super().__init__()
         self.register_mapping = {}
@@ -24,5 +23,5 @@ class ExtractRegisterVisitor(TreeRewriteVisitor):
         identifier, size = self.deconstruct_array_declaration(array_declaration)
         identifier = Identifier.parse(identifier)
         if identifier in self.register_mapping:
-            raise ValueError(f'Redefinition of register {identifier}')
+            raise ValueError(f"Redefinition of register {identifier}")
         self.register_mapping[identifier] = self.make_let_or_integer(size)

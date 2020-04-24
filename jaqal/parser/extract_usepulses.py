@@ -30,7 +30,6 @@ def extract_usepulses(tree):
 
 
 class ExtractUsepulsesVisitor(TreeRewriteVisitor):
-
     def __init__(self):
         self.usepulses_mapping = {}
 

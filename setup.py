@@ -2,6 +2,7 @@
 
 import sys
 from setuptools import setup
+
 try:
     from sphinx.setup_command import BuildDoc
 except ImportError:
@@ -27,7 +28,11 @@ setup(
     ],
     package_dir={"": "."},
     install_requires=["lark-parser"],
-    extras_require={"tests": ["pytest"], "docs": ["sphinx"], "pygsti-integration": ["pygsti"]},
+    extras_require={
+        "tests": ["pytest"],
+        "docs": ["sphinx"],
+        "pygsti-integration": ["pygsti"],
+    },
     python_requires=">=3.7",
     platforms=["any"],
     url="https://qscout.sandia.gov",

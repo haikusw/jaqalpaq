@@ -8,7 +8,6 @@ from . import randomize
 
 
 class UsedQubitTester(unittest.TestCase):
-
     def test_single_gate_no_qubits(self):
         """Test a gate that does not use any qubits."""
         gate = common.make_random_gate_statement(count=0)
@@ -20,7 +19,9 @@ class UsedQubitTester(unittest.TestCase):
         """Test getting the single qubit used by a gate."""
         reg = common.make_random_register()
         qubit, index = common.choose_random_qubit_getitem(reg, return_params=True)
-        gate_def, _, params = common.make_random_gate_definition(parameter_types=[core.QUBIT_TYPE], return_params=True)
+        gate_def, _, params = common.make_random_gate_definition(
+            parameter_types=[core.QUBIT_TYPE], return_params=True
+        )
         exp_qubits = {reg.name: {index}}
         args = {params[0].name: qubit}
         gate = core.GateStatement(gate_def, args)
@@ -66,17 +67,17 @@ class UsedQubitTester(unittest.TestCase):
 
         # Define a macro that has a statement that uses a fixed qubit and another statement that uses
         # a qubit given as an argument.
-        reg = core.Register('r', 3)
-        param = core.Parameter('a', core.QUBIT_TYPE)
-        gate_def = core.GateDefinition('g', [core.Parameter('p', core.QUBIT_TYPE)])
+        reg = core.Register("r", 3)
+        param = core.Parameter("a", core.QUBIT_TYPE)
+        gate_def = core.GateDefinition("g", [core.Parameter("p", core.QUBIT_TYPE)])
         g0 = gate_def(reg[0])
         g1 = gate_def(param)
         macro_body = core.BlockStatement()
         macro_body.append(g0)
         macro_body.append(g1)
-        macro = core.Macro('foo', [param], macro_body)
+        macro = core.Macro("foo", [param], macro_body)
         foo = macro(reg[2])
-        exp_qubits = {'r': {0, 2}}
+        exp_qubits = {"r": {0, 2}}
         act_qubits = core.get_used_qubit_indices(foo)
         self.assertEqual(exp_qubits, act_qubits)
 
@@ -102,6 +103,9 @@ class UsedQubitTester(unittest.TestCase):
             elif isinstance(arg, core.Register):
                 # Not allowed in Jaqal but supported by jaqalpup
                 # We have to allow for both registers and map aliases here.
-                for reg, idx in (arg[i].resolve_qubit(context) for i in range(arg.resolve_size(context))):
+                for reg, idx in (
+                    arg[i].resolve_qubit(context)
+                    for i in range(arg.resolve_size(context))
+                ):
                     exp_qubits[reg.name].add(idx)
         return exp_qubits
