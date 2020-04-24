@@ -2,7 +2,11 @@
 
 import sys
 from setuptools import setup
-from sphinx.setup_command import BuildDoc
+try:
+    from sphinx.setup_command import BuildDoc
+except ImportError:
+    print("Warning: document cannot be built without sphinx")
+    BuildDoc = None
 
 name = "Jaqal-pup"
 description = "Python tools for Jaqal"
@@ -22,9 +26,8 @@ setup(
         "jaqal.pygsti",
     ],
     package_dir={"": "."},
-    setup_requires=["sphinx"],
     install_requires=["lark-parser"],
-    extra_requires={"tests": ["pytest"]},
+    extra_requires={"tests": ["pytest"], "docs": ["sphinx"]},
     python_requires=">=3.7",
     platforms=["any"],
     url="https://qscout.sandia.gov",
