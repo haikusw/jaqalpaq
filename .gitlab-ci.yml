@@ -6,9 +6,16 @@ before_script:
   - export https_proxy=https://wwwproxy.sandia.gov:80
   - export no_proxy=.sandia.gov
   - pip install -e .[pygsti-integration,tests]
+  - pip install black
 
 stages:
+  - Static Analysis
   - Test
+
+black:
+  stage: Static Analysis
+  script:
+    - black --check .
 
 pytest:
   stage: Test
