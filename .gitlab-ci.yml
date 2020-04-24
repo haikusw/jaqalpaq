@@ -5,9 +5,7 @@ before_script:
   - export http_proxy=http://wwwproxy.sandia.gov:80
   - export https_proxy=https://wwwproxy.sandia.gov:80
   - export no_proxy=.sandia.gov
-  - pip install -r requirements.txt
-  - pip install pytest
-  - pip install -e .
+  - pip install -e .[pygsti-integration,tests]
 
 stages:
   - Test

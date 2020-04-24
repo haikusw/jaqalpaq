@@ -27,7 +27,7 @@ setup(
     ],
     package_dir={"": "."},
     install_requires=["lark-parser"],
-    extra_requires={"tests": ["pytest"], "docs": ["sphinx"]},
+    extras_require={"tests": ["pytest"], "docs": ["sphinx"], "pygsti-integration": ["pygsti"]},
     python_requires=">=3.7",
     platforms=["any"],
     url="https://qscout.sandia.gov",
