@@ -22,7 +22,7 @@ class ScheduledCircuit:
 		self._macros = {}
 		self._registers = {}
 		# Break circular dependency by putting the import here
-		from jaqalpup.qscout.native_gates import NATIVE_GATES
+		from jaqal.qscout.native_gates import NATIVE_GATES
 		self._native_gates = normalize_native_gates(native_gates, NATIVE_GATES)
 		self._body = BlockStatement()
 

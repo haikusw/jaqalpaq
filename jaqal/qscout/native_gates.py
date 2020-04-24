@@ -1,6 +1,6 @@
 import numpy as np
 
-from jaqalpup.core import GateDefinition, Parameter, QUBIT_TYPE, FLOAT_TYPE
+from jaqal.core import GateDefinition, Parameter, QUBIT_TYPE, FLOAT_TYPE
 
 
 def R_unitary(theta, phi):
