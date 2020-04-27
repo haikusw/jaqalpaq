@@ -312,7 +312,7 @@ class ScheduledCircuit:
 		
 		:param parallel: Set to False (default) for a sequential block, True for a
 			parallel block, or None for an unscheduled block, which is treated as a
-			sequential block except by the :mod:`qscout.scheduler` submodule.
+			sequential block except by the :mod:`jaqal.scheduler` submodule.
 		:type parallel: bool or None
 		:param statements: The contents of the block.
 		:type statements: list(GateStatement, LoopStatement, BlockStatement)
@@ -336,7 +336,7 @@ class ScheduledCircuit:
 		:param parallel: If a new :class:`BlockStatement` is created, this will be passed to
 			its constructor. Set to False (default) for a sequential block, True for a
 			parallel block, or None for an unscheduled block, which is treated as a
-			sequential block except by the :mod:`qscout.scheduler` submodule.
+			sequential block except by the :mod:`jaqal.scheduler` submodule.
 		:type parallel: bool or None
 		:returns: The new loop.
 		:rtype: LoopStatement

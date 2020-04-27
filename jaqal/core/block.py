@@ -3,7 +3,7 @@ class BlockStatement:
 	Represents a Jaqal block statement; either sequential or parallel. Can contain other
 	blocks, loop statements, and gate statements.
 	
-	:param parallel: Set to False (default) for a sequential block, True for a parallel block, or None for an unscheduled block, which is treated as a sequential block except by the :mod:`qscout.scheduler` submodule.
+	:param parallel: Set to False (default) for a sequential block, True for a parallel block, or None for an unscheduled block, which is treated as a sequential block except by the :mod:`jaqal.scheduler` submodule.
 	:type parallel: bool or None
 	:param statements: The contents of the block.
 	:type statements: list(GateStatement, LoopStatement, BlockStatement)
