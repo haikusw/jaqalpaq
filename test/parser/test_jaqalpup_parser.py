@@ -189,7 +189,7 @@ class ParserTester(TestCase):
         text = "register r[3]; Rx r[0] 1.5"
         exp_result = self.make_circuit(
             registers={"r": self.make_register("r", 3)},
-            gates=[self.make_native_gate("Rx", ("r", 0), 1.5)],
+            gates=[self.make_gate("Rx", ("r", 0), 1.5, native_gates=NATIVE_GATES)],
         )
         self.run_test(text, exp_result, native_gates=NATIVE_GATES)
 
@@ -358,19 +358,11 @@ class ParserTester(TestCase):
             circuit.registers.update(maps)
         return circuit
 
-    def make_gate(self, name, *args):
-        """Return a GateStatement, possibly creating a definition in the process."""
-        return self.make_gate_conditional(name, args, is_native=False)
-
-    def make_native_gate(self, name, *args):
-        """Return a GateStatement that must be a native gate."""
-        return self.make_gate_conditional(name, args, is_native=True)
-
-    def make_gate_conditional(self, name, args, is_native):
+    def make_gate(self, name, *args, native_gates=None):
         """Make a gate that is either native or not. Don't call directly."""
         arg_objects = [self.make_argument_object(arg) for arg in args]
-        if is_native:
-            gate_def = self.get_native_gate_definition(name)
+        if native_gates:
+            gate_def = self.get_native_gate_definition(name, native_gates)
         else:
             params = [
                 self.make_parameter_from_arg(idx, arg) for idx, arg in enumerate(args)
@@ -388,7 +380,7 @@ class ParserTester(TestCase):
         return gate_def
 
     @staticmethod
-    def get_native_gate_definition(name):
+    def get_native_gate_definition(name, NATIVE_GATES):
         """Return an existing GateDefinition for a native gate or raise an exception."""
         for gate in NATIVE_GATES:
             if gate.name == name:

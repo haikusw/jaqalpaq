@@ -15,7 +15,6 @@ from jaqal.core import (
     Constant,
     AnnotatedValue,
 )
-from jaqal.qscout.native_gates import NATIVE_GATES
 from jaqal.core.circuit import normalize_native_gates
 from jaqal import JaqalError
 
@@ -138,15 +137,13 @@ class CoreTypesVisitor(MacroContextRewriteVisitor, TreeManipulators):
 
     def visit_program(self, header_statements, body_statements):
         circuit = ScheduledCircuit(
-            native_gates=NATIVE_GATES if self.use_only_native_gates else None
+            native_gates=self.gate_definitions if self.use_only_native_gates else None
         )
         for stmt in body_statements:
             circuit.body.append(stmt)
         circuit.registers.update(self.registers)
         circuit.macros.update(self.macro_definitions)
         circuit.constants.update(self.let_constants)
-        if not self.use_only_native_gates:
-            circuit.native_gates.update(self.gate_definitions)
         return circuit
 
     def visit_register_statement(self, array_declaration):
