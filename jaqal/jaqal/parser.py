@@ -17,7 +17,7 @@ from jaqal.core import (
 )
 from jaqal.qscout.native_gates import NATIVE_GATES
 from jaqal.core.circuit import normalize_native_gates
-from jaqal import QSCOUTError
+from jaqal import JaqalError
 
 
 class Option(Enum):
@@ -155,7 +155,7 @@ class CoreTypesVisitor(MacroContextRewriteVisitor, TreeManipulators):
         )
         name = str(self.extract_identifier(identifier_token))
         if name in self.registers:
-            raise QSCOUTError(f"Redefinition of register {name}")
+            raise JaqalError(f"Redefinition of register {name}")
         if self.is_integer(size_tree):
             size = self.extract_integer(size_tree)
         elif self.is_let_identifier(size_tree):
@@ -163,7 +163,7 @@ class CoreTypesVisitor(MacroContextRewriteVisitor, TreeManipulators):
             size_var_name = str(self.deconstruct_let_identifier(size_tree))
             size = self.resolve_scalar_identifier(size_var_name)
         else:
-            raise QSCOUTError(f"Unknown object used as register size: {size_tree}")
+            raise JaqalError(f"Unknown object used as register size: {size_tree}")
         reg = Register(name, size)
         self.registers[name] = reg
 
@@ -200,13 +200,13 @@ class CoreTypesVisitor(MacroContextRewriteVisitor, TreeManipulators):
         # Target is the map being defined. source is the register or map we are basing it on.
         tgt_name = str(self.extract_identifier(target))
         if tgt_name in self.registers:
-            raise QSCOUTError(f"Redefinition of map or register {tgt_name}")
+            raise JaqalError(f"Redefinition of map or register {tgt_name}")
 
         if self.is_array_slice(source):
             src_name, src_slice = self.deconstruct_array_slice(source)
             src_name = str(self.extract_identifier(src_name))
             if src_name not in self.registers:
-                raise QSCOUTError(
+                raise JaqalError(
                     f"map {tgt_name} based on non-existent source {src_name}"
                 )
             src_reg = self.registers[src_name]
@@ -216,8 +216,8 @@ class CoreTypesVisitor(MacroContextRewriteVisitor, TreeManipulators):
             def get_default_stop():
                 try:
                     return src_reg.size
-                except QSCOUTError as exc:
-                    raise QSCOUTError(f"Cannot determine size of {src_name}: {exc}")
+                except JaqalError as exc:
+                    raise JaqalError(f"Cannot determine size of {src_name}: {exc}")
 
             src_stop = self.resolve_slice_element(src_stop, get_default_stop)
             src_step = self.resolve_slice_element(src_step, lambda: 1)
@@ -229,7 +229,7 @@ class CoreTypesVisitor(MacroContextRewriteVisitor, TreeManipulators):
             src_name, src_index = self.deconstruct_array_element(source)
             src_name = str(self.extract_identifier(src_name))
             if src_name not in self.registers:
-                raise QSCOUTError(
+                raise JaqalError(
                     f"map {tgt_name} based on non-existent source {src_name}"
                 )
             src_reg = self.registers[src_name]
@@ -241,7 +241,7 @@ class CoreTypesVisitor(MacroContextRewriteVisitor, TreeManipulators):
             # Basically renaming a whole register.
             src_name = str(self.extract_identifier(source))
             if src_name not in self.registers:
-                raise QSCOUTError(
+                raise JaqalError(
                     f"map {tgt_name} based on non-existent source {src_name}"
                 )
             src_reg = self.registers[src_name]
@@ -282,11 +282,11 @@ class CoreTypesVisitor(MacroContextRewriteVisitor, TreeManipulators):
             index_name = str(self.deconstruct_let_identifier(index))
             index = self.resolve_scalar_identifier(index_name)
         else:
-            raise QSCOUTError(f"Unknown index type {index}")
+            raise JaqalError(f"Unknown index type {index}")
         identifier = self.extract_qualified_identifier(identifier)
         ident_str = str(identifier)
         if ident_str not in self.registers:
-            raise QSCOUTError(f"No register or map named {ident_str}")
+            raise JaqalError(f"No register or map named {ident_str}")
         reg = self.registers[str(identifier)][index]
         return reg
 
@@ -322,7 +322,7 @@ class CoreTypesVisitor(MacroContextRewriteVisitor, TreeManipulators):
             self.gate_definitions[gate_name] = gate_def
             return gate_def
         else:
-            raise QSCOUTError(f"Gate {gate_name} not a QSCOUT native gate")
+            raise JaqalError(f"Gate {gate_name} not a QSCOUT native gate")
 
     @staticmethod
     def make_parameter_from_argument(index, arg):
@@ -353,4 +353,4 @@ class CoreTypesVisitor(MacroContextRewriteVisitor, TreeManipulators):
             return named_qubit
         if name in self.let_constants:
             return self.let_constants[name]
-        raise QSCOUTError(f"Unknown variable {name}")
+        raise JaqalError(f"Unknown variable {name}")

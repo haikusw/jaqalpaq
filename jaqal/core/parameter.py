@@ -1,4 +1,4 @@
-from jaqal import QSCOUTError
+from jaqal import JaqalError
 
 QUBIT_TYPE = "qubit"
 FLOAT_TYPE = "float"
@@ -25,7 +25,7 @@ class AnnotatedValue:
     def __init__(self, name, kind):
         self._name = name
         if kind not in PARAMETER_TYPES:
-            raise QSCOUTError("Invalid parameter type specifier %s." % kind)
+            raise JaqalError("Invalid parameter type specifier %s." % kind)
         self._kind = kind
 
     def __repr__(self):
@@ -63,18 +63,18 @@ class AnnotatedValue:
 			to the values corresponding to those names.
 		
 		:returns: What value the AnnotatedValue represents.
-		:raises QSCOUTError: If the AnnotatedValue doesn't represent a fixed value within
+		:raises JaqalError: If the AnnotatedValue doesn't represent a fixed value within
 			the context specified.
 		"""
         if self.name in context:
             return context[self.name]
         else:
-            raise QSCOUTError("Unbound identifier %s." % self.name)
+            raise JaqalError("Unbound identifier %s." % self.name)
 
     @property
     def classical(self):
         if self._kind is None:
-            raise QSCOUTError(f"No type defined for parameter {self.name}.")
+            raise JaqalError(f"No type defined for parameter {self.name}.")
         return self._kind not in (QUBIT_TYPE, REGISTER_TYPE)
 
 
@@ -96,7 +96,7 @@ class Parameter(AnnotatedValue):
 		Parameter may have.
 		
 		:param value: The candidate value to validate.
-		:raises QSCOUTError: If the value is not acceptable for this Parameter.
+		:raises JaqalError: If the value is not acceptable for this Parameter.
 		"""
         from .register import NamedQubit, Register
 
@@ -106,7 +106,7 @@ class Parameter(AnnotatedValue):
             elif isinstance(value, AnnotatedValue) and value.kind in (QUBIT_TYPE, None):
                 pass
             else:
-                raise QSCOUTError(
+                raise JaqalError(
                     "Type-checking failed: parameter %s=%s does not have type %s."
                     % (str(self.name), str(value), str(self.kind))
                 )
@@ -119,7 +119,7 @@ class Parameter(AnnotatedValue):
             ):
                 pass
             else:
-                raise QSCOUTError(
+                raise JaqalError(
                     "Type-checking failed: parameter %s=%s does not have type %s."
                     % (str(self.name), str(value), str(self.kind))
                 )
@@ -133,7 +133,7 @@ class Parameter(AnnotatedValue):
             ):
                 pass
             else:
-                raise QSCOUTError(
+                raise JaqalError(
                     "Type-checking failed: parameter %s=%s does not have type %s."
                     % (str(self.name), str(value), str(self.kind))
                 )
@@ -145,7 +145,7 @@ class Parameter(AnnotatedValue):
             elif isinstance(value, AnnotatedValue) and value.kind in (INT_TYPE, None):
                 pass
             else:
-                raise QSCOUTError(
+                raise JaqalError(
                     "Type-checking failed: parameter %s=%s does not have type %s."
                     % (str(self.name), str(value), str(self.kind))
                 )
@@ -155,7 +155,7 @@ class Parameter(AnnotatedValue):
             # ability to add type annotations in the Jaqal.
             pass
         else:
-            raise QSCOUTError(
+            raise JaqalError(
                 "Type-checking failed: unknown parameter type %s." + str(self.kind)
             )
 

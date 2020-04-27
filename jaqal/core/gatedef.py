@@ -1,6 +1,6 @@
 from collections import OrderedDict
 
-from jaqal import QSCOUTError
+from jaqal import JaqalError
 from .gate import GateStatement
 
 
@@ -56,16 +56,16 @@ class AbstractGate:
 		
 		:returns: The new statement.
 		:rtype: GateStatement
-		:raises QSCOUTError: If both keyword and positional arguments are passed.
-		:raises QSCOUTError: If the wrong number of arguments are passed.
-		:raises QSCOUTError: If the parameter names don't match the parameters this gate takes.
+		:raises JaqalError: If both keyword and positional arguments are passed.
+		:raises JaqalError: If the wrong number of arguments are passed.
+		:raises JaqalError: If the parameter names don't match the parameters this gate takes.
 		"""
         params = OrderedDict()
         if args and not kwargs:
             if len(args) > len(self.parameters):
-                raise QSCOUTError("Too many parameters for gate %s." % self.name)
+                raise JaqalError("Too many parameters for gate %s." % self.name)
             elif len(args) > len(self.parameters):
-                raise QSCOUTError("Insufficient parameters for gate %s." % self.name)
+                raise JaqalError("Insufficient parameters for gate %s." % self.name)
             else:
                 for name, arg in zip([param.name for param in self.parameters], args):
                     params[name] = arg
@@ -74,19 +74,19 @@ class AbstractGate:
                 for param in self.parameters:
                     params[param.name] = kwargs.pop(param.name)
             except KeyError as ex:
-                raise QSCOUTError(
+                raise JaqalError(
                     f"Missing parameter {param.name} for gate {self.name}."
                 ) from ex
             if kwargs:
-                raise QSCOUTError(
+                raise JaqalError(
                     f"Invalid parameters {', '.join(kwargs)} for gate {self.name}."
                 )
         elif kwargs and args:
-            raise QSCOUTError(
+            raise JaqalError(
                 "Cannot mix named and positional parameters in call to gate."
             )
         if len(self.parameters) != len(params):
-            raise QSCOUTError(
+            raise JaqalError(
                 f"Bad argument count: expected {len(self.parameters)}, found {len(params)}"
             )
         for param in self.parameters:

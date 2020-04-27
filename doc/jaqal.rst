@@ -2,7 +2,7 @@ jaqal package
 ================
 
 .. automodule:: jaqal
-   :members: QSCOUTError
+   :members: JaqalError
    :undoc-members:
    :show-inheritance:
 

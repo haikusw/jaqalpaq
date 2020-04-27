@@ -5,7 +5,7 @@ from .gatedef import GateDefinition
 from .macro import Macro
 from .register import Register, NamedQubit
 from .identifier import is_identifier_valid
-from jaqal import RESERVED_WORDS, QSCOUTError
+from jaqal import RESERVED_WORDS, JaqalError
 import re
 
 
@@ -123,7 +123,7 @@ class ScheduledCircuit:
                     self.macros[instr.name].body, {**context, **instr.parameters}
                 )
             else:
-                raise QSCOUTError("Unknown gate %s." % instr.name)
+                raise JaqalError("Unknown gate %s." % instr.name)
 
         return indices
 
@@ -159,13 +159,13 @@ class ScheduledCircuit:
 		:type value: int or float
 		:returns: The new object.
 		:rtype: Constant
-		:raises QSCOUTError: if the name is not available (see :meth:`validate_identifier`).
+		:raises JaqalError: if the name is not available (see :meth:`validate_identifier`).
 		"""
         if self.validate_identifier(name):
             self.constants[name] = Constant(name, value)
             return self.constants[name]
         else:
-            raise QSCOUTError("Name %s already used or invalid." % name)
+            raise JaqalError("Name %s already used or invalid." % name)
 
     def reg(self, name, size):
         """
@@ -177,16 +177,16 @@ class ScheduledCircuit:
 		:param int size: How many qubits are in the register.
 		:returns: The new register.
 		:rtype: Register
-		:raises QSCOUTError: if there's already a register declared for this circuit, or
+		:raises JaqalError: if there's already a register declared for this circuit, or
 			if the name provided is not available (see :meth:`validate_identifier`).
 		"""
         if self.validate_identifier(name):
             if self.registers:
-                raise QSCOUTError("Only one reg statement per program is permitted.")
+                raise JaqalError("Only one reg statement per program is permitted.")
             self.registers[name] = Register(name, size)
             return self.registers[name]
         else:
-            raise QSCOUTError("Name %s already used or invalid." % name)
+            raise JaqalError("Name %s already used or invalid." % name)
 
     def map(self, name, source, idxs=None):
         """
@@ -202,14 +202,14 @@ class ScheduledCircuit:
 		:type idxs: slice, int, AnnotatedValue, or None
 		:returns: The new register.
 		:rtype: Register or NamedQubit
-		:raises QSCOUTError: if the name is invalid (see :meth:`validate_identifier`), or
+		:raises JaqalError: if the name is invalid (see :meth:`validate_identifier`), or
 			the source register isn't part of this circuit, or there's no register with
 			the name provided for the source, or if the source register is a single qubit
 			and ``idxs`` isn't ``None``, or if creating the :class:`Register` fails.
 		"""
         if self.validate_identifier(name):
             if source is None:
-                raise QSCOUTError("Map statement for %s must have a source." % name)
+                raise JaqalError("Map statement for %s must have a source." % name)
             else:
                 if source in self.registers:
                     source_r = self.registers[source]
@@ -219,12 +219,12 @@ class ScheduledCircuit:
                 ):
                     source_r = source
                 else:
-                    raise QSCOUTError("Register %s does not exist." % source)
+                    raise JaqalError("Register %s does not exist." % source)
                 if isinstance(source_r, NamedQubit):
                     if idxs is None:
                         self.registers[name] = source_r.renamed(name)
                     else:
-                        raise QSCOUTError("Cannot index into single qubit %s." % source)
+                        raise JaqalError("Cannot index into single qubit %s." % source)
                 else:
                     if idxs is None:
                         self.registers[name] = Register(name, alias_from=source_r)
@@ -235,7 +235,7 @@ class ScheduledCircuit:
                     else:
                         self.registers[name] = NamedQubit(name, source_r, idxs)
         else:
-            raise QSCOUTError("Name %s already used or invalid." % name)
+            raise JaqalError("Name %s already used or invalid." % name)
         return self.registers[name]
 
     def macro(self, name, parameters=None, body=None):
@@ -250,7 +250,7 @@ class ScheduledCircuit:
 		:param BlockStatement body: What statements the macro expands to when called.
 		:returns: The new macro.
 		:rtype: Macro
-		:raises QSCOUTError: if the name of the macro or any of its parameters is invalid (see :meth:`validate_identifier`).
+		:raises JaqalError: if the name of the macro or any of its parameters is invalid (see :meth:`validate_identifier`).
 		"""
         if self.validate_identifier(name):
             if parameters is not None:
@@ -258,13 +258,13 @@ class ScheduledCircuit:
                     if (
                         not self.validate_identifier(parameter.name)
                     ) or parameter.name == name:
-                        raise QSCOUTError(
+                        raise JaqalError(
                             "Name %s already used or invalid." % parameter.name
                         )
             self.macros[name] = Macro(name, parameters, body)
             return self.macros[name]
         else:
-            raise QSCOUTError("Name %s already used or invalid." % name)
+            raise JaqalError("Name %s already used or invalid." % name)
 
     def build_gate(self, name, *args, **kwargs):
         """
@@ -277,7 +277,7 @@ class ScheduledCircuit:
 		:param str name: The name of the gate to call.
 		:returns: The new statement.
 		:rtype: GateStatement
-		:raises QSCOUTError: if the gate name doesn't match any native gate or macro, or
+		:raises JaqalError: if the gate name doesn't match any native gate or macro, or
 			if constructing the :class:`GateStatement` fails.
 		"""
         if name in self.macros:
@@ -285,7 +285,7 @@ class ScheduledCircuit:
         elif name in self.native_gates:
             return self.native_gates[name].call(*args, **kwargs)
         else:
-            raise QSCOUTError("Unknown gate %s." % name)
+            raise JaqalError("Unknown gate %s." % name)
 
     def gate(self, name, *args, **kwargs):
         """
@@ -298,7 +298,7 @@ class ScheduledCircuit:
 		:param str name: The name of the gate to call.
 		:returns: The new statement.
 		:rtype: GateStatement
-		:raises QSCOUTError: if the gate name doesn't match any native gate or macro, or
+		:raises JaqalError: if the gate name doesn't match any native gate or macro, or
 			if constructing the :class:`GateStatement` fails.
 		"""
         g = self.build_gate(name, *args, **kwargs)

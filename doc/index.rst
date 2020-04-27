@@ -20,7 +20,7 @@ Jaqal-PUP currently consists of the :mod:`jaqal` Python package, and its subpack
 * The :mod:`jaqal.scheduler` package modifies circuits to execute more gates in parallel, without changing the function of the circuit or breaking the restrictions of the QSCOUT hardware.
 
 Additionally, the top-level :mod:`jaqal` package provides a few useful imports that don't fit
-within the scope of any of the above subpackages: the :exc:`jaqal.QSCOUTError` class and a collection of :data:`RESERVED_WORDS`.
+within the scope of any of the above subpackages: the :exc:`jaqal.JaqalError` class and a collection of :data:`RESERVED_WORDS`.
 
 
 Indices and tables

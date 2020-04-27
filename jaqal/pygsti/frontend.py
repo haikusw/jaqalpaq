@@ -2,10 +2,10 @@ import pygsti
 import pygsti.objects
 
 import numpy as np
-from jaqal import QSCOUTError
+from jaqal import JaqalError
 
 
-def pygsti_label_from_qscout_gate(gate):
+def pygsti_label_from_statement(gate):
     name = "G" + gate.name.lower()
     qubits = []
     args = []
@@ -17,7 +17,7 @@ def pygsti_label_from_qscout_gate(gate):
     return pygsti.objects.Label(name, qubits, args=args if args else None)
 
 
-def pygsti_circuit_from_qscout_circuit(qsc):
+def pygsti_circuit_from_code(qsc):
     lst = []
     for moment in qsc.body.moment_iter():
         for gate in moment:

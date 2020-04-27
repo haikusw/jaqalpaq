@@ -1,5 +1,5 @@
 from .parameter import AnnotatedValue, INT_TYPE, FLOAT_TYPE
-from jaqal import QSCOUTError
+from jaqal import JaqalError
 
 
 class Constant(AnnotatedValue):
@@ -21,7 +21,7 @@ class Constant(AnnotatedValue):
         elif isinstance(value, int):
             super().__init__(name, INT_TYPE)
         else:
-            raise QSCOUTError(
+            raise JaqalError(
                 "Invalid/non-numeric value %s for constant %s!" % (value, name)
             )
         self._value = value

@@ -1,4 +1,4 @@
-from jaqal import QSCOUTError
+from jaqal import JaqalError
 from .parameter import AnnotatedValue, Parameter, INT_TYPE, REGISTER_TYPE
 from .constant import Constant
 
@@ -24,16 +24,16 @@ class Register:
 		can be specified by Parameters rather than integers.
 	:type alias_slice: slice or None
 	
-	:raises QSCOUTError: if passed a Parameter of the wrong type.
+	:raises JaqalError: if passed a Parameter of the wrong type.
 	"""
 
     def __init__(self, name, size=None, alias_from=None, alias_slice=None):
         self._name = name
         self._size = size
         if (alias_from is None) and not (alias_slice is None and size is not None):
-            raise QSCOUTError("Invalid register declaration: %s." % name)
+            raise JaqalError("Invalid register declaration: %s." % name)
         if (size is not None) and (alias_from is not None):
-            raise QSCOUTError(
+            raise JaqalError(
                 "Illegal size specification in map statement defining %s." % name
             )
         self._alias_from = alias_from
@@ -49,7 +49,7 @@ class Register:
                 if isinstance(
                     alias_slice.start, AnnotatedValue
                 ) and alias_slice.start.kind not in (INT_TYPE, None):
-                    raise QSCOUTError(
+                    raise JaqalError(
                         "Cannot slice register %s with parameter %s of non-integer kind %s."
                         % (
                             alias_from.name,
@@ -60,7 +60,7 @@ class Register:
                 elif isinstance(
                     alias_slice.stop, AnnotatedValue
                 ) and alias_slice.stop.kind not in (INT_TYPE, None):
-                    raise QSCOUTError(
+                    raise JaqalError(
                         "Cannot slice register %s with parameter %s of non-integer kind %s."
                         % (
                             alias_from.name,
@@ -71,7 +71,7 @@ class Register:
                 elif isinstance(
                     alias_slice.step, AnnotatedValue
                 ) and alias_slice.step.kind not in (INT_TYPE, None):
-                    raise QSCOUTError(
+                    raise JaqalError(
                         "Cannot slice register %s with parameter %s of non-integer kind %s."
                         % (
                             alias_from.name,
@@ -83,7 +83,7 @@ class Register:
                     REGISTER_TYPE,
                     None,
                 ):
-                    raise QSCOUTError(
+                    raise JaqalError(
                         "Cannot slice parameter %s of non-register kind %s."
                         % (alias_from.name, alias_from.kind)
                     )
@@ -91,7 +91,7 @@ class Register:
                 alias_from.size, AnnotatedValue
             ):
                 if alias_slice.stop > alias_from.size:
-                    raise QSCOUTError("Index out of range.")
+                    raise JaqalError("Index out of range.")
 
     def __repr__(self):
         if self.fundamental:
@@ -125,7 +125,7 @@ class Register:
         """
 		How many qubits are in the register.
 		
-		:raises QSCOUTError: If the register's size is undefined because it's mapped from
+		:raises JaqalError: If the register's size is undefined because it's mapped from
 			a :class:`Parameter`.
 		"""
         return self.resolve_size({})
@@ -198,7 +198,7 @@ class Register:
 		:rtype: (Register, int)
 		"""
         if self.size is not None and idx >= self.size:
-            raise QSCOUTError("Index out of range.")
+            raise JaqalError("Index out of range.")
         if self.fundamental:
             return (self, idx)
         start = self.alias_slice.start or 0
@@ -216,7 +216,7 @@ class Register:
 
     def __getitem__(self, key):
         if isinstance(key, slice):
-            raise QSCOUTError(
+            raise JaqalError(
                 "Anonymous slices are not currently supported; slice only in a map statement."
             )
             # But if the backend ever supports it, just replace the above line with the below line:
@@ -240,7 +240,7 @@ class Register:
 		:returns: True if the register now contains exactly ``new_size`` qubits, False if
 			the register previously contained and still contains more than that.
 		:rtype: bool
-		:raises QSCOUTError: If this register is not fundamental.
+		:raises JaqalError: If this register is not fundamental.
 		"""
 
     def __iter__(self):
@@ -260,7 +260,7 @@ class NamedQubit:
 		actually represents.
 	:type alias_index: int, Parameter
 	
-	:raises QSCOUTError: If the index is an int larger than the the size of the source register.
+	:raises JaqalError: If the index is an int larger than the the size of the source register.
 	"""
 
     def __init__(self, name, alias_from, alias_index):
@@ -268,7 +268,7 @@ class NamedQubit:
         self._alias_from = alias_from
         self._alias_index = alias_index
         if alias_index is None or alias_from is None:
-            raise QSCOUTError("Invalid map statement constructing qubit %s." % name)
+            raise JaqalError("Invalid map statement constructing qubit %s." % name)
         if isinstance(alias_index, AnnotatedValue) or isinstance(
             alias_from, AnnotatedValue
         ):
@@ -276,7 +276,7 @@ class NamedQubit:
                 INT_TYPE,
                 None,
             ):
-                raise QSCOUTError(
+                raise JaqalError(
                     "Cannot slice register %s with parameter %s of non-integer kind %s."
                     % (alias_from.name, alias_index.name, alias_index.kind)
                 )
@@ -284,17 +284,17 @@ class NamedQubit:
                 REGISTER_TYPE,
                 None,
             ):
-                raise QSCOUTError(
+                raise JaqalError(
                     "Cannot slice parameter %s of non-register kind %s."
                     % (alias_from.name, alias_from.kind)
                 )
         else:
             try:
                 from_size = alias_from.size
-            except QSCOUTError:
+            except JaqalError:
                 return
             if alias_index >= from_size:
-                raise QSCOUTError("Index out of range.")
+                raise JaqalError("Index out of range.")
 
     def __repr__(self):
         return f"NamedQubit({self.name}, {self.alias_from}, {self.alias_index})"
