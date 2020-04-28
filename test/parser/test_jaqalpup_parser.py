@@ -13,7 +13,6 @@ from jaqal.core import (
     NamedQubit,
     AnnotatedValue,
 )
-from jaqal.qscout.native_gates import NATIVE_GATES
 from jaqal.jaqal.parser import parse_jaqal_string, Option
 
 
@@ -165,43 +164,6 @@ class ParserTester(TestCase):
             gates=[], registers={"r": self.make_register("r", 7)}
         )
         self.run_test(text, exp_result=exp_result)
-
-    def test_deduce_native_gates(self):
-        """Test that the native gates are properly deduced from the text."""
-        # Note: This behavior is possibly not what we want long term
-        text = "register r[3]; foo 1 r[0]; bar 3.14"
-        exp_native_gates = {
-            "foo": self.get_gate_definition(
-                "foo",
-                [
-                    self.make_parameter(index=0, kind="float"),
-                    self.make_parameter(index=1, kind="qubit"),
-                ],
-            ),
-            "bar": self.get_gate_definition(
-                "bar", [self.make_parameter(index=0, kind="float")]
-            ),
-        }
-        self.run_test(text, exp_native_gates=exp_native_gates)
-
-    def test_use_native_gates(self):
-        """Test that we can use the native gates in the QSCOUT native gate set."""
-        text = "register r[3]; Rx r[0] 1.5"
-        exp_result = self.make_circuit(
-            registers={"r": self.make_register("r", 3)},
-            gates=[self.make_gate("Rx", ("r", 0), 1.5, native_gates=NATIVE_GATES)],
-        )
-        self.run_test(text, exp_result, native_gates=NATIVE_GATES)
-
-    def test_fail_on_missing_native_gate(self):
-        """Test that we fail when the using qscout native gates and the user uses a gate
-        that does not exist."""
-        text = "register r[3]; foo r[0] 1.5"
-        # Make sure things we aren't doing something stupid and things will parse
-        # without native gates on.
-        parse_jaqal_string(text)
-        with self.assertRaises(Exception):
-            parse_jaqal_string(text, native_gates=NATIVE_GATES)
 
     def test_macro_definition_no_expand(self):
         """Test parsing macro definitions without expanding them."""
