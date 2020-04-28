@@ -351,16 +351,14 @@ class ScheduledCircuit:
         return l
 
 
-def normalize_native_gates(native_gates, default_gates=None):
+def normalize_native_gates(native_gates):
     """Takes in the different ways that native gates can be represented and
 	returns a dictionary.
 
 	:param native_gates: A list or dict of gates, or None.
 	:type native_gates: Optional[dict] or Optional[list]
-	:param default_gates: The gates to use if native_gates is None. Defaults default to {}.
 	"""
-    if native_gates is None:
-        native_gates = default_gates or {}
+    native_gates = native_gates or {}
     if not isinstance(native_gates, dict):
         # This covers all iterables like list and tuple
         native_gates = {gate.name: gate for gate in native_gates}
