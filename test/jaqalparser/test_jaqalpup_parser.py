@@ -342,9 +342,9 @@ class ParserTester(TestCase):
         return gate_def
 
     @staticmethod
-    def get_native_gate_definition(name, NATIVE_GATES):
+    def get_native_gate_definition(name, native_gates):
         """Return an existing GateDefinition for a native gate or raise an exception."""
-        for gate in NATIVE_GATES:
+        for gate in native_gates:
             if gate.name == name:
                 return gate
         raise ValueError(f"Native gate {name} not found")
