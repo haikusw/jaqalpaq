@@ -6,16 +6,16 @@ from jaqal import JaqalError
 
 class Macro(AbstractGate):
     """
-	Base: :class:`AbstractGate`
-	
-	Represents a gate that's implemented by Jaqal macro statement.
-	
-	:param str name: The name of the gate.
-	:param parameters: What arguments (numbers, qubits, etc) the gate should be called with. If None, the gate takes no parameters.
-	:type parameters: list(Parameter) or None
-	:param body: The implementation of the macro. If None, an empty sequential BlockStatement is created.
-	:type body: BlockStatement or None
-	"""
+    Base: :class:`AbstractGate`
+
+    Represents a gate that's implemented by Jaqal macro statement.
+
+    :param str name: The name of the gate.
+    :param parameters: What arguments (numbers, qubits, etc) the gate should be called with. If None, the gate takes no parameters.
+    :type parameters: list(Parameter) or None
+    :param body: The implementation of the macro. If None, an empty sequential BlockStatement is created.
+    :type body: BlockStatement or None
+    """
 
     def __init__(self, name, parameters=None, body=None):
         super().__init__(name, parameters)
@@ -37,6 +37,6 @@ class Macro(AbstractGate):
     @property
     def body(self):
         """
-		A :class:`BlockStatement` that implements the macro.
-		"""
+        A :class:`BlockStatement` that implements the macro.
+        """
         return self._body
