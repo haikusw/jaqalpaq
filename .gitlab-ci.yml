@@ -5,19 +5,20 @@ before_script:
   - export http_proxy=http://wwwproxy.sandia.gov:80
   - export https_proxy=https://wwwproxy.sandia.gov:80
   - export no_proxy=.sandia.gov
-  - pip install -e .[pygsti-integration,tests]
-  - pip install black
 
 stages:
   - Static Analysis
   - Test
 
-black:
+syntax:
   stage: Static Analysis
   script:
-    - black --check .
+    - ( unset https_proxy ; git fetch origin master )
+    - if ! git diff --check origin/master HEAD ; then echo "See above whitespace errors." ; exit 1; fi
+    - if find . -iname '*.py' -exec grep -l -P '\t' {} + ; then echo 'Above files have tabs.' ; exit 1 ; fi
+    - pip install black && black --check .
 
 pytest:
   stage: Test
   script:
-    - pytest
+    - pip install -e .[pygsti-integration,tests] && pytest
