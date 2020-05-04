@@ -16,7 +16,7 @@ def build(expression, native_gates=None):
     """Given an expression in a specific format, return the appropriate type, recursively constructed, from the core
     types library.
 
-    :param expression: A tuple acting like an S-expression. Also accepts core types and just returns them.
+    :param expression: A tuple or list acting like an S-expression. Also accepts core types and just returns them.
     :param Dict[str, GateDefinition] native_gates: If given, raise an exception if a gate is not in this list or
     a macro.
 
@@ -250,14 +250,14 @@ def as_integer(value):
 class SExpression:
     """Represent an s-expression as used internally in the builder object.
 
-    By processing the expression and not directly using the tuple we give ourselves the opportunity to do things
+    By processing the expression and not directly using the tuple or list we give ourselves the opportunity to do things
     like add lisp-style keyword arguments or do other things without breaking existing code.
     """
 
     @classmethod
     def is_convertible(cls, obj):
         """Return whether the object can be converted to an SExpression"""
-        return isinstance(obj, tuple) or isinstance(obj, cls)
+        return isinstance(obj, tuple) or isinstance(obj, list) or isinstance(obj, cls)
 
     @classmethod
     def create(cls, expr):
@@ -267,8 +267,9 @@ class SExpression:
         return cls(expr)
 
     def __init__(self, expression):
-        if not isinstance(expression, tuple):
-            raise JaqalError(f"Need tuple to make SExpression, found {expression}")
+        if not isinstance(expression, tuple) and not isinstance(expression, list):
+            # Make sure you use the create() method as it accepts slightly more types.
+            raise JaqalError(f"Need tuple or list to make SExpression, found {expression}")
         if len(expression) < 1 or not isinstance(expression[0], str):
             raise JaqalError(f"SExpression first element must be a string, found {expression}")
         self._expression = expression
