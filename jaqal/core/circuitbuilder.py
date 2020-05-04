@@ -121,9 +121,10 @@ class Builder:
             raise JaqalError(f"Object {obj} already exists in context")
         context[name] = obj
 
-    def build_register(self, sexpression, _context):
+    def build_register(self, sexpression, context):
         """Create a qubit register."""
         name, size = sexpression.args
+        size = self.build(size, context)  # Resolve let-constants
         return Register(name, size)
 
     def build_map(self, sexpression, context):
@@ -154,8 +155,14 @@ class Builder:
                 raise JaqalError(f"Cannot map {src_name} to {name}, {src_name} does not exist")
             # These may be either integers, None, or let constants
             start = self.build(src_start, context)
+            if start is None:
+                start = 0
             stop = self.build(src_stop, context)
+            if stop is None:
+                stop = src.size
             step = self.build(src_step, context)
+            if step is None:
+                step = 1
             return Register(name, alias_from=src, alias_slice=slice(start, stop, step))
         raise JaqalError(f"Wrong number of arguments for map, found {args}")
 
@@ -164,7 +171,7 @@ class Builder:
         if len(args) != 2:
             raise JaqalError(f"let statement requires two arguments, found {args}")
         name, value = args
-        return Constant(name, value)
+        return Constant(name, as_integer(value))
 
     def build_macro(self, sexpression, context):
         args = list(sexpression.args)
@@ -223,9 +230,21 @@ class Builder:
     def build_array_item(self, sexpression, context):
         identifier, index = sexpression.args
         built_identifier = self.build(identifier, context)
-        built_index = self.build(index)
+        built_index = as_integer(self.build(index, context))
         # If built_identifier is the wrong type it will raise its own JaqalError, or at least it should.
         return built_identifier[built_index]
+
+
+def as_integer(value):
+    """Return the given value as an integer if possible."""
+    try:
+        int_value = int(value)
+        if value == int_value:
+            return int_value
+    except Exception:
+        # The value wasn't even numeric.
+        pass
+    return value
 
 
 class SExpression:
