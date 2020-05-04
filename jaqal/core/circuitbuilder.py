@@ -3,6 +3,7 @@ from typing import Dict
 from .constant import Constant
 from .macro import Macro
 from .register import Register, NamedQubit
+from .gate import GateStatement
 from .gatedef import GateDefinition, AbstractGate
 from .circuit import ScheduledCircuit
 from .parameter import Parameter
@@ -15,7 +16,7 @@ def build(expression, native_gates=None):
     """Given an expression in a specific format, return the appropriate type, recursively constructed, from the core
     types library.
 
-    :param tuple expression: A tuple acting like an S-expression.
+    :param expression: A tuple acting like an S-expression. Also accepts core types and just returns them.
     :param Dict[str, GateDefinition] native_gates: If given, raise an exception if a gate is not in this list or
     a macro.
 
@@ -34,16 +35,13 @@ def build(expression, native_gates=None):
     gate : *arguments
     sequential_block : *statements
     parallel_block : *statements
-    identifier : *name_qualifiers
     array_item : identifier index
 
     In lieu of an s-expression, the appropriate type from the core library will also be accepted. This allows to user
     to build up new expressions using partially built old ones.
 
-    Note: identifiers can consist of multiple name_qualifiers to handle identifiers from namespaces (not currently
-    supported in Jaqal but probably will be). So an identifier foo would be input as ('identifier', 'foo') and an
-    identifier bar.foo would be ('identifier', 'bar', 'foo'). The last element is the identifier's name, with each
-    preceding element being a less specific namespace.
+    Note: the jaqal-pup package partially supports qualified namespaces in identifiers. This function assumes all
+    identifiers are one string, that is they are multiple legal identifiers joined by periods.
 
     """
 
@@ -65,6 +63,11 @@ class Builder:
         """Build the appropriate thing based on the expression."""
         if context is None:
             context = self.make_context()
+        if isinstance(expression, str):
+            # Identifiers
+            if expression in context:
+                return context[expression]
+            raise JaqalError(f"Identifier {expression} not found in context")
         if not SExpression.is_convertible(expression):
             # This is either a number used as a gate argument or an already-created type.
             return expression
@@ -91,7 +94,8 @@ class Builder:
 
         for expr in sexpression.args:
             obj = self.build(expr, context)
-            if isinstance(obj, Register):
+            if isinstance(obj, Register) or isinstance(obj, NamedQubit):
+                # A Register is a register or map and a NamedQubit is a map of a single qubit.
                 registers[obj.name] = obj
                 self.add_to_context(context, obj.name, obj)
             elif isinstance(obj, Constant):
@@ -100,7 +104,7 @@ class Builder:
             elif isinstance(obj, Macro):
                 macros[obj.name] = obj
                 self.add_to_context(context, obj.name, obj)
-            elif isinstance(obj, GateDefinition) or isinstance(obj, BlockStatement) or isinstance(obj, LoopStatement):
+            elif isinstance(obj, GateStatement) or isinstance(obj, BlockStatement) or isinstance(obj, LoopStatement):
                 statements.append(obj)
             else:
                 raise JaqalError(f"Cannot process object {obj} at circuit level")
@@ -109,7 +113,13 @@ class Builder:
         circuit.registers.update(registers)
         circuit.constants.update(constants)
         circuit.macros.update(macros)
+        circuit.body.statements.extend(statements)
         return circuit
+
+    def add_to_context(self, context, name, obj):
+        if name in context:
+            raise JaqalError(f"Object {obj} already exists in context")
+        context[name] = obj
 
     def build_register(self, sexpression, _context):
         """Create a qubit register."""
@@ -133,7 +143,7 @@ class Builder:
                 src = context[src_name]
             except KeyError:
                 raise JaqalError(f"Cannot map {src_name} to {name}, {src_name} does not exist")
-            index = self.build(src_index)  # This may be either an integer or defined parameter.
+            index = self.build(src_index, context)  # This may be either an integer or defined parameter.
             return NamedQubit(name, src, index)
         if len(args) == 5:
             # Mapping a slice of a register
@@ -143,9 +153,9 @@ class Builder:
             except KeyError:
                 raise JaqalError(f"Cannot map {src_name} to {name}, {src_name} does not exist")
             # These may be either integers, None, or let constants
-            start = self.build(src_start)
-            stop = self.build(src_stop)
-            step = self.build(src_step)
+            start = self.build(src_start, context)
+            stop = self.build(src_stop, context)
+            step = self.build(src_step, context)
             return Register(name, alias_from=src, alias_slice=slice(start, stop, step))
         raise JaqalError(f"Wrong number of arguments for map, found {args}")
 
@@ -163,10 +173,13 @@ class Builder:
         name = args[0]
         parameter_names = args[1:-1]
         block = args[-1]
-        parameters = {name: Parameter(name, None) for name in parameter_names}
-        macro_context = {**context, **parameters}  # parameters must be listed second to take precedence
+        parameter_list = [Parameter(name, None) for name in parameter_names]
+        parameter_dict = {param.name: param for param in parameter_list}
+        macro_context = {**context, **parameter_dict}  # parameters must be listed second to take precedence
         built_block = self.build(block, macro_context)
-        return Macro(name, parameters=parameters, body=built_block)
+        if not isinstance(built_block, BlockStatement):
+            raise JaqalError(f"Macro body must be a block, found {type(built_block)}")
+        return Macro(name, parameters=parameter_list, body=built_block)
 
     def build_gate(self, sexpression, context):
         gate_name, *gate_args = sexpression.args
@@ -207,28 +220,12 @@ class Builder:
         statements = [self.build(arg, context) for arg in sexpression.args]
         return BlockStatement(parallel=is_parallel, statements=statements)
 
-    def build_identifier(self, sexpression, context):
-        """Parse an identifier. These identifiers are largely used as gate arguments."""
-        full_name = ".".join(sexpression.args)
-        if full_name in context:
-            obj = context[full_name]
-            allowed_types = [NamedQubit, Register, Parameter]
-            if not any(isinstance(obj, typ) for typ in allowed_types):
-                raise JaqalError(f"Cannot use {full_name} as an identifier, it is of type {type(obj)}")
-            return obj
-        return Parameter(full_name, None)
-
     def build_array_item(self, sexpression, context):
         identifier, index = sexpression.args
         built_identifier = self.build(identifier, context)
         built_index = self.build(index)
         # If built_identifier is the wrong type it will raise its own JaqalError, or at least it should.
         return built_identifier[built_index]
-
-    def add_to_context(self, context, name, obj):
-        if name in context:
-            raise JaqalError(f"Object {obj} already exists in context")
-        context[name] = obj
 
 
 class SExpression:
