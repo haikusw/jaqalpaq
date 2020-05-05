@@ -285,3 +285,164 @@ class SExpression:
         arg_iter = iter(self._expression)
         next(arg_iter)
         return arg_iter
+
+
+##
+# Object-oriented interface
+#
+
+class BuilderBase:
+    def __init__(self, name):
+        self.expression = [name]
+
+    def build(self, context=None):
+        return build(self.expression, context)
+
+
+class BlockBuilder(BuilderBase):
+    """Base class for several other builder objects. Stores statements and other blocks in a block."""
+
+    def __init__(self, name):
+        super().__init__(name)
+
+    def gate(self, name, *args, no_duplicate=False):
+        """Add a gate to this block.
+
+        :param str name: The name of the gate.
+        :param args: Any arguments to the gate.
+        :param bool no_duplicate: If True, only add this gate if it is not a duplicate of the gate to go right before
+        it (or it is the first gate).
+
+        Note: The old ScheduledCircuit also included a build_gate that did not add the gate. However this was only
+        used to add a gate to a block inside of a circuit. Since we now allow adding directly to blocks, there
+        is no longer a need for this method.
+        """
+        # Note: the gate expression will accept both core types and other s-expressions.
+        gate_expression = ('gate', name, *args)
+        if no_duplicate and self.expression and self.expression[-1] == gate_expression:
+            return
+        self.expression.append(gate_expression)
+
+    def block(self, parallel=False):
+        """Create, add, and return a new block builder to the statements stored in this block. Although it is not legal
+        in Jaqal to nest blocks of the same type (except at top level), this builder ignores that restriction.
+
+        To create a block builder without adding it to this block, use the appropriate class constructor directly. This
+        is useful when creating a macro or loop.
+        """
+
+        builder = SequentialBlockBuilder() if not parallel else ParallelBlockBuilder()
+        self.expression.append(builder.expression)
+        return builder
+
+    def loop(self, iterations, block, unevaluated=False):
+        """
+        Creates a new :class:`BlockStatement` object, and adds it to the end of the circuit.
+        All parameters are passed through to the :class:`BlockStatement` constructor.
+
+        :param int iterations: How many times to repeat the loop.
+        :param block: The contents of the loop. If a :class:`BlockStatement` is passed, it will
+            be used as the loop's body; otherwise, a new :class:`BlockStatement` will be
+            created with the list of instructions passed.
+        :type block: BlockStatement or list
+        :param bool unevaluated: If False, do not create a Register object to return.
+        :returns: The new loop.
+
+        .. warning::
+            If a :class:`BlockStatement` is passed for ``gates``, then ``parallel`` will be ignored!
+        """
+
+        loop = ('loop', iterations, block)
+        if not unevaluated:
+            loop = build(loop)
+        self.expression.append(loop)
+
+
+class SequentialBlockBuilder(BlockBuilder):
+    """Build up a sequential code block."""
+    def __init__(self):
+        super().__init__('sequential_block')
+
+
+class ParallelBlockBuilder(BlockBuilder):
+    """Build up a parallel code block."""
+    def __init__(self):
+        super().__init__('parallel_block')
+
+
+class CircuitBuilder(BlockBuilder):
+    """Object-oriented interface to the build() command. Build up a circuit from its components and the create a full
+    ScheduledCircuit on demand.
+
+    Unlike in legal Jaqal, we allow intermixing of body and header statements.
+    """
+
+    def __init__(self, native_gates=None):
+        super().__init__('circuit')
+        self.native_gates = native_gates
+
+    def register(self, name, size, unevaluated=False):
+        """Create a register object and add it to this cicuit."""
+        # This actually creates the register in case the user wants to do something with it externally.
+        register = ('register', name, size)
+        if not unevaluated:
+            register = build(register)
+        self.expression.append(register)
+        return register
+
+    def let(self, name, value, unevaluated=False):
+        """Create a constant defined by a let statement."""
+        constant = ('let', name, value)
+        if not unevaluated:
+            constant = build(constant)
+        self.expression.append(constant)
+        return constant
+
+    def map(self, name, source, idxs=None, unevaluated=False):
+        """
+        Creates a new :class:`Register` (or :class:`NamedQubit`, if idxs is a single index
+        rather than a slice) mapped to some subset of an existing register, and adds it to
+        the circuit. Equivalent to the Jaqal header statement
+        :samp:`map {name} {source}[{idxs}]`.
+
+        :param str name: The name of the new register.
+        :param source: The source register to map the new register onto, or its name.
+        :type source: Register or str
+        :param idxs: Which qubits in the source register to map. If None, map the entire register.
+        :type idxs: slice, int, AnnotatedValue, str, or None
+        :param bool unevaluated: If False, do not create a Register object to return.
+        :returns: The new register.
+        :rtype: Register or NamedQubit
+        """
+        if idxs is None:
+            register = ('map', name, source)
+        elif isinstance(idxs, slice):
+            register = ('map', name, source, idxs.start, idxs.stop, idxs.step)
+        else:
+            register = ('map', name, source, idxs)
+        if not unevaluated:
+            register = build(register)
+        self.expression.append(register)
+        return register
+
+    def macro(self, name, parameters=None, body=None, unevaluated=False):
+        """
+        Defines a :class:`Macro` and adds it to the circuit. Equivalent to the Jaqal
+        statement :samp:`macro {name} {parameters} \{{body}\}`.
+
+        :param str name: The name of the macro.
+        :param list parameters: What arguments (numbers, qubits, etc) the macro should be
+            called with. If None, the macro takes no parameters.
+        :param body: What statements the macro expands to when called.
+        :param bool unevaluated: If False, do not create a Macro object to return.
+        :returns: The new macro.
+        :rtype: Macro
+        :raises JaqalError: if the name of the macro or any of its parameters is invalid (see :meth:`validate_identifier`).
+        """
+
+        parameters = parameters or []
+        macro = ('macro', name, *parameters, body)
+        if not unevaluated:
+            macro = build(macro)
+        self.expression.append(macro)
+        return macro
