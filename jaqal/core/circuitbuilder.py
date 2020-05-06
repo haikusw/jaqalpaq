@@ -343,7 +343,7 @@ class BlockBuilder(BuilderBase):
         :param int iterations: How many times to repeat the loop.
         :param block: The contents of the loop. If a :class:`BlockStatement` is passed, it will
             be used as the loop's body; otherwise, a new :class:`BlockStatement` will be
-            created with the list of instructions passed.
+            created with the list of instructions passed. A :class:`BlockBuilder` may also be passed.
         :type block: BlockStatement or list
         :param bool unevaluated: If False, do not create a Register object to return.
         :returns: The new loop.
@@ -352,6 +352,8 @@ class BlockBuilder(BuilderBase):
             If a :class:`BlockStatement` is passed for ``gates``, then ``parallel`` will be ignored!
         """
 
+        if isinstance(block, BlockBuilder):
+            block = block.expression
         loop = ('loop', iterations, block)
         if not unevaluated:
             loop = build(loop)
@@ -380,6 +382,12 @@ class CircuitBuilder(BlockBuilder):
     def __init__(self, native_gates=None):
         super().__init__('circuit')
         self.native_gates = native_gates
+
+    def build(self, context=None):
+        """Override the build method to provide the native gates."""
+        if context is not None:
+            raise JaqalError("Do not provide a context to the build method of CircuitBuilder")
+        return super().build(self.native_gates)
 
     def register(self, name, size, unevaluated=False):
         """Create a register object and add it to this cicuit."""
@@ -433,7 +441,7 @@ class CircuitBuilder(BlockBuilder):
         :param str name: The name of the macro.
         :param list parameters: What arguments (numbers, qubits, etc) the macro should be
             called with. If None, the macro takes no parameters.
-        :param body: What statements the macro expands to when called.
+        :param body: What statements the macro expands to when called. This may also be a BlockBuilder.
         :param bool unevaluated: If False, do not create a Macro object to return.
         :returns: The new macro.
         :rtype: Macro
@@ -441,6 +449,8 @@ class CircuitBuilder(BlockBuilder):
         """
 
         parameters = parameters or []
+        if isinstance(body, BlockBuilder):
+            body = body.expression
         macro = ('macro', name, *parameters, body)
         if not unevaluated:
             macro = build(macro)

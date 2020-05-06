@@ -235,3 +235,133 @@ class BuildTester(unittest.TestCase):
         exp_value.body.statements.append(parallel_block)
 
         self.assertEqual(exp_value, act_value)
+
+
+class ObjectOrientedBuilderTester(unittest.TestCase):
+    """Test the object-oriented tester. Evaluate all things immediately where the option exists."""
+
+    def test_add_gate_to_block(self):
+        """Test adding a gate to a sequential block. """
+        builder = core.circuitbuilder.SequentialBlockBuilder()
+        builder.gate('foo', 3.14, 1)
+        self.run_test(
+            ('sequential_block', ('gate', 'foo', 3.14, 1)),
+            builder
+        )
+
+    def test_add_sequential_block_to_block(self):
+        builder = core.circuitbuilder.SequentialBlockBuilder()
+        block = builder.block()
+        block.gate('foo')
+        self.run_test(
+            ('sequential_block', ('sequential_block', ('gate', 'foo'))),
+            builder
+        )
+
+    def test_add_loop_to_block(self):
+        iterations = 5
+        builder = core.circuitbuilder.SequentialBlockBuilder()
+        loop_block_builder = core.circuitbuilder.SequentialBlockBuilder()
+        loop_block_builder.gate('foo')
+        loop_block_builder.gate('bar')
+        builder.loop(iterations, loop_block_builder)
+        self.run_test(
+            ('sequential_block', ('loop', iterations, ('sequential_block', ('gate', 'foo'), ('gate', 'bar')))),
+            builder
+        )
+
+    def test_add_parallel_block_to_block(self):
+        builder = core.circuitbuilder.SequentialBlockBuilder()
+        block = builder.block(parallel=True)
+        block.gate('foo')
+        block.gate('bar')
+        self.run_test(
+            ('sequential_block', ('parallel_block', ('gate', 'foo'), ('gate', 'bar'))),
+            builder
+        )
+
+    def test_add_register_to_circuit(self):
+        builder = core.circuitbuilder.CircuitBuilder()
+        builder.register('r', 3)
+        self.run_test(
+            ('circuit', ('register', 'r', 3)),
+            builder
+        )
+
+    def test_add_let_to_circuit(self):
+        builder = core.circuitbuilder.CircuitBuilder()
+        builder.let('x', -1)
+        self.run_test(
+            ('circuit', ('let', 'x', -1)),
+            builder
+        )
+
+    def test_add_macro_to_circuit(self):
+        foo_def = core.GateDefinition('foo', parameters=[Parameter('x', None)])
+        native_gates = {'foo': foo_def}
+        block = core.circuitbuilder.SequentialBlockBuilder()
+        block.gate('foo', 'a')
+        builder = core.circuitbuilder.CircuitBuilder(native_gates=native_gates)
+        builder.macro('my_macro', ['a'], body=block)
+        self.run_test(
+            ('circuit', ('macro', 'my_macro', 'a', ('sequential_block', ('gate', 'foo', 'a')))),
+            builder,
+            native_gates=native_gates
+        )
+
+    def test_use_qubit_in_gate(self):
+        foo_def = core.GateDefinition('foo', [core.Parameter('p0', core.QUBIT_TYPE)])
+        native_gates = {'foo': foo_def}
+        builder = core.circuitbuilder.CircuitBuilder(native_gates=native_gates)
+        reg = builder.register('r', 3)
+        builder.gate('foo', reg[0])
+        self.run_test(
+            ('circuit', ('register', 'r', 3), ('gate', 'foo', ('array_item', 'r', 0))),
+            builder,
+            native_gates=native_gates
+        )
+
+    def test_use_constant_in_gate(self):
+        foo_def = core.GateDefinition('foo', [core.Parameter('p0', None)])
+        native_gates={'foo': foo_def}
+        builder = core.circuitbuilder.CircuitBuilder(native_gates=native_gates)
+        const = builder.let('x', 1)
+        builder.gate('foo', const)
+        self.run_test(
+            ('circuit', ('let', 'x', 1), ('gate', 'foo', 'x')),
+            builder,
+            native_gates=native_gates
+        )
+
+    def test_use_constant_in_register(self):
+        builder = core.circuitbuilder.CircuitBuilder()
+        size = builder.let('size', 3)
+        builder.register('r', size)
+        self.run_test(
+            ('circuit', ('let', 'size', 3), ('register', 'r', 'size')),
+            builder
+        )
+
+    def test_use_macro_gate(self):
+        g_def = core.GateDefinition('g', [Parameter('p0', None)])
+        native_gates = {'g': g_def}
+        builder = core.circuitbuilder.CircuitBuilder(native_gates=native_gates)
+        block = core.circuitbuilder.SequentialBlockBuilder()
+        block.gate('g', 'a')
+        builder.macro('foo', ['a'], block)
+        builder.gate('foo', 1)
+        self.run_test(
+            ('circuit', ('macro', 'foo', 'a', ('sequential_block', ('gate', 'g', 'a'))), ('gate', 'foo', 1)),
+            builder,
+            native_gates=native_gates
+        )
+
+    ##
+    # Helper methods
+    #
+
+    def run_test(self, exp_sexpr, act_builder, native_gates=None):
+        """Run the test by evaluating the results of using the given s-expression vs. using the given builder."""
+        exp_value = build(exp_sexpr, native_gates=native_gates)
+        act_value = act_builder.build()
+        self.assertEqual(exp_value, act_value)
