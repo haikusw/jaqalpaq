@@ -329,6 +329,12 @@ class BlockBuilder(BuilderBase):
 
         To create a block builder without adding it to this block, use the appropriate class constructor directly. This
         is useful when creating a macro or loop.
+
+        :param parallel: Set to False (default) for a sequential block, True for a
+            parallel block.
+        :type parallel: bool or None
+        :returns: The new block builder.
+        :rtype: SequentialBlockBuilder or ParallelBlockBuilder
         """
 
         builder = SequentialBlockBuilder() if not parallel else ParallelBlockBuilder()
@@ -344,7 +350,7 @@ class BlockBuilder(BuilderBase):
         :param block: The contents of the loop. If a :class:`BlockStatement` is passed, it will
             be used as the loop's body; otherwise, a new :class:`BlockStatement` will be
             created with the list of instructions passed. A :class:`BlockBuilder` may also be passed.
-        :type block: BlockStatement or list
+        :type block: BlockStatement, BlockBuilder, or list
         :param bool unevaluated: If False, do not create a Register object to return.
         :returns: The new loop.
 
@@ -390,8 +396,17 @@ class CircuitBuilder(BlockBuilder):
         return super().build(self.native_gates)
 
     def register(self, name, size, unevaluated=False):
-        """Create a register object and add it to this cicuit."""
-        # This actually creates the register in case the user wants to do something with it externally.
+        """
+        Allocates a new fundamental :class:`Register` of the given size, adding it to the
+        circuit under the given name. Equivalent to the Jaqal header statement
+        :samp:`reg {name}[{size}]`.
+
+        :param str name: The name of the register.
+        :param int size: How many qubits are in the register.
+        :param bool unevaluated: If False, do not create a Register object to return.
+        :returns: The new register.
+        """
+
         register = ('register', name, size)
         if not unevaluated:
             register = build(register)
@@ -399,7 +414,16 @@ class CircuitBuilder(BlockBuilder):
         return register
 
     def let(self, name, value, unevaluated=False):
-        """Create a constant defined by a let statement."""
+        """
+        Creates a new :class:`Constant`, mapping the given name to the given value, and adds it to
+        the circuit. Equivalent to the Jaqal header statement :samp:`let {name} {value}`.
+
+        :param str name: The name of the new constant.
+        :param value: The numeric value of the new constant.
+        :type value: int or float
+        :param bool unevaluated: If False, do not create a Register object to return.
+        :returns: The new object.
+        """
         constant = ('let', name, value)
         if not unevaluated:
             constant = build(constant)

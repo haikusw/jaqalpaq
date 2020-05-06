@@ -323,7 +323,7 @@ class ObjectOrientedBuilderTester(unittest.TestCase):
 
     def test_use_constant_in_gate(self):
         foo_def = core.GateDefinition('foo', [core.Parameter('p0', None)])
-        native_gates={'foo': foo_def}
+        native_gates = {'foo': foo_def}
         builder = core.circuitbuilder.CircuitBuilder(native_gates=native_gates)
         const = builder.let('x', 1)
         builder.gate('foo', const)
