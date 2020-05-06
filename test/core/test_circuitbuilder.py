@@ -35,7 +35,7 @@ class BuildTester(unittest.TestCase):
         exp_value = Register(name, size)
         act_value = build(sexpr)
         self.assertEqual(exp_value, act_value)
-    
+
     def test_build_map_full(self):
         # This requires a defined register to test so this requires a circuit.
         rname = randomize.random_identifier()
@@ -59,7 +59,7 @@ class BuildTester(unittest.TestCase):
         circuit = build(sexpr)
         act_value = circuit.registers[mname]
         self.assertEqual(exp_value, act_value)
-    
+
     def test_build_map_slice(self):
         rname = randomize.random_identifier()
         rsize = randomize.random_whole()
@@ -105,7 +105,7 @@ class BuildTester(unittest.TestCase):
         gate_def = act_value.gate_def
         exp_value = gate_def(*args)
         self.assertEqual(exp_value, act_value)
-    
+
     def test_build_native_gate(self):
         name = randomize.random_identifier()
         parameters = [
@@ -135,7 +135,7 @@ class BuildTester(unittest.TestCase):
         act_value = circuit.body.statements[0]
         exp_value = macro()
         self.assertEqual(exp_value, act_value)
-    
+
     def test_build_sequential_block(self):
         sexpr = ('sequential_block', ('gate', 'foo'), ('gate', 'bar', 123))
         block: core.BlockStatement = build(sexpr)
@@ -144,7 +144,7 @@ class BuildTester(unittest.TestCase):
         self.assertEqual(block.statements[0].name, 'foo')
         self.assertEqual(block.statements[1].name, 'bar')
         self.assertEqual(block.statements[1].parameters['p0'], 123)
-    
+
     def test_build_parallel_block(self):
         sexpr = ('parallel_block', ('gate', 'foo'), ('gate', 'bar', 123))
         block: core.BlockStatement = build(sexpr)
@@ -153,7 +153,7 @@ class BuildTester(unittest.TestCase):
         self.assertEqual(block.statements[0].name, 'foo')
         self.assertEqual(block.statements[1].name, 'bar')
         self.assertEqual(block.statements[1].parameters['p0'], 123)
-    
+
     def test_build_loop(self):
         count = randomize.random_whole()
         sexpr = ('loop', count, ('sequential_block', ('gate', 'foo')))
