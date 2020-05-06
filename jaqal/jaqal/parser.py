@@ -104,28 +104,25 @@ def convert_to_circuit(tree, native_gates=None):
 
 
 class CoreTypesVisitor(MacroContextRewriteVisitor, TreeManipulators):
-
     def __init__(self, native_gates=None):
         super().__init__()
         self.native_gates = native_gates
 
     def visit_program(self, header_statements, body_statements):
-        circuit_sexpr = ('circuit', *header_statements, *body_statements)
+        circuit_sexpr = ("circuit", *header_statements, *body_statements)
         return build(circuit_sexpr, native_gates=self.native_gates)
 
     def visit_register_statement(self, array_declaration):
         if self.in_macro:
             raise JaqalError("Someone created an invalid parse tree")
-        name, size = self.deconstruct_array_declaration(
-            array_declaration
-        )
-        sexpr = ('register', name, size)
+        name, size = self.deconstruct_array_declaration(array_declaration)
+        sexpr = ("register", name, size)
         return sexpr
 
     def visit_macro_definition(self, name, arguments, block):
         # As an artifact of the way the parse tree is rebuilt, the block ends up
         # being a parse tree with a single statement which is the s-expression block.
-        return ('macro', name, *arguments, block)
+        return ("macro", name, *arguments, block)
 
     def visit_macro_gate_block(self, block):
         # The macro gate block level is helpful in setting macro contexts but otherwise
@@ -134,36 +131,36 @@ class CoreTypesVisitor(MacroContextRewriteVisitor, TreeManipulators):
         return block
 
     def visit_let_statement(self, identifier, number):
-        sexpr = ('let', identifier, number)
+        sexpr = ("let", identifier, number)
         return sexpr
 
     def visit_map_statement(self, target, source):
         if self.is_array_slice(source):
             src_name, src_slice_tuple = self.deconstruct_array_slice(source)
-            sexpr = ('map', target, src_name, *src_slice_tuple)
+            sexpr = ("map", target, src_name, *src_slice_tuple)
         elif self.is_array_element(source):
             src_name, src_index = self.deconstruct_array_element(source)
-            sexpr = ('map', target, src_name, src_index)
+            sexpr = ("map", target, src_name, src_index)
         else:
-            sexpr = ('map', target, source)
+            sexpr = ("map", target, source)
 
         return sexpr
 
     def visit_parallel_gate_block(self, statements):
-        return ('parallel_block', *statements)
+        return ("parallel_block", *statements)
 
     def visit_sequential_gate_block(self, statements):
-        return ('sequential_block', *statements)
+        return ("sequential_block", *statements)
 
     def visit_loop_statement(self, repetition_count, block):
-        sexpr = ('loop', repetition_count, block)
+        sexpr = ("loop", repetition_count, block)
         return sexpr
 
     def visit_gate_statement(self, gate_name, gate_args):
-        return ('gate', gate_name, *gate_args)
+        return ("gate", gate_name, *gate_args)
 
     def visit_array_element_qual(self, identifier, index):
-        sexpr = ('array_item', identifier, index)
+        sexpr = ("array_item", identifier, index)
         return sexpr
 
     ##
@@ -184,7 +181,7 @@ class CoreTypesVisitor(MacroContextRewriteVisitor, TreeManipulators):
         return str(self.extract_identifier(token))
 
     def visit_qualified_identifier(self, names):
-        return '.'.join(names)
+        return ".".join(names)
 
     def visit_integer(self, token):
         return self.extract_integer(token)

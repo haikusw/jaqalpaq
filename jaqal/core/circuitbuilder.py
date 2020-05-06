@@ -48,6 +48,7 @@ def build(expression, native_gates=None):
     builder = Builder(native_gates=native_gates)
     return builder.build(expression)
 
+
 ##
 # Private classes and functions. Use the build() function.
 #
@@ -104,7 +105,11 @@ class Builder:
             elif isinstance(obj, Macro):
                 macros[obj.name] = obj
                 self.add_to_context(context, obj.name, obj)
-            elif isinstance(obj, GateStatement) or isinstance(obj, BlockStatement) or isinstance(obj, LoopStatement):
+            elif (
+                isinstance(obj, GateStatement)
+                or isinstance(obj, BlockStatement)
+                or isinstance(obj, LoopStatement)
+            ):
                 statements.append(obj)
             else:
                 raise JaqalError(f"Cannot process object {obj} at circuit level")
@@ -135,7 +140,9 @@ class Builder:
             try:
                 src = context[src_name]
             except KeyError:
-                raise JaqalError(f"Cannot map {src_name} to {name}, {src_name} does not exist")
+                raise JaqalError(
+                    f"Cannot map {src_name} to {name}, {src_name} does not exist"
+                )
             return Register(name, alias_from=src)
         if len(args) == 3:
             # Mapping a single qubit
@@ -143,8 +150,12 @@ class Builder:
             try:
                 src = context[src_name]
             except KeyError:
-                raise JaqalError(f"Cannot map {src_name} to {name}, {src_name} does not exist")
-            index = self.build(src_index, context)  # This may be either an integer or defined parameter.
+                raise JaqalError(
+                    f"Cannot map {src_name} to {name}, {src_name} does not exist"
+                )
+            index = self.build(
+                src_index, context
+            )  # This may be either an integer or defined parameter.
             return NamedQubit(name, src, index)
         if len(args) == 5:
             # Mapping a slice of a register
@@ -152,7 +163,9 @@ class Builder:
             try:
                 src = context[src_name]
             except KeyError:
-                raise JaqalError(f"Cannot map {src_name} to {name}, {src_name} does not exist")
+                raise JaqalError(
+                    f"Cannot map {src_name} to {name}, {src_name} does not exist"
+                )
             # These may be either integers, None, or let constants
             start = self.build(src_start, context)
             if start is None:
@@ -182,7 +195,10 @@ class Builder:
         block = args[-1]
         parameter_list = [Parameter(name, None) for name in parameter_names]
         parameter_dict = {param.name: param for param in parameter_list}
-        macro_context = {**context, **parameter_dict}  # parameters must be listed second to take precedence
+        macro_context = {
+            **context,
+            **parameter_dict,
+        }  # parameters must be listed second to take precedence
         built_block = self.build(block, macro_context)
         if not isinstance(built_block, BlockStatement):
             raise JaqalError(f"Macro body must be a block, found {type(built_block)}")
@@ -200,13 +216,17 @@ class Builder:
         if name in context:
             gate_def = context[name]
             if not isinstance(gate_def, AbstractGate):
-                raise JaqalError(f"Cannot call gate {name}: it is type {type(gate_def)}")
+                raise JaqalError(
+                    f"Cannot call gate {name}: it is type {type(gate_def)}"
+                )
             return gate_def
 
-        is_anonymous_gate_allowed = (self.native_gates is None)
+        is_anonymous_gate_allowed = self.native_gates is None
         if not is_anonymous_gate_allowed:
             raise JaqalError(f"No gate {name} defined")
-        gate_def = GateDefinition(name, parameters=[Parameter(f'p{i}', None) for i in range(arg_count)])
+        gate_def = GateDefinition(
+            name, parameters=[Parameter(f"p{i}", None) for i in range(arg_count)]
+        )
         return gate_def
 
     def build_loop(self, sexpression, context):
@@ -269,9 +289,13 @@ class SExpression:
     def __init__(self, expression):
         if not isinstance(expression, tuple) and not isinstance(expression, list):
             # Make sure you use the create() method as it accepts slightly more types.
-            raise JaqalError(f"Need tuple or list to make SExpression, found {expression}")
+            raise JaqalError(
+                f"Need tuple or list to make SExpression, found {expression}"
+            )
         if len(expression) < 1 or not isinstance(expression[0], str):
-            raise JaqalError(f"SExpression first element must be a string, found {expression}")
+            raise JaqalError(
+                f"SExpression first element must be a string, found {expression}"
+            )
         self._expression = expression
 
     @property
@@ -290,6 +314,7 @@ class SExpression:
 ##
 # Object-oriented interface
 #
+
 
 class BuilderBase:
     def __init__(self, name):
@@ -318,7 +343,7 @@ class BlockBuilder(BuilderBase):
         is no longer a need for this method.
         """
         # Note: the gate expression will accept both core types and other s-expressions.
-        gate_expression = ('gate', name, *args)
+        gate_expression = ("gate", name, *args)
         if no_duplicate and self.expression and self.expression[-1] == gate_expression:
             return
         self.expression.append(gate_expression)
@@ -360,7 +385,7 @@ class BlockBuilder(BuilderBase):
 
         if isinstance(block, BlockBuilder):
             block = block.expression
-        loop = ('loop', iterations, block)
+        loop = ("loop", iterations, block)
         if not unevaluated:
             loop = build(loop)
         self.expression.append(loop)
@@ -368,14 +393,16 @@ class BlockBuilder(BuilderBase):
 
 class SequentialBlockBuilder(BlockBuilder):
     """Build up a sequential code block."""
+
     def __init__(self):
-        super().__init__('sequential_block')
+        super().__init__("sequential_block")
 
 
 class ParallelBlockBuilder(BlockBuilder):
     """Build up a parallel code block."""
+
     def __init__(self):
-        super().__init__('parallel_block')
+        super().__init__("parallel_block")
 
 
 class CircuitBuilder(BlockBuilder):
@@ -386,13 +413,15 @@ class CircuitBuilder(BlockBuilder):
     """
 
     def __init__(self, native_gates=None):
-        super().__init__('circuit')
+        super().__init__("circuit")
         self.native_gates = native_gates
 
     def build(self, context=None):
         """Override the build method to provide the native gates."""
         if context is not None:
-            raise JaqalError("Do not provide a context to the build method of CircuitBuilder")
+            raise JaqalError(
+                "Do not provide a context to the build method of CircuitBuilder"
+            )
         return super().build(self.native_gates)
 
     def register(self, name, size, unevaluated=False):
@@ -407,7 +436,7 @@ class CircuitBuilder(BlockBuilder):
         :returns: The new register.
         """
 
-        register = ('register', name, size)
+        register = ("register", name, size)
         if not unevaluated:
             register = build(register)
         self.expression.append(register)
@@ -424,7 +453,7 @@ class CircuitBuilder(BlockBuilder):
         :param bool unevaluated: If False, do not create a Register object to return.
         :returns: The new object.
         """
-        constant = ('let', name, value)
+        constant = ("let", name, value)
         if not unevaluated:
             constant = build(constant)
         self.expression.append(constant)
@@ -447,11 +476,11 @@ class CircuitBuilder(BlockBuilder):
         :rtype: Register or NamedQubit
         """
         if idxs is None:
-            register = ('map', name, source)
+            register = ("map", name, source)
         elif isinstance(idxs, slice):
-            register = ('map', name, source, idxs.start, idxs.stop, idxs.step)
+            register = ("map", name, source, idxs.start, idxs.stop, idxs.step)
         else:
-            register = ('map', name, source, idxs)
+            register = ("map", name, source, idxs)
         if not unevaluated:
             register = build(register)
         self.expression.append(register)
@@ -475,7 +504,7 @@ class CircuitBuilder(BlockBuilder):
         parameters = parameters or []
         if isinstance(body, BlockBuilder):
             body = body.expression
-        macro = ('macro', name, *parameters, body)
+        macro = ("macro", name, *parameters, body)
         if not unevaluated:
             macro = build(macro)
         self.expression.append(macro)
