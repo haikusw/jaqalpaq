@@ -33,7 +33,7 @@ setup(
         "docs": ["sphinx"],
         "pygsti-integration": ["pygsti"],
     },
-    python_requires=">=3.7",
+    python_requires=">=3.6.5",
     platforms=["any"],
     url="https://qscout.sandia.gov",
     classifiers=[
