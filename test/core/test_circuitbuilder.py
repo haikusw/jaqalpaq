@@ -6,6 +6,7 @@ import jaqal.core as core
 from jaqal import JaqalError
 
 import test.core.randomize as randomize
+import test.core.common as common
 
 
 class BuildTester(unittest.TestCase):
@@ -25,7 +26,7 @@ class BuildTester(unittest.TestCase):
     def test_build_float(self):
         exp_value = randomize.random_float()
         act_value = build(exp_value)
-        self.assertEqual(exp_value, act_value)
+        common.assert_values_same(self, exp_value, act_value)
 
     def test_build_register(self):
         name = randomize.random_identifier()
