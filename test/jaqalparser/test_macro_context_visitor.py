@@ -5,7 +5,7 @@ from jaqal.parser.parse import make_lark_parser
 from jaqal.parser.identifier import Identifier
 
 
-class TestVisitor(MacroContextRewriteVisitor):
+class MacroTaggerVisitor(MacroContextRewriteVisitor):
     def __init__(self):
         super().__init__()
         self.context_by_gate = {}
@@ -25,7 +25,7 @@ class MacroContextRewriteVisitorTester(unittest.TestCase):
         }
         parser = make_lark_parser()
         tree = parser.parse(text)
-        visitor = TestVisitor()
+        visitor = MacroTaggerVisitor()
         visitor.visit(tree)
         act_result = visitor.context_by_gate
         self.assertEqual(exp_result, act_result)
