@@ -15,7 +15,9 @@ def forward_simulate_circuit(
         [circuit.registers[key].size for key in circuit.registers.keys()]
     )
     if model is None:
-        model = build_noiseless_native_model(num_qubits, qubit_label_func)
+        model = build_noiseless_native_model(
+            num_qubits, circuit.native_gates, qubit_label_func
+        )
     pygsti_circuit = pygsti_circuit_from_code(circuit)
     probs = model.probs(pygsti_circuit)
     return probs
