@@ -26,15 +26,15 @@ def forward_simulate_circuit_counts(
     N,
     model=None,
     qubit_label_func=lambda qidx: "q[{}]".format(qidx),
-    tol=1e-6,
+    tol=1e-10,
 ):
     probs = forward_simulate_circuit(
         jaqal_circ, model=model, qubit_label_func=qubit_label_func
     )
     for item in probs.items():
-        if item[1] < -tol:
+        if (item[1] < 0) and (np.abs(item[1]) < tol):
             probs[item[0]] = 0
-        elif item[1] > 1 + tol:
+        elif (item[1] > 1) and (item[1] < 1 + tol):
             probs[item[0]] = 1
     counts = np.random.multinomial(N, list(probs.values()))
     counts_dict = {}
