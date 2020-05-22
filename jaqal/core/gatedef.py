@@ -44,6 +44,27 @@ class AbstractGate:
         """
         return self._parameters
 
+    @property
+    def ideal_action(self):
+        """
+        Returns the ideal unitary action of the gate.
+        """
+        return self._ideal_action
+
+    def ideal_action_pygsti(self, parms):
+        """
+        Returns the ideal unitary action of the gate.
+
+        Is compatible with pygsti's build_from_parameterization
+        nonstd_gate_unitaries parameters.
+        """
+        if parms:
+            return self._ideal_action(*parms)
+        else:
+            import numpy
+
+            return numpy.identity(2 ** self.quantum_parameters)
+
     def call(self, *args, **kwargs):
         """
         Create a :class:`GateStatement` that calls this gate.
