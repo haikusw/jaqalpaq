@@ -1,16 +1,26 @@
 import pygsti
 import numpy as np
-import scipy
+
+from jaqal.generator import generate_jaqal_program
+from jaqal.jaqal.parser import Option, parse_jaqal_string
+
 from .pygstimodel import build_noiseless_native_model
 from .frontend import pygsti_circuit_from_code
 
 
 def forward_simulate_circuit(
-    circuit, model=None, qubit_label_func=lambda qidx: "q[{}]".format(qidx)
+    circuit,
+    model=None,
+    qubit_label_func=lambda qidx: "q[{}]".format(qidx),
+    unroll_macros=True,
 ):
-    assert (
-        circuit.macros == {}
-    ), "Jaqal macros currently unsupported for forward simulation.  Please unroll Jaqal circuit first."
+    if circuit.macros and unroll_macros:
+        circuit = parse_jaqal_string(
+            generate_jaqal_program(circuit),
+            processing_option=Option.expand_macro,
+            native_gates=circuit.native_gates,
+        )
+
     num_qubits = np.sum(
         [circuit.registers[key].size for key in circuit.registers.keys()]
     )
