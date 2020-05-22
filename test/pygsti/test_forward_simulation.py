@@ -1,18 +1,18 @@
-import unittest
+import unittest, pytest
 
 import jaqal
 from jaqal.core import ScheduledCircuit as Circuit
 import numpy as np
 import jaqal.pygsti
-from qscout.gate_pulse import native_gates
 from jaqal.generator import generate_jaqal_program
 import jaqal.jaqal
 from jaqal.core.circuit import normalize_native_gates
 
+native_gates = pytest.importorskip("qscout.gate_pulse.native_gates")
+
 
 class ForwardSimulatorTester(unittest.TestCase):
     def __init__(self, *args, **kwargs):
-
         super().__init__(*args, **kwargs)
 
         c = Circuit(native_gates.NATIVE_GATES)
