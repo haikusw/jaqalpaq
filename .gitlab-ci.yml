@@ -22,3 +22,5 @@ pytest:
   stage: Test
   script:
     - pip install -e .[pygsti-integration,tests] && pytest
+    - ( unset https_proxy ; cd .. && rm -fr qscout_gpf && git clone --depth 1 https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.sandia.gov/jaqal/qscout_gpf.git/  )
+    - ( cd ../qscout_gpf && pip install -e . )
