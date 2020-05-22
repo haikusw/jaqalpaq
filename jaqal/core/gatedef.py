@@ -65,6 +65,34 @@ class AbstractGate:
 
             return numpy.identity(2 ** self.quantum_parameters)
 
+    @property
+    def quantum_parameters(self):
+        try:
+            return self._quantum_parameters
+        except AttributeError:
+            self.count_parameters()
+            return self._quantum_parameters
+
+    @property
+    def classical_parameters(self):
+        try:
+            return self._classical_parameters
+        except AttributeError:
+            self.count_parameters()
+            return self._classical_parameters
+
+    def count_parameters(self):
+        c = 0
+        q = 0
+        for p in self._parameters:
+            if p.classical:
+                c += 1
+            else:
+                q += 1
+
+        self._classical_parameters = c
+        self._quantum_parameters = q
+
     def call(self, *args, **kwargs):
         """
         Create a :class:`GateStatement` that calls this gate.
