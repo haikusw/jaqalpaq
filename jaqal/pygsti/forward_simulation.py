@@ -9,40 +9,26 @@ from .frontend import pygsti_circuit_from_code
 
 
 def forward_simulate_circuit(
-    circuit,
-    model=None,
-    qubit_label_func=lambda qidx: "q[{}]".format(qidx),
-    unroll_macros=True,
+    circuit, model=None, unroll_macros=True,
 ):
     if circuit.macros and unroll_macros:
         circuit = parse_jaqal_string(
             generate_jaqal_program(circuit),
-            processing_option=Option.expand_macro,
+            processing_option=Option.expand_macro | Option.expand_let_map,
             native_gates=circuit.native_gates,
         )
 
-    num_qubits = np.sum(
-        [circuit.registers[key].size for key in circuit.registers.keys()]
-    )
     if model is None:
-        model = build_noiseless_native_model(
-            num_qubits, circuit.native_gates, qubit_label_func
-        )
+        model = build_noiseless_native_model(circuit.registers, circuit.native_gates)
     pygsti_circuit = pygsti_circuit_from_code(circuit)
     probs = model.probs(pygsti_circuit)
     return probs
 
 
 def forward_simulate_circuit_counts(
-    jaqal_circ,
-    N,
-    model=None,
-    qubit_label_func=lambda qidx: "q[{}]".format(qidx),
-    tol=1e-10,
+    jaqal_circ, N, model=None, tol=1e-10,
 ):
-    probs = forward_simulate_circuit(
-        jaqal_circ, model=model, qubit_label_func=qubit_label_func
-    )
+    probs = forward_simulate_circuit(jaqal_circ, model=model,)
     for item in probs.items():
         if (item[1] < 0) and (np.abs(item[1]) < tol):
             probs[item[0]] = 0

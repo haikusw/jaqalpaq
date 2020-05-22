@@ -1,10 +1,11 @@
 import pygsti
 import numpy as np
 import scipy
+from collections import OrderedDict
 
 
 def build_noiseless_native_model(
-    num_qubits, gates, qubit_label_func=lambda qidx: f"q[{qidx}]",
+    registers, gates,
 ):
     gate_names = []
     unitaries = {}
@@ -30,12 +31,24 @@ def build_noiseless_native_model(
         if g.quantum_parameters > 1:
             availability[name] = "all-permutations"
 
+    fundamental_registers = [r for r in registers.values() if r._alias_from is None]
+    if len(fundamental_registers) > 1:
+        print(
+            "Warning:  More than one physical register name in use; ordering may be borked."
+        )
+    physical_qubit_list = []
+    for r in fundamental_registers:
+        for q in r:
+            physical_qubit_list.append(q._name)
+
+    num_qubits = len(physical_qubit_list)
+
     target_model = pygsti.construction.build_localnoise_model(
         nQubits=num_qubits,
         gate_names=gate_names,
         nonstd_gate_unitaries=unitaries,
         availability=availability,
-        qubit_labels=[qubit_label_func(qidx) for qidx in range(num_qubits)],
+        qubit_labels=physical_qubit_list,
         parameterization="static unitary",
     )
 

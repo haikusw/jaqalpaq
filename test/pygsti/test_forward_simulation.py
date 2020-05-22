@@ -67,8 +67,150 @@ measure_all
         self.assertAlmostEqual(jaqal_c_dict["110"], 0.5)
         self.assertAlmostEqual(jaqal_c_dict["111"], 0)
 
-    def test_forward_simulate_circuit(self):
+    def test_forward_simulate_circuit_counts(self):
         c_count_dict = jaqal.pygsti.forward_simulate_circuit_counts(self.c, 1000)
         jaqal_c_count_dict = jaqal.pygsti.forward_simulate_circuit_counts(
             self.jaqal_c, 1000
         )
+
+    def test_five_qubit_GHZ(self):
+        jaqal_text = """
+register q[5]
+
+let pi2 1.5707963267948966
+let mpi2 -1.5707963267948966
+
+macro CNOT control target {
+Ry control pi2
+MS control target pi2 0
+Rx target mpi2
+Rx control mpi2
+Ry control mpi2
+}
+
+prepare_all
+
+Rx q[0] pi2
+
+CNOT q[0] q[1]
+CNOT q[1] q[2]
+CNOT q[2] q[3]
+CNOT q[3] q[4]
+
+measure_all
+"""
+        jaqal_prog = jaqal.jaqal.parser.parse_jaqal_string(
+            jaqal_text, native_gates=normalize_native_gates(native_gates.NATIVE_GATES)
+        )
+        output_probs = jaqal.pygsti.forward_simulate_circuit(jaqal_prog)
+        output_counts = jaqal.pygsti.forward_simulate_circuit_counts(jaqal_prog, 1000)
+        self.assertAlmostEqual(output_probs["00000"], 0.5)
+        self.assertAlmostEqual(output_probs["11111"], 0.5)
+
+    def test_multiple_registers(self):
+        jaqal_text = """
+register p[3]
+register q[2]
+
+let pi2 1.5707963267948966
+let mpi2 -1.5707963267948966
+
+macro CNOT control target {
+Ry control pi2
+MS control target pi2 0
+Rx target mpi2
+Rx control mpi2
+Ry control mpi2
+}
+
+prepare_all
+
+Rx p[0] pi2
+
+CNOT p[0] p[1]
+CNOT p[1] p[2]
+CNOT p[2] q[0]
+CNOT q[0] q[1]
+
+measure_all
+"""
+        jaqal_prog = jaqal.jaqal.parser.parse_jaqal_string(
+            jaqal_text, native_gates=normalize_native_gates(native_gates.NATIVE_GATES)
+        )
+        output_probs = jaqal.pygsti.forward_simulate_circuit(jaqal_prog)
+        output_counts = jaqal.pygsti.forward_simulate_circuit_counts(jaqal_prog, 1000)
+        self.assertAlmostEqual(output_probs["00000"], 0.5)
+        self.assertAlmostEqual(output_probs["11111"], 0.5)
+
+    def test_multiple_registers_and_ancilla(self):
+        jaqal_text = """
+register p[3]
+register q[2]
+map ancilla q[1]
+
+let pi2 1.5707963267948966
+let mpi2 -1.5707963267948966
+
+macro CNOT control target {
+Ry control pi2
+MS control target pi2 0
+Rx target mpi2
+Rx control mpi2
+Ry control mpi2
+}
+
+prepare_all
+
+Rx p[0] pi2
+
+CNOT p[0] p[1]
+CNOT p[1] p[2]
+CNOT p[2] q[0]
+CNOT q[0] ancilla
+
+measure_all
+"""
+        jaqal_prog = jaqal.jaqal.parser.parse_jaqal_string(
+            jaqal_text, native_gates=normalize_native_gates(native_gates.NATIVE_GATES)
+        )
+        output_probs = jaqal.pygsti.forward_simulate_circuit(jaqal_prog)
+        output_counts = jaqal.pygsti.forward_simulate_circuit_counts(jaqal_prog, 1000)
+        self.assertAlmostEqual(output_probs["00000"], 0.5)
+        self.assertAlmostEqual(output_probs["11111"], 0.5)
+
+    def test_multiple_registers_and_ancillae(self):
+        jaqal_text = """
+register p[3]
+register q[3]
+map ancillae q[0:2]
+
+let pi2 1.5707963267948966
+let mpi2 -1.5707963267948966
+
+macro CNOT control target {
+Ry control pi2
+MS control target pi2 0
+Rx target mpi2
+Rx control mpi2
+Ry control mpi2
+}
+
+prepare_all
+
+Rx p[0] pi2
+
+CNOT p[0] p[1]
+CNOT p[1] p[2]
+CNOT p[2] ancillae[0]
+CNOT ancillae[0] ancillae[1]
+CNOT ancillae[1] q[2]
+
+measure_all
+"""
+        jaqal_prog = jaqal.jaqal.parser.parse_jaqal_string(
+            jaqal_text, native_gates=normalize_native_gates(native_gates.NATIVE_GATES)
+        )
+        output_probs = jaqal.pygsti.forward_simulate_circuit(jaqal_prog)
+        output_counts = jaqal.pygsti.forward_simulate_circuit_counts(jaqal_prog, 1000)
+        self.assertAlmostEqual(output_probs["000000"], 0.5)
+        self.assertAlmostEqual(output_probs["111111"], 0.5)
