@@ -13,13 +13,13 @@ class AbstractGate:
     :type parameters: list(Parameter) or None
     """
 
-    def __init__(self, name, parameters=None, ideal_action=None):
+    def __init__(self, name, parameters=None, ideal_unitary=None):
         self._name = name
         if parameters is None:
             self._parameters = []
         else:
             self._parameters = parameters
-        self._ideal_action = ideal_action
+        self._ideal_unitary = ideal_unitary
 
     def __repr__(self):
         return f"{type(self).__name__}({self.name}, {self.parameters})"
@@ -45,21 +45,25 @@ class AbstractGate:
         return self._parameters
 
     @property
-    def ideal_action(self):
+    def ideal_unitary(self):
         """
-        Returns the ideal unitary action of the gate.
-        """
-        return self._ideal_action
+        Returns the ideal unitary action of the gate on its target qubits.
 
-    def ideal_action_pygsti(self, parms):
+        Takes as parameters all classical arguments.
         """
-        Returns the ideal unitary action of the gate.
+        return self._ideal_unitary
+
+    def ideal_unitary_pygsti(self, parms):
+        """
+        Returns the ideal unitary action of the gate on its target qubits.
+
+        Takes as a parameter: a list of all classical arguments.
 
         Is compatible with pygsti's build_from_parameterization
         nonstd_gate_unitaries parameters.
         """
         if parms:
-            return self._ideal_action(*parms)
+            return self._ideal_unitary(*parms)
         else:
             import numpy
 

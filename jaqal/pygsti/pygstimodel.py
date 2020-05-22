@@ -24,9 +24,9 @@ def build_noiseless_native_model(
             continue
 
         if g.classical_parameters > 0:
-            unitaries[name] = g.ideal_action_pygsti
+            unitaries[name] = g.ideal_unitary_pygsti
         else:
-            unitaries[name] = g.ideal_action()
+            unitaries[name] = g.ideal_unitary()
 
         if g.quantum_parameters > 1:
             availability[name] = "all-permutations"
