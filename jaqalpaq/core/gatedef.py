@@ -169,3 +169,42 @@ class GateDefinition(AbstractGate):
     """
 
     pass
+
+
+class IdleGateDefinition(GateDefinition):
+    """
+    Base: :class:`AbstractGate`
+
+    Represents a gate that merely idles for some duration.
+    """
+
+    def __init__(self, gate, name=None):
+        self._parent_def = gate
+        self._parameters = gate._parameters
+        self._name = name if name else f"I_{gate.name}"
+
+    @property
+    def _ideal_unitary(self):
+        parent = self._parent_def
+        if parent._ideal_unitary:
+            import numpy
+
+            return lambda: numpy.identity(2 ** parent.quantum_parameters)
+        else:
+            return None
+
+    @property
+    def used_qubits(self):
+        yield from ()
+
+
+def add_idle_gates(active_gates):
+    gates = []
+    for g in active_gates:
+        gates.append(g)
+
+        # Special case handling of preparation and measurement
+        if g.name not in ("prepare_all", "measure_all"):
+            gates.append(IdleGateDefinition(g))
+
+    return tuple(gates)
