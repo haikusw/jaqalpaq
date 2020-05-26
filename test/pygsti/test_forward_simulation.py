@@ -103,7 +103,9 @@ measure_all
             jaqal_text, native_gates=normalize_native_gates(native_gates.NATIVE_GATES)
         )
         output_probs = jaqalpaq.pygsti.forward_simulate_circuit(jaqal_prog)
-        output_counts = jaqalpaq.pygsti.forward_simulate_circuit_counts(jaqal_prog, 1000)
+        output_counts = jaqalpaq.pygsti.forward_simulate_circuit_counts(
+            jaqal_prog, 1000
+        )
         self.assertAlmostEqual(output_probs["00000"], 0.5)
         self.assertAlmostEqual(output_probs["11111"], 0.5)
 
@@ -138,7 +140,9 @@ measure_all
             jaqal_text, native_gates=normalize_native_gates(native_gates.NATIVE_GATES)
         )
         output_probs = jaqalpaq.pygsti.forward_simulate_circuit(jaqal_prog)
-        output_counts = jaqalpaq.pygsti.forward_simulate_circuit_counts(jaqal_prog, 1000)
+        output_counts = jaqalpaq.pygsti.forward_simulate_circuit_counts(
+            jaqal_prog, 1000
+        )
         self.assertAlmostEqual(output_probs["00000"], 0.5)
         self.assertAlmostEqual(output_probs["11111"], 0.5)
 
@@ -174,7 +178,9 @@ measure_all
             jaqal_text, native_gates=normalize_native_gates(native_gates.NATIVE_GATES)
         )
         output_probs = jaqalpaq.pygsti.forward_simulate_circuit(jaqal_prog)
-        output_counts = jaqalpaq.pygsti.forward_simulate_circuit_counts(jaqal_prog, 1000)
+        output_counts = jaqalpaq.pygsti.forward_simulate_circuit_counts(
+            jaqal_prog, 1000
+        )
         self.assertAlmostEqual(output_probs["00000"], 0.5)
         self.assertAlmostEqual(output_probs["11111"], 0.5)
 
@@ -211,6 +217,8 @@ measure_all
             jaqal_text, native_gates=normalize_native_gates(native_gates.NATIVE_GATES)
         )
         output_probs = jaqalpaq.pygsti.forward_simulate_circuit(jaqal_prog)
-        output_counts = jaqalpaq.pygsti.forward_simulate_circuit_counts(jaqal_prog, 1000)
+        output_counts = jaqalpaq.pygsti.forward_simulate_circuit_counts(
+            jaqal_prog, 1000
+        )
         self.assertAlmostEqual(output_probs["000000"], 0.5)
         self.assertAlmostEqual(output_probs["111111"], 0.5)

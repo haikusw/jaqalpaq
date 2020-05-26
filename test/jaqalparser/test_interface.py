@@ -1,7 +1,12 @@
 from unittest import TestCase
 
 from jaqalpaq.parser.interface import Interface, MemoizedInterface
-from jaqalpaq.parser.iter_gates import Gate, Loop, ParallelGateBlock, SequentialGateBlock
+from jaqalpaq.parser.iter_gates import (
+    Gate,
+    Loop,
+    ParallelGateBlock,
+    SequentialGateBlock,
+)
 from jaqalpaq.parser.identifier import Identifier
 
 

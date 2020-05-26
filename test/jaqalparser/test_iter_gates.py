@@ -1,7 +1,12 @@
 import unittest
 
 from jaqalpaq.parser.iter_gates import get_gates_and_loops
-from jaqalpaq.parser.iter_gates import Gate, Loop, ParallelGateBlock, SequentialGateBlock
+from jaqalpaq.parser.iter_gates import (
+    Gate,
+    Loop,
+    ParallelGateBlock,
+    SequentialGateBlock,
+)
 from jaqalpaq.parser.parse import parse_with_lark
 
 
