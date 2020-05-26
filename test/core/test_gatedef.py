@@ -2,7 +2,7 @@ import unittest
 
 from .abstractgate import AbstractGateTesterBase
 from . import common
-from jaqal.core import GateDefinition
+from jaqalpaq.core import GateDefinition
 
 
 class GateDefinitionTester(AbstractGateTesterBase, unittest.TestCase):

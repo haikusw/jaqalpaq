@@ -1,9 +1,9 @@
 from unittest import TestCase
 
 from .helpers.parser import ParserTesterMixin
-from jaqal.parser.extract_register import extract_register
-from jaqal.parser.parse import make_lark_parser, TreeManipulators
-from jaqal.parser.identifier import Identifier
+from jaqalpaq.parser.extract_register import extract_register
+from jaqalpaq.parser.parse import make_lark_parser, TreeManipulators
+from jaqalpaq.parser.identifier import Identifier
 
 
 class ExtractRegisterTester(ParserTesterMixin, TestCase):

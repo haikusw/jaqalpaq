@@ -1,9 +1,9 @@
 from unittest import TestCase
 
-from jaqal.parser.resolve_map import resolve_map
+from jaqalpaq.parser.resolve_map import resolve_map
 from .helpers.parser import ParserTesterMixin
-from jaqal.parser.parse import make_lark_parser
-from jaqal.parser.extract_map import extract_map
+from jaqalpaq.parser.parse import make_lark_parser
+from jaqalpaq.parser.extract_map import extract_map
 
 
 class ResolveMapTester(ParserTesterMixin, TestCase):

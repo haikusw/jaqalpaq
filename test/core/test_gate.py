@@ -1,6 +1,6 @@
 import unittest
 
-from jaqal.core import GateStatement
+from jaqalpaq.core import GateStatement
 
 from .randomize import random_identifier, random_whole
 from . import common

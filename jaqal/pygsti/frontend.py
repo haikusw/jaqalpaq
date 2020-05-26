@@ -2,8 +2,8 @@ import pygsti
 import pygsti.objects
 
 import numpy as np
-from jaqal import JaqalError
-from jaqal.core.constant import Constant
+from jaqalpaq import JaqalError
+from jaqalpaq.core.constant import Constant
 
 
 def pygsti_label_from_statement(gate):

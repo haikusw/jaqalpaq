@@ -1,7 +1,7 @@
 from unittest import TestCase
 from numbers import Number
 
-from jaqal.core import (
+from jaqalpaq.core import (
     GateDefinition,
     Register,
     ScheduledCircuit,
@@ -13,9 +13,9 @@ from jaqal.core import (
     NamedQubit,
     AnnotatedValue,
 )
-from jaqal.jaqal.parser import parse_jaqal_string, Option
-from jaqal.parser.identifier import Identifier
-from jaqal import JaqalError
+from jaqalpaq.jaqal.parser import parse_jaqal_string, Option
+from jaqalpaq.parser.identifier import Identifier
+from jaqalpaq import JaqalError
 
 
 class ParserTester(TestCase):

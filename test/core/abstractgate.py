@@ -2,7 +2,7 @@ import unittest
 from itertools import dropwhile, takewhile
 from abc import abstractmethod
 
-from jaqal.core import INT_TYPE, FLOAT_TYPE, QUBIT_TYPE
+from jaqalpaq.core import INT_TYPE, FLOAT_TYPE, QUBIT_TYPE
 from . import common
 from .randomize import random_identifier, random_whole
 

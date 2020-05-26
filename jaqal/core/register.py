@@ -1,4 +1,4 @@
-from jaqal import JaqalError
+from jaqalpaq import JaqalError
 from .parameter import AnnotatedValue, Parameter, INT_TYPE, REGISTER_TYPE
 from .constant import Constant
 

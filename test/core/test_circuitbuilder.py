@@ -1,9 +1,9 @@
 import unittest
 
-from jaqal.core.circuitbuilder import build
-from jaqal.core import Parameter, Register, NamedQubit, Constant, GateDefinition
-import jaqal.core as core
-from jaqal import JaqalError
+from jaqalpaq.core.circuitbuilder import build
+from jaqalpaq.core import Parameter, Register, NamedQubit, Constant, GateDefinition
+import jaqalpaq.core as core
+from jaqalpaq import JaqalError
 
 import test.core.randomize as randomize
 import test.core.common as common

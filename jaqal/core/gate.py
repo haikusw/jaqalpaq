@@ -1,7 +1,7 @@
 from itertools import zip_longest
 import math
 
-from jaqal import JaqalError
+from jaqalpaq import JaqalError
 
 
 class GateStatement:

@@ -1,12 +1,12 @@
 import unittest, pytest
 
-import jaqal
-from jaqal.core import ScheduledCircuit as Circuit
+import jaqalpaq
+from jaqalpaq.core import ScheduledCircuit as Circuit
 import numpy as np
-import jaqal.pygsti
-from jaqal.generator import generate_jaqal_program
-import jaqal.jaqal
-from jaqal.core.circuit import normalize_native_gates
+import jaqalpaq.pygsti
+from jaqalpaq.generator import generate_jaqal_program
+import jaqalpaq.jaqal
+from jaqalpaq.core.circuit import normalize_native_gates
 
 native_gates = pytest.importorskip("qscout.gate_pulse.native_gates")
 
@@ -28,7 +28,7 @@ class ForwardSimulatorTester(unittest.TestCase):
 
         self.jaqal_string = generate_jaqal_program(c)
 
-        self.jaqal_c = jaqal.jaqal.parser.parse_jaqal_string(
+        self.jaqal_c = jaqalpaq.jaqal.parser.parse_jaqal_string(
             self.jaqal_string,
             native_gates=normalize_native_gates(native_gates=native_gates.NATIVE_GATES),
         )
@@ -47,7 +47,7 @@ measure_all
         )
 
     def test_forward_simulate_circuit(self):
-        c_dict = jaqal.pygsti.forward_simulate_circuit(self.c)
+        c_dict = jaqalpaq.pygsti.forward_simulate_circuit(self.c)
         self.assertAlmostEqual(c_dict["000"], 0.5)
         self.assertAlmostEqual(c_dict["001"], 0)
         self.assertAlmostEqual(c_dict["010"], 0)
@@ -57,7 +57,7 @@ measure_all
         self.assertAlmostEqual(c_dict["110"], 0.5)
         self.assertAlmostEqual(c_dict["111"], 0)
 
-        jaqal_c_dict = jaqal.pygsti.forward_simulate_circuit(self.jaqal_c)
+        jaqal_c_dict = jaqalpaq.pygsti.forward_simulate_circuit(self.jaqal_c)
         self.assertAlmostEqual(jaqal_c_dict["000"], 0.5)
         self.assertAlmostEqual(jaqal_c_dict["001"], 0)
         self.assertAlmostEqual(jaqal_c_dict["010"], 0)
@@ -68,8 +68,8 @@ measure_all
         self.assertAlmostEqual(jaqal_c_dict["111"], 0)
 
     def test_forward_simulate_circuit_counts(self):
-        c_count_dict = jaqal.pygsti.forward_simulate_circuit_counts(self.c, 1000)
-        jaqal_c_count_dict = jaqal.pygsti.forward_simulate_circuit_counts(
+        c_count_dict = jaqalpaq.pygsti.forward_simulate_circuit_counts(self.c, 1000)
+        jaqal_c_count_dict = jaqalpaq.pygsti.forward_simulate_circuit_counts(
             self.jaqal_c, 1000
         )
 
@@ -99,11 +99,11 @@ CNOT q[3] q[4]
 
 measure_all
 """
-        jaqal_prog = jaqal.jaqal.parser.parse_jaqal_string(
+        jaqal_prog = jaqalpaq.jaqal.parser.parse_jaqal_string(
             jaqal_text, native_gates=normalize_native_gates(native_gates.NATIVE_GATES)
         )
-        output_probs = jaqal.pygsti.forward_simulate_circuit(jaqal_prog)
-        output_counts = jaqal.pygsti.forward_simulate_circuit_counts(jaqal_prog, 1000)
+        output_probs = jaqalpaq.pygsti.forward_simulate_circuit(jaqal_prog)
+        output_counts = jaqalpaq.pygsti.forward_simulate_circuit_counts(jaqal_prog, 1000)
         self.assertAlmostEqual(output_probs["00000"], 0.5)
         self.assertAlmostEqual(output_probs["11111"], 0.5)
 
@@ -134,11 +134,11 @@ CNOT q[0] q[1]
 
 measure_all
 """
-        jaqal_prog = jaqal.jaqal.parser.parse_jaqal_string(
+        jaqal_prog = jaqalpaq.jaqal.parser.parse_jaqal_string(
             jaqal_text, native_gates=normalize_native_gates(native_gates.NATIVE_GATES)
         )
-        output_probs = jaqal.pygsti.forward_simulate_circuit(jaqal_prog)
-        output_counts = jaqal.pygsti.forward_simulate_circuit_counts(jaqal_prog, 1000)
+        output_probs = jaqalpaq.pygsti.forward_simulate_circuit(jaqal_prog)
+        output_counts = jaqalpaq.pygsti.forward_simulate_circuit_counts(jaqal_prog, 1000)
         self.assertAlmostEqual(output_probs["00000"], 0.5)
         self.assertAlmostEqual(output_probs["11111"], 0.5)
 
@@ -170,11 +170,11 @@ CNOT q[0] ancilla
 
 measure_all
 """
-        jaqal_prog = jaqal.jaqal.parser.parse_jaqal_string(
+        jaqal_prog = jaqalpaq.jaqal.parser.parse_jaqal_string(
             jaqal_text, native_gates=normalize_native_gates(native_gates.NATIVE_GATES)
         )
-        output_probs = jaqal.pygsti.forward_simulate_circuit(jaqal_prog)
-        output_counts = jaqal.pygsti.forward_simulate_circuit_counts(jaqal_prog, 1000)
+        output_probs = jaqalpaq.pygsti.forward_simulate_circuit(jaqal_prog)
+        output_counts = jaqalpaq.pygsti.forward_simulate_circuit_counts(jaqal_prog, 1000)
         self.assertAlmostEqual(output_probs["00000"], 0.5)
         self.assertAlmostEqual(output_probs["11111"], 0.5)
 
@@ -207,10 +207,10 @@ CNOT ancillae[1] q[2]
 
 measure_all
 """
-        jaqal_prog = jaqal.jaqal.parser.parse_jaqal_string(
+        jaqal_prog = jaqalpaq.jaqal.parser.parse_jaqal_string(
             jaqal_text, native_gates=normalize_native_gates(native_gates.NATIVE_GATES)
         )
-        output_probs = jaqal.pygsti.forward_simulate_circuit(jaqal_prog)
-        output_counts = jaqal.pygsti.forward_simulate_circuit_counts(jaqal_prog, 1000)
+        output_probs = jaqalpaq.pygsti.forward_simulate_circuit(jaqal_prog)
+        output_counts = jaqalpaq.pygsti.forward_simulate_circuit_counts(jaqal_prog, 1000)
         self.assertAlmostEqual(output_probs["000000"], 0.5)
         self.assertAlmostEqual(output_probs["111111"], 0.5)

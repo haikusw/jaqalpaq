@@ -1,7 +1,7 @@
 import unittest
 import random
 
-from jaqal.core.visitor import Visitor
+from jaqalpaq.core.visitor import Visitor
 
 
 class JaqalVisitorTester(unittest.TestCase):

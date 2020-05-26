@@ -1,8 +1,8 @@
 import unittest
 
-from jaqal.parser.block_normalizer import normalize_blocks_with_unitary_timing
+from jaqalpaq.parser.block_normalizer import normalize_blocks_with_unitary_timing
 from .helpers.parser import ParserTesterMixin
-from jaqal.parser.parse import make_lark_parser
+from jaqalpaq.parser.parse import make_lark_parser
 
 
 class BlockNormalizerTester(ParserTesterMixin, unittest.TestCase):

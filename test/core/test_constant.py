@@ -1,7 +1,7 @@
 import unittest
 
-from jaqal.core.parameter import FLOAT_TYPE, INT_TYPE
-from jaqal.core.constant import Constant
+from jaqalpaq.core.parameter import FLOAT_TYPE, INT_TYPE
+from jaqalpaq.core.constant import Constant
 from . import randomize
 from . import common
 

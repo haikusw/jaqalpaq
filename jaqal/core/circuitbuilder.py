@@ -9,7 +9,7 @@ from .circuit import ScheduledCircuit
 from .parameter import Parameter
 from .block import BlockStatement, LoopStatement
 
-from jaqal import JaqalError
+from jaqalpaq import JaqalError
 
 
 def build(expression, native_gates=None):

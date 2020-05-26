@@ -1,9 +1,9 @@
 from enum import Enum
 
-from jaqal.parser import Interface, MacroContextRewriteVisitor, TreeManipulators
+from jaqalpaq.parser import Interface, MacroContextRewriteVisitor, TreeManipulators
 
-from jaqal.core.circuitbuilder import build
-from jaqal import JaqalError
+from jaqalpaq.core.circuitbuilder import build
+from jaqalpaq import JaqalError
 
 
 class Option(Enum):

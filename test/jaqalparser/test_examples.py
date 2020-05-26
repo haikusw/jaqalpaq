@@ -1,7 +1,7 @@
 import unittest
 from pathlib import Path
-from jaqal.jaqal.parser import parse_jaqal_file
-from jaqal.core.circuitbuilder import build
+from jaqalpaq.jaqal.parser import parse_jaqal_file
+from jaqalpaq.core.circuitbuilder import build
 
 top_example_dir = Path("examples/jaqal")
 test_example_dir = Path("../examples/jaqal")

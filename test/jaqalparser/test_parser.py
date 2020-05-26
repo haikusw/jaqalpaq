@@ -4,7 +4,7 @@ import pathlib
 
 # Accommodate both running from the test directory (as PyCharm does) and running from the project root.
 from .helpers.parser import ParserTesterMixin
-from jaqal.parser.parse import make_lark_parser
+from jaqalpaq.parser.parse import make_lark_parser
 
 top_grammar_filename = "jaqal/jaqal_grammar.lark"
 test_grammar_filename = "../jaqal/jaqal_grammar.lark"

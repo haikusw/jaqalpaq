@@ -1,13 +1,13 @@
 import unittest
 
-from jaqal.core.parameter import (
+from jaqalpaq.core.parameter import (
     QUBIT_TYPE,
     FLOAT_TYPE,
     REGISTER_TYPE,
     INT_TYPE,
     PARAMETER_TYPES,
 )
-from jaqal.core.register import Register, NamedQubit
+from jaqalpaq.core.register import Register, NamedQubit
 from . import common
 from .randomize import random_float, random_integer
 

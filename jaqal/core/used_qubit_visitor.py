@@ -1,7 +1,7 @@
 from collections import defaultdict
 
-from jaqal.core.visitor import Visitor
-from jaqal.core import Macro
+from jaqalpaq.core.visitor import Visitor
+from jaqalpaq.core import Macro
 
 
 def get_used_qubit_indices(obj, context=None):

@@ -1,4 +1,4 @@
-from jaqal.core import (
+from jaqalpaq.core import (
     GateStatement,
     BlockStatement,
     LoopStatement,
@@ -26,7 +26,7 @@ def notate_slice(s):
 
 def generate_jaqal_program(circ):
     """
-    Converts a :class:`jaqal.core.ScheduledCircuit` object to the Jaqal program it represents.
+    Converts a :class:`jaqalpaq.core.ScheduledCircuit` object to the Jaqal program it represents.
 
     :param ScheduledCircuit circ: The circuit to output.
     :returns: The text of a Jaqal program that describes that circuit.

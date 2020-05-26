@@ -1,7 +1,7 @@
 import random
 import math
 
-from jaqal.core import (
+from jaqalpaq.core import (
     Register,
     Constant,
     NamedQubit,

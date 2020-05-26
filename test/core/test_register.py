@@ -1,6 +1,6 @@
 import unittest
 
-from jaqal.core import Register, Constant
+from jaqalpaq.core import Register, Constant
 from .randomize import random_identifier, random_whole, random_integer
 from . import common
 

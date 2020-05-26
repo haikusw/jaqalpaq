@@ -1,6 +1,6 @@
 from collections import OrderedDict
 
-from jaqal import JaqalError
+from jaqalpaq import JaqalError
 from .gate import GateStatement
 
 

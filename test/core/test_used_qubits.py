@@ -2,7 +2,7 @@ import unittest
 from collections import defaultdict
 import random
 
-import jaqal.core as core
+import jaqalpaq.core as core
 from . import common
 from . import randomize
 

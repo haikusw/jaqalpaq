@@ -3,7 +3,7 @@ import unittest
 
 from .abstractgate import AbstractGateTesterBase
 from . import common
-from jaqal.core import Macro
+from jaqalpaq.core import Macro
 
 
 class JaqalpupMacroTester(AbstractGateTesterBase, unittest.TestCase):

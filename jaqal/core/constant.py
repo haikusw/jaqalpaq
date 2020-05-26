@@ -1,5 +1,5 @@
 from .parameter import AnnotatedValue, INT_TYPE, FLOAT_TYPE
-from jaqal import JaqalError
+from jaqalpaq import JaqalError
 
 
 class Constant(AnnotatedValue):
