@@ -1,6 +1,6 @@
-jaqal.core package
+jaqalpaq.core package
 =====================
 
-.. automodule:: jaqal.core
+.. automodule:: jaqalpaq.core
 	:undoc-members:
 	:members:

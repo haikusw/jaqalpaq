@@ -1,4 +1,4 @@
-# Jaqal Programming Utilities Project (Jaqal-PUP)
+# Python Jaqal Programming Package (JaqalPaq)
 This is the part of QSCOUT's software stack that fits above the Jaqal level. Everything here should eventually output Jaqal. This is the place for compilation, compatibility, scheduling, and so forth.
 Key components that we should provide:
 * One or more higher-level internal representations. (Possibly one scheduled and one unscheduled?)

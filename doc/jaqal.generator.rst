@@ -1,7 +1,7 @@
-jaqal.generator package
+jaqalpaq.generator package
 ==========================
 
-.. automodule:: jaqal.generator
+.. automodule:: jaqalpaq.generator
    :members:
    :undoc-members:
    :show-inheritance:

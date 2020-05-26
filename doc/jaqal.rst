@@ -15,6 +15,6 @@ Subpackages
 
 .. toctree::
 
-   jaqal.core
-   jaqal.generator
-   jaqal.parser
+   jaqalpaq.core
+   jaqalpaq.generator
+   jaqalpaq.parser

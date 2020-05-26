@@ -9,7 +9,7 @@ except ImportError:
     print("Warning: document cannot be built without sphinx")
     BuildDoc = None
 
-name = "Jaqal-pup"
+name = "JaqalPaq"
 description = "Python tools for Jaqal"
 version = "1.0"
 
@@ -20,7 +20,7 @@ setup(
     author="Benjamin C. A. Morrison, Jay Wesley Van Der Wall, Lobser, Daniel, Antonio Russo, Kenneth Rudinger, Peter Maunz",
     author_email="qscout@sandia.gov",
     packages=[
-        "jaqal",
+        "jaqalpaq",
         "jaqalpaq.core",
         "jaqalpaq.generator",
         "jaqalpaq.parser",
