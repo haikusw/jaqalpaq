@@ -105,6 +105,9 @@ def parse_jaqal_string(
     else:
         ret_value = circuit
 
+    if sum(reg.fundamental for reg in circuit.registers.values()) > 1:
+        raise JaqalError(f"Circuit has too many registers: {list(circuit.registers)}")
+
     return ret_value
 
 

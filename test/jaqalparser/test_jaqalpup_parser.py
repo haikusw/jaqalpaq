@@ -15,6 +15,7 @@ from jaqal.core import (
 )
 from jaqal.jaqal.parser import parse_jaqal_string, Option
 from jaqal.parser.identifier import Identifier
+from jaqal import JaqalError
 
 
 class ParserTester(TestCase):
@@ -46,6 +47,11 @@ class ParserTester(TestCase):
             gates=[self.make_sequential_gate_block(self.make_gate("foo"))]
         )
         self.run_test(text, exp_result)
+
+    def test_forbid_multiple_registers(self):
+        text = "register r[3]; register q[7]"
+        with self.assertRaises(JaqalError):
+            parse_jaqal_string(text)
 
     def test_let_float(self):
         """Test a let constant that is a floating point value."""
