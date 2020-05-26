@@ -14,6 +14,7 @@ from jaqal.core import (
     AnnotatedValue,
 )
 from jaqal.jaqal.parser import parse_jaqal_string, Option
+from jaqal.parser.identifier import Identifier
 
 
 class ParserTester(TestCase):
@@ -277,6 +278,12 @@ class ParserTester(TestCase):
             gates=[self.make_gate("foo", ("q", self.make_constant("a", 2)), 3.14)],
         )
         self.run_test(text, exp_result, option=Option.none)
+
+    def test_return_usepulses(self):
+        text = "from MyPulses.MyClass usepulses *"
+        exp_value = {"usepulses": {Identifier.parse("MyPulses.MyClass"): all,}}
+        _, act_value = parse_jaqal_string(text, return_usepulses=True)
+        self.assertEqual(act_value, exp_value)
 
     ##
     # Helper methods

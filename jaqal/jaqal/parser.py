@@ -37,7 +37,11 @@ class OptionSet(set):
 
 
 def parse_jaqal_file(
-    filename, override_dict=None, native_gates=None, processing_option=None
+    filename,
+    override_dict=None,
+    native_gates=None,
+    processing_option=None,
+    return_usepulses=False,
 ):
     """Parse a file written in Jaqal into core types.
 
@@ -47,6 +51,7 @@ def parse_jaqal_file(
     :param native_gates: If given, allow only these native gates.
     :param processing_option: What kind of processing, if any, to perform on the tree.
     :type processing_option: Option or OptionSet
+    :param bool return_usepulses: Whether to both add a second return value and populate it with the usepulses statement.
     :return: A list of the gates, blocks, and loops to be run.
 
     """
@@ -56,11 +61,16 @@ def parse_jaqal_file(
             override_dict=override_dict,
             native_gates=native_gates,
             processing_option=processing_option,
+            return_usepulses=return_usepulses,
         )
 
 
 def parse_jaqal_string(
-    jaqal, override_dict=None, native_gates=None, processing_option=Option.none
+    jaqal,
+    override_dict=None,
+    native_gates=None,
+    processing_option=Option.none,
+    return_usepulses=False,
 ):
     """Parse a string written in Jaqal into core types.
 
@@ -70,6 +80,7 @@ def parse_jaqal_string(
     :param native_gates: If given, allow only these native gates.
     :param processing_option: What kind of processing, if any, to perform on the tree.
     :type processing_option: Option or OptionSet
+    :param bool return_usepulses: Whether to both add a second return value and populate it with the usepulses statement.
     :return: A list of the gates, blocks, and loops to be run.
 
     """
@@ -79,7 +90,6 @@ def parse_jaqal_string(
     # Do some minimal processing to fill in all let and map values. The interface does not automatically do this
     # as they may rely on values from override_dict.
     let_dict = iface.make_let_dict(override_dict)
-    register_dict = iface.make_register_dict(let_dict)
     tree = iface.tree
     if Option.expand_macro in processing_option:
         tree = iface.resolve_macro(tree)
@@ -88,8 +98,14 @@ def parse_jaqal_string(
     if Option.expand_let_map in processing_option:
         tree = iface.resolve_map(tree)
     circuit = convert_to_circuit(tree, native_gates=native_gates)
-    # Note: we also have metadata about imported files that we could output here as well.
-    return circuit
+
+    if return_usepulses:
+        ret_extra = {"usepulses": iface.usepulses}
+        ret_value = (circuit, ret_extra)
+    else:
+        ret_value = circuit
+
+    return ret_value
 
 
 def convert_to_circuit(tree, native_gates=None):
@@ -111,6 +127,10 @@ class CoreTypesVisitor(MacroContextRewriteVisitor, TreeManipulators):
     def visit_program(self, header_statements, body_statements):
         circuit_sexpr = ("circuit", *header_statements, *body_statements)
         return build(circuit_sexpr, native_gates=self.native_gates)
+
+    def visit_usepulses_statement(self, identifier, objects):
+        """Ignore a usepulses statement."""
+        return None
 
     def visit_register_statement(self, array_declaration):
         if self.in_macro:
