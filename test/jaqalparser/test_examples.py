@@ -1,7 +1,9 @@
 import unittest
 from pathlib import Path
-from .helpers.parser import ParserTesterMixin
-from jaqal.parser.parse import make_lark_parser
+
+# from jaqal.parser.parse import make_lark_parser
+from jaqal.jaqal.parser import parse_jaqal_file
+from jaqal.core.circuitbuilder import build
 
 from jaqal.parser.interface import Interface
 
@@ -16,23 +18,25 @@ else:
     raise IOError("Cannot find example directory")
 
 
-class ExampleFileTester(ParserTesterMixin, unittest.TestCase):
-    def implement_file_test(self, file_name):
-        text = Path(file_name).read_text()
-        parser = make_lark_parser()
-        try:
-            tree = parser.parse(text)
-        except Exception as e:
-            raise AssertionError(f"{file_name}: {e}")
-        return tree
+class ExampleFileTester(unittest.TestCase):
+    def implement_file_test(self, jaqal_filename, sexp_filename):
+        with open(sexp_filename, "r") as fd:
+            sexp = eval(fd.read())
+        act_circuit = parse_jaqal_file(jaqal_filename)
+        exp_circuit = build(sexp)
+        self.assertEqual(exp_circuit, act_circuit)
 
     def test_hadamard(self):
         """Test Hadamard example"""
-        self.implement_file_test(example_dir / "hadamard.jaqal")
+        jaqal_filename = example_dir / "hadamard.jaqal"
+        sexp_filename = example_dir / "hadamard.py"
+        self.implement_file_test(jaqal_filename, sexp_filename)
 
     def test_gst(self):
         """Test Single Qubit GST example"""
-        self.implement_file_test(example_dir / "single_qubit_gst.jaqal")
+        jaqal_filename = example_dir / "single_qubit_gst.jaqal"
+        sexp_filename = example_dir / "single_qubit_gst.py"
+        self.implement_file_test(jaqal_filename, sexp_filename)
 
     def test_hadamard_unitary_timed_gates(self):
         """Test visiting the hadamard program"""

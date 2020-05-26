@@ -40,7 +40,7 @@ def parse_jaqal_file(
     filename,
     override_dict=None,
     native_gates=None,
-    processing_option=None,
+    processing_option=Option.none,
     return_usepulses=False,
 ):
     """Parse a file written in Jaqal into core types.

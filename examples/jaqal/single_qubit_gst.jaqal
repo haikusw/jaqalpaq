@@ -12,7 +12,7 @@ macro G1 qubit { Sy qubit }
 macro G2 qubit { I qubit }
 macro G3 qubit { Sx qubit; Sy qubit }
 macro G4 qubit { Sx qubit; Sy qubit; I qubit }
-macro G5 qubit { Sx qubit; I qubir; Sy qubit }
+macro G5 qubit { Sx qubit; I qubit; Sy qubit }
 macro G6 qubit { Sx qubit; I qubit; I qubit }
 macro G7 qubit { Sy qubit; I qubit; I qubit }
 macro G8 qubit { Sx qubit; Sx qubit; I qubit; Sy qubit }
