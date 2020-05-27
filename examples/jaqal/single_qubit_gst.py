@@ -1,7 +1,7 @@
 (
     "circuit",
     ("register", "q", 1),
-    ("macro", "F0", "qubit", ("sequential_block", ("gate", "I", "qubit"))),
+    ("macro", "F0", "qubit", ("sequential_block",)),
     ("macro", "F1", "qubit", ("sequential_block", ("gate", "Sx", "qubit"))),
     ("macro", "F2", "qubit", ("sequential_block", ("gate", "Sy", "qubit"))),
     (
@@ -34,7 +34,7 @@
     ),
     ("macro", "G0", "qubit", ("sequential_block", ("gate", "Sx", "qubit"))),
     ("macro", "G1", "qubit", ("sequential_block", ("gate", "Sy", "qubit"))),
-    ("macro", "G2", "qubit", ("sequential_block", ("gate", "I", "qubit"))),
+    ("macro", "G2", "qubit", ("sequential_block", ("gate", "I_Sx", "qubit"))),
     (
         "macro",
         "G3",
@@ -49,7 +49,7 @@
             "sequential_block",
             ("gate", "Sx", "qubit"),
             ("gate", "Sy", "qubit"),
-            ("gate", "I", "qubit"),
+            ("gate", "I_Sx", "qubit"),
         ),
     ),
     (
@@ -59,7 +59,7 @@
         (
             "sequential_block",
             ("gate", "Sx", "qubit"),
-            ("gate", "I", "qubit"),
+            ("gate", "I_Sx", "qubit"),
             ("gate", "Sy", "qubit"),
         ),
     ),
@@ -70,8 +70,8 @@
         (
             "sequential_block",
             ("gate", "Sx", "qubit"),
-            ("gate", "I", "qubit"),
-            ("gate", "I", "qubit"),
+            ("gate", "I_Sx", "qubit"),
+            ("gate", "I_Sx", "qubit"),
         ),
     ),
     (
@@ -81,8 +81,8 @@
         (
             "sequential_block",
             ("gate", "Sy", "qubit"),
-            ("gate", "I", "qubit"),
-            ("gate", "I", "qubit"),
+            ("gate", "I_Sx", "qubit"),
+            ("gate", "I_Sx", "qubit"),
         ),
     ),
     (
@@ -93,7 +93,7 @@
             "sequential_block",
             ("gate", "Sx", "qubit"),
             ("gate", "Sx", "qubit"),
-            ("gate", "I", "qubit"),
+            ("gate", "I_Sx", "qubit"),
             ("gate", "Sy", "qubit"),
         ),
     ),
@@ -106,7 +106,7 @@
             ("gate", "Sx", "qubit"),
             ("gate", "Sy", "qubit"),
             ("gate", "Sy", "qubit"),
-            ("gate", "I", "qubit"),
+            ("gate", "I_Sx", "qubit"),
         ),
     ),
     (

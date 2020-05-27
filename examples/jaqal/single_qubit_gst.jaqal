@@ -1,6 +1,6 @@
 register q[1]
 
-macro F0 qubit { I qubit }  // Fiducials
+macro F0 qubit { }  // Fiducials
 macro F1 qubit { Sx qubit }
 macro F2 qubit { Sy qubit }
 macro F3 qubit { Sx qubit; Sy qubit}
@@ -9,14 +9,14 @@ macro F5 qubit { Sy qubit; Sy qubit; Sy qubit }
 
 macro G0 qubit { Sx qubit }  // Germs
 macro G1 qubit { Sy qubit }
-macro G2 qubit { I qubit }
+macro G2 qubit { I_Sx qubit }
 macro G3 qubit { Sx qubit; Sy qubit }
-macro G4 qubit { Sx qubit; Sy qubit; I qubit }
-macro G5 qubit { Sx qubit; I qubit; Sy qubit }
-macro G6 qubit { Sx qubit; I qubit; I qubit }
-macro G7 qubit { Sy qubit; I qubit; I qubit }
-macro G8 qubit { Sx qubit; Sx qubit; I qubit; Sy qubit }
-macro G9 qubit { Sx qubit; Sy qubit; Sy qubit; I qubit }
+macro G4 qubit { Sx qubit; Sy qubit; I_Sx qubit }
+macro G5 qubit { Sx qubit; I_Sx qubit; Sy qubit }
+macro G6 qubit { Sx qubit; I_Sx qubit; I_Sx qubit }
+macro G7 qubit { Sy qubit; I_Sx qubit; I_Sx qubit }
+macro G8 qubit { Sx qubit; Sx qubit; I_Sx qubit; Sy qubit }
+macro G9 qubit { Sx qubit; Sy qubit; Sy qubit; I_Sx qubit }
 macro G10 qubit { Sx qubit; Sx qubit; Sy qubit; Sx qubit; Sy qubit; Sy qubit }
 
 prepare_all  // Length 1
