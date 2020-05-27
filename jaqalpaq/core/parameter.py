@@ -17,8 +17,8 @@ class AnnotatedValue:
 
     :param str name: The name the AnnotatedValue is labeled with.
     :param kind: Optionally, an annotation denoting the the type of the value as
-        :data:`jaqalpaq.core.QUBIT_TYPE`, :data:`jaqal.core.FLOAT_TYPE`,
-        :data:`jaqalpaq.core.REGISTER_TYPE`, or :data:`jaqal.core.INT_TYPE`.
+        :data:`jaqalpaq.core.QUBIT_TYPE`, :data:`jaqalpaq.core.FLOAT_TYPE`,
+        :data:`jaqalpaq.core.REGISTER_TYPE`, or :data:`jaqalpaq.core.INT_TYPE`.
         If None, can hold a value of any type (like a macro parameter).
     """
 

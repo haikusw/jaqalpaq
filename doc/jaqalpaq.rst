@@ -1,7 +1,7 @@
-jaqal package
+jaqalpaq package
 ================
 
-.. automodule:: jaqal
+.. automodule:: jaqalpaq
    :members: JaqalError
    :undoc-members:
    :show-inheritance:

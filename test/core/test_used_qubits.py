@@ -101,7 +101,7 @@ class UsedQubitTester(unittest.TestCase):
                 reg, index = arg.resolve_qubit()
                 exp_qubits[reg.name].add(index)
             elif isinstance(arg, core.Register):
-                # Not allowed in Jaqal but supported by jaqalpup
+                # Not allowed in Jaqal but supported by jaqalpaq
                 # We have to allow for both registers and map aliases here.
                 for reg, idx in (
                     arg[i].resolve_qubit(context)

@@ -40,7 +40,7 @@ def build(expression, native_gates=None):
     In lieu of an s-expression, the appropriate type from the core library will also be accepted. This allows to user
     to build up new expressions using partially built old ones.
 
-    Note: the jaqal-pup package partially supports qualified namespaces in identifiers. This function assumes all
+    Note: jaqalpaq partially supports qualified namespaces in identifiers. This function assumes all
     identifiers are one string, that is they are multiple legal identifiers joined by periods.
 
     """
