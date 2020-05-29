@@ -227,6 +227,15 @@ class BuildTester(unittest.TestCase):
         act_value = circuit.body.statements[0]
         self.assertEqual(exp_value, act_value)
 
+    def test_unnormalized_native_gates(self):
+        """Test using native gates that are not a dictionary."""
+        gate_def = GateDefinition("g", [Parameter("p", None)])
+        sexpr = ("circuit", ("gate", "g", 0))
+        exp_value = gate_def(0)
+        circuit = build(sexpr, native_gates=[gate_def])
+        act_value = circuit.body.statements[0]
+        self.assertEqual(exp_value, act_value)
+
     def test_build_circuit(self):
         """Build a circuit with as many features as possible."""
         # We've already built a circuit elsewhere but this test tries to tie everything in together.

@@ -5,7 +5,7 @@ from .macro import Macro
 from .register import Register, NamedQubit
 from .gate import GateStatement
 from .gatedef import GateDefinition, AbstractGate
-from .circuit import ScheduledCircuit
+from .circuit import ScheduledCircuit, normalize_native_gates
 from .parameter import Parameter
 from .block import BlockStatement, LoopStatement
 
@@ -58,6 +58,8 @@ class Builder:
     """Helper class to recursively build a circuit (or type within it) from s-expressions."""
 
     def __init__(self, *, native_gates):
+        if native_gates is not None:
+            native_gates = normalize_native_gates(native_gates)
         self.native_gates = native_gates
 
     def build(self, expression, context=None):
