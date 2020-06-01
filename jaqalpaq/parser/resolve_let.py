@@ -2,7 +2,7 @@
 from numbers import Integral
 
 from .macro_context_visitor import MacroContextRewriteVisitor
-from .parse import TreeManipulators
+from .tree import TreeManipulators
 
 
 def resolve_let(tree, let_dict):

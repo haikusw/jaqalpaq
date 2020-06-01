@@ -1,10 +1,5 @@
-# The main, recommended way to access the parser is using the Interface class.
-from .interface import Interface
+# Parse Jaqal text into core objects.
+from .parser import parse_jaqal_file, parse_jaqal_string, Option
 
-# The following classes are used to read and manipulate parse trees without direct knowledge
-# of their data type. The methods of TreeManipulators may be used directly or it may be subclassed.
-# TreeRewriteVisitor should be subclassed and the appropriate methods overridden. Use the
-# methods of TreeManipulators to extract useful information from the input arguments and reconstruct
-# the trees.
-from .parse import TreeManipulators, TreeRewriteVisitor
-from .macro_context_visitor import MacroContextRewriteVisitor
+# A lower-level, slightly obsolete but not yet deprecated interface to the parser.
+from .interface import Interface

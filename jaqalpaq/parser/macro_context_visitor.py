@@ -1,4 +1,4 @@
-from .parse import TreeRewriteVisitor
+from .tree import TreeRewriteVisitor
 
 
 class MacroContextRewriteVisitor(TreeRewriteVisitor):

@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from .helpers.parser import ParserTesterMixin
 from jaqalpaq.parser.extract_usepulses import extract_usepulses
-from jaqalpaq.parser.parse import make_lark_parser
+from jaqalpaq.parser.tree import make_lark_parser
 from jaqalpaq.parser.identifier import Identifier
 
 

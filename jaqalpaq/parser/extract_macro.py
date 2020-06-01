@@ -1,7 +1,7 @@
 """Gather all macro definitions contained in a Jaqal file."""
 from collections import namedtuple
 
-from .parse import TreeRewriteVisitor
+from .tree import TreeRewriteVisitor
 
 
 def extract_macro(tree):

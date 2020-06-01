@@ -2,7 +2,7 @@ import unittest
 
 from jaqalpaq.parser.block_normalizer import normalize_blocks_with_unitary_timing
 from .helpers.parser import ParserTesterMixin
-from jaqalpaq.parser.parse import make_lark_parser
+from jaqalpaq.parser.tree import make_lark_parser
 
 
 class BlockNormalizerTester(ParserTesterMixin, unittest.TestCase):

@@ -1,6 +1,6 @@
 """Resolve references to macros to expansions of the gates they contain."""
 
-from .parse import TreeRewriteVisitor
+from .tree import TreeRewriteVisitor
 from .extract_macro import MacroRecord, ExtractMacroVisitor
 
 

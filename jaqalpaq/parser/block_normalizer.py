@@ -1,6 +1,6 @@
 import itertools
 
-from .parse import TreeRewriteVisitor, ParseTreeVisitor
+from .tree import TreeRewriteVisitor, ParseTreeVisitor
 
 
 def normalize_blocks_with_unitary_timing(tree):

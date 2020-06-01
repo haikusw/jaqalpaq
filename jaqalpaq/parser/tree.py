@@ -1,4 +1,4 @@
-"""Parsing related functions and data types"""
+"""Functions and data types creating and acting on parse trees."""
 
 from abc import ABC, abstractmethod
 import pathlib

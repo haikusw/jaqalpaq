@@ -2,7 +2,7 @@ import pygsti
 import numpy as np
 
 from jaqalpaq.generator import generate_jaqal_program
-from jaqalpaq.jaqal.parser import Option, parse_jaqal_string
+from jaqalpaq.parser import Option, parse_jaqal_string
 
 from .pygstimodel import build_noiseless_native_model
 from .frontend import pygsti_circuit_from_code

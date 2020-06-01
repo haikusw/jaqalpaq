@@ -1,7 +1,7 @@
 """Extract information on the maps used in a Jaqal file."""
 from collections import namedtuple
 
-from .parse import TreeRewriteVisitor
+from .tree import TreeRewriteVisitor
 from .identifier import Identifier
 
 

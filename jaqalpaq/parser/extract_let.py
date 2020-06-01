@@ -1,5 +1,5 @@
 """Extract the constant mappings used by let statements."""
-from .parse import TreeRewriteVisitor
+from .tree import TreeRewriteVisitor
 
 
 def extract_let(tree, use_float=False):

@@ -13,7 +13,7 @@ from jaqalpaq.core import (
     NamedQubit,
     AnnotatedValue,
 )
-from jaqalpaq.jaqal.parser import parse_jaqal_string, Option
+from jaqalpaq.parser import parse_jaqal_string, Option
 from jaqalpaq.parser.identifier import Identifier
 from jaqalpaq import JaqalError
 

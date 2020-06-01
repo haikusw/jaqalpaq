@@ -1,7 +1,7 @@
 import unittest
 
 from jaqalpaq.parser.macro_context_visitor import MacroContextRewriteVisitor
-from jaqalpaq.parser.parse import make_lark_parser
+from jaqalpaq.parser.tree import make_lark_parser
 from jaqalpaq.parser.identifier import Identifier
 
 

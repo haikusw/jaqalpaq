@@ -3,7 +3,7 @@ different constant values."""
 
 from functools import lru_cache
 
-from .parse import parse_with_lark, TreeRewriteVisitor
+from .tree import parse_with_lark, TreeRewriteVisitor
 from .extract_let import extract_let
 from .extract_map import extract_map
 from .extract_usepulses import extract_usepulses

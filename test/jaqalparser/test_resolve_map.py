@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from jaqalpaq.parser.resolve_map import resolve_map
 from .helpers.parser import ParserTesterMixin
-from jaqalpaq.parser.parse import make_lark_parser
+from jaqalpaq.parser.tree import make_lark_parser
 from jaqalpaq.parser.extract_map import extract_map
 
 

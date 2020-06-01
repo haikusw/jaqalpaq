@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from jaqalpaq.parser.resolve_let import resolve_let, combine_let_dicts
 from jaqalpaq.parser.identifier import Identifier
-from jaqalpaq.parser.parse import make_lark_parser, TreeManipulators
+from jaqalpaq.parser.tree import make_lark_parser, TreeManipulators
 
 
 class ResolveLetTester(TestCase):

@@ -1,5 +1,5 @@
 """Extract information on the registers used in a Jaqal file."""
-from .parse import TreeRewriteVisitor
+from .tree import TreeRewriteVisitor
 from .identifier import Identifier
 
 

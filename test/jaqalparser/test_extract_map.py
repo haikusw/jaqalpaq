@@ -1,8 +1,7 @@
 from unittest import TestCase
 
-from jaqalpaq.parser.parse import TreeManipulators
+from jaqalpaq.parser.tree import TreeManipulators, make_lark_parser
 from jaqalpaq.parser.identifier import Identifier
-from jaqalpaq.parser.parse import make_lark_parser
 from jaqalpaq.parser.extract_map import extract_map
 
 

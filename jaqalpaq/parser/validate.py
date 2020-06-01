@@ -2,7 +2,7 @@
 
 from numbers import Integral
 
-from .parse import TreeRewriteVisitor
+from .tree import TreeRewriteVisitor
 
 
 def validate(tree, registers):

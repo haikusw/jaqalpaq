@@ -1,7 +1,7 @@
 from unittest import TestCase
 import pathlib
 
-from jaqalpaq.parser.parse import *
+from jaqalpaq.parser.tree import *
 
 
 # Accommodate both running from the test directory (as PyCharm does) and running from the project root.

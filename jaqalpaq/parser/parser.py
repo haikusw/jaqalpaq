@@ -1,6 +1,8 @@
 from enum import Enum
 
-from jaqalpaq.parser import Interface, MacroContextRewriteVisitor, TreeManipulators
+from .interface import Interface
+from .macro_context_visitor import MacroContextRewriteVisitor
+from .tree import TreeManipulators
 
 from jaqalpaq.core.circuitbuilder import build
 from jaqalpaq import JaqalError

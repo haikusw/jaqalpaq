@@ -7,7 +7,7 @@ from jaqalpaq.parser.iter_gates import (
     ParallelGateBlock,
     SequentialGateBlock,
 )
-from jaqalpaq.parser.parse import parse_with_lark
+from jaqalpaq.parser.tree import parse_with_lark
 
 
 class GateParserTester(unittest.TestCase):

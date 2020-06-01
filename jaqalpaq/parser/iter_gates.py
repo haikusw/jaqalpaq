@@ -1,6 +1,6 @@
 """Functions for iterating over gates in a Jaqal file"""
 
-from .parse import ParseTreeVisitor
+from .tree import ParseTreeVisitor
 from .identifier import Identifier
 
 

@@ -3,7 +3,7 @@
 # this module will be a very limited version. It will only support one such
 # statement.
 
-from .parse import TreeRewriteVisitor
+from .tree import TreeRewriteVisitor
 
 
 def extract_usepulses(tree):
