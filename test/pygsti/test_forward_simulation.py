@@ -5,7 +5,7 @@ from jaqalpaq.core import ScheduledCircuit as Circuit
 import numpy as np
 import jaqalpaq.pygsti
 from jaqalpaq.generator import generate_jaqal_program
-import jaqalpaq.jaqal
+import jaqalpaq.parser
 from jaqalpaq.core.circuit import normalize_native_gates
 
 native_gates = pytest.importorskip("qscout.gate_pulse.native_gates")
@@ -28,7 +28,7 @@ class ForwardSimulatorTester(unittest.TestCase):
 
         self.jaqal_string = generate_jaqal_program(c)
 
-        self.jaqal_c = jaqalpaq.jaqal.parser.parse_jaqal_string(
+        self.jaqal_c = jaqalpaq.parser.parse_jaqal_string(
             self.jaqal_string,
             native_gates=normalize_native_gates(native_gates=native_gates.NATIVE_GATES),
         )
@@ -99,7 +99,7 @@ CNOT q[3] q[4]
 
 measure_all
 """
-        jaqal_prog = jaqalpaq.jaqal.parser.parse_jaqal_string(
+        jaqal_prog = jaqalpaq.parser.parse_jaqal_string(
             jaqal_text, native_gates=normalize_native_gates(native_gates.NATIVE_GATES)
         )
         output_probs = jaqalpaq.pygsti.forward_simulate_circuit(jaqal_prog)
@@ -109,6 +109,7 @@ measure_all
         self.assertAlmostEqual(output_probs["00000"], 0.5)
         self.assertAlmostEqual(output_probs["11111"], 0.5)
 
+    @unittest.skip("Multiple registers not allowed in Jaqal spec")
     def test_multiple_registers(self):
         jaqal_text = """
 register p[3]
@@ -136,7 +137,7 @@ CNOT q[0] q[1]
 
 measure_all
 """
-        jaqal_prog = jaqalpaq.jaqal.parser.parse_jaqal_string(
+        jaqal_prog = jaqalpaq.parser.parse_jaqal_string(
             jaqal_text, native_gates=normalize_native_gates(native_gates.NATIVE_GATES)
         )
         output_probs = jaqalpaq.pygsti.forward_simulate_circuit(jaqal_prog)
@@ -146,6 +147,7 @@ measure_all
         self.assertAlmostEqual(output_probs["00000"], 0.5)
         self.assertAlmostEqual(output_probs["11111"], 0.5)
 
+    @unittest.skip("Multiple registers not allowed in Jaqal spec")
     def test_multiple_registers_and_ancilla(self):
         jaqal_text = """
 register p[3]
@@ -174,7 +176,7 @@ CNOT q[0] ancilla
 
 measure_all
 """
-        jaqal_prog = jaqalpaq.jaqal.parser.parse_jaqal_string(
+        jaqal_prog = jaqalpaq.parser.parse_jaqal_string(
             jaqal_text, native_gates=normalize_native_gates(native_gates.NATIVE_GATES)
         )
         output_probs = jaqalpaq.pygsti.forward_simulate_circuit(jaqal_prog)
@@ -184,6 +186,7 @@ measure_all
         self.assertAlmostEqual(output_probs["00000"], 0.5)
         self.assertAlmostEqual(output_probs["11111"], 0.5)
 
+    @unittest.skip("Multiple registers not allowed in Jaqal spec")
     def test_multiple_registers_and_ancillae(self):
         jaqal_text = """
 register p[3]
@@ -213,7 +216,7 @@ CNOT ancillae[1] q[2]
 
 measure_all
 """
-        jaqal_prog = jaqalpaq.jaqal.parser.parse_jaqal_string(
+        jaqal_prog = jaqalpaq.parser.parse_jaqal_string(
             jaqal_text, native_gates=normalize_native_gates(native_gates.NATIVE_GATES)
         )
         output_probs = jaqalpaq.pygsti.forward_simulate_circuit(jaqal_prog)
