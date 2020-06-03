@@ -2,7 +2,7 @@ from enum import Enum
 
 from .interface import Interface
 from .macro_context_visitor import MacroContextRewriteVisitor
-from .tree import TreeManipulators
+from .tree import TreeManipulators, JaqalParseError
 
 from jaqalpaq.core.circuitbuilder import build
 from jaqalpaq import JaqalError

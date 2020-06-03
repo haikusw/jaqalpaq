@@ -5,14 +5,22 @@ from functools import wraps
 import pathlib
 
 from lark import Lark, Transformer, Tree, Token
+from lark.exceptions import UnexpectedInput
 
 from .identifier import Identifier
+from jaqalpaq import JaqalError
 
 
 def parse_with_lark(text, *args, **kwargs):
     """Parse the given text using Lark. Return the Lark parse tree."""
     parser = make_lark_parser(*args, **kwargs)
-    return parser.parse(text)
+    try:
+        return parser.parse(text)
+    except UnexpectedInput as exc:
+        raise JaqalParseError(
+            f"Expected: {list(exc.expected)}, found: `{exc.token}`",
+            line=exc.line,
+            column=exc.column)
 
 
 def make_lark_parser(*args, **kwargs):
@@ -289,23 +297,33 @@ class ParseTreeVisitor(ABC):
     def visit(self, tree):
         """Visit this tree and return the result of successively calling the visit_* methods."""
         self.transformer = VisitTransformer(self)
-        return self.transformer.transform(tree)
+        try:
+            return self.transformer.transform(tree)
+        except Exception as exc:
+            raise JaqalParseError(str(exc), transformer.current_line,
+                                  transformer.current_column)
 
     @property
     def current_line(self):
         """Return a line associated with the current item being processed."""
+        if not hasattr(self, 'transformer'):
+            raise RuntimeError("Cannot call current_line before visit")
         return self.transformer.current_line
 
     @property
     def current_column(self):
         """Return a column associated with the current item being
         processed."""
+        if not hasattr(self, 'transformer'):
+            raise RuntimeError("Cannot call current_column before visit")
         return self.transformer.current_column
 
     @property
     def current_pos(self):
         """Return a position in the input character stream associated with the
         current item being processed."""
+        if not hasattr(self, 'transformer'):
+            raise RuntimeError("Cannot call current_pos before visit")
         return self.transformer.current_pos
 
     ##
@@ -933,3 +951,13 @@ class TreeRewriteVisitor(ParseTreeVisitor, TreeManipulators):
 
     def visit_qualified_identifier(self, names):
         return self.make_qualified_identifier(names)
+
+
+class JaqalParseError(JaqalError):
+    def __init__(self, message, line, column):
+        self.message = message
+        self.line = line
+        self.column = column
+
+    def __str__(self):
+        return f"{self.message}: line {self.line} column {self.column}"

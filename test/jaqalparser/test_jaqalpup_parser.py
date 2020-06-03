@@ -13,7 +13,7 @@ from jaqalpaq.core import (
     NamedQubit,
     AnnotatedValue,
 )
-from jaqalpaq.parser import parse_jaqal_string, Option
+from jaqalpaq.parser import parse_jaqal_string, Option, JaqalParseError
 from jaqalpaq.parser.identifier import Identifier
 from jaqalpaq import JaqalError
 
@@ -510,3 +510,17 @@ class TestOption(TestCase):
         """Test that extract_let is in an OptionSet that was created with extract_let_map but not extract_let"""
         optset = Option.expand_macro | Option.expand_let_map
         self.assertIn(Option.expand_let_map, optset)
+
+
+class ErrorMessageTester(TestCase):
+    """Attempt to have uniform errors in parsing."""
+
+    def test_unexpected_token_message(self):
+        try:
+            text = "register r[-1]"
+            parse_jaqal_string(text)
+            self.fail("No exception raised")
+        except JaqalParseError as exc:
+            # Lines and columns are 1-indexed
+            self.assertEqual(exc.line, 1)
+            self.assertEqual(exc.column, 12)
