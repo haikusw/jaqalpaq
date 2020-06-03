@@ -1,6 +1,7 @@
 """Functions and data types creating and acting on parse trees."""
 
 from abc import ABC, abstractmethod
+from functools import wraps
 import pathlib
 
 from lark import Lark, Transformer, Tree, Token
@@ -44,18 +45,86 @@ def expand_qualified_identifiers(tree):
     return transformer.transform(tree)
 
 
-class QualifiedIdentifierTransformer(Transformer):
-    """Transformer class to replace instances of QUALIFIED_IDENTIFIER tokens with qualified_identifier trees."""
+class LarkTransformerBase(Transformer):
+    """Base for transformers based on the Lark Transformer class."""
 
-    def QUALIFIED_IDENTIFIER(self, string):
-        parts = Identifier.parse(string)
-        return Tree(
-            "qualified_identifier",
-            children=[Token("IDENTIFIER", part) for part in parts],
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # The last token read. This is used to get an approximation of
+        # the position of errors. We start with an invalid, zero-size
+        # token at the beginnning to avoid dereferencing an invalid
+        # object before the first token is read.
+        self.last_token = Token(
+            "INVALID", "", pos_in_stream=0, line=0, column=0, end_line=0,
+            end_column=0, end_pos=0
         )
 
+    ##
+    # Position properties
+    #
+    # Note: These are approximate as they pick the last token
+    # processed inside an expression and use that as its
+    # position. This should be good enough for debugging purposes
+    #
 
-class VisitTransformer(Transformer):
+    @property
+    def current_line(self):
+        """Return a line associated with the current item being processed."""
+        return self.last_token.line
+
+    @property
+    def current_column(self):
+        """Return a column associated with the current item being
+        processed."""
+        return self.last_token.column
+
+    @property
+    def current_pos(self):
+        """Return a position in the input character stream associated with the
+        current item being processed."""
+        return self.last_token.pos_in_stream
+
+
+def token_method(method):
+    """Decorator used in classes derived from LarkTransformerBase to
+    indicate they are handling a token."""
+    @wraps(method)
+    def wrapped_method(self, token):
+        self.last_token = token
+        return method(self, token)
+    return wrapped_method
+
+
+class QualifiedIdentifierTransformer(LarkTransformerBase):
+    """Transformer class to replace instances of QUALIFIED_IDENTIFIER tokens with qualified_identifier trees."""
+
+    @token_method
+    def QUALIFIED_IDENTIFIER(self, string):
+        parts = Identifier.parse(string)
+        children = []
+
+        # Assign positions in the original text to portions of the
+        # token. This doesn't have to be perfect as it's only useful
+        # in error messages.
+        remaining_token = str(string)
+        for part in parts:
+            offset = remaining_token.find(part)
+            remaining_token = remaining_token[offset + len(part):]
+            # Assume a token cannot cross lines, which I think is true
+            # for Jaqal
+            token = Token("IDENTIFIER", part,
+                          pos_in_stream=string.pos_in_stream + offset,
+                          line=string.line,
+                          column=string.column + offset,
+                          end_line=string.end_line,
+                          end_column=string.column + offset + len(part),
+                          end_pos=string.pos_in_stream + offset + len(part))
+            children.append(token)
+
+        return Tree("qualified_identifier", children=children)
+
+
+class VisitTransformer(LarkTransformerBase):
     """A Lark transformer that traverses the tree and calls the appropriate methods in the ParseTreeVisitor class.
 
     If you're unsure of whether you should be using this class, you should not be using this class.
@@ -185,18 +254,23 @@ class VisitTransformer(Transformer):
         names = tuple(name for name in args)
         return self._visitor.visit_qualified_identifier(names)
 
+    @token_method
     def IDENTIFIER(self, string):
         return self._visitor.visit_identifier(string)
 
+    @token_method
     def SIGNED_NUMBER(self, string):
         return self._visitor.visit_signed_number(string)
 
+    @token_method
     def NUMBER(self, string):
         return self._visitor.visit_number(string)
 
+    @token_method
     def INTEGER(self, string):
         return self._visitor.visit_integer(string)
 
+    @token_method
     def SIGNED_INTEGER(self, string):
         return self._visitor.visit_signed_integer(string)
 
@@ -212,13 +286,27 @@ class ParseTreeVisitor(ABC):
 
     """
 
-    # Derived classes may overwrite this to change behavior.
-    transformer_class = VisitTransformer
-
     def visit(self, tree):
         """Visit this tree and return the result of successively calling the visit_* methods."""
-        transformer = VisitTransformer(self)
-        return transformer.transform(tree)
+        self.transformer = VisitTransformer(self)
+        return self.transformer.transform(tree)
+
+    @property
+    def current_line(self):
+        """Return a line associated with the current item being processed."""
+        return self.transformer.current_line
+
+    @property
+    def current_column(self):
+        """Return a column associated with the current item being
+        processed."""
+        return self.transformer.current_column
+
+    @property
+    def current_pos(self):
+        """Return a position in the input character stream associated with the
+        current item being processed."""
+        return self.transformer.current_pos
 
     ##
     # Token-level methods

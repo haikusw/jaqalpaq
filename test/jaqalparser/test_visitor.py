@@ -17,7 +17,7 @@ else:
     raise IOError("Cannot find grammar file")
 
 
-class TestVisitor(ParseTreeVisitor):
+class Visitor(ParseTreeVisitor):
     def visit_program(self, header_statements, body_statements):
         return {
             "type": "program",
@@ -107,7 +107,7 @@ class ParseTreeVisitorTester(TestCase):
         text = "foo[42]"
         parser = self.make_parser(start="array_declaration")
         tree = parser.parse(text)
-        visitor = TestVisitor()
+        visitor = Visitor()
         exp_result = {"type": "array_declaration", "identifier": "foo", "size": 42}
         act_result = visitor.visit(tree)
         self.assertEqual(exp_result, act_result)
@@ -117,7 +117,7 @@ class ParseTreeVisitorTester(TestCase):
         text = "foo[42]"
         parser = self.make_parser(start="array_element")
         tree = parser.parse(text)
-        visitor = TestVisitor()
+        visitor = Visitor()
         exp_result = {"type": "array_element", "identifier": "foo", "index": 42}
         act_result = visitor.visit(tree)
         self.assertEqual(exp_result, act_result)
@@ -135,7 +135,7 @@ class ParseTreeVisitorTester(TestCase):
             ("foo[a:3:-1]", ("foo", slice(("a",), 3, -1))),
         ]
         parser = self.make_parser(start="array_slice")
-        visitor = TestVisitor()
+        visitor = Visitor()
         for text, (identifier, index_slice) in cases:
             tree = parser.parse(text)
             exp_result = {
@@ -153,7 +153,7 @@ class ParseTreeVisitorTester(TestCase):
             ("register foo [ abc ]", ("foo", ("abc",))),
         ]
         parser = self.make_parser(start="register_statement")
-        visitor = TestVisitor()
+        visitor = Visitor()
         for text, (identifier, size) in cases:
             tree = parser.parse(text)
             act_result = visitor.visit(tree)
@@ -184,7 +184,7 @@ class ParseTreeVisitorTester(TestCase):
             ),
         ]
         parser = self.make_parser(start="map_statement")
-        visitor = TestVisitor()
+        visitor = Visitor()
         for text, (target, source) in cases:
             tree = parser.parse(text)
             act_result = visitor.visit(tree)
@@ -195,7 +195,7 @@ class ParseTreeVisitorTester(TestCase):
         """Test visiting a let statement"""
         cases = [("let pi 3.14", ("pi", 3.14)), ("let a -1", ("a", -1))]
         parser = self.make_parser(start="let_statement")
-        visitor = TestVisitor()
+        visitor = Visitor()
         for text, (identifier, number) in cases:
             tree = parser.parse(text)
             act_result = visitor.visit(tree)
@@ -219,7 +219,7 @@ class ParseTreeVisitorTester(TestCase):
             ),
         ]
         parser = self.make_parser(start="gate_statement")
-        visitor = TestVisitor()
+        visitor = Visitor()
         for text, (gate_name, gate_args) in cases:
             tree = parser.parse(text)
             act_result = visitor.visit(tree)
@@ -255,7 +255,7 @@ class ParseTreeVisitorTester(TestCase):
             ),
         ]
         parser = self.make_parser(start="sequential_gate_block")
-        visitor = TestVisitor()
+        visitor = Visitor()
         for text, gate_statements in cases:
             tree = parser.parse(text)
             act_result = visitor.visit(tree)
@@ -297,7 +297,7 @@ class ParseTreeVisitorTester(TestCase):
             ),
         ]
         parser = self.make_parser(start="parallel_gate_block")
-        visitor = TestVisitor()
+        visitor = Visitor()
         for text, gate_statements in cases:
             tree = parser.parse(text)
             act_result = visitor.visit(tree)
@@ -339,7 +339,7 @@ class ParseTreeVisitorTester(TestCase):
             )
         ]
         parser = self.make_parser(start="macro_definition")
-        visitor = TestVisitor()
+        visitor = Visitor()
         for text, (name, arguments, block) in cases:
             tree = parser.parse(text)
             act_result = visitor.visit(tree)
@@ -372,7 +372,7 @@ class ParseTreeVisitorTester(TestCase):
             )
         ]
         parser = self.make_parser(start="loop_statement")
-        visitor = TestVisitor()
+        visitor = Visitor()
         for text, (repetition_count, block) in cases:
             tree = parser.parse(text)
             act_result = visitor.visit(tree)
@@ -411,8 +411,161 @@ class ParseTreeVisitorTester(TestCase):
             )
         ]
         parser = self.make_parser(start="start")
-        visitor = TestVisitor()
+        visitor = Visitor()
         for text, exp_result in cases:
             tree = parser.parse(text)
             act_result = visitor.visit(tree)
             self.assertEqual(exp_result, act_result, f"Failed to parse {text}")
+
+
+class VisitorWithPosition(Visitor):
+    """Like the test visitor but also include position information."""
+
+    def add_position(self, dictionary):
+        dictionary['pos'] = self.current_pos
+        dictionary['line'] = self.current_line
+        dictionary['column'] = self.current_column
+        return dictionary
+
+    def visit_program(self, *args):
+        return self.add_position(super().visit_program(*args))
+
+    def visit_register_statement(self, *args):
+        return self.add_position(super().visit_register_statement(*args))
+
+    def visit_map_statement(self, *args):
+        return self.add_position(super().visit_map_statement(*args))
+
+    def visit_let_statement(self, *args):
+        return self.add_position(super().visit_let_statement(*args))
+
+    def visit_usepulses_statement(self, *args):
+        return self.add_position(super().visit_usepulses_statement(*args))
+
+    def visit_gate_statement(self, *args):
+        return self.add_position(super().visit_gate_statement(*args))
+
+    def visit_macro_definition(self, *args):
+        return self.add_position(super().visit_macro_definition(*args))
+
+    def visit_macro_gate_block(self, *args):
+        return self.add_position(super().visit_macro_gate_block(*args))
+
+    def visit_loop_statement(self, *args):
+        return self.add_position(super().visit_loop_statement(*args))
+
+    def visit_sequential_gate_block(self, *args):
+        return self.add_position(super().visit_sequential_gate_block(*args))
+
+    def visit_parallel_gate_block(self, *args):
+        return self.add_position(super().visit_parallel_gate_block(*args))
+
+    def visit_array_declaration(self, *args):
+        return self.add_position(super().visit_array_declaration(*args))
+
+    def visit_array_element(self, *args):
+        return self.add_position(super().visit_array_element(*args))
+
+    def visit_array_element_qual(self, *args):
+        return self.add_position(super().visit_array_element_qual(*args))
+
+    def visit_array_slice(self, *args):
+        return self.add_position(super().visit_array_slice(*args))
+
+
+class PositionTester(TestCase):
+
+    def test_positions(self):
+        text = "from mypulses.myclass usepulses *\n"\
+            "register r[3]\n"\
+            "\n"\
+            "map a r[0]\n"\
+            "\n"\
+            "let pi 3.14\n"\
+            "\n"\
+            "macro foo a {\n"\
+            "  g0 a\n"\
+            "}\n"\
+            "\n"\
+            "{ g1 ; g2 r[0] }\n"\
+            "<\n"\
+            "  foo pi\n"\
+            "  g3\n"\
+            ">\n"
+
+        parser = make_lark_parser(start="start")
+        visitor = VisitorWithPosition()
+        tree = visitor.visit(parser.parse(text))
+
+        usepulses_entry = self.find_entry('usepulses_statement', tree)
+        usepulses_start = 0
+        self.check_positions(usepulses_entry, range(usepulses_start, usepulses_start + 34), range(1, 2), range(0, 34))
+
+        register_entry = self.find_entry('register_statement', tree)
+        register_start = text.find('register')
+        self.check_positions(register_entry, range(register_start, register_start + 14), range(2, 3), range(0, 14))
+
+        map_entry = self.find_entry('map_statement', tree)
+        map_start = text.find('map')
+        self.check_positions(
+            map_entry,
+            range(map_start, map_start + 11),
+            range(4, 5),
+            range(0, 11))
+
+        let_entry = self.find_entry('let_statement', tree)
+        let_start = text.find('let')
+        self.check_positions(
+            let_entry,
+            range(let_start, let_start + 12),
+            range(6, 7),
+            range(0, 12))
+
+        macro_entry = self.find_entry('macro_definition', tree)
+        macro_start = text.find('macro')
+        macro_end = text.find('\n}\n') + 1
+        self.check_positions(
+            macro_entry,
+            range(macro_start, macro_end + 1),
+            range(8, 11),
+            range(0, 14))
+
+        sequential_block_entry = self.find_entry('sequential_gate_block', tree)
+        sequential_start = text.find("\n{")
+        self.check_positions(
+            sequential_block_entry,
+            range(sequential_start, sequential_start + 17),
+            range(12, 13),
+            range(0, 17))
+
+        parallel_block_entry = self.find_entry('parallel_gate_block', tree)
+        parallel_start = text.find('<')
+        parallel_end = text.find('>') + 1
+        self.check_positions(
+            parallel_block_entry,
+            range(parallel_start, parallel_end),
+            range(13, 17),
+            range(0, 9))
+
+    def find_entry(self, entry_type, tree):
+        return self.find_entries(entry_type, tree)[0]
+
+    def find_entries(self, entry_type, tree):
+        entries = []
+        if tree['type'] == entry_type:
+            entries.append(tree)
+        for field, value in tree.items():
+            if isinstance(value, list):
+                for subtree in value:
+                    if isinstance(subtree, dict):
+                        entries.extend(self.find_entries(entry_type, subtree))
+        return entries
+
+    def check_positions(self, entry, exp_pos_range, exp_line_range,
+                        exp_column_range):
+        """Given a dictionary entry, make sure all position data falls in the
+        expected range."""
+
+        self.assertIn(entry['pos'], exp_pos_range)
+        self.assertIn(entry['line'], exp_line_range)
+        self.assertIn(entry['column'], exp_column_range)
