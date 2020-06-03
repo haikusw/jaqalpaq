@@ -20,7 +20,8 @@ def parse_with_lark(text, *args, **kwargs):
         raise JaqalParseError(
             f"Expected: {list(exc.expected)}, found: `{exc.token}`",
             line=exc.line,
-            column=exc.column)
+            column=exc.column,
+        )
 
 
 def make_lark_parser(*args, **kwargs):
@@ -63,8 +64,14 @@ class LarkTransformerBase(Transformer):
         # token at the beginnning to avoid dereferencing an invalid
         # object before the first token is read.
         self.last_token = Token(
-            "INVALID", "", pos_in_stream=0, line=0, column=0, end_line=0,
-            end_column=0, end_pos=0
+            "INVALID",
+            "",
+            pos_in_stream=0,
+            line=0,
+            column=0,
+            end_line=0,
+            end_column=0,
+            end_pos=0,
         )
 
     ##
@@ -96,10 +103,12 @@ class LarkTransformerBase(Transformer):
 def token_method(method):
     """Decorator used in classes derived from LarkTransformerBase to
     indicate they are handling a token."""
+
     @wraps(method)
     def wrapped_method(self, token):
         self.last_token = token
         return method(self, token)
+
     return wrapped_method
 
 
@@ -117,16 +126,19 @@ class QualifiedIdentifierTransformer(LarkTransformerBase):
         remaining_token = str(string)
         for part in parts:
             offset = remaining_token.find(part)
-            remaining_token = remaining_token[offset + len(part):]
+            remaining_token = remaining_token[offset + len(part) :]
             # Assume a token cannot cross lines, which I think is true
             # for Jaqal
-            token = Token("IDENTIFIER", part,
-                          pos_in_stream=string.pos_in_stream + offset,
-                          line=string.line,
-                          column=string.column + offset,
-                          end_line=string.end_line,
-                          end_column=string.column + offset + len(part),
-                          end_pos=string.pos_in_stream + offset + len(part))
+            token = Token(
+                "IDENTIFIER",
+                part,
+                pos_in_stream=string.pos_in_stream + offset,
+                line=string.line,
+                column=string.column + offset,
+                end_line=string.end_line,
+                end_column=string.column + offset + len(part),
+                end_pos=string.pos_in_stream + offset + len(part),
+            )
             children.append(token)
 
         return Tree("qualified_identifier", children=children)
@@ -300,13 +312,14 @@ class ParseTreeVisitor(ABC):
         try:
             return self.transformer.transform(tree)
         except Exception as exc:
-            raise JaqalParseError(str(exc), transformer.current_line,
-                                  transformer.current_column)
+            raise JaqalParseError(
+                str(exc), transformer.current_line, transformer.current_column
+            )
 
     @property
     def current_line(self):
         """Return a line associated with the current item being processed."""
-        if not hasattr(self, 'transformer'):
+        if not hasattr(self, "transformer"):
             raise RuntimeError("Cannot call current_line before visit")
         return self.transformer.current_line
 
@@ -314,7 +327,7 @@ class ParseTreeVisitor(ABC):
     def current_column(self):
         """Return a column associated with the current item being
         processed."""
-        if not hasattr(self, 'transformer'):
+        if not hasattr(self, "transformer"):
             raise RuntimeError("Cannot call current_column before visit")
         return self.transformer.current_column
 
@@ -322,7 +335,7 @@ class ParseTreeVisitor(ABC):
     def current_pos(self):
         """Return a position in the input character stream associated with the
         current item being processed."""
-        if not hasattr(self, 'transformer'):
+        if not hasattr(self, "transformer"):
             raise RuntimeError("Cannot call current_pos before visit")
         return self.transformer.current_pos
 

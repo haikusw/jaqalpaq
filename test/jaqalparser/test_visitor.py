@@ -422,9 +422,9 @@ class VisitorWithPosition(Visitor):
     """Like the test visitor but also include position information."""
 
     def add_position(self, dictionary):
-        dictionary['pos'] = self.current_pos
-        dictionary['line'] = self.current_line
-        dictionary['column'] = self.current_column
+        dictionary["pos"] = self.current_pos
+        dictionary["line"] = self.current_line
+        dictionary["column"] = self.current_column
         return dictionary
 
     def visit_program(self, *args):
@@ -474,85 +474,92 @@ class VisitorWithPosition(Visitor):
 
 
 class PositionTester(TestCase):
-
     def test_positions(self):
-        text = "from mypulses.myclass usepulses *\n"\
-            "register r[3]\n"\
-            "\n"\
-            "map a r[0]\n"\
-            "\n"\
-            "let pi 3.14\n"\
-            "\n"\
-            "macro foo a {\n"\
-            "  g0 a\n"\
-            "}\n"\
-            "\n"\
-            "{ g1 ; g2 r[0] }\n"\
-            "<\n"\
-            "  foo pi\n"\
-            "  g3\n"\
+        text = (
+            "from mypulses.myclass usepulses *\n"
+            "register r[3]\n"
+            "\n"
+            "map a r[0]\n"
+            "\n"
+            "let pi 3.14\n"
+            "\n"
+            "macro foo a {\n"
+            "  g0 a\n"
+            "}\n"
+            "\n"
+            "{ g1 ; g2 r[0] }\n"
+            "<\n"
+            "  foo pi\n"
+            "  g3\n"
             ">\n"
+        )
 
         parser = make_lark_parser(start="start")
         visitor = VisitorWithPosition()
         tree = visitor.visit(parser.parse(text))
 
-        usepulses_entry = self.find_entry('usepulses_statement', tree)
+        usepulses_entry = self.find_entry("usepulses_statement", tree)
         usepulses_start = 0
-        self.check_positions(usepulses_entry, range(usepulses_start, usepulses_start + 34), range(1, 2), range(0, 34))
-
-        register_entry = self.find_entry('register_statement', tree)
-        register_start = text.find('register')
-        self.check_positions(register_entry, range(register_start, register_start + 14), range(2, 3), range(0, 14))
-
-        map_entry = self.find_entry('map_statement', tree)
-        map_start = text.find('map')
         self.check_positions(
-            map_entry,
-            range(map_start, map_start + 11),
-            range(4, 5),
-            range(0, 11))
+            usepulses_entry,
+            range(usepulses_start, usepulses_start + 34),
+            range(1, 2),
+            range(0, 34),
+        )
 
-        let_entry = self.find_entry('let_statement', tree)
-        let_start = text.find('let')
+        register_entry = self.find_entry("register_statement", tree)
+        register_start = text.find("register")
         self.check_positions(
-            let_entry,
-            range(let_start, let_start + 12),
-            range(6, 7),
-            range(0, 12))
+            register_entry,
+            range(register_start, register_start + 14),
+            range(2, 3),
+            range(0, 14),
+        )
 
-        macro_entry = self.find_entry('macro_definition', tree)
-        macro_start = text.find('macro')
-        macro_end = text.find('\n}\n') + 1
+        map_entry = self.find_entry("map_statement", tree)
+        map_start = text.find("map")
         self.check_positions(
-            macro_entry,
-            range(macro_start, macro_end + 1),
-            range(8, 11),
-            range(0, 14))
+            map_entry, range(map_start, map_start + 11), range(4, 5), range(0, 11)
+        )
 
-        sequential_block_entry = self.find_entry('sequential_gate_block', tree)
+        let_entry = self.find_entry("let_statement", tree)
+        let_start = text.find("let")
+        self.check_positions(
+            let_entry, range(let_start, let_start + 12), range(6, 7), range(0, 12)
+        )
+
+        macro_entry = self.find_entry("macro_definition", tree)
+        macro_start = text.find("macro")
+        macro_end = text.find("\n}\n") + 1
+        self.check_positions(
+            macro_entry, range(macro_start, macro_end + 1), range(8, 11), range(0, 14)
+        )
+
+        sequential_block_entry = self.find_entry("sequential_gate_block", tree)
         sequential_start = text.find("\n{")
         self.check_positions(
             sequential_block_entry,
             range(sequential_start, sequential_start + 17),
             range(12, 13),
-            range(0, 17))
+            range(0, 17),
+        )
 
-        parallel_block_entry = self.find_entry('parallel_gate_block', tree)
-        parallel_start = text.find('<')
-        parallel_end = text.find('>') + 1
+        parallel_block_entry = self.find_entry("parallel_gate_block", tree)
+        parallel_start = text.find("<")
+        parallel_end = text.find(">") + 1
         self.check_positions(
             parallel_block_entry,
             range(parallel_start, parallel_end),
             range(13, 17),
-            range(0, 9))
+            range(0, 9),
+        )
 
     def find_entry(self, entry_type, tree):
         return self.find_entries(entry_type, tree)[0]
 
     def find_entries(self, entry_type, tree):
         entries = []
-        if tree['type'] == entry_type:
+        if tree["type"] == entry_type:
             entries.append(tree)
         for field, value in tree.items():
             if isinstance(value, list):
@@ -561,11 +568,10 @@ class PositionTester(TestCase):
                         entries.extend(self.find_entries(entry_type, subtree))
         return entries
 
-    def check_positions(self, entry, exp_pos_range, exp_line_range,
-                        exp_column_range):
+    def check_positions(self, entry, exp_pos_range, exp_line_range, exp_column_range):
         """Given a dictionary entry, make sure all position data falls in the
         expected range."""
 
-        self.assertIn(entry['pos'], exp_pos_range)
-        self.assertIn(entry['line'], exp_line_range)
-        self.assertIn(entry['column'], exp_column_range)
+        self.assertIn(entry["pos"], exp_pos_range)
+        self.assertIn(entry["line"], exp_line_range)
+        self.assertIn(entry["column"], exp_column_range)
