@@ -208,7 +208,7 @@ class ScheduledCircuit:
             if source is None:
                 raise JaqalError("Map statement for %s must have a source." % name)
             else:
-                if source in self.registers:
+                if isinstance(source, str) and source in self.registers:
                     source_r = self.registers[source]
                 elif (
                     source.name in self.registers
