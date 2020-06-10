@@ -313,7 +313,7 @@ class ParseTreeVisitor(ABC):
             return self.transformer.transform(tree)
         except Exception as exc:
             raise JaqalParseError(
-                str(exc), transformer.current_line, transformer.current_column
+                str(exc), self.transformer.current_line, self.transformer.current_column
             )
 
     @property

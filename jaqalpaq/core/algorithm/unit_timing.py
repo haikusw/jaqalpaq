@@ -28,14 +28,13 @@ def normalize_blocks_with_unitary_timing(circuit):
 
 
 class BlockNormalizer(Visitor):
-
     def visit_default(self, obj):
         """By default we leave all objects alone. Note that the object is not
         copied."""
         return obj
 
     def visit_ScheduledCircuit(self, circuit):
-        """Return a new Circuit with the same metadata and normalized
+        """Return a new ScheduledCircuit with the same metadata and normalized
         gates."""
 
         new_circuit = core.circuit.ScheduledCircuit(native_gates=circuit.native_gates)
@@ -60,9 +59,11 @@ class BlockNormalizer(Visitor):
             new_statements = []
             for parallel_chunk in self.iter_chunk_blocks(visited_statements):
                 if len(parallel_chunk) == 1:
-                    block, = parallel_chunk
+                    (block,) = parallel_chunk
                 else:
-                    block = core.BlockStatement(parallel=True, statements=parallel_chunk)
+                    block = core.BlockStatement(
+                        parallel=True, statements=parallel_chunk
+                    )
                 new_statements.append(block)
         else:
             new_statements = list(self.iter_unroll_blocks(visited_statements))
@@ -75,18 +76,20 @@ class BlockNormalizer(Visitor):
         (treating a gate as a block of 1 statement)."""
         iterators = [UnrollIterator().visit(stmt) for stmt in statements]
         for ch in zip_longest(*iterators):
-             non_none = list(filter(lambda x: x is not None, ch))
-             chunk = []
-             for stmt in non_none:
-                 if isinstance(stmt, core.BlockStatement):
-                     assert stmt.parallel, "Normalization Failed"
-                     chunk.extend(stmt.statements)
-                 else:
-                     chunk.append(stmt)
-                 if isinstance(stmt, core.LoopStatement):
-                     raise JaqalError("A Loop is embedded somewhere within a parallel block. This is legal Jaqal, but cannot be handled here. Unroll loops first.")
-                 
-             yield chunk
+            non_none = list(filter(lambda x: x is not None, ch))
+            chunk = []
+            for stmt in non_none:
+                if isinstance(stmt, core.BlockStatement):
+                    assert stmt.parallel, "Normalization Failed"
+                    chunk.extend(stmt.statements)
+                else:
+                    chunk.append(stmt)
+                if isinstance(stmt, core.LoopStatement):
+                    raise JaqalError(
+                        "A Loop is embedded somewhere within a parallel block. This is legal Jaqal, but cannot be handled here. Unroll loops first."
+                    )
+
+            yield chunk
 
     def iter_unroll_blocks(self, statements):
         for stmt in statements:

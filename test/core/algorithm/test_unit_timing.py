@@ -4,8 +4,8 @@ from jaqalpaq import JaqalError
 from jaqalpaq.parser import parse_jaqal_string
 from jaqalpaq.core.algorithm.unit_timing import normalize_blocks_with_unitary_timing
 
-class UnitTimingTester(unittest.TestCase):
 
+class UnitTimingTester(unittest.TestCase):
     def test_single_gate(self):
         test = "foo 1 2 3"
         exp = "foo 1 2 3"
@@ -53,5 +53,5 @@ class UnitTimingTester(unittest.TestCase):
         self.assertEqual(exp_result, act_result)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
