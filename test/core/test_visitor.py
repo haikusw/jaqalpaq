@@ -2,6 +2,7 @@ import unittest
 import random
 
 from jaqalpaq.core.visitor import Visitor
+from jaqalpaq import JaqalError
 
 
 class JaqalVisitorTester(unittest.TestCase):
@@ -44,5 +45,5 @@ class JaqalVisitorTester(unittest.TestCase):
                 return obj.x
 
         visitor = TestVisitor()
-        with self.assertRaises(TypeError):
+        with self.assertRaises(JaqalError):
             visitor.visit(1)
