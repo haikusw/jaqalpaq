@@ -1,7 +1,8 @@
 """Resolve references to macros to expansions of the gates they contain."""
 
 from .tree import TreeRewriteVisitor
-from .extract_macro import MacroRecord, ExtractMacroVisitor
+from .extract_macro import ExtractMacroVisitor
+from jaqalpaq import JaqalError
 
 
 def resolve_macro(tree, macro_dict):
@@ -30,7 +31,7 @@ class ResolveMacroVisitor(ExtractMacroVisitor):
         if gate_name_key in self.macro_mapping:
             arguments, block = self.macro_mapping[gate_name_key]
             if len(arguments) != len(gate_args):
-                raise ValueError(
+                raise JaqalError(
                     f"In resolving macro {gate_name_key}, expected {len(arguments)} arguments, found {len(gate_args)}"
                 )
             arg_dict = {arg: gate_arg for arg, gate_arg in zip(arguments, gate_args)}

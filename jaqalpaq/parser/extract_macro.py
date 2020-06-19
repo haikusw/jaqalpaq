@@ -2,6 +2,7 @@
 from collections import namedtuple
 
 from .tree import TreeRewriteVisitor
+from jaqalpaq import JaqalError
 
 
 def extract_macro(tree):
@@ -21,7 +22,7 @@ class ExtractMacroVisitor(TreeRewriteVisitor):
         name_id = self.extract_identifier(name)
         arg_ids = [self.extract_identifier(arg) for arg in arguments]
         if name_id in self.macro_mapping:
-            raise ValueError(f"Redefinition of {name_id} macro")
+            raise JaqalError(f"Redefinition of {name_id} macro")
         self.macro_mapping[name_id] = MacroRecord(
             arg_ids, self.deconstruct_macro_gate_block(block)
         )

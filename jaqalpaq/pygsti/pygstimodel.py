@@ -1,7 +1,7 @@
 import pygsti
 import numpy as np
-import scipy
-from collections import OrderedDict
+
+from jaqalpaq import JaqalError
 
 
 def build_noiseless_native_model(
@@ -20,7 +20,7 @@ def build_noiseless_native_model(
             if g.name in ("prepare_all", "measure_all"):
                 unitaries[name] = np.identity(2)
             else:
-                raise NotImplementedError(f"{g.name} not supported")
+                raise JaqalError(f"{g.name} not supported")
             continue
 
         if g.classical_parameters > 0:

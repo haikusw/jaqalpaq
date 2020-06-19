@@ -3,6 +3,7 @@ from collections import namedtuple
 
 from .tree import TreeRewriteVisitor
 from .identifier import Identifier
+from jaqalpaq import JaqalError
 
 
 def extract_map(tree):
@@ -30,7 +31,7 @@ class ExtractMapVisitor(TreeRewriteVisitor):
         # be too confusing if we ignored the double register declaration error.
         identifier = Identifier(self.extract_identifier(identifier))
         if identifier in self.registers:
-            raise ValueError(f"Register {identifier} already declared")
+            raise JaqalError(f"Register {identifier} already declared")
         self.registers[identifier] = size
 
         return self.make_register_statement(array_declaration)
@@ -51,17 +52,17 @@ class ExtractMapVisitor(TreeRewriteVisitor):
             src_id_token, _ = self.deconstruct_array_element(source)
             src_identifier = self.extract_identifier(src_id_token)
         else:
-            raise ValueError(f"Unknown map source format: {source}")
+            raise JaqalError(f"Unknown map source format: {source}")
 
         if (
             src_identifier not in self.registers
             and src_identifier not in self.map_mapping
         ):
-            raise ValueError(
+            raise JaqalError(
                 f"Map statement references unknown source {src_identifier}"
             )
         if dst_identifier in self.map_mapping:
-            raise ValueError(
+            raise JaqalError(
                 f"Map statement redeclares existing alias {dst_identifier}"
             )
 

@@ -1,6 +1,7 @@
 """Extract information on the registers used in a Jaqal file."""
 from .tree import TreeRewriteVisitor
 from .identifier import Identifier
+from jaqalpaq import JaqalError
 
 
 def extract_register(tree):
@@ -23,5 +24,5 @@ class ExtractRegisterVisitor(TreeRewriteVisitor):
         identifier, size = self.deconstruct_array_declaration(array_declaration)
         identifier = Identifier.parse(identifier)
         if identifier in self.register_mapping:
-            raise ValueError(f"Redefinition of register {identifier}")
+            raise JaqalError(f"Redefinition of register {identifier}")
         self.register_mapping[identifier] = self.make_let_or_integer(size)

@@ -13,6 +13,7 @@ from .resolve_macro import resolve_macro
 from .block_normalizer import normalize_blocks_with_unitary_timing
 from .iter_gates import get_gates_and_loops
 from .validate import validate
+from jaqalpaq import JaqalError
 
 
 class Interface:
@@ -183,7 +184,7 @@ class Interface:
             or not self._usepulses
             and not self._allow_no_usepulses
         ):
-            raise NotImplementedError("At most one usepulses allowed for now")
+            raise JaqalError("At most one usepulses allowed for now")
 
 
 class HashDict(dict):
@@ -226,7 +227,7 @@ def convert_to_int(token):
     float_value = float(token)
     int_value = int(float_value)
     if int_value != float_value:
-        raise ValueError(f"Invalid register size {float_value}")
+        raise JaqalError(f"Invalid register size {float_value}")
     return int_value
 
 

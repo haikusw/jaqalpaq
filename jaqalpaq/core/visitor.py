@@ -1,5 +1,7 @@
 """Define the infrastructure for visiting Jaqal core types"""
 
+from jaqalpaq import JaqalError
+
 
 class Visitor:
     """Base class for all visitors for the Jaqal core types. To use this class, create a subclass and create methods
@@ -19,7 +21,7 @@ class Visitor:
 
     def visit_default(self, obj, *args, **kwargs):
         """Method called when no method matches. Override to provide default behavior."""
-        raise TypeError(f"No visitor defined for {obj}")
+        raise JaqalError(f"No visitor defined for {obj}")
 
     def visit(self, obj, *args, **kwargs):
         """Find the appropriate visitor method for the argument and call it."""

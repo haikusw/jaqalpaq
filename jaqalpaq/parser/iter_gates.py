@@ -2,6 +2,7 @@
 
 from .tree import ParseTreeVisitor
 from .identifier import Identifier
+from jaqalpaq import JaqalError
 
 
 def get_gates_and_loops(tree):
@@ -21,10 +22,10 @@ class IterateGatesAndLoopsVisitor(ParseTreeVisitor):
         return None
 
     def visit_map_statement(self, target, source):
-        raise ValueError(f"Map statements should have been removed by now")
+        raise JaqalError(f"Map statements should have been removed by now")
 
     def visit_let_statement(self, identifier, number):
-        raise ValueError(f"Let statements should have been removed by now")
+        raise JaqalError(f"Let statements should have been removed by now")
 
     def visit_usepulses_statement(self, identifier, objects):
         return None
@@ -33,7 +34,7 @@ class IterateGatesAndLoopsVisitor(ParseTreeVisitor):
         return Gate(gate_name, gate_args)
 
     def visit_macro_definition(self, name, arguments, block):
-        raise ValueError(f"Macro definition should have been removed by now")
+        raise JaqalError(f"Macro definition should have been removed by now")
 
     def visit_loop_statement(self, repetition_count, block):
         return Loop(repetition_count, block)

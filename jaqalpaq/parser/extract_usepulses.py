@@ -4,6 +4,7 @@
 # statement.
 
 from .tree import TreeRewriteVisitor
+from jaqalpaq import JaqalError
 
 
 def extract_usepulses(tree):
@@ -36,6 +37,6 @@ class ExtractUsepulsesVisitor(TreeRewriteVisitor):
     def visit_usepulses_statement(self, identifier, objects):
         ident_value = self.extract_qualified_identifier(identifier)
         if objects is not all:
-            raise NotImplementedError("Only from foo usepulses * implemented")
+            raise JaqalError("Only from foo usepulses * implemented")
         self.usepulses_mapping[ident_value] = objects
         return self.make_usepulses_statement(identifier, objects)

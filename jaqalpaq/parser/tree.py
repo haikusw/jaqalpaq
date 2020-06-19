@@ -172,14 +172,14 @@ class VisitTransformer(LarkTransformerBase):
 
     def usepulses_statement(self, args):
         if len(args) != 2:
-            raise NotImplementedError("Only from foo usepulses * implemented")
+            raise JaqalError("Only from foo usepulses * implemented")
         if args[0].data == "from_clause":
             if args[1].data != "all_module":
-                raise NotImplementedError("Only from foo usepulses * implemented")
+                raise JaqalError("Only from foo usepulses * implemented")
             identifier = args[0].children[0]
             objects = all
         else:
-            raise NotImplementedError("Only from foo usepulses * implemented")
+            raise JaqalError("Only from foo usepulses * implemented")
         return self._visitor.visit_usepulses_statement(identifier, objects)
 
     def body_statements(self, args):
@@ -320,7 +320,7 @@ class ParseTreeVisitor(ABC):
     def current_line(self):
         """Return a line associated with the current item being processed."""
         if not hasattr(self, "transformer"):
-            raise RuntimeError("Cannot call current_line before visit")
+            raise JaqalError("Cannot call current_line before visit")
         return self.transformer.current_line
 
     @property
@@ -328,7 +328,7 @@ class ParseTreeVisitor(ABC):
         """Return a column associated with the current item being
         processed."""
         if not hasattr(self, "transformer"):
-            raise RuntimeError("Cannot call current_column before visit")
+            raise JaqalError("Cannot call current_column before visit")
         return self.transformer.current_column
 
     @property
@@ -336,7 +336,7 @@ class ParseTreeVisitor(ABC):
         """Return a position in the input character stream associated with the
         current item being processed."""
         if not hasattr(self, "transformer"):
-            raise RuntimeError("Cannot call current_pos before visit")
+            raise JaqalError("Cannot call current_pos before visit")
         return self.transformer.current_pos
 
     ##
@@ -506,7 +506,7 @@ class TreeManipulators:
     @staticmethod
     def make_usepulses_statement(identifier, objects):
         if objects is not all:
-            raise NotImplementedError("Only from foo usepulses * implemented")
+            raise JaqalError("Only from foo usepulses * implemented")
         from_clause = Tree("from_clause", [identifier])
         all_module = Tree("all_module", [])
         return Tree("usepulses_statement", [from_clause, all_module])
@@ -625,7 +625,7 @@ class TreeManipulators:
     @staticmethod
     def make_signed_number(number):
         if not isinstance(number, float) and not isinstance(number, int):
-            raise TypeError(f"Expected number, found {number}")
+            raise JaqalError(f"Expected number, found {number}")
         return Token("SIGNED_NUMBER", str(number))
 
     @staticmethod
@@ -633,19 +633,19 @@ class TreeManipulators:
         if (
             not isinstance(number, float) and not isinstance(number, int)
         ) or number < 0:
-            raise TypeError(f"Expected non-negative number, found {number}")
+            raise JaqalError(f"Expected non-negative number, found {number}")
         return Token("NUMBER", str(number))
 
     @staticmethod
     def make_integer(number):
         if not isinstance(number, int) or number < 0:
-            raise TypeError(f"Expected non-negative integer, found {number}")
+            raise JaqalError(f"Expected non-negative integer, found {number}")
         return Token("INTEGER", str(number))
 
     @staticmethod
     def make_signed_integer(number):
         if not isinstance(number, int):
-            raise TypeError(f"Expected integer, found {number}")
+            raise JaqalError(f"Expected integer, found {number}")
         return Token("SIGNED_INTEGER", str(number))
 
     @classmethod
@@ -659,7 +659,7 @@ class TreeManipulators:
         ):
             # A signed number token can be converted to a float but not an int, so we have a workaround here.
             if float(number) < 0 or float(number) != int(float(number)):
-                raise ValueError(f"Expected integer, found {number}")
+                raise JaqalError(f"Expected integer, found {number}")
             return cls.make_integer(int(float(number)))
         else:
             # Likely an identifier
@@ -674,7 +674,7 @@ class TreeManipulators:
         elif cls.is_number(number) or cls.is_signed_number(number):
             # A signed number token can be converted to a float but not an int, so we have a workaround here.
             if float(number) != int(float(number)):
-                raise ValueError(f"Expected signed integer, found {number}")
+                raise JaqalError(f"Expected signed integer, found {number}")
             return cls.make_signed_integer(int(float(number)))
         else:
             return number
@@ -888,7 +888,7 @@ class TreeManipulators:
         elif cls.is_signed_number(token):
             return cls.extract_signed_number(token)
         else:
-            raise TypeError(f"Unknown token: {token}")
+            raise JaqalError(f"Unknown token: {token}")
 
 
 class TreeRewriteVisitor(ParseTreeVisitor, TreeManipulators):

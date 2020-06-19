@@ -1,5 +1,6 @@
 """Extract the constant mappings used by let statements."""
 from .tree import TreeRewriteVisitor
+from jaqalpaq import JaqalError
 
 
 def extract_let(tree, use_float=False):
@@ -26,5 +27,5 @@ class ExtractLetVisitor(TreeRewriteVisitor):
             number = self.extract_signed_number(number)
         ext_identifier = self.extract_identifier(identifier)
         if ext_identifier in self.let_mapping:
-            raise ValueError(f"Redefinition of let-constant {ext_identifier}")
+            raise JaqalError(f"Redefinition of let-constant {ext_identifier}")
         self.let_mapping[ext_identifier] = number

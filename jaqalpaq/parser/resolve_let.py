@@ -3,6 +3,7 @@ from numbers import Integral
 
 from .macro_context_visitor import MacroContextRewriteVisitor
 from .tree import TreeManipulators
+from jaqalpaq import JaqalError
 
 
 def resolve_let(tree, let_dict):
@@ -39,7 +40,7 @@ def combine_let_dicts(let_dict, *additional_dicts):
     for ad in additional_dicts:
         for key in ad:
             if key not in let_str_dict:
-                raise ValueError(f"Attempted to override unknown let {key}")
+                raise JaqalError(f"Attempted to override unknown let {key}")
 
     def get_value(key):
         key = str(key)
@@ -85,7 +86,7 @@ class ResolveLetVisitor(MacroContextRewriteVisitor):
         """Validate the repetition count is a non-negative integer."""
         num = self.extract_signed_number(repetition_count)
         if not is_non_negative_integer(num):
-            raise ValueError(
+            raise JaqalError(
                 f"While resolving let values: illegal loop statement count: {num}"
             )
         return self.make_loop_statement(repetition_count, block)
@@ -94,7 +95,7 @@ class ResolveLetVisitor(MacroContextRewriteVisitor):
         """Validate the size is a non-negative integer."""
         num = self.extract_signed_number(size)
         if not is_non_negative_integer(num):
-            raise ValueError(
+            raise JaqalError(
                 f"While resolving let values: illegal array declaration size: {num}"
             )
         return self.make_array_declaration(identifier, size)
@@ -103,14 +104,14 @@ class ResolveLetVisitor(MacroContextRewriteVisitor):
         """Validate the index is an integer."""
         num = self.extract_signed_number(index)
         if not is_integer(num):
-            raise ValueError(f"While resolving let values: illegal array index {num}")
+            raise JaqalError(f"While resolving let values: illegal array index {num}")
         return self.make_array_element(identifier, index)
 
     def visit_array_element_qual(self, identifier, index):
         """Validate the index is an integer."""
         num = self.extract_signed_number(index)
         if not is_integer(num):
-            raise ValueError(f"While resolving let values: illegal array index {num}")
+            raise JaqalError(f"While resolving let values: illegal array index {num}")
         return self.make_array_element_qual(identifier, index)
 
     def visit_array_slice(self, identifier, index_slice):
@@ -119,7 +120,7 @@ class ResolveLetVisitor(MacroContextRewriteVisitor):
             if value is not None:
                 num = self.extract_signed_number(value)
                 if not is_integer(num):
-                    raise ValueError(
+                    raise JaqalError(
                         f"While resolving let values: illegal array slice value {num}"
                     )
         return self.make_array_slice(identifier, index_slice)

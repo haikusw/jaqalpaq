@@ -2,6 +2,7 @@
 from sys import maxsize
 
 from .macro_context_visitor import MacroContextRewriteVisitor
+from jaqalpaq import JaqalError
 
 
 def resolve_map(tree, map_dict, register_set):
@@ -17,7 +18,7 @@ class ResolveMapVisitor(MacroContextRewriteVisitor):
     def __init__(self, map_dict, register_set):
         super().__init__()
         if any(reg in map_dict for reg in register_set):
-            raise ValueError("Name of a map alias is also a register")
+            raise JaqalError("Name of a map alias is also a register")
         self.map_dict = map_dict
         self.register_set = register_set
 
@@ -27,7 +28,7 @@ class ResolveMapVisitor(MacroContextRewriteVisitor):
         index_value = self.extract_signed_integer(index)
 
         if self.is_macro_argument(identifier_value):
-            raise ValueError(
+            raise JaqalError(
                 "This macro uses an argument as a register; please resolve macros before resolving maps"
             )
 
@@ -74,7 +75,7 @@ class ResolveMapVisitor(MacroContextRewriteVisitor):
         """Find the array or register that this identifier maps to, and return the name and index."""
 
         if identifier_value not in self.map_dict:
-            raise ValueError(f"Cannot resolve map {identifier_value}")
+            raise JaqalError(f"Cannot resolve map {identifier_value}")
 
         source = self.map_dict[identifier_value]
 
@@ -88,7 +89,7 @@ class ResolveMapVisitor(MacroContextRewriteVisitor):
                 comp is not None and not self.is_signed_integer(comp)
                 for comp in src_slice
             ):
-                raise ValueError(f"Unresolved map element {identifier_value}")
+                raise JaqalError(f"Unresolved map element {identifier_value}")
             src_start, src_stop, src_step = [
                 self.extract_signed_integer(comp) if comp is not None else comp
                 for comp in src_slice
@@ -101,15 +102,15 @@ class ResolveMapVisitor(MacroContextRewriteVisitor):
             try:
                 src_index = src_range[index_value]
             except IndexError:
-                raise ValueError(
+                raise JaqalError(
                     f"Index {index_value} out of range for mapping {identifier_value}"
                 )
         elif self.is_array_element(source):
-            raise ValueError(
+            raise JaqalError(
                 f"Cannot use map alias {identifier_value} as an array element"
             )
         else:
-            raise ValueError(f"Unknown map source format: {source}")
+            raise JaqalError(f"Unknown map source format: {source}")
 
         return src_identifier, src_index
 
@@ -117,7 +118,7 @@ class ResolveMapVisitor(MacroContextRewriteVisitor):
         """Find the array element that maps to this identifier and return it."""
 
         if identifier_value not in self.map_dict:
-            raise ValueError(f"Cannot resolve map {identifier_value}")
+            raise JaqalError(f"Cannot resolve map {identifier_value}")
 
         source = self.map_dict[identifier_value]
 
@@ -127,11 +128,11 @@ class ResolveMapVisitor(MacroContextRewriteVisitor):
                 res_identifier = self.resolve_map_identifier(src_identifier)
                 return res_identifier
             else:
-                raise ValueError(
+                raise JaqalError(
                     f"Cannot resolve map alias {identifier_value} to a register element"
                 )
         elif self.is_array_slice(source):
-            raise ValueError(
+            raise JaqalError(
                 f"Cannot use map alias {identifier_value} as a gate argument"
             )
         elif self.is_array_element(source):
@@ -146,4 +147,4 @@ class ResolveMapVisitor(MacroContextRewriteVisitor):
                 self.make_signed_integer(res_index),
             )
         else:
-            raise ValueError(f"Unknown map source format: {source}")
+            raise JaqalError(f"Unknown map source format: {source}")

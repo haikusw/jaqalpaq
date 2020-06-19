@@ -1,6 +1,7 @@
 import itertools
 
-from .tree import TreeRewriteVisitor, ParseTreeVisitor
+from .tree import TreeRewriteVisitor
+from jaqalpaq import JaqalError
 
 
 def normalize_blocks_with_unitary_timing(tree):
@@ -43,7 +44,7 @@ class UnitaryBlockRewriteVisitor(TreeRewriteVisitor):
             # executed in parallel at the given timestep.
             gates = list(itertools.chain(*gate_lists))
             if not all(self.is_gate_statement(gate) for gate in gates):
-                raise TypeError(f"Expected list of parallel gates, found {gates}")
+                raise JaqalError(f"Expected list of parallel gates, found {gates}")
             assert gates, "No gates were returned instead of stopping the iteration"
             if len(gates) == 1:
                 sequential_statements.append(gates[0])
@@ -73,7 +74,7 @@ def _sequence_gates(tree):
     gates = GateSequencingVisitor().visit(tree)
 
     if not isinstance(gates, list):
-        raise TypeError(
+        raise JaqalError(
             f"Expected list returned from GateSequencingVisitor, found {gates}"
         )
 
@@ -98,7 +99,7 @@ class GateSequencingVisitor(TreeRewriteVisitor):
             isinstance(stmt, list) and self.is_gate_statement(stmt[0])
             for stmt in statements
         ):
-            raise TypeError("Non gate statement found in parallel block")
+            raise JaqalError("Non gate statement found in parallel block")
         return [lst[0] for lst in statements]
 
     def visit_gate_statement(self, gate_name, gate_args):
