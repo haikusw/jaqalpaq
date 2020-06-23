@@ -2,12 +2,50 @@
 
 import sys
 from setuptools import setup
+import os, shutil
+from os.path import dirname, join
+
+# copytree with dirs_exist_ok is too new
+def copytree(src, dst, dirs_exist_ok=True):
+    src = os.path.abspath(src)
+    dst = os.path.abspath(dst)
+
+    for sdir, dirnames, files in os.walk(src):
+        ddir = sdir.replace(src, dst, 1)
+        if not os.path.exists(ddir):
+            os.makedirs(ddir)
+        for f in files:
+            sfile = os.path.join(sdir, f)
+            dfile = os.path.join(ddir, f)
+            if os.path.exists(dfile):
+                if not dirs_exist_ok:
+                    raise RuntimeError("unsupported feature")
+                if os.path.samefile(sfile, dfile):
+                    continue
+                os.remove(dfile)
+            shutil.copy(sfile, ddir)
+
 
 try:
     from sphinx.setup_command import BuildDoc
 except ImportError:
     print("Warning: document cannot be built without sphinx")
-    BuildDoc = None
+    DoBuildDoc = None
+else:
+
+    try:
+        import jaqalpaq.transpilers as jet
+    except ImportError:
+        DoBuildDoc = BuildDoc
+    else:
+        extra_doc = join(dirname(dirname(dirname(jet.__file__))), "doc")
+
+        class DoBuildDoc(BuildDoc):
+            def _guess_source_dir(self):
+                root = super()._guess_source_dir()
+                copytree(extra_doc, root, dirs_exist_ok=True)
+                return root
+
 
 name = "JaqalPaq"
 description = "Python tools for Jaqal"
@@ -46,5 +84,5 @@ setup(
         "Operating System :: MacOS :: MacOS X",
         "Operating System :: Unix",
     ],
-    cmdclass={"build_sphinx": BuildDoc},
+    cmdclass={"build_sphinx": DoBuildDoc},
 )
