@@ -1,7 +1,7 @@
 import unittest
 import random
 
-from jaqalpaq.core.visitor import Visitor
+from jaqalpaq.core.algorithm.visitor import Visitor
 from jaqalpaq import JaqalError
 
 

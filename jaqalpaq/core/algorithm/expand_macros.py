@@ -3,7 +3,7 @@
 from typing import Dict
 
 from jaqalpaq import JaqalError
-from jaqalpaq.core.visitor import Visitor
+from jaqalpaq.core.algorithm.visitor import Visitor
 import jaqalpaq.core as core
 
 

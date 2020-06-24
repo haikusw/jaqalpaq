@@ -4,7 +4,7 @@ unitary timing (or are padded to be so)."""
 from itertools import zip_longest
 
 from jaqalpaq import JaqalError
-from jaqalpaq.core.visitor import Visitor
+from jaqalpaq.core.algorithm.visitor import Visitor
 import jaqalpaq.core as core
 
 

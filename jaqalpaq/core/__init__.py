@@ -14,7 +14,12 @@ from .parameter import (
     Parameter,
 )
 from .register import Register, NamedQubit
-from .used_qubit_visitor import get_used_qubit_indices
+from .circuitbuilder import (
+    build,
+    CircuitBuilder,
+    SequentialBlockBuilder,
+    ParallelBlockBuilder,
+)
 
 __all__ = [
     "BlockStatement",
@@ -34,5 +39,4 @@ __all__ = [
     "Parameter",
     "Register",
     "NamedQubit",
-    "get_used_qubit_indices",
 ]

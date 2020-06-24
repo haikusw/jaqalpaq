@@ -1,10 +1,9 @@
 import unittest
 from collections import defaultdict
-import random
 
 import jaqalpaq.core as core
-from . import common
-from . import randomize
+from jaqalpaq.core.algorithm import get_used_qubit_indices
+from .. import common
 
 
 class UsedQubitTester(unittest.TestCase):
@@ -12,7 +11,7 @@ class UsedQubitTester(unittest.TestCase):
         """Test a gate that does not use any qubits."""
         gate = common.make_random_gate_statement(count=0)
         exp_qubits = {}
-        act_qubits = core.get_used_qubit_indices(gate)
+        act_qubits = get_used_qubit_indices(gate)
         self.assertEqual(exp_qubits, act_qubits)
 
     def test_single_gate_one_qubit(self):
@@ -25,32 +24,32 @@ class UsedQubitTester(unittest.TestCase):
         exp_qubits = {reg.name: {index}}
         args = {params[0].name: qubit}
         gate = core.GateStatement(gate_def, args)
-        act_qubits = core.get_used_qubit_indices(gate)
+        act_qubits = get_used_qubit_indices(gate)
         self.assertEqual(exp_qubits, act_qubits)
 
     def test_single_gate_mixed_args(self):
         """Test getting the qubits from a gate that mixes qubits and non-qubit arguments."""
         gate = common.make_random_gate_statement()
         exp_qubits = self.make_exp_qubits_from_gate(gate)
-        act_qubits = core.get_used_qubit_indices(gate)
+        act_qubits = get_used_qubit_indices(gate)
         self.assertEqual(exp_qubits, act_qubits)
 
     def test_loop(self):
         loop = common.make_random_loop_statement()
         exp_qubits = self.make_exp_qubits_from_block(loop.statements)
-        act_qubits = core.get_used_qubit_indices(loop)
+        act_qubits = get_used_qubit_indices(loop)
         self.assertEqual(exp_qubits, act_qubits)
 
     def test_block(self):
         block = common.make_random_block()
         exp_qubits = self.make_exp_qubits_from_block(block)
-        act_qubits = core.get_used_qubit_indices(block)
+        act_qubits = get_used_qubit_indices(block)
         self.assertEqual(exp_qubits, act_qubits)
 
     def test_parallel_block(self):
         block = common.make_random_block(parallel=True)
         exp_qubits = self.make_exp_qubits_from_block(block)
-        act_qubits = core.get_used_qubit_indices(block)
+        act_qubits = get_used_qubit_indices(block)
         self.assertEqual(exp_qubits, act_qubits)
 
     def test_circuit(self):
@@ -59,7 +58,7 @@ class UsedQubitTester(unittest.TestCase):
         block = common.make_random_block()
         circuit.body.statements.extend(block.statements)
         exp_qubits = self.make_exp_qubits_from_block(block)
-        act_qubits = core.get_used_qubit_indices(circuit)
+        act_qubits = get_used_qubit_indices(circuit)
         self.assertEqual(exp_qubits, act_qubits)
 
     def test_macro(self):
@@ -78,7 +77,7 @@ class UsedQubitTester(unittest.TestCase):
         macro = core.Macro("foo", [param], macro_body)
         foo = macro(reg[2])
         exp_qubits = {"r": {0, 2}}
-        act_qubits = core.get_used_qubit_indices(foo)
+        act_qubits = get_used_qubit_indices(foo)
         self.assertEqual(exp_qubits, act_qubits)
 
     ##

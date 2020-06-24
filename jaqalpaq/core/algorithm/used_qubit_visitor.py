@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from jaqalpaq.core.visitor import Visitor
+from jaqalpaq.core.algorithm.visitor import Visitor
 from jaqalpaq.core import Macro
 
 
