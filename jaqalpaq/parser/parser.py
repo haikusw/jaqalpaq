@@ -27,7 +27,10 @@ def parse_jaqal_file(
     :param bool return_usepulses: Whether to both add a second return value and populate it with the usepulses statement.
     :param inject_pulses: If given, use these pulses specifically.
     :param bool autoload_pulses: Whether to employ the usepulses statement for parsing.  Requires appropriate gate definitions.
-    :return: A list of the gates, blocks, and loops to be run.
+    :return: The circuit representation of the file and usepulses if
+    requested. usepulses is stored in a dict under the key
+    'usepulses'. It is itself a dict mapping :class:`Identifier`
+    objects to what the import, which may be the special symbol all.
 
     """
     with open(filename) as fd:
@@ -64,7 +67,10 @@ def parse_jaqal_string(
     :param bool return_usepulses: Whether to both add a second return value and populate it with the usepulses statement.
     :param inject_pulses: If given, use these pulses specifically.
     :param bool autoload_pulses: Whether to employ the usepulses statement for parsing.  Requires appropriate gate definitions.
-    :return: A list of the gates, blocks, and loops to be run.
+    :return: The circuit representation of the file and usepulses if
+    requested. usepulses is stored in a dict under the key
+    'usepulses'. It is itself a dict mapping :class:`Identifier`
+    objects to what the import, which may be the special symbol all.
 
     """
 
