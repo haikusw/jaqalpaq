@@ -24,7 +24,7 @@ setup(
         "jaqalpaq.core",
         "jaqalpaq.generator",
         "jaqalpaq.parser",
-        "jaqalpaq.pygsti",
+        "jaqalpaq.emulator",
     ],
     package_dir={"": "."},
     install_requires=["lark-parser"],

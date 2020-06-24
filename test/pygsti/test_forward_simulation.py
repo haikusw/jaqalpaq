@@ -3,7 +3,7 @@ import unittest, pytest
 import jaqalpaq
 from jaqalpaq.core.circuitbuilder import CircuitBuilder
 import numpy as np
-import jaqalpaq.pygsti
+import jaqalpaq.emulator.pygsti
 from jaqalpaq.generator import generate_jaqal_program
 import jaqalpaq.parser
 from jaqalpaq.core.circuit import normalize_native_gates
@@ -46,7 +46,7 @@ measure_all
         )
 
     def test_forward_simulate_circuit(self):
-        c_dict = jaqalpaq.pygsti.forward_simulate_circuit(self.c)
+        c_dict = jaqalpaq.emulator.pygsti.forward_simulate_circuit(self.c)
         self.assertAlmostEqual(c_dict["000"], 0.5)
         self.assertAlmostEqual(c_dict["001"], 0)
         self.assertAlmostEqual(c_dict["010"], 0)
@@ -56,7 +56,7 @@ measure_all
         self.assertAlmostEqual(c_dict["110"], 0.5)
         self.assertAlmostEqual(c_dict["111"], 0)
 
-        jaqal_c_dict = jaqalpaq.pygsti.forward_simulate_circuit(self.jaqal_c)
+        jaqal_c_dict = jaqalpaq.emulator.pygsti.forward_simulate_circuit(self.jaqal_c)
         self.assertAlmostEqual(jaqal_c_dict["000"], 0.5)
         self.assertAlmostEqual(jaqal_c_dict["001"], 0)
         self.assertAlmostEqual(jaqal_c_dict["010"], 0)
@@ -67,8 +67,10 @@ measure_all
         self.assertAlmostEqual(jaqal_c_dict["111"], 0)
 
     def test_forward_simulate_circuit_counts(self):
-        c_count_dict = jaqalpaq.pygsti.forward_simulate_circuit_counts(self.c, 1000)
-        jaqal_c_count_dict = jaqalpaq.pygsti.forward_simulate_circuit_counts(
+        c_count_dict = jaqalpaq.emulator.pygsti.forward_simulate_circuit_counts(
+            self.c, 1000
+        )
+        jaqal_c_count_dict = jaqalpaq.emulator.pygsti.forward_simulate_circuit_counts(
             self.jaqal_c, 1000
         )
 
@@ -101,8 +103,8 @@ measure_all
         jaqal_prog = jaqalpaq.parser.parse_jaqal_string(
             jaqal_text, native_gates=normalize_native_gates(native_gates.NATIVE_GATES)
         )
-        output_probs = jaqalpaq.pygsti.forward_simulate_circuit(jaqal_prog)
-        output_counts = jaqalpaq.pygsti.forward_simulate_circuit_counts(
+        output_probs = jaqalpaq.emulator.pygsti.forward_simulate_circuit(jaqal_prog)
+        output_counts = jaqalpaq.emulator.pygsti.forward_simulate_circuit_counts(
             jaqal_prog, 1000
         )
         self.assertAlmostEqual(output_probs["00000"], 0.5)
@@ -139,8 +141,8 @@ measure_all
         jaqal_prog = jaqalpaq.parser.parse_jaqal_string(
             jaqal_text, native_gates=normalize_native_gates(native_gates.NATIVE_GATES)
         )
-        output_probs = jaqalpaq.pygsti.forward_simulate_circuit(jaqal_prog)
-        output_counts = jaqalpaq.pygsti.forward_simulate_circuit_counts(
+        output_probs = jaqalpaq.emulator.pygsti.forward_simulate_circuit(jaqal_prog)
+        output_counts = jaqalpaq.emulator.pygsti.forward_simulate_circuit_counts(
             jaqal_prog, 1000
         )
         self.assertAlmostEqual(output_probs["00000"], 0.5)
@@ -178,8 +180,8 @@ measure_all
         jaqal_prog = jaqalpaq.parser.parse_jaqal_string(
             jaqal_text, native_gates=normalize_native_gates(native_gates.NATIVE_GATES)
         )
-        output_probs = jaqalpaq.pygsti.forward_simulate_circuit(jaqal_prog)
-        output_counts = jaqalpaq.pygsti.forward_simulate_circuit_counts(
+        output_probs = jaqalpaq.emulator.pygsti.forward_simulate_circuit(jaqal_prog)
+        output_counts = jaqalpaq.emulator.pygsti.forward_simulate_circuit_counts(
             jaqal_prog, 1000
         )
         self.assertAlmostEqual(output_probs["00000"], 0.5)
@@ -218,8 +220,8 @@ measure_all
         jaqal_prog = jaqalpaq.parser.parse_jaqal_string(
             jaqal_text, native_gates=normalize_native_gates(native_gates.NATIVE_GATES)
         )
-        output_probs = jaqalpaq.pygsti.forward_simulate_circuit(jaqal_prog)
-        output_counts = jaqalpaq.pygsti.forward_simulate_circuit_counts(
+        output_probs = jaqalpaq.emulator.pygsti.forward_simulate_circuit(jaqal_prog)
+        output_counts = jaqalpaq.emulator.pygsti.forward_simulate_circuit_counts(
             jaqal_prog, 1000
         )
         self.assertAlmostEqual(output_probs["000000"], 0.5)
