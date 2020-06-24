@@ -26,20 +26,10 @@ class ExpandMacrosTester(unittest.TestCase):
         exp_text = "bar 1"
         self.run_test(text, exp_text)
 
-    @unittest.expectedFailure
     def test_arguments_are_not_gates(self):
         """Test that when substituting gates are ignored, even if they have the same name as a parameter to a macro."""
-        # TODO: This is not passing because of an issue in the
-        # circuitbuilder
         text = "macro foo x { x }; foo 2"
         exp_text = "x"
-        self.run_test(text, exp_text)
-
-    @unittest.expectedFailure
-    def test_define_macro_in_text(self):
-        # TODO: Another problem with the circuitbuilder
-        text = "foo; macro foo { bar }; foo"
-        exp_text = "foo; { bar }"
         self.run_test(text, exp_text)
 
     def test_parallel_block(self):

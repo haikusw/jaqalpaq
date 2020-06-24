@@ -93,14 +93,14 @@ class BuildTester(unittest.TestCase):
         gate_def = GateDefinition("foo", parameters=[Parameter("x", None)])
         sexpr = (
             "macro",
-            "foo",
+            "bar",
             "a",
             "b",
             ("sequential_block", ("gate", "foo", "a"), ("gate", "foo", "b")),
         )
         act_value = build(sexpr, native_gates={"foo": gate_def})
         exp_value = core.Macro(
-            "foo", parameters=[Parameter("a", None), Parameter("b", None)]
+            "bar", parameters=[Parameter("a", None), Parameter("b", None)]
         )
         exp_value.body.statements.append(
             core.GateStatement(gate_def, parameters={"x": Parameter("a", None)})
@@ -136,6 +136,16 @@ class BuildTester(unittest.TestCase):
     def test_fail_anonymous_gate(self):
         """Test that we fail when using an anonymous gate if we only allow native gates."""
         sexpr = ("gate", "foo")
+        with self.assertRaises(JaqalError):
+            build(sexpr, {})
+
+    def test_fail_redefine_gate(self):
+        sexpr = (
+            "circuit",
+            ("gate", "foo"),
+            ("macro", "foo", ("sequential_block", ("gate", "bar"))),
+            ("gate", "foo"),
+        )
         with self.assertRaises(JaqalError):
             build(sexpr, {})
 

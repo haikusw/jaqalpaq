@@ -62,10 +62,12 @@ class Builder:
             native_gates = normalize_native_gates(native_gates)
         self.native_gates = native_gates
 
-    def build(self, expression, context=None):
+    def build(self, expression, context=None, gate_context=None):
         """Build the appropriate thing based on the expression."""
         if context is None:
             context = self.make_context()
+        if gate_context is None:
+            gate_context = self.make_gate_context()
         if isinstance(expression, str):
             # Identifiers
             if expression in context:
@@ -78,16 +80,20 @@ class Builder:
         method_name = f"build_{sexpression.command}"
         if not hasattr(self, method_name):
             raise JaqalError(f"Cannot handle object of type {sexpression.command}")
-        return getattr(self, method_name)(sexpression, context)
+        return getattr(self, method_name)(sexpression, context, gate_context)
 
     def make_context(self):
         """Return a context dictionary consisting of elements given in the constructor."""
-        context = {}
-        if self.native_gates:
-            context.update(self.native_gates)
-        return context
+        return {}
 
-    def build_circuit(self, sexpression, context):
+    def make_gate_context(self):
+        """Return a context dictionary consisting of gates given in the constructor."""
+        gate_context = {}
+        if self.native_gates:
+            gate_context.update(self.native_gates)
+        return gate_context
+
+    def build_circuit(self, sexpression, context, gate_context):
         """Build a ScheduledCircuit object."""
         # registers also include register aliases defined with the map statement
         registers = {}
@@ -96,7 +102,7 @@ class Builder:
         statements = []
 
         for expr in sexpression.args:
-            obj = self.build(expr, context)
+            obj = self.build(expr, context, gate_context)
             if isinstance(obj, Register) or isinstance(obj, NamedQubit):
                 # A Register is a register or map and a NamedQubit is a map of a single qubit.
                 registers[obj.name] = obj
@@ -106,7 +112,7 @@ class Builder:
                 self.add_to_context(context, obj.name, obj)
             elif isinstance(obj, Macro):
                 macros[obj.name] = obj
-                self.add_to_context(context, obj.name, obj)
+                self.add_to_context(gate_context, obj.name, obj)
             elif (
                 isinstance(obj, GateStatement)
                 or isinstance(obj, BlockStatement)
@@ -128,13 +134,13 @@ class Builder:
             raise JaqalError(f"Object {obj} already exists in context")
         context[name] = obj
 
-    def build_register(self, sexpression, context):
+    def build_register(self, sexpression, context, gate_context):
         """Create a qubit register."""
         name, size = sexpression.args
-        size = self.build(size, context)  # Resolve let-constants
+        size = self.build(size, context, gate_context)  # Resolve let-constants
         return Register(name, size)
 
-    def build_map(self, sexpression, context):
+    def build_map(self, sexpression, context, gate_context):
         args = list(sexpression.args)
         if len(args) == 2:
             # Mapping a whole register or alias onto this alias
@@ -169,30 +175,32 @@ class Builder:
                     f"Cannot map {src_name} to {name}, {src_name} does not exist"
                 )
             # These may be either integers, None, or let constants
-            start = self.build(src_start, context)
+            start = self.build(src_start, context, gate_context)
             if start is None:
                 start = 0
-            stop = self.build(src_stop, context)
+            stop = self.build(src_stop, context, gate_context)
             if stop is None:
                 stop = src.size
-            step = self.build(src_step, context)
+            step = self.build(src_step, context, gate_context)
             if step is None:
                 step = 1
             return Register(name, alias_from=src, alias_slice=slice(start, stop, step))
         raise JaqalError(f"Wrong number of arguments for map, found {args}")
 
-    def build_let(self, sexpression, _context):
+    def build_let(self, sexpression, _context, _gate_context):
         args = list(sexpression.args)
         if len(args) != 2:
             raise JaqalError(f"let statement requires two arguments, found {args}")
         name, value = args
         return Constant(name, as_integer(value))
 
-    def build_macro(self, sexpression, context):
+    def build_macro(self, sexpression, context, gate_context):
         args = list(sexpression.args)
         if len(args) < 2:
             raise JaqalError(f"Macro must have at least two arguments, found {args}")
         name = args[0]
+        if name in gate_context:
+            raise JaqalError(f"Attempting to redefine gate {name}")
         parameter_names = args[1:-1]
         block = args[-1]
         parameter_list = [Parameter(name, None) for name in parameter_names]
@@ -201,22 +209,22 @@ class Builder:
             **context,
             **parameter_dict,
         }  # parameters must be listed second to take precedence
-        built_block = self.build(block, macro_context)
+        built_block = self.build(block, macro_context, gate_context)
         if not isinstance(built_block, BlockStatement):
             raise JaqalError(f"Macro body must be a block, found {type(built_block)}")
         return Macro(name, parameters=parameter_list, body=built_block)
 
-    def build_gate(self, sexpression, context):
+    def build_gate(self, sexpression, context, gate_context):
         gate_name, *gate_args = sexpression.args
-        gate_def = self.get_gate_definition(gate_name, len(gate_args), context)
-        built_args = [self.build(arg, context) for arg in gate_args]
+        gate_def = self.get_gate_definition(gate_name, len(gate_args), gate_context)
+        built_args = [self.build(arg, context, gate_context) for arg in gate_args]
         return gate_def(*built_args)
 
-    def get_gate_definition(self, name, arg_count, context):
+    def get_gate_definition(self, name, arg_count, gate_context):
         """Return the definition for the given gate. If no such definition exists, and we aren't requiring all gates
         to be a native gate or macro, then create a new definition and return it."""
-        if name in context:
-            gate_def = context[name]
+        if name in gate_context:
+            gate_def = gate_context[name]
             if not isinstance(gate_def, AbstractGate):
                 raise JaqalError(
                     f"Cannot call gate {name}: it is type {type(gate_def)}"
@@ -229,30 +237,33 @@ class Builder:
         gate_def = GateDefinition(
             name, parameters=[Parameter(f"p{i}", None) for i in range(arg_count)]
         )
+        gate_context[name] = gate_def
         return gate_def
 
-    def build_loop(self, sexpression, context):
+    def build_loop(self, sexpression, context, gate_context):
         count, block = sexpression.args
-        built_count = self.build(count, context)
-        built_block = self.build(block, context)
+        built_count = self.build(count, context, gate_context)
+        built_block = self.build(block, context, gate_context)
         return LoopStatement(built_count, built_block)
 
-    def build_sequential_block(self, sexpression, context):
-        return self.build_block(sexpression, context, is_parallel=False)
+    def build_sequential_block(self, sexpression, context, gate_context):
+        return self.build_block(sexpression, context, gate_context, is_parallel=False)
 
-    def build_parallel_block(self, sexpression, context):
-        return self.build_block(sexpression, context, is_parallel=True)
+    def build_parallel_block(self, sexpression, context, gate_context):
+        return self.build_block(sexpression, context, gate_context, is_parallel=True)
 
-    def build_block(self, sexpression, context, is_parallel=False):
+    def build_block(self, sexpression, context, gate_context, is_parallel=False):
         # Note: Unlike at the circuit level statements here can't affect the context (i.e. we can't define
         # a macro inside of a block).
-        statements = [self.build(arg, context) for arg in sexpression.args]
+        statements = [
+            self.build(arg, context, gate_context) for arg in sexpression.args
+        ]
         return BlockStatement(parallel=is_parallel, statements=statements)
 
-    def build_array_item(self, sexpression, context):
+    def build_array_item(self, sexpression, context, gate_context):
         identifier, index = sexpression.args
-        built_identifier = self.build(identifier, context)
-        built_index = as_integer(self.build(index, context))
+        built_identifier = self.build(identifier, context, gate_context)
+        built_index = as_integer(self.build(index, context, gate_context))
         # If built_identifier is the wrong type it will raise its own JaqalError, or at least it should.
         return built_identifier[built_index]
 
@@ -322,8 +333,8 @@ class BuilderBase:
     def __init__(self, name):
         self.expression = [name]
 
-    def build(self, context=None):
-        return build(self.expression, context)
+    def build(self, native_gates=None):
+        return build(self.expression, native_gates)
 
 
 class BlockBuilder(BuilderBase):
