@@ -11,13 +11,25 @@ import re
 
 class Circuit:
     """
-    Represents an entire quantum program.
+    An immutable representation of an entire Jaqal program. The `constants`, `registers`,
+    and `native_gates` properties correspond to the statements of the Jaqal program's
+    header; the `macros` and `body` properties correspond to the body statements of the
+    Jaqal program.
 
-    :param native_gates: Set these gates as the native gates to be used in this
-        circuit. If not given, gate definitions are automatically generated.
+    This initializer should rarely be called directly; instead, the
+    :class:`jaqalpaq.core.CircuitBuilder` object-oriented interface or
+    :func:`jaqalpaq.core.build` S-expression-based interface should be used to construct
+    circuit objects.
+
+    :param native_gates: Set these gates as the native gates to be used in this circuit.
+        If not given, gate definitions are automatically generated.
     :type native_gates: Optional[dict] or Optional[list]
+    :raises JaqalError: If `native_gates` is a dict and any gate's name doesn't match its
+        dictionary key.
+    :raises JaqalError: If any of the `native_gates` aren't :class:`GateDefinition`s; for
+        example, if a macro is passed as a native gate.
 
-    """  # TODO: Flesh this out more, explain how it's used and how it maps to the structure of a Jaqal file.
+    """
 
     def __init__(self, native_gates=None):
         self._constants = {}

@@ -22,6 +22,9 @@ def build(expression, inject_pulses=None, autoload_pulses=False):
     :param bool autoload_pulses: Whether to employ the usepulses statement for parsing.  Requires appropriate gate definitions.
 
     :return: An appropriate core type object.
+    :raises JaqalError: If an undefined identifier is used.
+    :raises JaqalError: If an s-expression not of the following forms is given.
+    :raises JaqalError: If the same name is defined twice.
 
     Each expression must be an s-expression where the first element defines the type and the rest of the elements define
     the arguments. The signatures are as follows where the first element is before the colon and the remaining are
@@ -38,7 +41,7 @@ def build(expression, inject_pulses=None, autoload_pulses=False):
     parallel_block : \*statements
     array_item : identifier index
 
-    In lieu of an s-expression, the appropriate type from the core library will also be accepted. This allows to user
+    In lieu of an s-expression, the appropriate type from the core library will also be accepted. This allows the user
     to build up new expressions using partially built old ones.
 
     Note: jaqalpaq partially supports qualified namespaces in identifiers. This function assumes all
@@ -381,10 +384,12 @@ class BlockBuilder:
     def build(self, inject_pulses=None, autoload_pulses=False):
         """Create a circuit.
 
+        Recursively construct an immutable core object of the appropriate type, as
+        described by this Builder.
+
         :param inject_pulses: If given, use these pulses specifically.
         :param bool autoload_pulses: Whether to employ the usepulses statement for
-          parsing.  Requires appropriate gate definitions.
-
+            parsing.  Requires appropriate gate definitions.
         :return: An appropriate core type object.
 
         """
@@ -432,8 +437,7 @@ class BlockBuilder:
 
     def loop(self, iterations, block, unevaluated=False):
         """
-        Creates a new :class:`BlockStatement` object, and adds it to the end of the circuit.
-        All parameters are passed through to the :class:`BlockStatement` constructor.
+        Creates a new :class:`LoopStatement` object, and adds it to the end of this block.
 
         :param int iterations: How many times to repeat the loop.
         :param block: The contents of the loop. If a :class:`BlockStatement` is passed, it will
@@ -444,7 +448,7 @@ class BlockBuilder:
         :returns: The new loop.
 
         .. warning::
-            If a :class:`BlockStatement` is passed for ``gates``, then ``parallel`` will be ignored!
+            If a :class:`BlockStatement` or :class:`BlockBuilder` is passed for ``gates``, then ``parallel`` will be ignored!
         """
 
         if isinstance(block, BlockBuilder):

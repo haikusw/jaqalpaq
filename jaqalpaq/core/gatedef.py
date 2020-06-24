@@ -10,6 +10,7 @@ class AbstractGate:
 
     :param str name: The name of the gate.
     :param parameters: What arguments (numbers, qubits, etc) the gate should be called with. If None, the gate takes no parameters.
+    :param function ideal_unitary: A function mapping a list of all classical arguments to a numpy 2D array representation of the gate's ideal action in the computational basis.
     :type parameters: list(Parameter) or None
     """
 
@@ -145,7 +146,11 @@ class GateDefinition(AbstractGate):
 
     @property
     def quantum_parameters(self):
-        """The parameters that are qubits."""
+        """The quantum parameters (qubits or registers) this gate takes.
+
+        :raises JaqalError: If this gate has parameters without type annotations; for
+            example, if it is a macro.
+        """
         try:
             return [param for param in self.parameters if not param.classical]
         except JaqalError:
@@ -154,7 +159,12 @@ class GateDefinition(AbstractGate):
 
     @property
     def classical_parameters(self):
-        """The parameters that are not qubits."""
+        """The classical parameters (ints or floats) this gate takes.
+
+        :raises JaqalError: If this gate has parameters without type annotations; for
+            example, if it is a macro.
+
+        """
         try:
             return [param for param in self.parameters if param.classical]
         except JaqalError:

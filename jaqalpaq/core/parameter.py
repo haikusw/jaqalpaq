@@ -89,6 +89,14 @@ class AnnotatedValue:
 
     @property
     def classical(self):
+        """
+        A boolean flag denoting whether this AnnotatedValue has a classical type
+        (`ParamType.INT` or `ParamType.FLOAT`) or a quantum type (`ParamType.QUBIT` or
+        `ParamType.REGISTER`).
+
+        :raises JaqalError: If the AnnotatedValue doesn't have a type annotation.
+        """
+
         if self._kind == ParamType.NONE:
             raise JaqalError(f"No type defined for parameter {self.name}.")
         return self._kind not in (ParamType.QUBIT, ParamType.REGISTER)
