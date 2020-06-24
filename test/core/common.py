@@ -123,7 +123,7 @@ def make_random_size_constant(name=None, value=None, return_params=False):
 def choose_random_qubit_getitem(reg, index=None, return_params=False):
     """Choose a random qubit from a register with its getitem special method."""
     if index is None:
-        index = random_integer(lower=0, upper=reg.size - 1)
+        index = random_integer(lower=0, upper=int(reg.size) - 1)
     qubit = reg[index]
     if not return_params:
         return qubit

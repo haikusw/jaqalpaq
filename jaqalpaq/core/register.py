@@ -122,11 +122,15 @@ class Register:
 
     @property
     def size(self):
-        """
-        How many qubits are in the register.
+        """How many qubits are in the register.
+
+        Note: This may return a :class:`Constant` if that is how the
+        size is defined. To always get an integer, use ex:
+        int(reg.size).
 
         :raises JaqalError: If the register's size is undefined because it's mapped from
             a :class:`Parameter`.
+
         """
         return self.resolve_size({})
 
@@ -177,12 +181,16 @@ class Register:
         if step is None:
             step = 1
         stop = self.alias_slice.stop
-        while isinstance(start, AnnotatedValue):
-            start.resolve_value(context)
-        while isinstance(step, AnnotatedValue):
-            step.resolve_value(context)
-        while isinstance(stop, AnnotatedValue):
-            stop.resolve_value(context)
+
+        def resolve_annotated_value(value):
+            while isinstance(value, AnnotatedValue):
+                value = value.resolve_value(context)
+            return value
+
+        start = resolve_annotated_value(start)
+        step = resolve_annotated_value(step)
+        stop = resolve_annotated_value(stop)
+
         return len(range(start, stop, step))
 
     def resolve_qubit(self, idx, context={}):
@@ -201,17 +209,22 @@ class Register:
             raise JaqalError("Index out of range.")
         if self.fundamental:
             return (self, idx)
+        alias_from = self.alias_from
+        if self.alias_slice is None:
+            return alias_from.resolve_qubit(idx, context)
         start = self.alias_slice.start or 0
         step = self.alias_slice.step
         if step is None:
             step = 1
-        alias_from = self.alias_from
-        while isinstance(start, AnnotatedValue):
-            start.resolve_value(context)
-        while isinstance(step, AnnotatedValue):
-            step.resolve_value(context)
-        while isinstance(alias_from, AnnotatedValue):
-            alias_from.resolve_value(context)
+
+        def resolve_annotated_value(value):
+            while isinstance(value, AnnotatedValue):
+                value = value.resolve_value(context)
+            return value
+
+        start = resolve_annotated_value(start)
+        step = resolve_annotated_value(step)
+
         return alias_from.resolve_qubit(start + idx * step, context)
 
     def __getitem__(self, key):
@@ -226,22 +239,6 @@ class Register:
 
     def __len__(self):
         return self.size
-
-    def __iter__(self):
-        for key in range(self.size):
-            yield self[key]
-
-    def stretch(self, new_size):
-        """
-        If this register is fundamental and smaller than ``new_size``, increase its size
-        to ``new_size``.
-
-        :param int new_size: How large the register should be come.
-        :returns: True if the register now contains exactly ``new_size`` qubits, False if
-            the register previously contained and still contains more than that.
-        :rtype: bool
-        :raises JaqalError: If this register is not fundamental.
-        """
 
     def __iter__(self):
         for key in range(self.size):
@@ -290,7 +287,7 @@ class NamedQubit:
                 )
         else:
             try:
-                from_size = alias_from.size
+                from_size = int(alias_from.size)
             except JaqalError:
                 return
             if alias_index >= from_size:
@@ -367,3 +364,7 @@ class NamedQubit:
         :rtype: NamedQubit
         """
         return NamedQubit(name, self.alias_from, self.alias_index)
+
+
+if __name__ == "__main__":
+    unittest

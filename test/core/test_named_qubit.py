@@ -36,7 +36,6 @@ class NamedQubitTester(unittest.TestCase):
         # Not sure where the following field would be used
         self.assertFalse(qubit.fundamental)
 
-    @unittest.expectedFailure
     def test_resolve_from_map(self):
         """Resolve a named qubit created from a map."""
         reg = common.make_random_register()

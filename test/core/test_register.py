@@ -20,22 +20,20 @@ class RegisterTester(unittest.TestCase):
         self.assertIsNone(reg.alias_slice)
         self.assertEqual(exp_size, reg.resolve_size())
 
-    @unittest.expectedFailure
     def test_create_fundamental_unknown_size(self):
         """Test creating a fundamental register with a size determined by a let constant."""
         const, const_name, exp_size = common.make_random_size_constant(
             return_params=True
         )
-        # Note: The documentation does not list Constant as an acceptable type for size.
         reg, exp_name, _ = common.make_random_register(size=const, return_params=True)
-        self.assertEqual(exp_size, reg.size)
+        self.assertEqual(exp_size, int(reg.size))
         self.assertEqual(exp_name, reg.name)
         self.assertTrue(reg.fundamental)
         self.assertIsNone(reg.alias_from)
         self.assertIsNone(reg.alias_slice)
         new_size = random_whole()
         new_const = Constant(const_name, new_size)
-        self.assertEqual(exp_size, reg.resolve_size({const_name: new_const}))
+        self.assertEqual(exp_size, int(reg.resolve_size({const_name: new_const})))
 
     def test_fundamental_register_resolve_valid_qubit(self):
         """Test creating a fundamental register and resolving a qubit."""
@@ -53,13 +51,11 @@ class RegisterTester(unittest.TestCase):
         with self.assertRaises(Exception):
             reg[index]
 
-    @unittest.expectedFailure
     def test_fundamental_register_unknown_size_resolve_valid_qubit(self):
         """Test resolving a valid qubit from a register whose size is defined with a let constant."""
         const, const_name, exp_size = common.make_random_size_constant(
             return_params=True
         )
-        # Note: The documentation does not list Constant as an acceptable type for size.
         reg, exp_name, _ = common.make_random_register(size=const, return_params=True)
         qubit, index = common.choose_random_qubit_getitem(reg, return_params=True)
         self.assertEqual(reg, qubit.alias_from)
@@ -71,28 +67,10 @@ class RegisterTester(unittest.TestCase):
         const, const_name, exp_size = common.make_random_size_constant(
             return_params=True
         )
-        # Note: The documentation does not list Constant as an acceptable type for size.
         reg, exp_name, _ = common.make_random_register(size=const, return_params=True)
         index = random_integer(lower=exp_size, upper=exp_size + 100)
         with self.assertRaises(Exception):
             reg[index]
-
-    @unittest.expectedFailure
-    def test_stretch_fundamental_register(self):
-        reg, _, orig_size = common.make_random_register(return_params=True)
-        self.assertEqual(orig_size, reg.size)
-        reg.stretch(min(1, orig_size // 2))
-        self.assertEqual(orig_size, reg.size)
-        reg.stretch(orig_size)
-        self.assertEqual(orig_size, reg.size)
-        new_size = orig_size + 10
-        reg.stretch(new_size)
-        self.assertEqual(new_size, reg.size)
-
-    @unittest.expectedFailure
-    def test_stretch_fundamental_register_unknown_size(self):
-        # I'm not even sure what the semantics here would be.
-        self.fail()
 
     def test_create_map_full_register(self):
         """Test creating a map alias for an entire register."""
@@ -115,7 +93,6 @@ class RegisterTester(unittest.TestCase):
         self.assertEqual(map_slice, map_reg.alias_slice)
         self.assertFalse(map_reg.fundamental)
 
-    @unittest.skip("This currently causes an infinite loop in resolve_size()")
     def test_create_map_slice_with_constants(self):
         """Test creating a map slice of a register using Constant values"""
         reg = common.make_random_register()
@@ -136,7 +113,6 @@ class RegisterTester(unittest.TestCase):
         self.assertEqual(map_const_slice, map_reg.alias_slice)
         self.assertFalse(map_reg.fundamental)
 
-    @unittest.expectedFailure
     def test_full_map_resolve_qubit(self):
         reg = common.make_random_register()
         map_reg, map_name = common.make_map_full(reg, return_params=True)
@@ -164,7 +140,6 @@ class RegisterTester(unittest.TestCase):
         self.assertEqual(orig_index, res_index)
         self.assertEqual(reg, res_reg)
 
-    @unittest.skip("Causes an infinite loop resolving qubits")
     def test_slice_map_with_constants_resolve_qubit(self):
         reg = common.make_random_register()
         map_slice = common.make_random_slice(reg.size)

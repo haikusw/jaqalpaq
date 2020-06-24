@@ -42,6 +42,18 @@ class Constant(AnnotatedValue):
         """
         return self._value
 
+    def __int__(self):
+        """Resolve this value to an integer. Raise an error if this is not an
+        integer, rather than rounding."""
+        if isinstance(self._value, int):
+            return self._value
+        else:
+            raise JaqalError(r"Could not convert {type(self._value)} to int")
+
+    def __float__(self):
+        """Resolve this value converted to a float."""
+        return float(self._value)
+
     def resolve_value(self, context={}):
         """
         Overrides: :meth:`qscout.core.AnnotatedValue.resolve_value`
