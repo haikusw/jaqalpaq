@@ -34,11 +34,11 @@ loop_statement: _LOOP let_or_integer gate_block
 
 // Gate blocks
 ?gate_block: sequential_gate_block | parallel_gate_block
-sequential_gate_block: "{" _sequential_statements "}"
-_sequential_statements: [_seq_sep* _sequential_statement (_seq_sep _sequential_statement)* _seq_sep*]
+sequential_gate_block: "{" _sequential_statements _NEWLINE* "}"
+_sequential_statements: _seq_sep* [_sequential_statement (_seq_sep _sequential_statement)* _seq_sep*]
 _sequential_statement: gate_statement | loop_statement | parallel_gate_block
 parallel_gate_block: "<" _parallel_statements ">"
-_parallel_statements: [_par_sep* _parallel_statement (_par_sep _parallel_statement)* _par_sep*]
+_parallel_statements: _par_sep* [_parallel_statement (_par_sep _parallel_statement)* _par_sep*]
 _parallel_statement: gate_statement | sequential_gate_block
 
 // Common rules

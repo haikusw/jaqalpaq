@@ -249,6 +249,23 @@ class ParserTester(ParserTesterMixin, unittest.TestCase):
             self.make_gate_statement("g", 0), self.make_gate_statement("h", 1)
         )
         act_tree = self.simplify_tree(tree)
+
+        self.assertEqual(exp_tree, act_tree)
+
+    def test_serial_gate_block_no_statements(self):
+        text = "{}"
+        parser = make_lark_parser(start="gate_block")
+        tree = parser.parse(text)
+        exp_tree = self.make_serial_gate_block()
+        act_tree = self.simplify_tree(tree)
+        self.assertEqual(exp_tree, act_tree)
+
+    def test_serial_gate_block_no_statements_with_newline(self):
+        text = "{\n}"
+        parser = make_lark_parser(start="gate_block")
+        tree = parser.parse(text)
+        exp_tree = self.make_serial_gate_block()
+        act_tree = self.simplify_tree(tree)
         self.assertEqual(exp_tree, act_tree)
 
     def test_parallel_gate_block(self):
@@ -273,6 +290,22 @@ class ParserTester(ParserTesterMixin, unittest.TestCase):
         act_tree = self.simplify_tree(tree)
         self.assertEqual(exp_tree, act_tree)
 
+    def test_parallel_gate_block_no_statements(self):
+        text = "<>"
+        parser = make_lark_parser(start="gate_block")
+        tree = parser.parse(text)
+        exp_tree = self.make_parallel_gate_block()
+        act_tree = self.simplify_tree(tree)
+        self.assertEqual(exp_tree, act_tree)
+
+    def test_parallel_gate_block_no_statements_with_newline(self):
+        text = "<\n>"
+        parser = make_lark_parser(start="gate_block")
+        tree = parser.parse(text)
+        exp_tree = self.make_parallel_gate_block()
+        act_tree = self.simplify_tree(tree)
+        self.assertEqual(exp_tree, act_tree)
+
     def test_macro_definition(self):
         """Test defining a macro."""
         text = "macro mymacro a b { g a ; h b }"
@@ -282,6 +315,26 @@ class ParserTester(ParserTesterMixin, unittest.TestCase):
             self.make_gate_statement("g", "a"), self.make_gate_statement("h", "b")
         )
         exp_tree = self.make_macro_statement("mymacro", "a", "b", gate_block)
+        act_tree = self.simplify_tree(tree)
+        self.assertEqual(exp_tree, act_tree)
+
+    def test_macro_definition_one_line(self):
+        """Test defining a macro with no statements on one line."""
+        text = "macro mymacro a { }"
+        parser = make_lark_parser(start="macro_definition")
+        tree = parser.parse(text)
+        gate_block = self.make_serial_gate_block()
+        exp_tree = self.make_macro_statement("mymacro", "a", gate_block)
+        act_tree = self.simplify_tree(tree)
+        self.assertEqual(exp_tree, act_tree)
+
+    def test_macro_definition_two_lines(self):
+        """Test defining a macro with no statements on two lines."""
+        text = "macro mymacro a {\n}"
+        parser = make_lark_parser(start="macro_definition")
+        tree = parser.parse(text)
+        gate_block = self.make_serial_gate_block()
+        exp_tree = self.make_macro_statement("mymacro", "a", gate_block)
         act_tree = self.simplify_tree(tree)
         self.assertEqual(exp_tree, act_tree)
 
