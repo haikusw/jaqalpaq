@@ -198,6 +198,18 @@ class IdleGateDefinition(GateDefinition):
         yield from ()
 
 
+class BusyGateDefinition(GateDefinition):
+    """
+    Base: :class:`AbstractGate`
+
+    Represents an operation that cannot be parallelized with any other operation.
+    """
+
+    @property
+    def used_qubits(self):
+        yield all
+
+
 def add_idle_gates(active_gates):
     gates = []
     for g in active_gates:
