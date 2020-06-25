@@ -322,7 +322,7 @@ class ParserTester(TestCase):
     def make_circuit(*, gates, registers=None, macros=None, constants=None, maps=None):
         circuit = ScheduledCircuit()
         for gate in gates:
-            circuit.body.append(gate)
+            circuit.body.statements.append(gate)
         if registers:
             circuit.registers.update(registers)
         if macros:

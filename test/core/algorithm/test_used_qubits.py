@@ -71,9 +71,7 @@ class UsedQubitTester(unittest.TestCase):
         gate_def = core.GateDefinition("g", [core.Parameter("p", core.QUBIT_TYPE)])
         g0 = gate_def(reg[0])
         g1 = gate_def(param)
-        macro_body = core.BlockStatement()
-        macro_body.append(g0)
-        macro_body.append(g1)
+        macro_body = core.BlockStatement(statements=(g0, g1))
         macro = core.Macro("foo", [param], macro_body)
         foo = macro(reg[2])
         exp_qubits = {"r": {0, 2}}

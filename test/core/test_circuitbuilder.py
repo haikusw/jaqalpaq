@@ -274,12 +274,12 @@ class BuildTester(unittest.TestCase):
         exp_value.constants[x.name] = x
         exp_value.macros[foo.name] = foo
         exp_value.body.statements.append(foo(x))
-        loop = core.LoopStatement(5)
-        loop.statements.append(gate_def(3))
+        loop_block = core.BlockStatement(statements=[gate_def(3),])
+        loop = core.LoopStatement(5, loop_block)
         exp_value.body.statements.append(loop)
         parallel_block = core.BlockStatement(parallel=True)
-        parallel_block.append(gate_def(0))
-        parallel_block.append(gate_def(1))
+        parallel_block.statements.append(gate_def(0))
+        parallel_block.statements.append(gate_def(1))
         exp_value.body.statements.append(parallel_block)
 
         self.assertEqual(exp_value, act_value)
