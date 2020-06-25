@@ -70,6 +70,17 @@ class AbstractGate:
             return numpy.identity(2 ** self.quantum_parameters)
 
     @property
+    def used_qubits(self):
+        for p in self._parameters:
+            try:
+                if not p.classical:
+                    yield p
+            except JaqalError:
+                # This happens if we don't have a real gate definition.
+                # Lean on the upper layers being able to infer the type.
+                yield p
+
+    @property
     def quantum_parameters(self):
         try:
             return self._quantum_parameters

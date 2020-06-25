@@ -50,6 +50,14 @@ class GateStatement:
         return self._gate_def
 
     @property
+    def used_qubits(self):
+        for param in self.gate_def.used_qubits:
+            if param is all:
+                yield all
+                return
+            yield self._parameters[param.name]
+
+    @property
     def parameters(self):
         """
         Read-only access to the dictionary mapping gate parameter names to the associated values.

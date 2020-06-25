@@ -47,8 +47,10 @@ class UsedQubitIndicesVisitor(Visitor):
             macro_body = obj.gate_def.body
             return self.visit(macro_body, macro_context)
         else:
-            # Assumed to be a native gate
-            for param in obj.parameters.values():
+            for param in obj.used_qubits:
+                if param is all:
+                    # How do we guard against this being called in an inappropriate place?
+                    raise JaqalError("prepare_all and measure_all not supported")
                 self.merge_into(indices, self.visit(param, context=context))
             return indices
 
