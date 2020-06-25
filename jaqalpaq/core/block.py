@@ -31,7 +31,7 @@ class BlockStatement:
     def statements(self):
         """
         The contents of the block. In addition to read-only access through this property,
-        a basic sequence protocol (``len()``, ``append()``, iteration, and indexing) is also
+        a basic sequence protocol (``len()``, iteration, and indexing) is also
         supported to access the contents.
         """
         return self._statements
@@ -39,26 +39,11 @@ class BlockStatement:
     def __getitem__(self, key):
         return self.statements[key]
 
-    def __setitem__(self, key, value):
-        self.statements[key] = value
-
-    def __delitem__(self, key):
-        del self.statements[key]
-
     def __iter__(self):
         return iter(self.statements)
 
     def __len__(self):
         return len(self.statements)
-
-    def append(self, instr):
-        """
-        Adds an instruction to the end of the block.
-
-        :param instr: The instruction to add.
-        :type instr: GateStatement, LoopStatement, or BlockStatement
-        """
-        self.statements.append(instr)
 
     def moment_iter(self):
         if self.parallel:
@@ -119,8 +104,8 @@ class LoopStatement:
     def statements(self):
         """
         The block that's repeated by the loop statement. In addition to read-only access
-        through this property, the same basic sequence protocol (``len()``, ``append()``,
-        iteration, and indexing) that the :class:`BlockStatement` supports can also be used on
+        through this property, the same basic sequence protocol (``len()``, iteration,
+        and indexing) that the :class:`BlockStatement` supports can also be used on
         the LoopStatement, and will be passed through.
         """
         return self._statements
@@ -128,26 +113,11 @@ class LoopStatement:
     def __getitem__(self, key):
         return self.statements[key]
 
-    def __setitem__(self, key, value):
-        self.statements[key] = value
-
-    def __delitem__(self, key):
-        del self.statements[key]
-
     def __iter__(self):
         return iter(self.statements)
 
     def __len__(self):
         return len(self.statements)
-
-    def append(self, instr):
-        """
-        Adds an instruction to the end of the repeated block.
-
-        :param instr: The instruction to add.
-        :type instr: GateStatement, LoopStatement, or BlockStatement
-        """
-        self.statements.append(instr)
 
     def moment_iter(self):
         for i in range(self.iterations):
