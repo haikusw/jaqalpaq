@@ -98,7 +98,7 @@ class BuildTester(unittest.TestCase):
             "b",
             ("sequential_block", ("gate", "foo", "a"), ("gate", "foo", "b")),
         )
-        act_value = build(sexpr, native_gates={"foo": gate_def})
+        act_value = build(sexpr, inject_pulses={"foo": gate_def})
         exp_value = core.Macro(
             "bar", parameters=[Parameter("a", None), Parameter("b", None)]
         )
@@ -233,7 +233,7 @@ class BuildTester(unittest.TestCase):
         gate_def = GateDefinition("g", [Parameter("p", None)])
         sexpr = ("circuit", ("let", "a", 1), ("gate", "g", "a"))
         exp_value = gate_def(Constant("a", 1))
-        circuit = build(sexpr, native_gates={"g": gate_def})
+        circuit = build(sexpr, inject_pulses={"g": gate_def})
         act_value = circuit.body.statements[0]
         self.assertEqual(exp_value, act_value)
 
@@ -242,7 +242,7 @@ class BuildTester(unittest.TestCase):
         gate_def = GateDefinition("g", [Parameter("p", None)])
         sexpr = ("circuit", ("gate", "g", 0))
         exp_value = gate_def(0)
-        circuit = build(sexpr, native_gates=[gate_def])
+        circuit = build(sexpr, inject_pulses=[gate_def])
         act_value = circuit.body.statements[0]
         self.assertEqual(exp_value, act_value)
 
@@ -261,7 +261,7 @@ class BuildTester(unittest.TestCase):
             ("loop", 5, ("sequential_block", ("gate", "g", 3))),
             ("parallel_block", ("gate", "g", 0), ("gate", "g", 1)),
         )
-        act_value = build(sexpr, native_gates=native_gates)
+        act_value = build(sexpr, inject_pulses=native_gates)
 
         r = Register("r", 7)
         q = Register("q", alias_from=r)
@@ -413,6 +413,6 @@ class ObjectOrientedBuilderTester(unittest.TestCase):
 
     def run_test(self, exp_sexpr, act_builder, native_gates=None):
         """Run the test by evaluating the results of using the given s-expression vs. using the given builder."""
-        exp_value = build(exp_sexpr, native_gates=native_gates)
+        exp_value = build(exp_sexpr, inject_pulses=native_gates)
         act_value = act_builder.build()
         self.assertEqual(exp_value, act_value)

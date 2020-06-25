@@ -1,4 +1,5 @@
 from typing import Dict
+from importlib import import_module
 
 from .constant import Constant
 from .macro import Macro
@@ -12,12 +13,12 @@ from .block import BlockStatement, LoopStatement
 from jaqalpaq import JaqalError
 
 
-def build(expression, native_gates=None):
+def build(expression, inject_pulses=None, autoload_pulses=False):
     """Given an expression in a specific format, return the appropriate type, recursively constructed, from the core
     types library.
 
     :param expression: A tuple or list acting like an S-expression. Also accepts core types and just returns them.
-    :param Dict[str, GateDefinition] native_gates: If given, raise an exception if a gate is not in this list or
+    :param Dict[str, GateDefinition] inject_pulses: If given, raise an exception if a gate is not in this list or
     a macro.
 
     :return: An appropriate core type object.
@@ -45,7 +46,7 @@ def build(expression, native_gates=None):
 
     """
 
-    builder = Builder(native_gates=native_gates)
+    builder = Builder(inject_pulses=inject_pulses, autoload_pulses=autoload_pulses)
     return builder.build(expression)
 
 
@@ -57,10 +58,11 @@ def build(expression, native_gates=None):
 class Builder:
     """Helper class to recursively build a circuit (or type within it) from s-expressions."""
 
-    def __init__(self, *, native_gates):
-        if native_gates is not None:
-            native_gates = normalize_native_gates(native_gates)
-        self.native_gates = native_gates
+    def __init__(self, *, inject_pulses, autoload_pulses):
+        if inject_pulses is not None:
+            inject_pulses = normalize_native_gates(inject_pulses)
+        self.inject_pulses = inject_pulses
+        self.autoload_pulses = autoload_pulses
 
     def build(self, expression, context=None, gate_context=None):
         """Build the appropriate thing based on the expression."""
@@ -89,8 +91,8 @@ class Builder:
     def make_gate_context(self):
         """Return a context dictionary consisting of gates given in the constructor."""
         gate_context = {}
-        if self.native_gates:
-            gate_context.update(self.native_gates)
+        if self.inject_pulses:
+            gate_context.update(self.inject_pulses)
         return gate_context
 
     def build_circuit(self, sexpression, context, gate_context):
@@ -100,6 +102,7 @@ class Builder:
         constants = {}
         macros = {}
         statements = []
+        native_gates = gate_context.copy()
 
         for expr in sexpression.args:
             obj = self.build(expr, context, gate_context)
@@ -119,10 +122,13 @@ class Builder:
                 or isinstance(obj, LoopStatement)
             ):
                 statements.append(obj)
+            elif isinstance(obj, dict):
+                # this comes from build_usepulses
+                native_gates.update(obj)
             else:
                 raise JaqalError(f"Cannot process object {obj} at circuit level")
 
-        circuit = ScheduledCircuit(native_gates=self.native_gates)
+        circuit = ScheduledCircuit(native_gates=native_gates)
         circuit.registers.update(registers)
         circuit.constants.update(constants)
         circuit.macros.update(macros)
@@ -231,7 +237,10 @@ class Builder:
                 )
             return gate_def
 
-        is_anonymous_gate_allowed = self.native_gates is None
+        is_anonymous_gate_allowed = (
+            self.inject_pulses is None
+        ) and not self.autoload_pulses
+
         if not is_anonymous_gate_allowed:
             raise JaqalError(f"No gate {name} defined")
         gate_def = GateDefinition(
@@ -266,6 +275,32 @@ class Builder:
         built_index = as_integer(self.build(index, context, gate_context))
         # If built_identifier is the wrong type it will raise its own JaqalError, or at least it should.
         return built_identifier[built_index]
+
+    def build_usepulses(self, sexpression, context, gate_context):
+        # Process a from ... usepulses * statement if autoload_pulses
+        ret = {}
+        if not self.autoload_pulses:
+            return ret
+
+        name, filt = sexpression.args
+
+        module = import_module(str(name))
+        native_gates = module.NATIVE_GATES
+
+        if (filt is not all) and (filt != "*"):
+            raise JaqalError("Only from ... usepulses * currently supported.")
+
+        for g in native_gates:
+            # inject_pulses overrides usepulses
+            if self.inject_pulses and g.name in self.inject_pulses:
+                continue
+
+            # but later usepulses override earlier imports
+            gate_context[g.name] = g
+            ret[g.name] = g
+
+        # Separate imported context from local
+        return ret
 
 
 def as_integer(value):

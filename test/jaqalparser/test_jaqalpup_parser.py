@@ -307,10 +307,10 @@ class ParserTester(TestCase):
         act_result = parse_jaqal_string(
             text,
             override_dict=override_dict,
-            native_gates=native_gates,
             expand_macro=expand_macro,
             expand_let=expand_let,
             expand_let_map=expand_let_map,
+            inject_pulses=native_gates,
         )
         if exp_result is not None:
             self.assertEqual(exp_result.body, act_result.body)

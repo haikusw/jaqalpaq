@@ -9,22 +9,24 @@ from jaqalpaq import JaqalError
 def parse_jaqal_file(
     filename,
     override_dict=None,
-    native_gates=None,
     expand_macro=False,
     expand_let=False,
     expand_let_map=False,
     return_usepulses=False,
+    inject_pulses=None,
+    autoload_pulses=False,
 ):
     """Parse a file written in Jaqal into core types.
 
     :param str filename: The name of the Jaqal file.
     :param dict[str, float] override_dict:  An optional dictionary that overrides let statements in the Jaqal code.
     Note: all keys in this dictionary must exist as let statements or an error will be raised.
-    :param native_gates: If given, allow only these native gates.
     :param bool expand_macro: Replace macro invocations by their body while parsing.
     :param bool expand_let: Replace let constants by their value while parsing.
     :param bool expand_let_map: Replace let constants and mapped qubits while parsing. expand_let is ignored if this is True.
     :param bool return_usepulses: Whether to both add a second return value and populate it with the usepulses statement.
+    :param inject_pulses: If given, use these pulses specifically.
+    :param bool autoload_pulses: Whether to employ the usepulses statement for parsing.  Requires appropriate gate definitions.
     :return: A list of the gates, blocks, and loops to be run.
 
     """
@@ -32,42 +34,44 @@ def parse_jaqal_file(
         return parse_jaqal_string(
             fd.read(),
             override_dict=override_dict,
-            native_gates=native_gates,
             expand_macro=expand_macro,
             expand_let=expand_let,
             expand_let_map=expand_let_map,
             return_usepulses=return_usepulses,
+            inject_pulses=inject_pulses,
+            autoload_pulses=autoload_pulses,
         )
 
 
 def parse_jaqal_string(
     jaqal,
     override_dict=None,
-    native_gates=None,
     expand_macro=False,
     expand_let=False,
     expand_let_map=False,
     return_usepulses=False,
+    inject_pulses=None,
+    autoload_pulses=False,
 ):
     """Parse a string written in Jaqal into core types.
 
     :param str jaqal: The Jaqal code.
     :param dict[str, float] override_dict:  An optional dictionary that overrides let statements in the Jaqal code.
     Note: all keys in this dictionary must exist as let statements or an error will be raised.
-    :param native_gates: If given, allow only these native gates.
-    :param processing_option: What kind of processing, if any, to perform on the tree.
     :param bool expand_macro: Replace macro invocations by their body while parsing.
     :param bool expand_let: Replace let constants by their value while parsing.
     :param bool expand_let_map: Replace let constants and mapped qubits while parsing. expand_let is ignored if this is True.
     :param bool return_usepulses: Whether to both add a second return value and populate it with the usepulses statement.
+    :param inject_pulses: If given, use these pulses specifically.
+    :param bool autoload_pulses: Whether to employ the usepulses statement for parsing.  Requires appropriate gate definitions.
     :return: A list of the gates, blocks, and loops to be run.
 
     """
 
     # The interface will automatically expand macros and scrape let, map, and register metadata.
     iface = Interface(jaqal, allow_no_usepulses=True)
-    # Do some minimal processing to fill in all let and map values. The interface does not automatically do this
-    # as they may rely on values from override_dict.
+    # Do some minimal processing to fill in all let and map values. The interface does not
+    # automatically do this as they may rely on values from override_dict.
     let_dict = iface.make_let_dict(override_dict)
     tree = iface.tree
     expand_let = expand_let or expand_let_map
@@ -77,7 +81,9 @@ def parse_jaqal_string(
         tree = iface.resolve_let(tree, let_dict=let_dict)
     if expand_let_map:
         tree = iface.resolve_map(tree)
-    circuit = convert_to_circuit(tree, native_gates=native_gates)
+    circuit = convert_to_circuit(
+        tree, inject_pulses=inject_pulses, autoload_pulses=autoload_pulses
+    )
 
     if return_usepulses:
         ret_extra = {"usepulses": iface.usepulses}
@@ -91,29 +97,36 @@ def parse_jaqal_string(
     return ret_value
 
 
-def convert_to_circuit(tree, native_gates=None):
+def convert_to_circuit(tree, inject_pulses=None, autoload_pulses=False):
     """Convert a tree into a scheduled circuit.
 
     :param tree: A parse tree.
-    :param native_gates: If given, allow only these native gates.
+    :param inject_pulses: If given, use these pulses specifically.
+    :param bool autoload_pulses: Whether to employ the usepulses statement for parsing.  Requires appropriate gate definitions.
     :return: A ScheduledCircuit object that faithfully represents the input.
     """
-    visitor = CoreTypesVisitor(native_gates=native_gates)
+    visitor = CoreTypesVisitor(
+        inject_pulses=inject_pulses, autoload_pulses=autoload_pulses
+    )
     return visitor.visit(tree)
 
 
 class CoreTypesVisitor(MacroContextRewriteVisitor, TreeManipulators):
-    def __init__(self, native_gates=None):
+    def __init__(self, inject_pulses=None, autoload_pulses=False):
         super().__init__()
-        self.native_gates = native_gates
+        self.inject_pulses = inject_pulses
+        self.autoload_pulses = autoload_pulses
 
     def visit_program(self, header_statements, body_statements):
         circuit_sexpr = ("circuit", *header_statements, *body_statements)
-        return build(circuit_sexpr, native_gates=self.native_gates)
+        return build(
+            circuit_sexpr,
+            inject_pulses=self.inject_pulses,
+            autoload_pulses=self.autoload_pulses,
+        )
 
     def visit_usepulses_statement(self, identifier, objects):
-        """Ignore a usepulses statement."""
-        return None
+        return ("usepulses", identifier, objects)
 
     def visit_register_statement(self, array_declaration):
         if self.in_macro:

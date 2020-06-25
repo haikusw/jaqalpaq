@@ -16,7 +16,8 @@ def forward_simulate_circuit(
             generate_jaqal_program(circuit),
             expand_macro=True,
             expand_let_map=True,
-            native_gates=circuit.native_gates,
+            autoload_pulses=True,
+            inject_pulses=circuit.native_gates,
         )
 
     if model is None:

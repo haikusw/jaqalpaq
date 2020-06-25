@@ -29,7 +29,7 @@ class ForwardSimulatorTester(unittest.TestCase):
 
         self.jaqal_c = jaqalpaq.parser.parse_jaqal_string(
             self.jaqal_string,
-            native_gates=normalize_native_gates(native_gates=native_gates.NATIVE_GATES),
+            inject_pulses=normalize_native_gates(native_gates.NATIVE_GATES),
         )
 
     def test_generate_jaqal_program(self):
@@ -101,7 +101,7 @@ CNOT q[3] q[4]
 measure_all
 """
         jaqal_prog = jaqalpaq.parser.parse_jaqal_string(
-            jaqal_text, native_gates=normalize_native_gates(native_gates.NATIVE_GATES)
+            jaqal_text, inject_pulses=normalize_native_gates(native_gates.NATIVE_GATES)
         )
         output_probs = jaqalpaq.emulator.pygsti.forward_simulate_circuit(jaqal_prog)
         output_counts = jaqalpaq.emulator.pygsti.forward_simulate_circuit_counts(
@@ -139,7 +139,7 @@ CNOT q[0] q[1]
 measure_all
 """
         jaqal_prog = jaqalpaq.parser.parse_jaqal_string(
-            jaqal_text, native_gates=normalize_native_gates(native_gates.NATIVE_GATES)
+            jaqal_text, inject_pulses=normalize_native_gates(native_gates.NATIVE_GATES)
         )
         output_probs = jaqalpaq.emulator.pygsti.forward_simulate_circuit(jaqal_prog)
         output_counts = jaqalpaq.emulator.pygsti.forward_simulate_circuit_counts(
@@ -178,7 +178,7 @@ CNOT q[0] ancilla
 measure_all
 """
         jaqal_prog = jaqalpaq.parser.parse_jaqal_string(
-            jaqal_text, native_gates=normalize_native_gates(native_gates.NATIVE_GATES)
+            jaqal_text, inject_pulses=normalize_native_gates(native_gates.NATIVE_GATES)
         )
         output_probs = jaqalpaq.emulator.pygsti.forward_simulate_circuit(jaqal_prog)
         output_counts = jaqalpaq.emulator.pygsti.forward_simulate_circuit_counts(
@@ -218,7 +218,7 @@ CNOT ancillae[1] q[2]
 measure_all
 """
         jaqal_prog = jaqalpaq.parser.parse_jaqal_string(
-            jaqal_text, native_gates=normalize_native_gates(native_gates.NATIVE_GATES)
+            jaqal_text, inject_pulses=normalize_native_gates(native_gates.NATIVE_GATES)
         )
         output_probs = jaqalpaq.emulator.pygsti.forward_simulate_circuit(jaqal_prog)
         output_counts = jaqalpaq.emulator.pygsti.forward_simulate_circuit_counts(
