@@ -25,7 +25,7 @@ class AnnotatedValue:
     def __init__(self, name, kind):
         self._name = name
         if kind not in PARAMETER_TYPES:
-            raise JaqalError("Invalid parameter type specifier %s." % kind)
+            raise JaqalError("Invalid parameter type specifier {kind}")
         self._kind = kind
 
     def __repr__(self):
@@ -51,7 +51,7 @@ class AnnotatedValue:
         """
         return self._kind
 
-    def resolve_value(self, context={}):
+    def resolve_value(self, context=None):
         """
         Determines what value the AnnotatedValue represents in a particular context. For
         example, a gate parameter may have different values each time the gate is called.
@@ -66,10 +66,10 @@ class AnnotatedValue:
         :raises JaqalError: If the AnnotatedValue doesn't represent a fixed value within
             the context specified.
         """
-        if self.name in context:
+        if context and self.name in context:
             return context[self.name]
         else:
-            raise JaqalError("Unbound identifier %s." % self.name)
+            raise JaqalError("Unbound identifier {self.name}.")
 
     @property
     def classical(self):
@@ -107,8 +107,7 @@ class Parameter(AnnotatedValue):
                 pass
             else:
                 raise JaqalError(
-                    "Type-checking failed: parameter %s=%s does not have type %s."
-                    % (str(self.name), str(value), str(self.kind))
+                    "Type-checking failed: parameter {self.name}={value} does not have type {self.kind}."
                 )
         elif self.kind == REGISTER_TYPE:
             if isinstance(value, Register):
@@ -120,8 +119,7 @@ class Parameter(AnnotatedValue):
                 pass
             else:
                 raise JaqalError(
-                    "Type-checking failed: parameter %s=%s does not have type %s."
-                    % (str(self.name), str(value), str(self.kind))
+                    "Type-checking failed: parameter {self.name}={value} does not have type {self.kind}."
                 )
         elif self.kind == FLOAT_TYPE:
             if isinstance(value, float) or isinstance(value, int):
@@ -134,7 +132,7 @@ class Parameter(AnnotatedValue):
                 pass
             else:
                 raise JaqalError(
-                    "Type-checking failed: parameter %s=%s does not have type %s."
+                    "Type-checking failed: parameter {self.name}={value} does not have type {self.kind}."
                     % (str(self.name), str(value), str(self.kind))
                 )
         elif self.kind == INT_TYPE:
@@ -146,26 +144,30 @@ class Parameter(AnnotatedValue):
                 pass
             else:
                 raise JaqalError(
-                    "Type-checking failed: parameter %s=%s does not have type %s."
+                    "Type-checking failed: parameter {self.name}={value} does not have type {self.kind}."
                     % (str(self.name), str(value), str(self.kind))
                 )
-        elif self.kind == None:
+        elif self.kind is None:
             # A parameter with kind None can take anything as input.
             # Such parameters are normally from user-defined macros, where there's no
             # ability to add type annotations in the Jaqal.
             pass
         else:
             raise JaqalError(
-                "Type-checking failed: unknown parameter type %s." + str(self.kind)
+                "Type-checking failed: unknown parameter type {self.kind}."
             )
 
     def __getitem__(self, key):
         # Only makes sense for register parameters, but we'll let Register and NamedQubit do the typechecking.
         from .register import Register, NamedQubit
 
+        name = make_item_name(self, key)
         if isinstance(key, slice):
-            return Register(
-                self.name + "[" + str(key) + "]", alias_from=self, alias_slice=key
-            )
+            return Register(name, alias_from=self, alias_slice=key)
         else:
-            return NamedQubit(self.name + "[" + str(key) + "]", self, key)
+            return NamedQubit(name, self, key)
+
+
+def make_item_name(array, index):
+    """Create a name from an indexable object and its index."""
+    return f"{array.name}[{index}]"

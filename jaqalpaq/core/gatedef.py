@@ -127,9 +127,9 @@ class AbstractGate:
         params = OrderedDict()
         if args and not kwargs:
             if len(args) > len(self.parameters):
-                raise JaqalError("Too many parameters for gate %s." % self.name)
+                raise JaqalError(f"Too many parameters for gate {self.name}.")
             elif len(args) > len(self.parameters):
-                raise JaqalError("Insufficient parameters for gate %s." % self.name)
+                raise JaqalError("Insufficient parameters for gate {self.name}.")
             else:
                 for name, arg in zip([param.name for param in self.parameters], args):
                     params[name] = arg

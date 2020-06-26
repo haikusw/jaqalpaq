@@ -21,9 +21,7 @@ class Constant(AnnotatedValue):
         elif isinstance(value, int):
             super().__init__(name, INT_TYPE)
         else:
-            raise JaqalError(
-                "Invalid/non-numeric value %s for constant %s!" % (value, name)
-            )
+            raise JaqalError("Invalid/non-numeric value {value} for constant {name}!")
         self._value = value
 
     def __repr__(self):
@@ -54,7 +52,7 @@ class Constant(AnnotatedValue):
         """Resolve this value converted to a float."""
         return float(self._value)
 
-    def resolve_value(self, context={}):
+    def resolve_value(self, context=None):
         """
         Overrides: :meth:`qscout.core.AnnotatedValue.resolve_value`
 

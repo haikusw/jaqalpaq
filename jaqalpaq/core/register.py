@@ -1,5 +1,5 @@
 from jaqalpaq import JaqalError
-from .parameter import AnnotatedValue, Parameter, INT_TYPE, REGISTER_TYPE
+from .parameter import AnnotatedValue, Parameter, INT_TYPE, REGISTER_TYPE, make_item_name
 from .constant import Constant
 
 
@@ -34,7 +34,7 @@ class Register:
             raise JaqalError("Invalid register declaration: %s." % name)
         if (size is not None) and (alias_from is not None):
             raise JaqalError(
-                "Illegal size specification in map statement defining %s." % name
+                "Illegal size specification in map statement defining {name}."
             )
         self._alias_from = alias_from
         self._alias_slice = alias_slice
@@ -50,42 +50,26 @@ class Register:
                     alias_slice.start, AnnotatedValue
                 ) and alias_slice.start.kind not in (INT_TYPE, None):
                     raise JaqalError(
-                        "Cannot slice register %s with parameter %s of non-integer kind %s."
-                        % (
-                            alias_from.name,
-                            alias_slice.start.name,
-                            alias_slice.start.kind,
-                        )
+                        "Cannot slice register {alias_from.name} with parameter {alias_slice.start.name} of non-integer kind {alias_slice.start.kind}."
                     )
                 elif isinstance(
                     alias_slice.stop, AnnotatedValue
                 ) and alias_slice.stop.kind not in (INT_TYPE, None):
                     raise JaqalError(
-                        "Cannot slice register %s with parameter %s of non-integer kind %s."
-                        % (
-                            alias_from.name,
-                            alias_slice.stop.name,
-                            alias_slice.stop.kind,
-                        )
+                        "Cannot slice register {alias_from.name} with parameter {alias_slice.stop.name} of non-integer kind {alias_slice.stop.kind}."
                     )
                 elif isinstance(
                     alias_slice.step, AnnotatedValue
                 ) and alias_slice.step.kind not in (INT_TYPE, None):
                     raise JaqalError(
-                        "Cannot slice register %s with parameter %s of non-integer kind %s."
-                        % (
-                            alias_from.name,
-                            alias_slice.step.name,
-                            alias_slice.step.kind,
-                        )
+                        "Cannot slice register {alias_from.name} with parameter {alias_slice.step.name} of non-integer kind {alias_slice.step.kind}."
                     )
                 elif isinstance(alias_from, AnnotatedValue) and alias_from.kind not in (
                     REGISTER_TYPE,
                     None,
                 ):
                     raise JaqalError(
-                        "Cannot slice parameter %s of non-register kind %s."
-                        % (alias_from.name, alias_from.kind)
+                        "Cannot slice parameter {alias_from.name} of non-register kind {alias_from.kind}."
                     )
             elif alias_from.size is not None and not isinstance(
                 alias_from.size, AnnotatedValue
@@ -158,7 +142,7 @@ class Register:
         """
         return self._alias_slice
 
-    def resolve_size(self, context={}):
+    def resolve_size(self, context=None):
         """
         Determines how many qubits are in the register.
 
@@ -167,8 +151,11 @@ class Register:
         :returns: The size of the register.
         :rtype: int
         """
+
         if self._size is not None:
             return self._size
+
+        context = context or {}
 
         alias_from = self.alias_from
         while isinstance(alias_from, AnnotatedValue):
@@ -193,7 +180,7 @@ class Register:
 
         return len(range(start, stop, step))
 
-    def resolve_qubit(self, idx, context={}):
+    def resolve_qubit(self, idx, context=None):
         """
         Given a specific qubit in this register, follow all map statements back to find
         which fundamental register, and which qubit in that register, the specified qubit
@@ -205,6 +192,9 @@ class Register:
         :returns: The fundamental register, and what index into that register, the specified qubit corresponds to.
         :rtype: (Register, int)
         """
+
+        context = context or {}
+
         if self.size is not None and idx >= self.size:
             raise JaqalError("Index out of range.")
         if self.fundamental:
@@ -228,6 +218,7 @@ class Register:
         return alias_from.resolve_qubit(start + idx * step, context)
 
     def __getitem__(self, key):
+        name = make_item_name(self, key)
         if isinstance(key, slice):
             raise JaqalError(
                 "Anonymous slices are not currently supported; slice only in a map statement."
@@ -235,7 +226,7 @@ class Register:
             # But if the backend ever supports it, just replace the above line with the below line:
             # return Register(self.name + '[' + str(key) + ']', alias_from=self, alias_slice=key)
         else:
-            return NamedQubit(self.name + "[" + str(key) + "]", self, key)
+            return NamedQubit(name, self, key)
 
     def __len__(self):
         return self.size
@@ -265,7 +256,7 @@ class NamedQubit:
         self._alias_from = alias_from
         self._alias_index = alias_index
         if alias_index is None or alias_from is None:
-            raise JaqalError("Invalid map statement constructing qubit %s." % name)
+            raise JaqalError("Invalid map statement constructing qubit {name}.")
         if isinstance(alias_index, AnnotatedValue) or isinstance(
             alias_from, AnnotatedValue
         ):
@@ -274,16 +265,14 @@ class NamedQubit:
                 None,
             ):
                 raise JaqalError(
-                    "Cannot slice register %s with parameter %s of non-integer kind %s."
-                    % (alias_from.name, alias_index.name, alias_index.kind)
+                    "Cannot slice register {alias_from.name} with parameter {alias_index.name} of non-integer kind {alias_index.kind}."
                 )
             if isinstance(alias_from, AnnotatedValue) and alias_from.kind not in (
                 REGISTER_TYPE,
                 None,
             ):
                 raise JaqalError(
-                    "Cannot slice parameter %s of non-register kind %s."
-                    % (alias_from.name, alias_from.kind)
+                    "Cannot slice parameter {alias_from.name} of non-register kind {alias_from.kind}."
                 )
         else:
             try:
@@ -337,7 +326,7 @@ class NamedQubit:
         """
         return self._alias_index
 
-    def resolve_qubit(self, context={}):
+    def resolve_qubit(self, context=None):
         """
         Follow all map statements back to find which fundamental register, and which qubit
         in that register, this qubit is equivalent to.
@@ -347,6 +336,7 @@ class NamedQubit:
         :returns: The fundamental register, and what index into that register, this qubit corresponds to.
         :rtype: (Register, int)
         """
+        context = context or {}
         alias_index = self.alias_index
         alias_from = self.alias_from
         while isinstance(alias_index, AnnotatedValue):
@@ -364,7 +354,3 @@ class NamedQubit:
         :rtype: NamedQubit
         """
         return NamedQubit(name, self.alias_from, self.alias_index)
-
-
-if __name__ == "__main__":
-    unittest
