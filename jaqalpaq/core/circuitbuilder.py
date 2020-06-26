@@ -18,8 +18,8 @@ def build(expression, inject_pulses=None, autoload_pulses=False):
     types library.
 
     :param expression: A tuple or list acting like an S-expression. Also accepts core types and just returns them.
-    :param Dict[str, GateDefinition] inject_pulses: If given, raise an exception if a gate is not in this list or
-    a macro.
+    :param inject_pulses: If given, use these pulses specifically.
+    :param bool autoload_pulses: Whether to employ the usepulses statement for parsing.  Requires appropriate gate definitions.
 
     :return: An appropriate core type object.
 
