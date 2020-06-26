@@ -2,6 +2,7 @@ from collections import defaultdict
 
 from jaqalpaq.core.algorithm.visitor import Visitor
 from jaqalpaq.core import Macro
+from jaqalpaq.error import JaqalError
 
 
 def get_used_qubit_indices(obj, context=None):
@@ -20,6 +21,8 @@ def get_used_qubit_indices(obj, context=None):
 
 
 class UsedQubitIndicesVisitor(Visitor):
+    validate_parallel = False
+
     def visit_default(self, obj, *args, **kwargs):
         """Anything that isn't explicitly listed here can't have any qubits."""
         return {}
@@ -29,11 +32,23 @@ class UsedQubitIndicesVisitor(Visitor):
 
     def visit_BlockStatement(self, obj, context=None):
         indices = defaultdict(set)
+        if self.validate_parallel and obj.parallel:
+            for sub_obj in obj:
+                self.merge_into(
+                    indices, self.visit(sub_obj, context=context), disjoint=True
+                )
+            return indices
+
         for sub_obj in obj:
             self.merge_into(indices, self.visit(sub_obj, context=context))
         return indices
 
     def visit_Circuit(self, obj, context=None):
+        # Work around prepare_all/measure_all not taking a register
+        self.all_qubits = {}
+        for reg in obj.fundamental_registers():
+            self.all_qubits[reg.name] = set(range(reg.size))
+
         return self.visit(obj.body, context=context)
 
     def visit_GateStatement(self, obj, context=None):
@@ -49,9 +64,9 @@ class UsedQubitIndicesVisitor(Visitor):
         else:
             for param in obj.used_qubits:
                 if param is all:
-                    # How do we guard against this being called in an inappropriate place?
-                    raise JaqalError("prepare_all and measure_all not supported")
-                self.merge_into(indices, self.visit(param, context=context))
+                    self.merge_into(indices, self.all_qubits)
+                else:
+                    self.merge_into(indices, self.visit(param, context=context))
             return indices
 
     def visit_Parameter(self, obj, context=None):
@@ -59,7 +74,7 @@ class UsedQubitIndicesVisitor(Visitor):
 
     def visit_NamedQubit(self, obj, context=None):
         reg, idx = obj.resolve_qubit(context)
-        return {reg.name: {idx}}
+        return {reg.name: set((idx,))}
 
     def visit_Register(self, obj, context=None):
         """Called when a register (or register alias) is an argument to a gate. Jaqal
@@ -70,7 +85,18 @@ class UsedQubitIndicesVisitor(Visitor):
             indices[reg.name].add(idx)
         return indices
 
-    def merge_into(self, tgt_dict, src_dict):
+    def merge_into(self, tgt_dict, src_dict, disjoint=False):
         """Merge all values from src_dict into tgt_dict"""
         for key in src_dict:
-            tgt_dict[key] |= src_dict[key]
+            tgt = tgt_dict[key]
+            src = src_dict[key]
+
+            if disjoint and (tgt & src):
+                # This is thrown if you have a parallel block with branches that
+                # hit the same qubit. I.e.
+                # < Sx q[0] | Sx q[0] >
+                # This also occurs if they aren't scheduled at the same time:
+                # < { Sy q[1] ; Sx q[0] } | { Sx q[0] ; Sy q[2] } >
+                raise JaqalError("Parallel branches of block acting on the same qubit.")
+
+            tgt |= src
