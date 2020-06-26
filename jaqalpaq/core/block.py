@@ -3,9 +3,8 @@ class BlockStatement:
     Represents a Jaqal block statement; either sequential or parallel. Can contain other
     blocks, loop statements, and gate statements.
 
-    :param parallel: Set to False (default) for a sequential block, True for a parallel block, or None for an unscheduled block, which is treated as a sequential block except by the :mod:`jaqalpaq.scheduler` submodule.
-    :type parallel: bool or None
-    :param statements: The contents of the block.
+    :param bool parallel: Set to False (default) for a sequential block or True for a parallel block.
+    :param statements: The contents of the block; defaults to an empty block.
     :type statements: list(GateStatement, LoopStatement, BlockStatement)
     """
 
@@ -44,6 +43,12 @@ class BlockStatement:
 
     def __len__(self):
         return len(self.statements)
+
+
+class UnscheduledBlockStatement(BlockStatement):
+    """An unscheduled block, which is treated as an ordinary block except by the :mod:`jaqalpaq.scheduler` submodule."""
+
+    pass
 
 
 class LoopStatement:

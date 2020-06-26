@@ -8,7 +8,7 @@ from .gate import GateStatement
 from .gatedef import GateDefinition, AbstractGate
 from .circuit import Circuit, normalize_native_gates
 from .parameter import Parameter
-from .block import BlockStatement, LoopStatement
+from .block import BlockStatement, LoopStatement, UnscheduledBlockStatement
 
 from jaqalpaq import JaqalError
 
@@ -257,6 +257,13 @@ class Builder:
     def build_parallel_block(self, sexpression, context, gate_context):
         return self.build_block(sexpression, context, gate_context, is_parallel=True)
 
+    def build_unscheduled_block(self, sexpression, context, gate_context):
+        # This is not API, and is strictly for internal use (by extras) at the moment.
+        statements = [
+            self.build(arg, context, gate_context) for arg in sexpression.args
+        ]
+        return UnscheduledBlockStatement(parallel=False, statements=statements)
+
     def build_block(self, sexpression, context, gate_context, is_parallel=False):
         # Note: Unlike at the circuit level statements here can't affect the context (i.e. we can't define
         # a macro inside of a block).
@@ -449,8 +456,16 @@ class ParallelBlockBuilder(BlockBuilder):
         super().__init__("parallel_block")
 
 
+# This is not API currently, but is used by jaqalpaq-extras for automatic scheduling.
+class UnscheduledBlockBuilder(BlockBuilder):
+    """Build up an unscheduled code block."""
+
+    def __init__(self):
+        super().__init__("unscheduled_block")
+
+
 class CircuitBuilder(BlockBuilder):
-    """Object-oriented interface to the build() command. Build up a circuit from its components and the create a full
+    """Object-oriented interface to the build() command. Build up a circuit from its components and then create a full
     Circuit on demand.
 
     Unlike in legal Jaqal, we allow intermixing of body and header statements.
