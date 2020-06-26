@@ -210,7 +210,7 @@ class Builder:
         parameter_args = args[1:-1]
         block = args[-1]
         parameter_list = [
-            param if isinstance(param, Parameter) else Parameter(name, None)
+            param if isinstance(param, Parameter) else Parameter(param, None)
             for param in parameter_args
         ]
         parameter_dict = {param.name: param for param in parameter_list}
