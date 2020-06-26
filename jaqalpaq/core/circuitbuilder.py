@@ -463,6 +463,7 @@ class CircuitBuilder(BlockBuilder):
     def __init__(self, native_gates=None):
         super().__init__("circuit")
         self.native_gates = native_gates
+        self._fundamental_register_index = None
 
     def build(self, context=None):
         """Override the build method to provide the native gates."""
@@ -487,6 +488,7 @@ class CircuitBuilder(BlockBuilder):
         register = ("register", name, size)
         if not unevaluated:
             register = build(register)
+        self._fundamental_register_index = len(self.expression)
         self.expression.append(register)
         return register
 
@@ -557,3 +559,35 @@ class CircuitBuilder(BlockBuilder):
             macro = build(macro)
         self.expression.append(macro)
         return macro
+
+    def stretch_register(self, new_size):
+        """
+        If this circuit has a fundamental register smaller than ``new_size``, increase its
+        size to ``new_size``.
+
+        :param int new_size: How large the register should become.
+        :returns: True if the register now contains exactly ``new_size`` qubits, False if
+            the register previously contained and still contains more than that.
+        :rtype: bool
+        :raises JaqalError: If the circuit does not have a fundamental register.
+        """
+
+        if self._fundamental_register_index is None:
+            raise JaqalError("No fundamental register to stretch.")
+        register = self.expression[self._fundamental_register_index]
+        if isinstance(register, Register):
+            old_size = register.size
+            old_name = register.name
+            if old_size < new_size:
+                register._size = new_size
+        else:
+            old_size = register[2]
+            old_name = register[1]
+            if old_size < new_size:
+                self.expression[self._fundamental_register_index] = (
+                    "register",
+                    old_name,
+                    new_size,
+                )
+
+        return new_size >= old_size

@@ -407,6 +407,14 @@ class ObjectOrientedBuilderTester(unittest.TestCase):
             native_gates=native_gates,
         )
 
+    def test_stretch_register(self):
+        builder = core.circuitbuilder.CircuitBuilder()
+        builder.register("r", 3)
+        self.assertTrue(builder.stretch_register(3))
+        self.assertTrue(builder.stretch_register(6))
+        self.assertFalse(builder.stretch_register(2))
+        self.run_test(("circuit", ("register", "r", 6)), builder)
+
     ##
     # Helper methods
     #
