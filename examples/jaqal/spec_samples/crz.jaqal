@@ -1,0 +1,19 @@
+register q[2]
+
+let phi 0.7853981634;
+let phi_2 0.3926990817;
+let phi_m_2 -0.3926990817;
+
+let pi 3.14159265359
+let pi2 1.57079632679
+let pi4 0.78539816339
+let mpi2 -1.57079632679
+
+macro cnot control target {  // CNOT implementation from Maslov (2017)
+	R control pi2 pi2        //
+	MS control target 0 pi4
+	<R control 0 mpi2 | R target 0 mpi2>  // we can perform these in parallel
+	R control pi2 pi2
+}
+
+Rz q[1] phi_2; CNOT q[0] q[1]; Rz q[1] phi_m_2; CNOT q[0] q[1];

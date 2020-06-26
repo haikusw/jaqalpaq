@@ -1,0 +1,7 @@
+register q[2]
+
+loop 1024 {
+    prepare_all
+    Sxx q[0] q[1]
+    measure_all
+}

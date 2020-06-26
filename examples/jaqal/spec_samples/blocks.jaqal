@@ -1,0 +1,18 @@
+register q[3]
+< Sx q[0] | Sy q[1] >
+<
+    Sx q[0]
+    Sy q[1]
+>
+{
+    Sxx q[0] q[1]
+    < Sx q[0] | Sy q[1] >
+}
+<
+    Sx q[0]
+    { Sx q[1] ; Sy q[1] }
+>
+<
+    Rx q[1] 0.1
+    Sx q[2]
+>

@@ -1,0 +1,3 @@
+register q[3]
+let total_count 4
+let rotations 1.5

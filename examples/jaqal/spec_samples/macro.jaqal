@@ -1,0 +1,7 @@
+register q[3]
+
+macro foo a b {
+    Sx a
+    Sxx a q[0]
+    Sxx b q[0]
+}

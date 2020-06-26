@@ -1,0 +1,3 @@
+register q[3]
+map ancilla q[1]
+Sxx q[0] ancilla

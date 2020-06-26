@@ -1,0 +1,7 @@
+register q[3]
+
+loop 7 {
+    Sx q[0]
+    Sz q[1]
+    Sxx q[0] q[1]
+}

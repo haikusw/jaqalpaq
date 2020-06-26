@@ -1,0 +1,3 @@
+register q[3]
+map ancilla q[0]
+map qubits q

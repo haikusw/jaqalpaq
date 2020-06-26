@@ -1,0 +1,13 @@
+register q[2]
+
+loop 2 {
+    prepare_all
+    Px q[0]
+    measure_all
+}
+
+loop 2 {
+    prepare_all
+    Px q[1]
+    measure_all
+}

@@ -1,0 +1,2 @@
+register q[7]
+map ancilla q[1:7:2]

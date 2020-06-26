@@ -1,0 +1,21 @@
+register q[1]
+
+let pi_32   0.09817477042
+let pi_16   0.1963495408
+let pi_3_32 0.2945243113
+let pi_8    0.3926990817
+
+loop 100 {
+    prepare_all
+    Ry q[0] pi_32
+    measure_all
+    prepare_all
+    Ry q[0] pi_16
+    measure_all
+    prepare_all
+    Ry q[0] pi_3_32
+    measure_all
+    prepare_all
+    Ry q[0] pi_8
+    measure_all
+}
