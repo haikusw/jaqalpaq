@@ -6,7 +6,11 @@ from jaqalpaq.parser import parse_jaqal_file, parse_jaqal_string
 
 class GeneratorTester(TestCase):
     def run_test(self, program):
-        circuit1 = parse_jaqal_file(program)
+        with open(program) as fd:
+            self.run_test_string(fd.read())
+
+    def run_test_string(self, text):
+        circuit1 = parse_jaqal_string(text)
         generated = generate_jaqal_program(circuit1)
         circuit2 = parse_jaqal_string(generated)
         self.assertEqual(circuit1, circuit2)
@@ -65,3 +69,6 @@ class GeneratorTester(TestCase):
                     f.write("Rx q[0] %f\n" % angle)
                     f.write("measure_all\n\n")
             self.run_test(os.path.join(tempdir, "randomness_example.jql"))
+
+    def test_let_in_register(self):
+        self.run_test_string("let len 3; register q[len]")

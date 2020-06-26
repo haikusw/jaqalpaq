@@ -35,9 +35,9 @@ class ForwardSimulatorTester(unittest.TestCase):
     def test_generate_jaqal_program(self):
         self.assertEqual(
             "\n".join([p.strip() for p in self.jaqal_string.split("\n")]),
-            """register q[3]
+            """let pi2 1.5707963267948966
 
-let pi2 1.5707963267948966
+register q[3]
 
 prepare_all
 MS q[1] q[0] pi2 pi2
