@@ -207,9 +207,12 @@ class Builder:
         name = args[0]
         if name in gate_context:
             raise JaqalError(f"Attempting to redefine gate {name}")
-        parameter_names = args[1:-1]
+        parameter_args = args[1:-1]
         block = args[-1]
-        parameter_list = [Parameter(name, None) for name in parameter_names]
+        parameter_list = [
+            param if isinstance(param, Parameter) else Parameter(name, None)
+            for param in parameter_args
+        ]
         parameter_dict = {param.name: param for param in parameter_list}
         macro_context = {
             **context,

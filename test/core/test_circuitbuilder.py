@@ -110,6 +110,15 @@ class BuildTester(unittest.TestCase):
         )
         self.assertEqual(exp_value, act_value)
 
+    def test_build_macro_with_premade_parameters(self):
+        param_ident = randomize.random_identifier()
+        param = Parameter(param_ident, None)
+        macro_ident = randomize.random_identifier()
+        sexpr = ("macro", macro_ident, param, ("sequential_block",))
+        exp_value = core.Macro(macro_ident, [param])
+        act_value = build(sexpr)
+        self.assertEqual(exp_value, act_value)
+
     def test_build_anonymous_gate(self):
         # To test this we're going to create a gate, then take the temporary definition that is created in the process,
         # and use that to create an identical gate.
