@@ -33,14 +33,14 @@ def generate_jaqal_program(circ):
     :rtype: str
     """
     program = ""
-    for register in circ.registers.values():
-        if register.fundamental:
-            program += generate_jaqal_reg(register)
-    program += "\n"
     for const in circ.constants.values():
         program += generate_jaqal_let(const)
     if circ.constants:
         program += "\n"
+    for register in circ.registers.values():
+        if register.fundamental:
+            program += generate_jaqal_reg(register)
+    program += "\n"
     for register in circ.registers.values():
         if not register.fundamental:
             program += generate_jaqal_map(register)
