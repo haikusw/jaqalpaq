@@ -1,7 +1,7 @@
 start: header_statements body_statements
 
 // Header Rules
-header_statements: [_seq_sep? header_statement (_seq_sep header_statement)* _seq_sep?]
+header_statements: [_seq_sep* header_statement (_seq_sep+ header_statement)* _seq_sep*]
 ?header_statement: register_statement | map_statement | let_statement | import_statement | usepulses_statement
 register_statement: _REG array_declaration
 map_statement: _MAP map_target map_source
@@ -20,7 +20,7 @@ _unparenthesized_module_list: as_clause ("," as_clause)*
 as_clause: IDENTIFIER [_AS IDENTIFIER]
 
 // Body rules
-body_statements: [body_statement (_seq_sep body_statement)* _seq_sep?]
+body_statements: [body_statement (_seq_sep+ body_statement)* _seq_sep?]
 ?body_statement: gate_statement | macro_definition | loop_statement | gate_block
 gate_statement: _gate_name _gate_arg_list
 _gate_name: QUALIFIED_IDENTIFIER
@@ -35,10 +35,10 @@ loop_statement: _LOOP let_or_integer gate_block
 // Gate blocks
 ?gate_block: sequential_gate_block | parallel_gate_block
 sequential_gate_block: "{" _sequential_statements _NEWLINE* "}"
-_sequential_statements: _seq_sep* [_sequential_statement (_seq_sep _sequential_statement)* _seq_sep*]
+_sequential_statements: _seq_sep* [_sequential_statement (_seq_sep+ _sequential_statement)* _seq_sep*]
 _sequential_statement: gate_statement | loop_statement | parallel_gate_block
 parallel_gate_block: "<" _parallel_statements ">"
-_parallel_statements: _par_sep* [_parallel_statement (_par_sep _parallel_statement)* _par_sep*]
+_parallel_statements: _par_sep* [_parallel_statement (_par_sep+ _parallel_statement)* _par_sep*]
 _parallel_statement: gate_statement | sequential_gate_block
 
 // Common rules

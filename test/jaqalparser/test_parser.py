@@ -106,6 +106,21 @@ class ParserTester(ParserTesterMixin, unittest.TestCase):
         act_tree = self.simplify_tree(tree)
         self.assertEqual(exp_tree, act_tree)
 
+    def test_let_with_semicolon(self):
+        """Test parsing a let statement followed by a semicolon and newline."""
+        text = "let pi 3.14;\nlet tau 6.28"
+        parser = make_lark_parser(start="start")
+        tree = parser.parse(text)
+        exp_tree = self.make_program(
+            self.make_header_statements(
+                self.make_let_statement("pi", 3.14),
+                self.make_let_statement("tau", 6.28),
+            ),
+            self.make_body_statements(),
+        )
+        act_tree = self.simplify_tree(tree)
+        self.assertEqual(exp_tree, act_tree)
+
     def test_import_statement(self):
         """Test parsing an import statement."""
         text = "import foo"
@@ -229,6 +244,19 @@ class ParserTester(ParserTesterMixin, unittest.TestCase):
         act_tree = self.simplify_tree(tree)
         self.assertEqual(exp_tree, act_tree)
 
+    def test_gate_with_trailing_semicolon(self):
+        text = "g;\nf"
+        parser = make_lark_parser(start="start")
+        tree = parser.parse(text)
+        exp_tree = self.make_program(
+            self.make_header_statements(),
+            self.make_body_statements(
+                self.make_gate_statement("g"), self.make_gate_statement("f"),
+            ),
+        )
+        act_tree = self.simplify_tree(tree)
+        self.assertEqual(exp_tree, act_tree)
+
     def test_serial_gate_block(self):
         """Test a serial gate block with a separator."""
         text = "{g 0 ; h 1}"
@@ -268,6 +296,16 @@ class ParserTester(ParserTesterMixin, unittest.TestCase):
         act_tree = self.simplify_tree(tree)
         self.assertEqual(exp_tree, act_tree)
 
+    def test_serial_gate_block_separator_newline(self):
+        text = "{g ;\n f}"
+        parser = make_lark_parser(start="gate_block")
+        tree = parser.parse(text)
+        exp_tree = self.make_serial_gate_block(
+            self.make_gate_statement("g"), self.make_gate_statement("f")
+        )
+        act_tree = self.simplify_tree(tree)
+        self.assertEqual(exp_tree, act_tree)
+
     def test_parallel_gate_block(self):
         """Test a parallel gate block with a separator."""
         text = "<g 0 | h 1>"
@@ -303,6 +341,16 @@ class ParserTester(ParserTesterMixin, unittest.TestCase):
         parser = make_lark_parser(start="gate_block")
         tree = parser.parse(text)
         exp_tree = self.make_parallel_gate_block()
+        act_tree = self.simplify_tree(tree)
+        self.assertEqual(exp_tree, act_tree)
+
+    def test_parallel_gate_block_separator_newline(self):
+        text = "<g |\n f>"
+        parser = make_lark_parser(start="gate_block")
+        tree = parser.parse(text)
+        exp_tree = self.make_parallel_gate_block(
+            self.make_gate_statement("g"), self.make_gate_statement("f")
+        )
         act_tree = self.simplify_tree(tree)
         self.assertEqual(exp_tree, act_tree)
 
@@ -422,3 +470,7 @@ class ParserTester(ParserTesterMixin, unittest.TestCase):
         text = "register q[7]\n \n"
         parser = make_lark_parser()
         parser.parse(text)
+
+
+if __name__ == "__main__":
+    unittest.main()
