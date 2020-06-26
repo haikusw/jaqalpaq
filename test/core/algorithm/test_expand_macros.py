@@ -64,6 +64,25 @@ class ExpandMacrosTester(unittest.TestCase):
         with self.assertRaises(JaqalError):
             expand_macros(circuit)
 
+    def test_register_argument(self):
+        """Test expanding a macro that has a parameter used as a register."""
+        text = "register q[3]; macro foo a { g a[0] }; foo q"
+        exp_text = "register q[3]; g q[0]"
+        self.run_test(text, exp_text)
+
+    def test_non_argument_register(self):
+        """Text expanding a macro containing a register that is not part of a
+        paramter."""
+        text = "register q[3]; macro foo a { g a q[0] }; foo 3.14"
+        exp_text = "register q[3]; g 3.14 q[0]"
+        self.run_test(text, exp_text)
+
+    def test_register_index_argument(self):
+        """Text expanding a macro containing a register indexed by a paramter."""
+        text = "register q[3]; macro foo a { g q[a] }; foo 2"
+        exp_text = "register q[3]; g q[2]"
+        self.run_test(text, exp_text)
+
     def run_test(self, text, exp_text):
         act_parsed = parse_jaqal_string(text)
         act_circuit = expand_macros(act_parsed)

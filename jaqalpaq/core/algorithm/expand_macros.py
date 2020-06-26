@@ -117,3 +117,17 @@ class GateReplacer(Visitor):
             return arg
         else:
             return param
+
+    def visit_NamedQubit(self, qubit: core.NamedQubit):
+        """This happens when the user indexes a qubit register."""
+        alias_from = self.visit(qubit.alias_from)
+        alias_index = filter_float(self.visit(qubit.alias_index))
+        return alias_from[alias_index]
+
+
+def filter_float(value):
+    """Change a floating point value that represents an integer into an
+    integer."""
+    if isinstance(value, float) and float(value) == int(value):
+        return int(value)
+    return value
