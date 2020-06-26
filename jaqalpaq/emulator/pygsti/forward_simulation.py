@@ -2,7 +2,7 @@ import pygsti
 import numpy as np
 
 from jaqalpaq.generator import generate_jaqal_program
-from jaqalpaq.parser import Option, parse_jaqal_string
+from jaqalpaq.parser import parse_jaqal_string
 
 from .pygstimodel import build_noiseless_native_model
 from .frontend import pygsti_circuit_from_code
@@ -14,7 +14,8 @@ def forward_simulate_circuit(
     if circuit.macros and unroll_macros:
         circuit = parse_jaqal_string(
             generate_jaqal_program(circuit),
-            processing_option=Option.expand_macro | Option.expand_let_map,
+            expand_macro=True,
+            expand_let_map=True,
             native_gates=circuit.native_gates,
         )
 

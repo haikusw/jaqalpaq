@@ -1,48 +1,18 @@
-from enum import Enum
-
 from .interface import Interface
 from .macro_context_visitor import MacroContextRewriteVisitor
-from .tree import TreeManipulators, JaqalParseError
+from .tree import TreeManipulators
 
 from jaqalpaq.core.circuitbuilder import build
 from jaqalpaq import JaqalError
-
-
-class Option(Enum):
-    """Control how and whether the parser expands certain constructs."""
-
-    none = 0
-    expand_macro = 0x1
-    expand_let = 0x2
-    expand_let_map = 0x6
-    full = 0xF
-
-    def __contains__(self, item):
-        return (self.value & item.value) == item.value
-
-    def __or__(self, other):
-        if isinstance(other, OptionSet):
-            result = OptionSet([self]) | other
-        else:
-            result = OptionSet([self, other])
-        return result
-
-    def __ror__(self, other):
-        return self | other
-
-
-class OptionSet(set):
-    """Represent multiple parser options. Acts like a bitmask"""
-
-    def __contains__(self, other):
-        return any(other in item for item in self)
 
 
 def parse_jaqal_file(
     filename,
     override_dict=None,
     native_gates=None,
-    processing_option=Option.none,
+    expand_macro=False,
+    expand_let=False,
+    expand_let_map=False,
     return_usepulses=False,
 ):
     """Parse a file written in Jaqal into core types.
@@ -51,8 +21,9 @@ def parse_jaqal_file(
     :param dict[str, float] override_dict:  An optional dictionary that overrides let statements in the Jaqal code.
     Note: all keys in this dictionary must exist as let statements or an error will be raised.
     :param native_gates: If given, allow only these native gates.
-    :param processing_option: What kind of processing, if any, to perform on the tree.
-    :type processing_option: Option or OptionSet
+    :param bool expand_macro: Replace macro invocations by their body while parsing.
+    :param bool expand_let: Replace let constants by their value while parsing.
+    :param bool expand_let_map: Replace let constants and mapped qubits while parsing. expand_let is ignored if this is True.
     :param bool return_usepulses: Whether to both add a second return value and populate it with the usepulses statement.
     :return: A list of the gates, blocks, and loops to be run.
 
@@ -62,7 +33,9 @@ def parse_jaqal_file(
             fd.read(),
             override_dict=override_dict,
             native_gates=native_gates,
-            processing_option=processing_option,
+            expand_macro=expand_macro,
+            expand_let=expand_let,
+            expand_let_map=expand_let_map,
             return_usepulses=return_usepulses,
         )
 
@@ -71,7 +44,9 @@ def parse_jaqal_string(
     jaqal,
     override_dict=None,
     native_gates=None,
-    processing_option=Option.none,
+    expand_macro=False,
+    expand_let=False,
+    expand_let_map=False,
     return_usepulses=False,
 ):
     """Parse a string written in Jaqal into core types.
@@ -81,7 +56,9 @@ def parse_jaqal_string(
     Note: all keys in this dictionary must exist as let statements or an error will be raised.
     :param native_gates: If given, allow only these native gates.
     :param processing_option: What kind of processing, if any, to perform on the tree.
-    :type processing_option: Option or OptionSet
+    :param bool expand_macro: Replace macro invocations by their body while parsing.
+    :param bool expand_let: Replace let constants by their value while parsing.
+    :param bool expand_let_map: Replace let constants and mapped qubits while parsing. expand_let is ignored if this is True.
     :param bool return_usepulses: Whether to both add a second return value and populate it with the usepulses statement.
     :return: A list of the gates, blocks, and loops to be run.
 
@@ -93,11 +70,12 @@ def parse_jaqal_string(
     # as they may rely on values from override_dict.
     let_dict = iface.make_let_dict(override_dict)
     tree = iface.tree
-    if Option.expand_macro in processing_option:
+    expand_let = expand_let or expand_let_map
+    if expand_macro:
         tree = iface.resolve_macro(tree)
-    if Option.expand_let in processing_option:
+    if expand_let:
         tree = iface.resolve_let(tree, let_dict=let_dict)
-    if Option.expand_let_map in processing_option:
+    if expand_let_map:
         tree = iface.resolve_map(tree)
     circuit = convert_to_circuit(tree, native_gates=native_gates)
 

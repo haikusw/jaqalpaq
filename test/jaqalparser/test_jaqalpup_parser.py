@@ -13,7 +13,7 @@ from jaqalpaq.core import (
     NamedQubit,
     AnnotatedValue,
 )
-from jaqalpaq.parser import parse_jaqal_string, Option, JaqalParseError
+from jaqalpaq.parser import parse_jaqal_string, JaqalParseError
 from jaqalpaq.parser.identifier import Identifier
 from jaqalpaq import JaqalError
 
@@ -73,9 +73,7 @@ class ParserTester(TestCase):
             gates=[self.make_gate("foo", ("r", 0), 1.41)],
         )
         override_dict = {"a": 0, "b": 1.41}
-        self.run_test(
-            text, exp_result, override_dict=override_dict, option=Option.expand_let
-        )
+        self.run_test(text, exp_result, override_dict=override_dict, expand_let=True)
 
     def test_let_as_register_index(self):
         """Test a let-constant used as a register index and not expanded."""
@@ -85,7 +83,7 @@ class ParserTester(TestCase):
             constants={"a": self.make_constant("a", 1)},
             gates=[self.make_gate("foo", ("r", self.make_constant("a", 1)))],
         )
-        self.run_test(text, exp_result, option=Option.none)
+        self.run_test(text, exp_result)
 
     def test_let_as_map_index(self):
         """Test a let-constant used as a map index and not expanded."""
@@ -96,7 +94,7 @@ class ParserTester(TestCase):
             constants={"a": self.make_constant("a", 1)},
             gates=[self.make_gate("foo", ("q", self.make_constant("a", 1)))],
         )
-        self.run_test(text, exp_result, option=Option.none)
+        self.run_test(text, exp_result)
 
     def test_let_as_map_range(self):
         """Test a let-constant used as an element in the slice defining a map that is not expanded."""
@@ -190,7 +188,7 @@ class ParserTester(TestCase):
             # so the definition will still be there.
             macros={"foo": self.make_macro("foo", ["a"], self.make_gate("g", "a"))},
         )
-        self.run_test(text, exp_result, option=Option.expand_macro)
+        self.run_test(text, exp_result, expand_macro=True)
 
     def test_let_no_resolve(self):
         """Test parsing a let statement"""
@@ -199,7 +197,7 @@ class ParserTester(TestCase):
             gates=[self.make_gate("foo", self.make_constant("a", 2))],
             constants={"a": self.make_constant("a", 2)},
         )
-        self.run_test(text, exp_result, option=Option.none)
+        self.run_test(text, exp_result)
 
     def test_let_resolve(self):
         """Test parsing a let statement and resolving it."""
@@ -208,7 +206,7 @@ class ParserTester(TestCase):
             gates=[self.make_gate("foo", 2)],
             constants={"a": self.make_constant("a", 2)},
         )
-        self.run_test(text, exp_result, option=Option.expand_let)
+        self.run_test(text, exp_result, expand_let=True)
 
     def test_map_no_resolve(self):
         """Test parsing a map statement."""
@@ -218,7 +216,7 @@ class ParserTester(TestCase):
             maps={"q": self.make_map("q", "r", (1, 3, 1))},
             gates=[self.make_gate("foo", ("q", 0))],
         )
-        self.run_test(text, exp_result, option=Option.none)
+        self.run_test(text, exp_result)
 
     def test_map_single_qubit_no_resolve(self):
         text = "register r[3]; map q r[1]; foo q"
@@ -227,7 +225,7 @@ class ParserTester(TestCase):
             maps={"q": self.make_map("q", "r", 1)},
             gates=[self.make_gate("foo", self.make_named_qubit("q"))],
         )
-        self.run_test(text, exp_result, option=Option.none)
+        self.run_test(text, exp_result)
 
     def test_map_resolve(self):
         """Test parsing a map statement and resolving it."""
@@ -237,7 +235,7 @@ class ParserTester(TestCase):
             maps={"q": self.make_map("q", "r", (1, 3, 1))},
             gates=[self.make_gate("foo", ("r", 1))],
         )
-        self.run_test(text, exp_result, option=Option.expand_let_map)
+        self.run_test(text, exp_result, expand_let_map=True)
 
     def test_map_single_qubit_resolve(self):
         text = "register r[3]; map q r[1]; foo q"
@@ -246,7 +244,7 @@ class ParserTester(TestCase):
             maps={"q": self.make_map("q", "r", 1)},
             gates=[self.make_gate("foo", ("r", 1))],
         )
-        self.run_test(text, exp_result, option=Option.expand_let_map)
+        self.run_test(text, exp_result, expand_let_map=True)
 
     def test_map_whole_register(self):
         text = "register r[3]; map q r; foo q[1]"
@@ -255,7 +253,7 @@ class ParserTester(TestCase):
             maps={"q": self.make_map("q", "r", None)},
             gates=[self.make_gate("foo", ("q", 1))],
         )
-        self.run_test(text, exp_result, option=Option.none)
+        self.run_test(text, exp_result)
 
     def test_expand_macro_let_map_strip_metadata(self):
         """Test an example that exercises all available options."""
@@ -269,7 +267,7 @@ class ParserTester(TestCase):
             },
             gates=[self.make_gate("g", ("r", 2), 3.14)],
         )
-        self.run_test(text, exp_result, option=Option.full)
+        self.run_test(text, exp_result, expand_macro=True, expand_let_map=True)
 
     def test_no_expand_macro_let_map_leave_metadata(self):
         """Test an example that does not exercise all available options but involves features that could be."""
@@ -283,7 +281,7 @@ class ParserTester(TestCase):
             },
             gates=[self.make_gate("foo", ("q", self.make_constant("a", 2)), 3.14)],
         )
-        self.run_test(text, exp_result, option=Option.none)
+        self.run_test(text, exp_result)
 
     def test_return_usepulses(self):
         text = "from MyPulses.MyClass usepulses *"
@@ -302,13 +300,17 @@ class ParserTester(TestCase):
         exp_native_gates=None,
         override_dict=None,
         native_gates=None,
-        option=Option.none,
+        expand_macro=False,
+        expand_let=False,
+        expand_let_map=False,
     ):
         act_result = parse_jaqal_string(
             text,
             override_dict=override_dict,
             native_gates=native_gates,
-            processing_option=option,
+            expand_macro=expand_macro,
+            expand_let=expand_let,
+            expand_let_map=expand_let_map,
         )
         if exp_result is not None:
             self.assertEqual(exp_result.body, act_result.body)
@@ -473,43 +475,6 @@ class ParserTester(TestCase):
         if not isinstance(named_qubit, NamedQubit):
             raise TypeError(f"Register entry {name} not a named qubit")
         return named_qubit
-
-
-class TestOption(TestCase):
-    """Test the Option and OptionSet classes."""
-
-    def test_contains_self(self):
-        """Test that all options contain themselves."""
-        for opt in Option:
-            self.assertIn(opt, opt)
-
-    def test_contains_bitmask(self):
-        """Test that element containment acts like a bitmask."""
-        for opt0 in Option:
-            for opt1 in Option:
-                self.assertEqual(opt0.value & opt1.value == opt1.value, opt1 in opt0)
-
-    def test_in_option_set(self):
-        """Test that options are in an option set containing them."""
-        for opt0 in Option:
-            for opt1 in Option:
-                optset = opt0 | opt1
-                self.assertIn(opt0, optset)
-                self.assertIn(opt1, optset)
-
-    def test_combine_opt_set_with_option(self):
-        """Test that an option set combines with an option"""
-        for opt0 in Option:
-            for opt1 in Option:
-                for opt2 in Option:
-                    optset = opt0 | opt1
-                    self.assertIn(opt2, optset | opt2)
-                    self.assertIn(opt2, opt2 | optset)
-
-    def test_let_in_optionset_with_let_map(self):
-        """Test that extract_let is in an OptionSet that was created with extract_let_map but not extract_let"""
-        optset = Option.expand_macro | Option.expand_let_map
-        self.assertIn(Option.expand_let_map, optset)
 
 
 class ErrorMessageTester(TestCase):
