@@ -7,6 +7,12 @@ from jaqalpaq import JaqalError
 def build_noiseless_native_model(
     registers, gates,
 ):
+    """Builds a noise model for each Jaqal gate
+
+    :param register: the Jaqal registers that the gates may act on
+    :param gates: a dictionary of Jaqal gates
+    :return: a pyGSTi noise model object
+    """
     gate_names = []
     unitaries = {}
     availability = {}
