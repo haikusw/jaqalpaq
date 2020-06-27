@@ -83,7 +83,7 @@ let mpi2 -1.5707963267948966
 
 macro CNOT control target {
 Ry control pi2
-MS control target pi2 0
+MS control target 0 pi2
 Rx target mpi2
 Rx control mpi2
 Ry control mpi2
@@ -121,7 +121,7 @@ let mpi2 -1.5707963267948966
 
 macro CNOT control target {
 Ry control pi2
-MS control target pi2 0
+MS control target 0 pi2
 Rx target mpi2
 Rx control mpi2
 Ry control mpi2
@@ -160,7 +160,7 @@ let mpi2 -1.5707963267948966
 
 macro CNOT control target {
 Ry control pi2
-MS control target pi2 0
+MS control target 0 pi2
 Rx target mpi2
 Rx control mpi2
 Ry control mpi2
@@ -199,7 +199,7 @@ let mpi2 -1.5707963267948966
 
 macro CNOT control target {
 Ry control pi2
-MS control target pi2 0
+MS control target 0 pi2
 Rx target mpi2
 Rx control mpi2
 Ry control mpi2
