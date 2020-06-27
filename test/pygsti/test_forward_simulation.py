@@ -8,7 +8,9 @@ from jaqalpaq.generator import generate_jaqal_program
 import jaqalpaq.parser
 from jaqalpaq.core.circuit import normalize_native_gates
 
-native_gates = pytest.importorskip("qscout.gate_pulse.native_gates")
+qscout = pytest.importorskip("qscout")
+
+from qscout.v1 import native_gates
 
 
 class ForwardSimulatorTester(unittest.TestCase):
