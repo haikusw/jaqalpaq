@@ -1,0 +1,20 @@
+from qscout.v1.std usepulses *
+
+register q[1]
+
+prepare_all
+
+Sx q[0]
+
+Sx q[0]
+measure_all
+
+loop 7 {
+prepare_all
+Sx q[0]
+measure_all
+}
+
+prepare_all
+Sy q[0]
+measure_all
