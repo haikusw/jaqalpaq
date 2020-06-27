@@ -1,6 +1,6 @@
 import unittest
 
-from jaqalpaq.core.parameter import FLOAT_TYPE, INT_TYPE
+from jaqalpaq.core.parameter import ParamType
 from jaqalpaq.core.constant import Constant
 from . import randomize
 from . import common
@@ -10,8 +10,8 @@ class ConstantTester(unittest.TestCase):
     def test_valid_types(self):
         """Test that a Constant can only be created from valid types."""
         valid_values = [
-            (randomize.random_float(), FLOAT_TYPE),
-            (randomize.random_integer(), INT_TYPE),
+            (randomize.random_float(), ParamType.FLOAT),
+            (randomize.random_integer(), ParamType.INT),
         ]
         for value, kind in valid_values:
             const, name, _ = common.make_random_constant(

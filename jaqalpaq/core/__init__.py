@@ -5,11 +5,7 @@ from .gate import GateStatement
 from .gatedef import AbstractGate, GateDefinition
 from .macro import Macro
 from .parameter import (
-    QUBIT_TYPE,
-    FLOAT_TYPE,
-    REGISTER_TYPE,
-    INT_TYPE,
-    PARAMETER_TYPES,
+    ParamType,
     AnnotatedValue,
     Parameter,
 )
@@ -30,13 +26,13 @@ __all__ = [
     "AbstractGate",
     "GateDefinition",
     "Macro",
-    "QUBIT_TYPE",
-    "FLOAT_TYPE",
-    "REGISTER_TYPE",
-    "INT_TYPE",
-    "PARAMETER_TYPES",
+    "ParamType",
     "AnnotatedValue",
     "Parameter",
     "Register",
     "NamedQubit",
+    "build",
+    "CircuitBuilder",
+    "SequentialBlockBuilder",
+    "ParallelBlockBuilder",
 ]

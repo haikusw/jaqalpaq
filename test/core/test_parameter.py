@@ -1,12 +1,7 @@
 import unittest
 
-from jaqalpaq.core.parameter import (
-    QUBIT_TYPE,
-    FLOAT_TYPE,
-    REGISTER_TYPE,
-    INT_TYPE,
-    PARAMETER_TYPES,
-)
+from jaqalpaq.core.parameter import ParamType
+
 from jaqalpaq.core.register import Register, NamedQubit
 from . import common
 from .randomize import random_float, random_integer
@@ -16,20 +11,23 @@ class ParameterTester(unittest.TestCase):
     def setUp(self):
         reg = common.make_random_register()
         self.example_values = [
-            (reg, [REGISTER_TYPE, None]),
-            (common.choose_random_qubit_getitem(reg), [QUBIT_TYPE, None]),
-            (random_float(), [FLOAT_TYPE, None]),
-            (float(random_integer()), [FLOAT_TYPE, INT_TYPE, None]),
-            (random_integer(), [FLOAT_TYPE, INT_TYPE, None]),
+            (reg, [ParamType.REGISTER, ParamType.NONE]),
+            (
+                common.choose_random_qubit_getitem(reg),
+                [ParamType.QUBIT, ParamType.NONE],
+            ),
+            (random_float(), [ParamType.FLOAT, ParamType.NONE]),
+            (float(random_integer()), [ParamType.FLOAT, ParamType.INT, ParamType.NONE]),
+            (random_integer(), [ParamType.FLOAT, ParamType.INT, ParamType.NONE]),
         ]
         self.example_params = {
             kind: common.make_random_parameter(allowed_types=[kind])
-            for kind in PARAMETER_TYPES
+            for kind in ParamType
         }
 
     def test_create(self):
         """Test creating a parameter with a name and kind."""
-        for kind in PARAMETER_TYPES:
+        for kind in ParamType:
             param, name, _ = common.make_random_parameter(
                 allowed_types=[kind], return_params=True
             )
@@ -65,9 +63,9 @@ class ParameterTester(unittest.TestCase):
 
     def test_classical(self):
         """Test that the right parameter types are classical."""
-        classical_kinds = [FLOAT_TYPE, INT_TYPE]
+        classical_kinds = [ParamType.FLOAT, ParamType.INT]
         for param_kind, param in self.example_params.items():
-            if param_kind is None:
+            if param_kind == ParamType.NONE:
                 with self.assertRaises(Exception):
                     # Note: This behavior implies that classical checking is only reasonable when a
                     # parameter has a known type.
@@ -77,7 +75,7 @@ class ParameterTester(unittest.TestCase):
 
     def test_getitem(self):
         """Treat a parameter like a register or register alias."""
-        allowed_kinds = [REGISTER_TYPE, None]
+        allowed_kinds = [ParamType.REGISTER, ParamType.NONE]
         for param_kind, param in self.example_params.items():
             if param_kind in allowed_kinds:
                 # Note: these don't seem to have an application in Jaqal directly.

@@ -19,7 +19,7 @@ class UsedQubitTester(unittest.TestCase):
         reg = common.make_random_register()
         qubit, index = common.choose_random_qubit_getitem(reg, return_params=True)
         gate_def, _, params = common.make_random_gate_definition(
-            parameter_types=[core.QUBIT_TYPE], return_params=True
+            parameter_types=[core.ParamType.QUBIT], return_params=True
         )
         exp_qubits = {reg.name: {index}}
         args = {params[0].name: qubit}
@@ -67,8 +67,8 @@ class UsedQubitTester(unittest.TestCase):
         # Define a macro that has a statement that uses a fixed qubit and another statement that uses
         # a qubit given as an argument.
         reg = core.Register("r", 3)
-        param = core.Parameter("a", core.QUBIT_TYPE)
-        gate_def = core.GateDefinition("g", [core.Parameter("p", core.QUBIT_TYPE)])
+        param = core.Parameter("a", core.ParamType.QUBIT)
+        gate_def = core.GateDefinition("g", [core.Parameter("p", core.ParamType.QUBIT)])
         g0 = gate_def(reg[0])
         g1 = gate_def(param)
         macro_body = core.BlockStatement(statements=(g0, g1))

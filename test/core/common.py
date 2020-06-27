@@ -5,13 +5,9 @@ from jaqalpaq.core import (
     Register,
     Constant,
     NamedQubit,
-    PARAMETER_TYPES,
+    ParamType,
     Parameter,
     GateDefinition,
-    FLOAT_TYPE,
-    INT_TYPE,
-    QUBIT_TYPE,
-    REGISTER_TYPE,
     Macro,
     BlockStatement,
     GateStatement,
@@ -19,7 +15,7 @@ from jaqalpaq.core import (
 )
 from .randomize import random_identifier, random_whole, random_integer, random_float
 
-VALID_GATE_ARG_TYPES = [FLOAT_TYPE, INT_TYPE, QUBIT_TYPE]
+VALID_GATE_ARG_TYPES = [ParamType.FLOAT, ParamType.INT, ParamType.QUBIT]
 
 
 def assert_values_same(tester, value0, value1, message=None):
@@ -36,9 +32,9 @@ def make_random_parameter(name=None, allowed_types=None, return_params=False):
     if name is None:
         name = random_identifier()
     if allowed_types is None:
-        allowed_types = PARAMETER_TYPES
+        allowed_types = ParamType.types
     param_type = random.choice(allowed_types)
-    if param_type not in PARAMETER_TYPES:
+    if param_type not in ParamType:
         raise ValueError(f"Unknown parameter type {param_type}")
     param = Parameter(name, param_type)
     if not return_params:
@@ -58,7 +54,7 @@ def make_random_parameter_list(*, parameter_types=None, allowed_types=None, coun
         count = len(parameter_types)
     else:
         if allowed_types is None:
-            allowed_types = PARAMETER_TYPES
+            allowed_types = ParamType.types
         if count is None:
             count = random_integer(lower=0, upper=16)
     param_list = []
@@ -80,10 +76,10 @@ def make_random_constant(name=None, value=None, return_params=False):
     if name is None:
         name = random_identifier()
     if value is None:
-        const_type = random.choice([FLOAT_TYPE, INT_TYPE])
-        if const_type == FLOAT_TYPE:
+        const_type = random.choice([ParamType.FLOAT, ParamType.INT])
+        if const_type == ParamType.FLOAT:
             value = random_float()
-        elif const_type == INT_TYPE:
+        elif const_type == ParamType.INT:
             value = random_integer()
         else:
             assert False
@@ -190,7 +186,7 @@ def make_random_gate_definition(
     if parameter_types is None:
         if parameter_count is None:
             parameter_count = random_integer(lower=0, upper=16)
-        allowed_types = VALID_GATE_ARG_TYPES + [None]
+        allowed_types = VALID_GATE_ARG_TYPES + [ParamType.NONE]
         parameters = make_random_parameter_list(
             count=parameter_count, allowed_types=allowed_types
         )
@@ -223,15 +219,17 @@ def make_random_value(value_type):
     tied to any existing objects.
 
     Note that in the case of a float, this can return nan and inf."""
-    if value_type is None:
-        value_type = random.choice([INT_TYPE, FLOAT_TYPE, REGISTER_TYPE, QUBIT_TYPE])
-    if value_type == INT_TYPE:
+    if value_type == ParamType.NONE:
+        value_type = random.choice(
+            [ParamType.INT, ParamType.FLOAT, ParamType.REGISTER, ParamType.QUBIT]
+        )
+    if value_type == ParamType.INT:
         return random_integer()
-    elif value_type == FLOAT_TYPE:
+    elif value_type == ParamType.FLOAT:
         return random_float()
-    elif value_type == REGISTER_TYPE:
+    elif value_type == ParamType.REGISTER:
         return make_random_register()
-    elif value_type == QUBIT_TYPE:
+    elif value_type == ParamType.QUBIT:
         reg = make_random_register()
         return choose_random_qubit_getitem(reg)
     else:
@@ -260,7 +258,7 @@ def make_random_macro_definition(
             else:
                 body_count = random_whole(upper=100)
         body = make_random_block(count=body_count)
-    allowed_types = [None]  # In Jaqal we don't declare types for macros
+    allowed_types = [ParamType.NONE]  # In Jaqal we don't declare types for macros
     parameters = make_random_parameter_list(
         count=parameter_count, allowed_types=allowed_types
     )

@@ -1,10 +1,37 @@
+import enum
+
 from jaqalpaq import JaqalError
 
-QUBIT_TYPE = "qubit"
-FLOAT_TYPE = "float"
-REGISTER_TYPE = "register"
-INT_TYPE = "int"
-PARAMETER_TYPES = (QUBIT_TYPE, FLOAT_TYPE, REGISTER_TYPE, INT_TYPE, None)
+
+class ParamMeta(enum.EnumMeta):
+    @property
+    def types(cls):
+        """A list of all the types in this enumeration. This just excludes
+        NONE."""
+        return [typ for typ in cls if typ != cls.NONE]
+
+
+class ParamType(enum.Enum, metaclass=ParamMeta):
+    NONE = None  # Unknown type
+    QUBIT = enum.auto()
+    FLOAT = enum.auto()
+    REGISTER = enum.auto()
+    INT = enum.auto()
+
+    def __str__(self):
+        if self == ParamType.NONE:
+            return "None"
+        else:
+            return super().__str__(self).lower()
+
+    @classmethod
+    def make(cls, obj):
+        """Create a new ParamType or raise a JaqalError if not possible."""
+        try:
+            return cls(obj)
+        except ValueError:
+            pass
+        raise JaqalError(f"{obj} is not convertible to ParamType")
 
 
 class AnnotatedValue:
@@ -16,17 +43,12 @@ class AnnotatedValue:
     may find other uses as the language evolves.
 
     :param str name: The name the AnnotatedValue is labeled with.
-    :param kind: Optionally, an annotation denoting the the type of the value as
-        :data:`jaqalpaq.core.QUBIT_TYPE`, :data:`jaqalpaq.core.FLOAT_TYPE`,
-        :data:`jaqalpaq.core.REGISTER_TYPE`, or :data:`jaqalpaq.core.INT_TYPE`.
-        If None, can hold a value of any type (like a macro parameter).
+    :param kind: Optionally, an annotation denoting the the type of the value. If None, can hold a value of any type (like a macro parameter).
     """
 
     def __init__(self, name, kind):
         self._name = name
-        if kind not in PARAMETER_TYPES:
-            raise JaqalError("Invalid parameter type specifier {kind}")
-        self._kind = kind
+        self._kind = ParamType.make(kind)
 
     def __repr__(self):
         return f"Parameter({repr(self.name)}, {self.kind})"
@@ -73,9 +95,9 @@ class AnnotatedValue:
 
     @property
     def classical(self):
-        if self._kind is None:
+        if self._kind == ParamType.NONE:
             raise JaqalError(f"No type defined for parameter {self.name}.")
-        return self._kind not in (QUBIT_TYPE, REGISTER_TYPE)
+        return self._kind not in (ParamType.QUBIT, ParamType.REGISTER)
 
 
 class Parameter(AnnotatedValue):
@@ -100,34 +122,37 @@ class Parameter(AnnotatedValue):
         """
         from .register import NamedQubit, Register
 
-        if self.kind == QUBIT_TYPE:
+        if self.kind == ParamType.QUBIT:
             if isinstance(value, NamedQubit):
                 pass
-            elif isinstance(value, AnnotatedValue) and value.kind in (QUBIT_TYPE, None):
-                pass
-            else:
-                raise JaqalError(
-                    "Type-checking failed: parameter {self.name}={value} does not have type {self.kind}."
-                )
-        elif self.kind == REGISTER_TYPE:
-            if isinstance(value, Register):
-                pass
             elif isinstance(value, AnnotatedValue) and value.kind in (
-                REGISTER_TYPE,
-                None,
+                ParamType.QUBIT,
+                ParamType.NONE,
             ):
                 pass
             else:
                 raise JaqalError(
                     "Type-checking failed: parameter {self.name}={value} does not have type {self.kind}."
                 )
-        elif self.kind == FLOAT_TYPE:
+        elif self.kind == ParamType.REGISTER:
+            if isinstance(value, Register):
+                pass
+            elif isinstance(value, AnnotatedValue) and value.kind in (
+                ParamType.REGISTER,
+                ParamType.NONE,
+            ):
+                pass
+            else:
+                raise JaqalError(
+                    "Type-checking failed: parameter {self.name}={value} does not have type {self.kind}."
+                )
+        elif self.kind == ParamType.FLOAT:
             if isinstance(value, float) or isinstance(value, int):
                 pass
             elif isinstance(value, AnnotatedValue) and value.kind in (
-                INT_TYPE,
-                FLOAT_TYPE,
-                None,
+                ParamType.INT,
+                ParamType.FLOAT,
+                ParamType.NONE,
             ):
                 pass
             else:
@@ -135,19 +160,21 @@ class Parameter(AnnotatedValue):
                     "Type-checking failed: parameter {self.name}={value} does not have type {self.kind}."
                     % (str(self.name), str(value), str(self.kind))
                 )
-        elif self.kind == INT_TYPE:
+        elif self.kind == ParamType.INT:
             if (isinstance(value, float) and int(value) == value) or isinstance(
                 value, int
             ):
                 pass
-            elif isinstance(value, AnnotatedValue) and value.kind in (INT_TYPE, None):
+            elif isinstance(value, AnnotatedValue) and value.kind in (
+                ParamType.INT,
+                ParamType.NONE,
+            ):
                 pass
             else:
                 raise JaqalError(
                     "Type-checking failed: parameter {self.name}={value} does not have type {self.kind}."
-                    % (str(self.name), str(value), str(self.kind))
                 )
-        elif self.kind is None:
+        elif self.kind == ParamType.NONE:
             # A parameter with kind None can take anything as input.
             # Such parameters are normally from user-defined macros, where there's no
             # ability to add type annotations in the Jaqal.

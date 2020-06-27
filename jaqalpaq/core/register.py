@@ -1,5 +1,10 @@
 from jaqalpaq import JaqalError
-from .parameter import AnnotatedValue, Parameter, INT_TYPE, REGISTER_TYPE, make_item_name
+from .parameter import (
+    ParamType,
+    AnnotatedValue,
+    Parameter,
+    make_item_name,
+)
 from .constant import Constant
 
 
@@ -48,25 +53,25 @@ class Register:
                 # Verify that the Parameters given have the correct types
                 if isinstance(
                     alias_slice.start, AnnotatedValue
-                ) and alias_slice.start.kind not in (INT_TYPE, None):
+                ) and alias_slice.start.kind not in (ParamType.INT, ParamType.NONE):
                     raise JaqalError(
                         "Cannot slice register {alias_from.name} with parameter {alias_slice.start.name} of non-integer kind {alias_slice.start.kind}."
                     )
                 elif isinstance(
                     alias_slice.stop, AnnotatedValue
-                ) and alias_slice.stop.kind not in (INT_TYPE, None):
+                ) and alias_slice.stop.kind not in (ParamType.INT, ParamType.NONE):
                     raise JaqalError(
                         "Cannot slice register {alias_from.name} with parameter {alias_slice.stop.name} of non-integer kind {alias_slice.stop.kind}."
                     )
                 elif isinstance(
                     alias_slice.step, AnnotatedValue
-                ) and alias_slice.step.kind not in (INT_TYPE, None):
+                ) and alias_slice.step.kind not in (ParamType.INT, ParamType.NONE):
                     raise JaqalError(
                         "Cannot slice register {alias_from.name} with parameter {alias_slice.step.name} of non-integer kind {alias_slice.step.kind}."
                     )
                 elif isinstance(alias_from, AnnotatedValue) and alias_from.kind not in (
-                    REGISTER_TYPE,
-                    None,
+                    ParamType.REGISTER,
+                    ParamType.NONE,
                 ):
                     raise JaqalError(
                         "Cannot slice parameter {alias_from.name} of non-register kind {alias_from.kind}."
@@ -261,15 +266,15 @@ class NamedQubit:
             alias_from, AnnotatedValue
         ):
             if isinstance(alias_index, AnnotatedValue) and alias_index.kind not in (
-                INT_TYPE,
-                None,
+                ParamType.INT,
+                ParamType.NONE,
             ):
                 raise JaqalError(
                     "Cannot slice register {alias_from.name} with parameter {alias_index.name} of non-integer kind {alias_index.kind}."
                 )
             if isinstance(alias_from, AnnotatedValue) and alias_from.kind not in (
-                REGISTER_TYPE,
-                None,
+                ParamType.REGISTER,
+                ParamType.NONE,
             ):
                 raise JaqalError(
                     "Cannot slice parameter {alias_from.name} of non-register kind {alias_from.kind}."

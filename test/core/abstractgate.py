@@ -2,7 +2,7 @@ import unittest
 from itertools import dropwhile, takewhile
 from abc import abstractmethod
 
-from jaqalpaq.core import INT_TYPE, FLOAT_TYPE, QUBIT_TYPE
+from jaqalpaq.core import ParamType
 from . import common
 from .randomize import random_identifier, random_whole
 
@@ -78,13 +78,13 @@ class AbstractGateTesterBase:
 
     def test_fail_wrong_arg_type(self):
         """Test creating a GateStatement with the wrong argument types."""
-        param_types = [INT_TYPE, FLOAT_TYPE, QUBIT_TYPE]
+        param_types = [ParamType.INT, ParamType.FLOAT, ParamType.QUBIT]
         for param_type in param_types:
             parameter = common.make_random_parameter(allowed_types=[param_type])
             gatedef = self.tested_type(random_identifier(), parameters=[parameter])
             other_types = [ptype for ptype in param_types if ptype != param_type]
-            if param_type == FLOAT_TYPE:
-                other_types.remove(INT_TYPE)
+            if param_type == ParamType.FLOAT:
+                other_types.remove(ParamType.INT)
             for other_type in other_types:
                 arguments = [common.make_random_value(other_type)]
                 with self.assertRaises(Exception):

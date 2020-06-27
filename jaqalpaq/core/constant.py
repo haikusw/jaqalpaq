@@ -1,4 +1,4 @@
-from .parameter import AnnotatedValue, INT_TYPE, FLOAT_TYPE
+from .parameter import AnnotatedValue, ParamType
 from jaqalpaq import JaqalError
 
 
@@ -17,9 +17,9 @@ class Constant(AnnotatedValue):
         if isinstance(value, Constant):
             super().__init__(name, value.kind)
         elif isinstance(value, float):
-            super().__init__(name, FLOAT_TYPE)
+            super().__init__(name, ParamType.FLOAT)
         elif isinstance(value, int):
-            super().__init__(name, INT_TYPE)
+            super().__init__(name, ParamType.INT)
         else:
             raise JaqalError("Invalid/non-numeric value {value} for constant {name}!")
         self._value = value

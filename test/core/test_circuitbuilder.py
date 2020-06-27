@@ -1,7 +1,14 @@
 import unittest
 
 from jaqalpaq.core.circuitbuilder import build
-from jaqalpaq.core import Parameter, Register, NamedQubit, Constant, GateDefinition
+from jaqalpaq.core import (
+    Parameter,
+    Register,
+    NamedQubit,
+    Constant,
+    GateDefinition,
+    ParamType,
+)
 import jaqalpaq.core as core
 from jaqalpaq import JaqalError
 
@@ -132,7 +139,7 @@ class BuildTester(unittest.TestCase):
 
     def test_build_native_gate(self):
         name = randomize.random_identifier()
-        parameters = [Parameter("a", core.INT_TYPE), Parameter("b", core.FLOAT_TYPE)]
+        parameters = [Parameter("a", ParamType.INT), Parameter("b", ParamType.FLOAT)]
         gate_def = GateDefinition(name, parameters=parameters)
         native_gates = {name: gate_def}
         a = 5
@@ -367,7 +374,7 @@ class ObjectOrientedBuilderTester(unittest.TestCase):
         )
 
     def test_use_qubit_in_gate(self):
-        foo_def = core.GateDefinition("foo", [core.Parameter("p0", core.QUBIT_TYPE)])
+        foo_def = core.GateDefinition("foo", [core.Parameter("p0", ParamType.QUBIT)])
         native_gates = {"foo": foo_def}
         builder = core.circuitbuilder.CircuitBuilder(native_gates=native_gates)
         reg = builder.register("r", 3)
