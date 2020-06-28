@@ -27,15 +27,15 @@ def build(expression, inject_pulses=None, autoload_pulses=False):
     the arguments. The signatures are as follows where the first element is before the colon and the remaining are
     space separated after the colon.
 
-    circuit : *elements
-    macro : *parameter_names block
+    circuit : \*elements
+    macro : \*parameter_names block
     let : identifier value
     register : name size
     map : name [src_name | src_name src_index | src_name src_start src_stop src_step]
     loop : count sequential_block
-    gate : *arguments
-    sequential_block : *statements
-    parallel_block : *statements
+    gate : \*arguments
+    sequential_block : \*statements
+    parallel_block : \*statements
     array_item : identifier index
 
     In lieu of an s-expression, the appropriate type from the core library will also be accepted. This allows to user

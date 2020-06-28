@@ -20,7 +20,7 @@ def parse_jaqal_file(
 
     :param str filename: The name of the Jaqal file.
     :param dict[str, float] override_dict:  An optional dictionary that overrides let statements in the Jaqal code.
-    Note: all keys in this dictionary must exist as let statements or an error will be raised.
+        Note: all keys in this dictionary must exist as let statements or an error will be raised.
     :param bool expand_macro: Replace macro invocations by their body while parsing.
     :param bool expand_let: Replace let constants by their value while parsing.
     :param bool expand_let_map: Replace let constants and mapped qubits while parsing. expand_let is ignored if this is True.
@@ -28,9 +28,9 @@ def parse_jaqal_file(
     :param inject_pulses: If given, use these pulses specifically.
     :param bool autoload_pulses: Whether to employ the usepulses statement for parsing.  Requires appropriate gate definitions.
     :return: The circuit representation of the file and usepulses if
-    requested. usepulses is stored in a dict under the key
-    'usepulses'. It is itself a dict mapping :class:`Identifier`
-    objects to what the import, which may be the special symbol all.
+        requested. usepulses is stored in a dict under the key
+        'usepulses'. It is itself a dict mapping :class:`Identifier`
+        bjects to what the import, which may be the special symbol all.
 
     """
     with open(filename) as fd:
@@ -60,7 +60,7 @@ def parse_jaqal_string(
 
     :param str jaqal: The Jaqal code.
     :param dict[str, float] override_dict:  An optional dictionary that overrides let statements in the Jaqal code.
-    Note: all keys in this dictionary must exist as let statements or an error will be raised.
+        Note: all keys in this dictionary must exist as let statements or an error will be raised.
     :param bool expand_macro: Replace macro invocations by their body while parsing.
     :param bool expand_let: Replace let constants by their value while parsing.
     :param bool expand_let_map: Replace let constants and mapped qubits while parsing. expand_let is ignored if this is True.
@@ -68,9 +68,9 @@ def parse_jaqal_string(
     :param inject_pulses: If given, use these pulses specifically.
     :param bool autoload_pulses: Whether to employ the usepulses statement for parsing.  Requires appropriate gate definitions.
     :return: The circuit representation of the file and usepulses if
-    requested. usepulses is stored in a dict under the key
-    'usepulses'. It is itself a dict mapping :class:`Identifier`
-    objects to what the import, which may be the special symbol all.
+        requested. usepulses is stored in a dict under the key
+        'usepulses'. It is itself a dict mapping :class:`Identifier`
+        objects to what the import, which may be the special symbol all.
 
     """
 
