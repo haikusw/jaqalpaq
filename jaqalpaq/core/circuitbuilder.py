@@ -148,25 +148,24 @@ class Builder:
 
     def build_map(self, sexpression, context, gate_context):
         args = list(sexpression.args)
+        if len(args) > 1:
+            if isinstance(args[1], Register):
+                src = args[1]
+            else:
+                try:
+                    name, src_name = args[:2]
+                    src = context[src_name]
+                except KeyError:
+                    raise JaqalError(
+                        f"Cannot map {src_name} to {name}, {src_name} does not exist"
+                    )
         if len(args) == 2:
             # Mapping a whole register or alias onto this alias
             name, src_name = args
-            try:
-                src = context[src_name]
-            except KeyError:
-                raise JaqalError(
-                    f"Cannot map {src_name} to {name}, {src_name} does not exist"
-                )
             return Register(name, alias_from=src)
         if len(args) == 3:
             # Mapping a single qubit
             name, src_name, src_index = args
-            try:
-                src = context[src_name]
-            except KeyError:
-                raise JaqalError(
-                    f"Cannot map {src_name} to {name}, {src_name} does not exist"
-                )
             index = self.build(
                 src_index, context
             )  # This may be either an integer or defined parameter.
@@ -174,12 +173,6 @@ class Builder:
         if len(args) == 5:
             # Mapping a slice of a register
             name, src_name, src_start, src_stop, src_step = args
-            try:
-                src = context[src_name]
-            except KeyError:
-                raise JaqalError(
-                    f"Cannot map {src_name} to {name}, {src_name} does not exist"
-                )
             # These may be either integers, None, or let constants
             start = self.build(src_start, context, gate_context)
             if start is None:
