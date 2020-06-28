@@ -3,7 +3,7 @@ import unittest, pytest
 import jaqalpaq
 from jaqalpaq.core.circuitbuilder import CircuitBuilder
 import numpy as np
-import jaqalpaq.emulator.pygsti
+from jaqalpaq.emulator import run_jaqal_circuit
 from jaqalpaq.generator import generate_jaqal_program
 import jaqalpaq.parser
 from jaqalpaq.core.circuit import normalize_native_gates
@@ -48,33 +48,18 @@ measure_all
         )
 
     def test_forward_simulate_circuit(self):
-        c_dict = jaqalpaq.emulator.pygsti.forward_simulate_circuit(self.c)
-        self.assertAlmostEqual(c_dict["000"], 0.5)
-        self.assertAlmostEqual(c_dict["001"], 0)
-        self.assertAlmostEqual(c_dict["010"], 0)
-        self.assertAlmostEqual(c_dict["011"], 0)
-        self.assertAlmostEqual(c_dict["100"], 0)
-        self.assertAlmostEqual(c_dict["101"], 0)
-        self.assertAlmostEqual(c_dict["110"], 0.5)
-        self.assertAlmostEqual(c_dict["111"], 0)
+        for c in [self.c, self.jaqal_c]:
+            res = run_jaqal_circuit(c)
 
-        jaqal_c_dict = jaqalpaq.emulator.pygsti.forward_simulate_circuit(self.jaqal_c)
-        self.assertAlmostEqual(jaqal_c_dict["000"], 0.5)
-        self.assertAlmostEqual(jaqal_c_dict["001"], 0)
-        self.assertAlmostEqual(jaqal_c_dict["010"], 0)
-        self.assertAlmostEqual(jaqal_c_dict["011"], 0)
-        self.assertAlmostEqual(jaqal_c_dict["100"], 0)
-        self.assertAlmostEqual(jaqal_c_dict["101"], 0)
-        self.assertAlmostEqual(jaqal_c_dict["110"], 0.5)
-        self.assertAlmostEqual(jaqal_c_dict["111"], 0)
-
-    def test_forward_simulate_circuit_counts(self):
-        c_count_dict = jaqalpaq.emulator.pygsti.forward_simulate_circuit_counts(
-            self.c, 1000
-        )
-        jaqal_c_count_dict = jaqalpaq.emulator.pygsti.forward_simulate_circuit_counts(
-            self.jaqal_c, 1000
-        )
+            c_dict = res.probabilities(0, fmt="str")
+            self.assertAlmostEqual(c_dict["000"], 0.5)
+            self.assertAlmostEqual(c_dict["001"], 0)
+            self.assertAlmostEqual(c_dict["010"], 0)
+            self.assertAlmostEqual(c_dict["011"], 0)
+            self.assertAlmostEqual(c_dict["100"], 0)
+            self.assertAlmostEqual(c_dict["101"], 0)
+            self.assertAlmostEqual(c_dict["110"], 0.5)
+            self.assertAlmostEqual(c_dict["111"], 0)
 
     def test_five_qubit_GHZ(self):
         jaqal_text = """
@@ -105,10 +90,8 @@ measure_all
         jaqal_prog = jaqalpaq.parser.parse_jaqal_string(
             jaqal_text, inject_pulses=normalize_native_gates(native_gates.NATIVE_GATES)
         )
-        output_probs = jaqalpaq.emulator.pygsti.forward_simulate_circuit(jaqal_prog)
-        output_counts = jaqalpaq.emulator.pygsti.forward_simulate_circuit_counts(
-            jaqal_prog, 1000
-        )
+        res = run_jaqal_circuit(jaqal_prog)
+        output_probs = res.probabilities(0, fmt="str")
         self.assertAlmostEqual(output_probs["00000"], 0.5)
         self.assertAlmostEqual(output_probs["11111"], 0.5)
 
@@ -143,10 +126,8 @@ measure_all
         jaqal_prog = jaqalpaq.parser.parse_jaqal_string(
             jaqal_text, inject_pulses=normalize_native_gates(native_gates.NATIVE_GATES)
         )
-        output_probs = jaqalpaq.emulator.pygsti.forward_simulate_circuit(jaqal_prog)
-        output_counts = jaqalpaq.emulator.pygsti.forward_simulate_circuit_counts(
-            jaqal_prog, 1000
-        )
+        res = run_jaqal_circuit(jaqal_prog)
+        output_probs = res.probabilities(0, fmt="str")
         self.assertAlmostEqual(output_probs["00000"], 0.5)
         self.assertAlmostEqual(output_probs["11111"], 0.5)
 
@@ -182,10 +163,8 @@ measure_all
         jaqal_prog = jaqalpaq.parser.parse_jaqal_string(
             jaqal_text, inject_pulses=normalize_native_gates(native_gates.NATIVE_GATES)
         )
-        output_probs = jaqalpaq.emulator.pygsti.forward_simulate_circuit(jaqal_prog)
-        output_counts = jaqalpaq.emulator.pygsti.forward_simulate_circuit_counts(
-            jaqal_prog, 1000
-        )
+        res = run_jaqal_circuit(jaqal_prog)
+        output_probs = res.probabilities(0, fmt="str")
         self.assertAlmostEqual(output_probs["00000"], 0.5)
         self.assertAlmostEqual(output_probs["11111"], 0.5)
 
@@ -222,9 +201,7 @@ measure_all
         jaqal_prog = jaqalpaq.parser.parse_jaqal_string(
             jaqal_text, inject_pulses=normalize_native_gates(native_gates.NATIVE_GATES)
         )
-        output_probs = jaqalpaq.emulator.pygsti.forward_simulate_circuit(jaqal_prog)
-        output_counts = jaqalpaq.emulator.pygsti.forward_simulate_circuit_counts(
-            jaqal_prog, 1000
-        )
+        res = run_jaqal_circuit(jaqal_prog)
+        output_probs = res.probabilities(0, fmt="str")
         self.assertAlmostEqual(output_probs["000000"], 0.5)
         self.assertAlmostEqual(output_probs["111111"], 0.5)
