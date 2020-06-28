@@ -1,4 +1,4 @@
-import unittest
+import unittest, pytest
 from pathlib import Path
 from jaqalpaq.parser import parse_jaqal_file
 from jaqalpaq.core.circuitbuilder import build
@@ -16,6 +16,7 @@ else:
 
 class ExampleFileTester(unittest.TestCase):
     def implement_file_test(self, jaqal_filename, sexp_filename):
+        pytest.importorskip("qscout")
         with open(sexp_filename, "r") as fd:
             sexp = eval(fd.read())
         act_circuit = parse_jaqal_file(jaqal_filename)

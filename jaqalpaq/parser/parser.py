@@ -14,7 +14,7 @@ def parse_jaqal_file(
     expand_let_map=False,
     return_usepulses=False,
     inject_pulses=None,
-    autoload_pulses=False,
+    autoload_pulses=True,
 ):
     """Parse a file written in Jaqal into core types.
 
@@ -54,7 +54,7 @@ def parse_jaqal_string(
     expand_let_map=False,
     return_usepulses=False,
     inject_pulses=None,
-    autoload_pulses=False,
+    autoload_pulses=True,
 ):
     """Parse a string written in Jaqal into core types.
 
