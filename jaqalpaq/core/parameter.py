@@ -91,7 +91,7 @@ class AnnotatedValue:
         if context and self.name in context:
             return context[self.name]
         else:
-            raise JaqalError("Unbound identifier {self.name}.")
+            raise JaqalError(f"Unbound identifier {self.name}.")
 
     @property
     def classical(self):
@@ -132,7 +132,7 @@ class Parameter(AnnotatedValue):
                 pass
             else:
                 raise JaqalError(
-                    "Type-checking failed: parameter {self.name}={value} does not have type {self.kind}."
+                    f"Type-checking failed: parameter {self.name}={value} does not have type {self.kind}."
                 )
         elif self.kind == ParamType.REGISTER:
             if isinstance(value, Register):
@@ -144,7 +144,7 @@ class Parameter(AnnotatedValue):
                 pass
             else:
                 raise JaqalError(
-                    "Type-checking failed: parameter {self.name}={value} does not have type {self.kind}."
+                    f"Type-checking failed: parameter {self.name}={value} does not have type {self.kind}."
                 )
         elif self.kind == ParamType.FLOAT:
             if isinstance(value, float) or isinstance(value, int):
@@ -157,8 +157,7 @@ class Parameter(AnnotatedValue):
                 pass
             else:
                 raise JaqalError(
-                    "Type-checking failed: parameter {self.name}={value} does not have type {self.kind}."
-                    % (str(self.name), str(value), str(self.kind))
+                    f"Type-checking failed: parameter {self.name}={value} does not have type {self.kind}."
                 )
         elif self.kind == ParamType.INT:
             if (isinstance(value, float) and int(value) == value) or isinstance(
@@ -172,7 +171,7 @@ class Parameter(AnnotatedValue):
                 pass
             else:
                 raise JaqalError(
-                    "Type-checking failed: parameter {self.name}={value} does not have type {self.kind}."
+                    f"Type-checking failed: parameter {self.name}={value} does not have type {self.kind}."
                 )
         elif self.kind == ParamType.NONE:
             # A parameter with kind None can take anything as input.
@@ -181,7 +180,7 @@ class Parameter(AnnotatedValue):
             pass
         else:
             raise JaqalError(
-                "Type-checking failed: unknown parameter type {self.kind}."
+                f"Type-checking failed: unknown parameter type {self.kind}."
             )
 
     def __getitem__(self, key):

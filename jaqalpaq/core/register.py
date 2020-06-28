@@ -36,10 +36,10 @@ class Register:
         self._name = name
         self._size = size
         if (alias_from is None) and not (alias_slice is None and size is not None):
-            raise JaqalError("Invalid register declaration: %s." % name)
+            raise JaqalError(f"Invalid register declaration: {name}.")
         if (size is not None) and (alias_from is not None):
             raise JaqalError(
-                "Illegal size specification in map statement defining {name}."
+                f"Illegal size specification in map statement defining {name}."
             )
         self._alias_from = alias_from
         self._alias_slice = alias_slice
@@ -55,26 +55,26 @@ class Register:
                     alias_slice.start, AnnotatedValue
                 ) and alias_slice.start.kind not in (ParamType.INT, ParamType.NONE):
                     raise JaqalError(
-                        "Cannot slice register {alias_from.name} with parameter {alias_slice.start.name} of non-integer kind {alias_slice.start.kind}."
+                        f"Cannot slice register {alias_from.name} with parameter {alias_slice.start.name} of non-integer kind {alias_slice.start.kind}."
                     )
                 elif isinstance(
                     alias_slice.stop, AnnotatedValue
                 ) and alias_slice.stop.kind not in (ParamType.INT, ParamType.NONE):
                     raise JaqalError(
-                        "Cannot slice register {alias_from.name} with parameter {alias_slice.stop.name} of non-integer kind {alias_slice.stop.kind}."
+                        f"Cannot slice register {alias_from.name} with parameter {alias_slice.stop.name} of non-integer kind {alias_slice.stop.kind}."
                     )
                 elif isinstance(
                     alias_slice.step, AnnotatedValue
                 ) and alias_slice.step.kind not in (ParamType.INT, ParamType.NONE):
                     raise JaqalError(
-                        "Cannot slice register {alias_from.name} with parameter {alias_slice.step.name} of non-integer kind {alias_slice.step.kind}."
+                        f"Cannot slice register {alias_from.name} with parameter {alias_slice.step.name} of non-integer kind {alias_slice.step.kind}."
                     )
                 elif isinstance(alias_from, AnnotatedValue) and alias_from.kind not in (
                     ParamType.REGISTER,
                     ParamType.NONE,
                 ):
                     raise JaqalError(
-                        "Cannot slice parameter {alias_from.name} of non-register kind {alias_from.kind}."
+                        f"Cannot slice parameter {alias_from.name} of non-register kind {alias_from.kind}."
                     )
             elif alias_from.size is not None and not isinstance(
                 alias_from.size, AnnotatedValue
@@ -261,7 +261,7 @@ class NamedQubit:
         self._alias_from = alias_from
         self._alias_index = alias_index
         if alias_index is None or alias_from is None:
-            raise JaqalError("Invalid map statement constructing qubit {name}.")
+            raise JaqalError(f"Invalid map statement constructing qubit {name}.")
         if isinstance(alias_index, AnnotatedValue) or isinstance(
             alias_from, AnnotatedValue
         ):
@@ -270,14 +270,14 @@ class NamedQubit:
                 ParamType.NONE,
             ):
                 raise JaqalError(
-                    "Cannot slice register {alias_from.name} with parameter {alias_index.name} of non-integer kind {alias_index.kind}."
+                    f"Cannot slice register {alias_from.name} with parameter {alias_index.name} of non-integer kind {alias_index.kind}."
                 )
             if isinstance(alias_from, AnnotatedValue) and alias_from.kind not in (
                 ParamType.REGISTER,
                 ParamType.NONE,
             ):
                 raise JaqalError(
-                    "Cannot slice parameter {alias_from.name} of non-register kind {alias_from.kind}."
+                    f"Cannot slice parameter {alias_from.name} of non-register kind {alias_from.kind}."
                 )
         else:
             try:

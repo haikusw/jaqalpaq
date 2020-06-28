@@ -21,7 +21,7 @@ class Constant(AnnotatedValue):
         elif isinstance(value, int):
             super().__init__(name, ParamType.INT)
         else:
-            raise JaqalError("Invalid/non-numeric value {value} for constant {name}!")
+            raise JaqalError(f"Invalid/non-numeric value {value} for constant {name}!")
         self._value = value
 
     def __repr__(self):
@@ -46,7 +46,7 @@ class Constant(AnnotatedValue):
         if isinstance(self._value, int):
             return self._value
         else:
-            raise JaqalError(r"Could not convert {type(self._value)} to int")
+            raise JaqalError(f"Could not convert {type(self._value)} to int")
 
     def __float__(self):
         """Resolve this value converted to a float."""

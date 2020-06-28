@@ -129,7 +129,7 @@ class AbstractGate:
             if len(args) > len(self.parameters):
                 raise JaqalError(f"Too many parameters for gate {self.name}.")
             elif len(args) > len(self.parameters):
-                raise JaqalError("Insufficient parameters for gate {self.name}.")
+                raise JaqalError(f"Insufficient parameters for gate {self.name}.")
             else:
                 for name, arg in zip([param.name for param in self.parameters], args):
                     params[name] = arg

@@ -1,7 +1,5 @@
 from .block import BlockStatement
-from .gate import GateStatement
 from .gatedef import AbstractGate
-from jaqalpaq import JaqalError
 
 
 class Macro(AbstractGate):

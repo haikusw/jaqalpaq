@@ -92,7 +92,7 @@ def normalize_native_gates(native_gates):
         # This covers all iterables like list and tuple
         native_gates = {gate.name: gate for gate in native_gates}
     if any(name != gate.name for name, gate in native_gates.items()):
-        raise JaqalError(f"Native gate dictionary key did not match its name")
+        raise JaqalError("Native gate dictionary key did not match its name")
     if any(not isinstance(gate, GateDefinition) for gate in native_gates.values()):
         raise JaqalError("Native gates must be GateDefinition instances")
     return native_gates
