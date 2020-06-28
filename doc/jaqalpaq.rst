@@ -7,8 +7,8 @@ jaqalpaq package
    :show-inheritance:
 
 .. data:: RESERVED_WORDS
-	
-	The current list of words that cannot be used as names of constants, macros, or registers in Jaqal code.
+
+   The current list of words that cannot be used as names of constants, macros, or registers in Jaqal code.
 
 Subpackages
 -----------
