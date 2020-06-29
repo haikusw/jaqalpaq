@@ -430,6 +430,14 @@ class ObjectOrientedBuilderTester(unittest.TestCase):
         self.assertTrue(builder.stretch_register(6))
         self.assertFalse(builder.stretch_register(2))
         self.run_test(("circuit", ("register", "r", 6)), builder)
+    
+    def test_map_register(self):
+        builder = core.circuitbuilder.CircuitBuilder()
+        r = builder.register("r", 3)
+        builder.map("alias", r)
+        builder.map("named", r, 0)
+        builder.map("sliced", r, slice(0,2))
+        self.run_test(("circuit", ("register", "r", 3), ("map", "alias", "r"), ("map", "named", r, 0), ("map", "sliced", "r", 0, 2, 1)), builder)
 
     ##
     # Helper methods
