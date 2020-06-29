@@ -1,0 +1,3 @@
+from qscout.v1.std usepulses *
+
+register q[1]

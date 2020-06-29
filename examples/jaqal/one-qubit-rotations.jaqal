@@ -1,0 +1,65 @@
+from qscout.v1.std usepulses *
+
+register q[1]
+
+prepare_all
+R q[0] 0.123 0.987
+measure_all
+
+prepare_all
+Rx q[0] 1.234
+measure_all
+
+prepare_all
+Ry q[0] 1.234
+measure_all
+
+prepare_all
+Sx q[0] 
+Rz q[0] 1.234
+Sxd q[0]
+measure_all
+
+prepare_all
+R q[0] 0.221275 0.578238
+measure_all
+
+prepare_all
+Rx q[0] 0.39544
+measure_all
+
+prepare_all
+Ry q[0] 0.321168
+measure_all
+
+prepare_all
+Sx q[0] 
+Rz q[0] 0.215873
+Sxd q[0]
+measure_all
+
+// EXPECTED PROBABILITIES
+// SUBEXPERIMENT 0
+// 0 0 0.7755977328263766
+// 1 1 0.22440226717362335
+// SUBEXPERIMENT 1
+// 0 0 0.6652325540358649
+// 1 1 0.3347674459641351
+// SUBEXPERIMENT 2
+// 0 0 0.6652325540358649
+// 1 1 0.3347674459641351
+// SUBEXPERIMENT 3
+// 0 0 0.6652325540358651
+// 1 1 0.334767445964135
+// SUBEXPERIMENT 4
+// 0 0 0.9187134845665632
+// 1 1 0.08128651543343678
+// SUBEXPERIMENT 5
+// 0 0 0.9614135797097194
+// 1 1 0.03858642029028056
+// SUBEXPERIMENT 6
+// 0 0 0.9744336784691922
+// 1 1 0.025566321530807772
+// SUBEXPERIMENT 7
+// 0 0 0.9883948848173079
+// 1 1 0.011605115182691842

@@ -21,8 +21,10 @@ hadamard q[0]
 cnot q[0] q[1]
 Px q[0]
 measure_all
-// Prepare each qubit in the computational basis.
-// Measure each qubit and read out the results.
 
-//Expected outcome from running emulate-jaqal bell_prep_spec.jaqal is:
-//OutcomeLabelDict([(('00',), 0.4999999999999999), (('01',), 5.635228886195119e-33), (('10',), 1.8590926861063497e-32), (('11',), 0.4999999999999999)])
+// EXPECTED PROBABILITIES
+// SUBEXPERIMENT 0
+// 00 0 9.856016266176781e-33
+// 10 1 0.4999999999999999
+// 01 2 0.4999999999999999
+// 11 3 6.51436181077082e-33

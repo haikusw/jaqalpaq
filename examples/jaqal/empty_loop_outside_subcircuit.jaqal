@@ -1,0 +1,17 @@
+from qscout.v1.std usepulses *
+
+register q[1]
+
+loop 10 {
+}
+
+prepare_all
+measure_all
+
+// EXPECTED MEASUREMENTS
+// 0 0 0
+
+// EXPECTED PROBABILITIES
+// SUBEXPERIMENT 0
+// 0 0 1.0
+// 1 1 0.0

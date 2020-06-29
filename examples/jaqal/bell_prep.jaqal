@@ -19,12 +19,27 @@ macro cnot control target {  // CNOT implementation from Maslov (2017)
 	R control pi2 mpi2
 }
 
-loop 10 {
 prepare_all         // Prepare each qubit in the computational basis.
 hadamard q[0]
 cnot q[0] q[1]
 Px q[0]
 measure_all         // Measure each qubit and read out the results.
-}
-//Expected outcome from emulate-jaqal bell_prep.jaqal is:
-//OutcomeLabelDict([(('00',), 0.4999999999999999), (('01',), 5.9941669678867126e-24), (('10',), 5.994172824829576e-24), (('11',), 0.4999999999999999)])
+
+prepare_all         // Prepare each qubit in the computational basis.
+hadamard q[0]
+cnot q[0] q[1]
+cnot q[0] q[1]
+hadamard q[0]
+measure_all         // Measure each qubit and read out the results.
+
+// EXPECTED PROBABILITIES
+// SUBEXPERIMENT 0
+// 00 0 5.994022910855264e-24
+// 10 1 0.4999999999999999
+// 01 2 0.4999999999999999
+// 11 3 5.994316883104985e-24
+// SUBEXPERIMENT 1
+// 00 0 0.9999999999999996
+// 10 1 9.794401777216853e-23
+// 01 2 2.3976526437498353e-23
+// 11 3 2.3976798254006252e-23
