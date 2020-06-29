@@ -58,6 +58,12 @@ def main(argv=sys.argv[1:]):
     else:
         exe = run_jaqal_string(sys.stdin.read())
 
+    if not ns.output:
+        ns.output = "human"
+    else:
+        (ns.output,) = ns.output
+        ns.suppress = True
+
     if not ns.suppress:
         print("\n".join(exe.output(fmt="str")))
 
@@ -70,10 +76,36 @@ def main(argv=sys.argv[1:]):
         if not ns.probs:
             ns.probs = "str"
 
-        if not ns.output:
-            ns.output = "human"
-        else:
-            (ns.output,) = ns.output
+        if ns.output == "validation":
+            print("// EXPECTED MEASUREMENTS")
+            print(
+                "\n".join(
+                    " ".join(
+                        (
+                            "//",
+                            exe.output(n),
+                            str(exe.output(n, fmt="int")),
+                            str(exe.get_s_idx(n)),
+                        )
+                    )
+                    for n in range(exe.output_len)
+                )
+            )
+
+            print("\n// EXPECTED PROBABILITIES")
+
+            for s_idx, se in enumerate(exe.subexperiments):
+                print(f"// SUBEXPERIMENT {s_idx}")
+                for (n, ((s, ps), p)) in enumerate(
+                    zip(
+                        exe.probabilities(s_idx).items(),
+                        exe.probabilities(s_idx, fmt="int"),
+                    )
+                ):
+                    assert ps == p
+                    print(f"// {s} {n} {p}")
+
+            return 0
 
         probs = []
         for n in range(len(exe.subexperiments)):
