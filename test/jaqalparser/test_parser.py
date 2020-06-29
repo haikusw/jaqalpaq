@@ -70,6 +70,34 @@ class PreparseTester(ParserTesterMixin, unittest.TestCase):
 
 
 class ParserTester(ParserTesterMixin, unittest.TestCase):
+    def test_comment(self):
+        """Test parsing a single-line comment"""
+        text = "//register q[3]\nregister q[2]"
+        parser = make_lark_parser(start="start")
+        tree = parser.parse(text)
+        exp_tree = self.make_program(
+            self.make_header_statements(
+                self.make_register_statement(self.make_array_declaration("q", 2))
+            ),
+            self.make_body_statements(),
+        )
+        act_tree = self.simplify_tree(tree)
+        self.assertEqual(exp_tree, act_tree)
+
+    def test_multiline_comment(self):
+        """Test parsing a single-line comment"""
+        text = "/*register q[3]\nMore text\nlet a 2\n*/register q[2]"
+        parser = make_lark_parser(start="start")
+        tree = parser.parse(text)
+        exp_tree = self.make_program(
+            self.make_header_statements(
+                self.make_register_statement(self.make_array_declaration("q", 2))
+            ),
+            self.make_body_statements(),
+        )
+        act_tree = self.simplify_tree(tree)
+        self.assertEqual(exp_tree, act_tree)
+
     def test_reg(self):
         """Test parsing the register statement"""
         text = "register q[3]"

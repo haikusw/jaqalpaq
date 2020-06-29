@@ -59,7 +59,7 @@ _NEWLINE: NEWLINE
 
 // Comment rules
 LINE_COMMENT: "//" /[^\n]*/
-BLOCK_COMMENT: "/*" /.*/ "*/"
+BLOCK_COMMENT: "/*" /([\n]|.)*/ "*/"
 %ignore LINE_COMMENT
 %ignore BLOCK_COMMENT
 
