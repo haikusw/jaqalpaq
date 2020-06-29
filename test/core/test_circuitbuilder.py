@@ -442,7 +442,7 @@ class ObjectOrientedBuilderTester(unittest.TestCase):
                 "circuit",
                 ("register", "r", 3),
                 ("map", "alias", "r"),
-                ("map", "named", r, 0),
+                ("map", "named", "r", 0),
                 ("map", "sliced", "r", 0, 2, 1),
             ),
             builder,
