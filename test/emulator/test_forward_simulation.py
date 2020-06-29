@@ -244,6 +244,51 @@ Px q[1]
         true_output = ["10", "10", "01", "01"]
         self.assertEqual(output, true_output)
 
+    def test_interleaved_bit_flip(self):
+        jaqal_str = """
+from qscout.v1.std usepulses *
+
+register q[3]
+loop 2 {
+    prepare_all
+    Px q[0]
+    measure_all
+    loop 2 {
+        prepare_all
+        Px q[1]
+        measure_all
+    }
+}
+
+prepare_all
+Px q[2]
+prepare_all
+Px q[2]
+measure_all
+"""
+        results = jaqalpaq.emulator.run_jaqal_string(jaqal_str)
+        output = results.output()
+        int_output = results.output(fmt="int")
+        true_output = ["100", "010", "010", "100", "010", "010", "001"]
+        true_int_output = [1, 2, 2, 1, 2, 2, 4]
+        self.assertEqual(output, true_output)
+        self.assertEqual(int_output, true_int_output)
+
+        int_output = results.output(s_idx=0, fmt="int")
+        output = results.output(s_idx=0)
+        self.assertEqual(int_output, [1, 1])
+        self.assertEqual(output, ["100", "100"])
+
+        int_output = results.output(s_idx=1, fmt="int")
+        output = results.output(s_idx=1)
+        self.assertEqual(int_output, [2, 2, 2, 2])
+        self.assertEqual(output, ["010", "010", "010", "010"])
+
+        int_output = results.output(s_idx=2, fmt="int")
+        output = results.output(s_idx=2)
+        self.assertEqual(int_output, [4])
+        self.assertEqual(output, ["001"])
+
     def test_spec_pi_fracs(self):
         jaqal_str = """
 from qscout.v1.std usepulses *
