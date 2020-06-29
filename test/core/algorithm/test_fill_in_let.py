@@ -122,10 +122,14 @@ class FillInLetTester(unittest.TestCase):
     #
 
     def run_test(self, text, exp_text, inject_pulses=None, override_dict=None):
-        act_parsed = parse_jaqal_string(text, inject_pulses=inject_pulses)
+        act_parsed = parse_jaqal_string(
+            text, inject_pulses=inject_pulses, autoload_pulses=False
+        )
         act_circuit = fill_in_let(act_parsed, override_dict=override_dict)
         if isinstance(exp_text, str):
-            exp_circuit = parse_jaqal_string(exp_text, inject_pulses=inject_pulses)
+            exp_circuit = parse_jaqal_string(
+                exp_text, inject_pulses=inject_pulses, autoload_pulses=False
+            )
         else:
             exp_circuit = build(exp_text, inject_pulses=inject_pulses)
         if exp_circuit != act_circuit:

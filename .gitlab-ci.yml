@@ -9,6 +9,7 @@ before_script:
 stages:
   - Static Analysis
   - Test
+  - Documentation
 
 syntax:
   stage: Static Analysis
@@ -24,3 +25,11 @@ pytest:
     - pip install -e .[pygsti-integration,tests] && pytest
     - ( unset https_proxy ; cd .. && rm -fr qscout-gatemodels && git clone --depth 1 https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.sandia.gov/jaqal/qscout-gatemodels.git/  )
     - ( cd ../qscout-gatemodels && pip install -e . )
+
+sphinx:
+  stage: Documentation
+  script:
+    - pip install -e.[docs]
+    - ( unset https_proxy ; cd .. && rm -fr jaqalpaq-extras && git clone --depth 1 https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.sandia.gov/jaqal/jaqalpaq-extras.git/  )
+    - ( cd ../jaqalpaq-extras && pip install -e . )
+    - python3 setup.py build_sphinx

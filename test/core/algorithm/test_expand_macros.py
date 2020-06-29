@@ -84,10 +84,10 @@ class ExpandMacrosTester(unittest.TestCase):
         self.run_test(text, exp_text)
 
     def run_test(self, text, exp_text):
-        act_parsed = parse_jaqal_string(text)
+        act_parsed = parse_jaqal_string(text, autoload_pulses=False)
         act_circuit = expand_macros(act_parsed)
         if isinstance(exp_text, str):
-            exp_circuit = parse_jaqal_string(exp_text)
+            exp_circuit = parse_jaqal_string(exp_text, autoload_pulses=False)
         else:
             exp_circuit = build(exp_text)
         if exp_circuit != act_circuit:

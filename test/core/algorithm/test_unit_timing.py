@@ -44,11 +44,13 @@ class UnitTimingTester(unittest.TestCase):
     def test_reject_nested_loop(self):
         test = "<{loop 5 {}}>"
         with self.assertRaises(JaqalError):
-            normalize_blocks_with_unitary_timing(parse_jaqal_string(test))
+            normalize_blocks_with_unitary_timing(
+                parse_jaqal_string(test, autoload_pulses=False)
+            )
 
     def run_test(self, test, exp):
-        exp_result = parse_jaqal_string(exp)
-        test_parsed = parse_jaqal_string(test)
+        exp_result = parse_jaqal_string(exp, autoload_pulses=False)
+        test_parsed = parse_jaqal_string(test, autoload_pulses=False)
         act_result = normalize_blocks_with_unitary_timing(test_parsed)
         self.assertEqual(exp_result, act_result)
 

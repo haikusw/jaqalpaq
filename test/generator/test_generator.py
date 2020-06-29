@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from jaqalpaq.generator import generate_jaqal_program
-from jaqalpaq.parser import parse_jaqal_file, parse_jaqal_string
+from jaqalpaq.parser import parse_jaqal_string
 
 
 class GeneratorTester(TestCase):
@@ -10,9 +10,9 @@ class GeneratorTester(TestCase):
             self.run_test_string(fd.read())
 
     def run_test_string(self, text):
-        circuit1 = parse_jaqal_string(text)
+        circuit1 = parse_jaqal_string(text, autoload_pulses=False)
         generated = generate_jaqal_program(circuit1)
-        circuit2 = parse_jaqal_string(generated)
+        circuit2 = parse_jaqal_string(generated, autoload_pulses=False)
         self.assertEqual(circuit1, circuit2)
 
     def test_map_registers(self):

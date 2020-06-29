@@ -51,7 +51,7 @@ class ParserTester(TestCase):
     def test_forbid_multiple_registers(self):
         text = "register r[3]; register q[7]"
         with self.assertRaises(JaqalError):
-            parse_jaqal_string(text)
+            parse_jaqal_string(text, autoload_pulses=False)
 
     def test_let_float(self):
         """Test a let constant that is a floating point value."""
@@ -286,7 +286,9 @@ class ParserTester(TestCase):
     def test_return_usepulses(self):
         text = "from MyPulses.MyClass usepulses *"
         exp_value = {"usepulses": {Identifier.parse("MyPulses.MyClass"): all,}}
-        _, act_value = parse_jaqal_string(text, return_usepulses=True)
+        _, act_value = parse_jaqal_string(
+            text, return_usepulses=True, autoload_pulses=False
+        )
         self.assertEqual(act_value, exp_value)
 
     ##
@@ -311,6 +313,7 @@ class ParserTester(TestCase):
             expand_let=expand_let,
             expand_let_map=expand_let_map,
             inject_pulses=native_gates,
+            autoload_pulses=False,
         )
         if exp_result is not None:
             self.assertEqual(exp_result.body, act_result.body)
@@ -483,7 +486,7 @@ class ErrorMessageTester(TestCase):
     def test_unexpected_token_message(self):
         try:
             text = "register r[-1]"
-            parse_jaqal_string(text)
+            parse_jaqal_string(text, autoload_pulses=False)
             self.fail("No exception raised")
         except JaqalParseError as exc:
             # Lines and columns are 1-indexed
