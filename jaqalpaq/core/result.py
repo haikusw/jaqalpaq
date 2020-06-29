@@ -44,7 +44,7 @@ class ExecutionResult:
     def __init__(self, circuit, output=None):
         """Encapsulates measurements made by Jaqal program.
 
-        :param circuit: either a ScheduledCircuit representing a Jaqal program, or
+        :param circuit: either a Circuit representing a Jaqal program, or
             another ExecutionResult representing the desired Jaqal program
         :param output: (optional) A list of measurements to encapsulate
 

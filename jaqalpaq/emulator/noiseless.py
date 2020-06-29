@@ -41,9 +41,9 @@ def generate_probabilities(exe_res, *, prob_kwargs=None):
 
 
 def run_jaqal_circuit(circ):
-    """Execute a Jaqal ScheduledCircuit in a noiseless emulator.
+    """Execute a Jaqal Circuit in a noiseless emulator.
 
-    :param circ: a Jaqalpaq ScheduledCircuit object to be run.
+    :param circ: a Jaqalpaq Circuit object to be run.
 
     :return: An ExecutionResult object.
 

@@ -7,7 +7,7 @@ from jaqalpaq.core.block import BlockStatement, LoopStatement
 
 
 class Subcircuit:
-    """Describes start and stop location in a ScheduledCircuita"""
+    """Describes start and stop location in a Circuita"""
 
     def __init__(self, start=None, end=None):
         if start is None:
@@ -44,7 +44,7 @@ class SubcircuitSerializer(Visitor):
         self.address = []
         self.serialized = []
 
-    def visit_ScheduledCircuit(self, circuit):
+    def visit_Circuit(self, circuit):
         return self.visit(circuit.body)
 
     def visit_BlockStatement(self, block):
@@ -98,7 +98,7 @@ class SubcircuitSerializer(Visitor):
 
 
 class DiscoverSubexperiments(UsedQubitIndicesVisitor):
-    """Walks a ScheduledCircuit, identifying subexperiments bounded by prepare_all and measure_all"""
+    """Walks a Circuit, identifying subexperiments bounded by prepare_all and measure_all"""
 
     # While this *is* the behavior of DiscoverSubexperiments,
     # this flag does nothing.
@@ -112,8 +112,8 @@ class DiscoverSubexperiments(UsedQubitIndicesVisitor):
         self.p_gate = p_gate
         self.m_gate = m_gate
 
-    def visit_ScheduledCircuit(self, circuit, context=None):
-        super().visit_ScheduledCircuit(circuit, context=context)
+    def visit_Circuit(self, circuit, context=None):
+        super().visit_Circuit(circuit, context=context)
 
         subcircuits = self.subcircuits
         if len(subcircuits) == 0:
@@ -167,7 +167,7 @@ class SubcircuitsVisitor(Visitor):
     def process_subcircuit(self):
         raise NotImplementedError()
 
-    def visit_ScheduledCircuit(self, circuit):
+    def visit_Circuit(self, circuit):
         if len(self.subcircuits) == 0:
             return
         self.objective = self.subcircuits[self.s_idx].start
