@@ -350,44 +350,14 @@ loop 2 {
             "1111",
         ]
         self.assertEqual(output, true_output)
-        cli_output = """1000
-1100
-1110
-1111
-1111
-1110
-1111
-1111
-1100
-1110
-1111
-1111
-1110
-1111
-1111
-1000
-1100
-1110
-1111
-1111
-1110
-1111
-1111
-1100
-1110
-1111
-1111
-1110
-1111
-1111
-"""
 
-        parsed_jaqal_str = jaqalpaq.parser.parse_jaqal_string(
-            jaqal_str, autoload_pulses=True
-        )
-        exe = ExecutionResult(parsed_jaqal_str)
-        exe.parse_output(cli_output.split("\n"))
-        self.assertEqual(exe.output(), results.output())
+        parsed_jaqal_str = jaqalpaq.parser.parse_jaqal_string(jaqal_str)
+
+        exe_reuse = ExecutionResult(results, output=true_output)
+        exe = ExecutionResult(parsed_jaqal_str, output=true_output)
+        self.assertEqual(true_output, results.output())
+        self.assertEqual(true_output, exe.output())
+        self.assertEqual(true_output, exe_reuse.output())
 
     @unittest.skip("Multiple registers not allowed in Jaqal spec")
     def test_multiple_registers(self):
