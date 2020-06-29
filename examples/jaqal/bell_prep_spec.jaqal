@@ -1,0 +1,28 @@
+from qscout.v1.std usepulses *
+
+register q[2]
+
+let pi2 1.5707963267948966
+let pi4 0.7853981633974483
+
+macro hadamard target { // A Hadamard gate can be implemented as
+    Sy target           // a pi/2 rotation around Y
+    Px target           // followed by a pi rotation around X.
+}
+macro cnot control target {  // CNOT implementation from Maslov (2017)
+    Sy control               //
+    MS control target 0 pi2
+    <Sxd control | Sxd target>  // we can perform these in parallel
+    Syd control
+}
+
+prepare_all
+hadamard q[0]
+cnot q[0] q[1]
+Px q[0]
+measure_all
+// Prepare each qubit in the computational basis.
+// Measure each qubit and read out the results.
+
+//Expected outcome from running emulate-jaqal bell_prep_spec.jaqal is:
+//OutcomeLabelDict([(('00',), 0.4999999999999999), (('01',), 5.635228886195119e-33), (('10',), 1.8590926861063497e-32), (('11',), 0.4999999999999999)])
