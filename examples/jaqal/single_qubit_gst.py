@@ -39,7 +39,7 @@
         "macro",
         "G3",
         "qubit",
-        ("sequential_block", ("gate", "Sx", "qubit"), ("gate", "Sx", "qubit")),
+        ("sequential_block", ("gate", "Sx", "qubit"), ("gate", "Sy", "qubit")),
     ),
     (
         "macro",

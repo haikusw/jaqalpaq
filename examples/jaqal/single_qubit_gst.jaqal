@@ -12,7 +12,7 @@ macro F5 qubit { Sy qubit; Sy qubit; Sy qubit }
 macro G0 qubit { Sx qubit }  // Germs
 macro G1 qubit { Sy qubit }
 macro G2 qubit { I_Sx qubit }
-macro G3 qubit { Sx qubit; Sx qubit }
+macro G3 qubit { Sx qubit; Sy qubit }
 macro G4 qubit { Sx qubit; Sy qubit; I_Sx qubit }
 macro G5 qubit { Sx qubit; I_Sx qubit; Sy qubit }
 macro G6 qubit { Sx qubit; I_Sx qubit; I_Sx qubit }
