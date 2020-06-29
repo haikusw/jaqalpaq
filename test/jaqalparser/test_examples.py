@@ -19,7 +19,7 @@ class ExampleFileTester(unittest.TestCase):
         pytest.importorskip("qscout")
         with open(sexp_filename, "r") as fd:
             sexp = eval(fd.read())
-        act_circuit = parse_jaqal_file(jaqal_filename)
+        act_circuit = parse_jaqal_file(jaqal_filename, autoload_pulses=False)
         exp_circuit = build(sexp)
         self.assertEqual(exp_circuit, act_circuit)
 
