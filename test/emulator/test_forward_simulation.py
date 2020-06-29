@@ -3,7 +3,7 @@ import unittest, pytest
 import jaqalpaq
 from jaqalpaq.core.circuitbuilder import CircuitBuilder
 import numpy as np
-from jaqalpaq.emulator import run_jaqal_circuit
+from jaqalpaq.emulator import run_jaqal_string, run_jaqal_circuit
 from jaqalpaq.generator import generate_jaqal_program
 import jaqalpaq.parser
 from jaqalpaq.core.circuit import normalize_native_gates
@@ -51,7 +51,9 @@ measure_all
 
     def test_forward_simulate_circuit(self):
         for c in [self.c, self.jaqal_c]:
-            res = run_jaqal_circuit(c)
+            res = run_jaqal_string(
+                "\n".join(("from qscout.v1.std usepulses *", self.jaqal_string))
+            )
 
             c_dict = res.probabilities(0, fmt="str")
             self.assertAlmostEqual(c_dict["000"], 0.5)
