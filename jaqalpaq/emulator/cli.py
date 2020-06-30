@@ -1,4 +1,5 @@
 import sys, argparse
+from jaqalpaq.parser import parse_jaqal_string
 
 
 def main(argv=sys.argv[1:]):
@@ -15,9 +16,7 @@ def main(argv=sys.argv[1:]):
         "--suppress-output",
         "-s",
         dest="suppress",
-        default=False,
-        const=True,
-        action="store_const",
+        action="store_true",
         help="Do not produce literal Jaqal output, i.e., a time-ordered list of bit strings.  Implies -p, and outputs to stdout.",
     )
     parser.add_argument(
@@ -28,7 +27,7 @@ def main(argv=sys.argv[1:]):
         default=None,
         nargs="?",
         const="str",
-        help="""Print distribution probabilities of outcomes to stderr.  Listed in lexical order.  Takes optional argument FORMAT `str` to print bitstrings, and `int` to print probabilities in integer order of outcomes, little-endian encoded. If set, defaults to `str`.""",
+        help="Print distribution probabilities of outcomes to stderr.  Listed in lexical order.  Takes optional argument FORMAT `str` to print bitstrings, and `int` to print probabilities in integer order of outcomes, little-endian encoded. If set, defaults to `str`.",
     )
     parser.add_argument(
         "--cutoff",
@@ -40,8 +39,22 @@ def main(argv=sys.argv[1:]):
         "--output",
         dest="output",
         default=None,
+        choices=["human", "python", "json", "validation"],
         nargs=1,
-        help="Determines if `human` readible probability, `python` dictionary, or `json` output.",
+        help="Determines if `human` readible probability, `python` dictionary, or `json` output.  [undocumented] validation template",
+    )
+    parser.add_argument(
+        "--validate",
+        dest="validate",
+        action="store_true",
+        help="[undocumented] Performs a validation of jaqal versus the expressed expected results.",
+    )
+    parser.add_argument(
+        "--debug-traces",
+        "-d",
+        dest="debug",
+        action="store_true",
+        help="Automatically invoke the post-mortem debugger on exception",
     )
 
     ns = parser.parse_args(argv)
@@ -49,74 +62,85 @@ def main(argv=sys.argv[1:]):
         ns.cutoff = float(ns.cutoff)
     except Exception:
         print(f"Invalid cutoff {ns.cutoff}", file=sys.stderr)
-        return 1
-
-    from .noiseless import run_jaqal_file, run_jaqal_string
-
-    if ns.filename:
-        exe = run_jaqal_file(ns.filename)
-    else:
-        exe = run_jaqal_string(sys.stdin.read())
+        return 2
 
     if not ns.output:
         ns.output = "human"
     else:
         (ns.output,) = ns.output
-        ns.suppress = True
+
+    if ns.filename:
+        with open(ns.filename, "r") as f:
+            txt = f.read()
+    else:
+        txt = sys.stdin.read()
+
+    from .noiseless import run_jaqal_file, run_jaqal_circuit
+    from ._validator import validate_jaqal_string, generate_jaqal_validation
+    from jaqalpaq.parser import parse_jaqal_string
+    from jaqalpaq.core.result import ExecutionResult
+
+    if ns.validate:
+        try:
+            v = validate_jaqal_string(txt)
+        except Exception as ex:
+            if ns.debug:
+                import pdb, traceback
+
+                traceback.print_exc()
+                _, _, tb = sys.exc_info()
+                pdb.post_mortem(tb)
+                return 1
+            else:
+                print(f"Validation failure: {type(ex).__name__}: {ex}")
+                return 1
+
+        if v:
+            a = '", "'
+            print(f'Validations: "{a.join(v)}" passed.')
+        else:
+            print("Warning: no validation data present")
+        return
+
+    try:
+        circ = parse_jaqal_string(txt, autoload_pulses=True)
+    except Exception as ex:
+        if ns.debug:
+            import pdb, traceback
+
+            traceback.print_exc()
+            _, _, tb = sys.exc_info()
+            pdb.post_mortem(tb)
+            return 1
+        else:
+            print(f"Error during parsing: {type(ex).__name__}: {ex}")
+            return 1
 
     if not ns.suppress:
-        print("\n".join(exe.output(fmt="str")))
-
-    if ns.suppress:
-        out = sys.stdout
-    else:
+        exe = run_jaqal_circuit(circ)
+        if ns.output != "validation":
+            print("\n".join(exe.output(fmt="str")), flush=True)
         out = sys.stderr
+    else:
+        exe = ExecutionResult(circ)
+        out = sys.stdout
+
+    if ns.output == "validation":
+        print(generate_jaqal_validation(exe))
+        return
 
     if ns.suppress or ns.probs or ns.output:
         if not ns.probs:
             ns.probs = "str"
 
-        if ns.output == "validation":
-            print("// EXPECTED MEASUREMENTS")
-            print(
-                "\n".join(
-                    " ".join(
-                        (
-                            "//",
-                            exe.output(n),
-                            str(exe.output(n, fmt="int")),
-                            str(exe.get_s_idx(n)),
-                        )
-                    )
-                    for n in range(exe.output_len)
-                )
-            )
-
-            print("\n// EXPECTED PROBABILITIES")
-
-            for s_idx, se in enumerate(exe.subexperiments):
-                print(f"// SUBEXPERIMENT {s_idx}")
-                for (n, ((s, ps), p)) in enumerate(
-                    zip(
-                        exe.probabilities(s_idx).items(),
-                        exe.probabilities(s_idx, fmt="int"),
-                    )
-                ):
-                    assert ps == p
-                    print(f"// {s} {n} {p}")
-
-            return 0
-
         probs = []
         for n in range(len(exe.subexperiments)):
-            probs.append(exe.probabilities(n, fmt=ns.probs))
+            prob = exe.probabilities(n, fmt=ns.probs)
             if ns.probs == "int":
-                continue
-
-            if ns.cutoff > 0:
-                probs[-1] = dict(
-                    [(k, v) for k, v in probs[-1].items() if v >= ns.cutoff]
-                )
+                probs.append(list(prob))
+            elif ns.cutoff > 0:
+                prob = dict([(k, v) for k, v in prob.items() if v >= ns.cutoff])
+                probs.append(prob)
 
         if ns.output == "json":
             # This should be identical to python for our use case.
@@ -129,9 +153,8 @@ def main(argv=sys.argv[1:]):
             for n, prob in enumerate(probs):
                 print(f"Sub-experiment {n}:", file=out)
                 if ns.probs == "int":
-                    print("\n".join(f"{o}: {p}" for o, p in enumerate(prob)))
+                    print("\n".join(f"{o}: {p}" for o, p in enumerate(prob)), file=out)
                 else:
-                    print("\n".join(f"{o}: {p}" for o, p in prob.items()))
+                    print("\n".join(f"{o}: {p}" for o, p in prob.items()), file=out)
         else:
-            print(f"Unknown output format {ns.output}.", file=sys.stderr)
-            return 1
+            assert False
