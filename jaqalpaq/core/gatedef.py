@@ -44,70 +44,6 @@ class AbstractGate:
         """
         return self._parameters
 
-    @property
-    def ideal_unitary(self):
-        """
-        Returns the ideal unitary action of the gate on its target qubits.
-
-        Takes as parameters all classical arguments.
-        """
-        return self._ideal_unitary
-
-    def ideal_unitary_pygsti(self, parms):
-        """
-        Returns the ideal unitary action of the gate on its target qubits.
-
-        Takes as a parameter: a list of all classical arguments.
-
-        Is compatible with pygsti's build_from_parameterization
-        nonstd_gate_unitaries parameters.
-        """
-        if parms:
-            return self._ideal_unitary(*parms)
-        else:
-            import numpy
-
-            return numpy.identity(2 ** self.quantum_parameters)
-
-    @property
-    def used_qubits(self):
-        for p in self._parameters:
-            try:
-                if not p.classical:
-                    yield p
-            except JaqalError:
-                # This happens if we don't have a real gate definition.
-                # Lean on the upper layers being able to infer the type.
-                yield p
-
-    @property
-    def quantum_parameters(self):
-        try:
-            return self._quantum_parameters
-        except AttributeError:
-            self.count_parameters()
-            return self._quantum_parameters
-
-    @property
-    def classical_parameters(self):
-        try:
-            return self._classical_parameters
-        except AttributeError:
-            self.count_parameters()
-            return self._classical_parameters
-
-    def count_parameters(self):
-        c = 0
-        q = 0
-        for p in self._parameters:
-            if p.classical:
-                c += 1
-            else:
-                q += 1
-
-        self._classical_parameters = c
-        self._quantum_parameters = q
-
     def call(self, *args, **kwargs):
         """
         Create a :class:`GateStatement` that calls this gate.
@@ -168,7 +104,62 @@ class GateDefinition(AbstractGate):
     Represents a gate that's implemented by a pulse sequence in a gate definition file.
     """
 
-    pass
+    @property
+    def ideal_unitary(self):
+        """
+        Returns the ideal unitary action of the gate on its target qubits.
+
+        Takes as parameters all classical arguments.
+        """
+        return self._ideal_unitary
+
+    def _ideal_unitary_pygsti(self, parms):
+        """
+        Returns the ideal unitary action of the gate on its target qubits.
+
+        Takes as a parameter: a list of all classical arguments.
+
+        Is compatible with pygsti's build_from_parameterization
+        nonstd_gate_unitaries parameters.
+        """
+        if parms:
+            return self._ideal_unitary(*parms)
+        else:
+            import numpy
+
+            return numpy.identity(2 ** len(self.quantum_parameters))
+
+    @property
+    def used_qubits(self):
+        """Return the parameters in this gate that are qubits. Subclasses may
+        return the special symbol `all` indicating they operate on all
+        qubits. Otherwise this is identical to quantum_parameters."""
+        for p in self._parameters:
+            try:
+                if not p.classical:
+                    yield p
+            except JaqalError:
+                # This happens if we don't have a real gate definition.
+                # Lean on the upper layers being able to infer the type.
+                yield p
+
+    @property
+    def quantum_parameters(self):
+        """The parameters that are qubits."""
+        try:
+            return [param for param in self.parameters if not param.classical]
+        except JaqalError:
+            pass
+        raise JaqalError("Gate {self.name} has a parameter with unknown type")
+
+    @property
+    def classical_parameters(self):
+        """The parameters that are not qubits."""
+        try:
+            return [param for param in self.parameters if param.classical]
+        except JaqalError:
+            pass
+        raise JaqalError("Gate {self.name} has a parameter with unknown type")
 
 
 class IdleGateDefinition(GateDefinition):
@@ -189,7 +180,7 @@ class IdleGateDefinition(GateDefinition):
         if parent._ideal_unitary:
             import numpy
 
-            return lambda: numpy.identity(2 ** parent.quantum_parameters)
+            return lambda: numpy.identity(2 ** len(parent.quantum_parameters))
         else:
             return None
 

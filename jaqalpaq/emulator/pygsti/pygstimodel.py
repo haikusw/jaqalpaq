@@ -15,7 +15,7 @@ def build_noiseless_native_model(
         name = f"G{g.name.lower()}"
         gate_names.append(name)
 
-        if g.quantum_parameters == 0:
+        if len(g.quantum_parameters) == 0:
             # AER: We are special casing prepare and measurements right now
             if g.name in ("prepare_all", "measure_all"):
                 unitaries[name] = np.identity(2)
@@ -23,12 +23,12 @@ def build_noiseless_native_model(
                 raise JaqalError(f"{g.name} not supported")
             continue
 
-        if g.classical_parameters > 0:
-            unitaries[name] = g.ideal_unitary_pygsti
+        if len(g.classical_parameters) > 0:
+            unitaries[name] = g._ideal_unitary_pygsti
         else:
             unitaries[name] = g.ideal_unitary()
 
-        if g.quantum_parameters > 1:
+        if len(g.quantum_parameters) > 1:
             availability[name] = "all-permutations"
 
     fundamental_registers = [r for r in registers.values() if r._alias_from is None]
