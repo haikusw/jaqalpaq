@@ -1,0 +1,21 @@
+from qscout.v1.std usepulses *
+
+register q[2]
+
+prepare_all
+loop 2 <
+Sx q[0]
+Sx q[1]
+>
+measure_all
+
+
+// EXPECTED MEASUREMENTS
+// 11 3 0
+
+// EXPECTED PROBABILITIES
+// SUBEXPERIMENT 0
+// 00 0 1.5192908393215678e-64
+// 10 1 4.930380657631324e-32
+// 01 2 2.4651903288156613e-32
+// 11 3 1.0
