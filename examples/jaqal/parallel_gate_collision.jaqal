@@ -1,0 +1,13 @@
+from qscout.v1.std usepulses *
+
+register q[2]
+
+prepare_all
+<
+    Px q[0]
+    Px q[0]
+>
+measure_all
+
+// EXPECTED ERROR
+// jaqalpaq.error.JaqalError: Parallel branches of block acting on the same qubit.

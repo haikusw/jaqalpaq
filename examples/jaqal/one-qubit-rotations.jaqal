@@ -15,7 +15,7 @@ Ry q[0] 1.234
 measure_all
 
 prepare_all
-Sx q[0] 
+Sx q[0]
 Rz q[0] 1.234
 Sxd q[0]
 measure_all
@@ -33,7 +33,7 @@ Ry q[0] 0.321168
 measure_all
 
 prepare_all
-Sx q[0] 
+Sx q[0]
 Rz q[0] 0.215873
 Sxd q[0]
 measure_all

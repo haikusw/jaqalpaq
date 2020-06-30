@@ -14,3 +14,6 @@ loop 8 {
 
 Sy q[0]
 measure_all
+
+// EXPECTED ERROR
+// jaqalpaq.error.JaqalError: measure_all -> prepare_all not supported in loops

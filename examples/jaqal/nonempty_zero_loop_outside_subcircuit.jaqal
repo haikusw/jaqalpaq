@@ -1,0 +1,13 @@
+from qscout.v1.std usepulses *
+
+register q[1]
+
+loop 0 {
+Px q[0]
+}
+
+prepare_all
+measure_all
+
+// EXPECTED ERROR
+// jaqalpaq.error.JaqalError: gates must follow a prepare_all
