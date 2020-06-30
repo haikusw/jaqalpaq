@@ -8,3 +8,6 @@ loop 2 <
 Sx q[1]>
 >
 measure_all
+
+// EXPECTED ERROR
+// jaqalpaq.parser.tree.JaqalParseError

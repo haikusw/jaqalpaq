@@ -8,3 +8,6 @@ Px q[0]
 }
 >
 measure_all
+
+// EXPECTED ERROR
+// jaqalpaq.parser.tree.JaqalParseError
