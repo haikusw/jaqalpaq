@@ -18,12 +18,6 @@ class ParamType(enum.Enum, metaclass=ParamMeta):
     REGISTER = enum.auto()
     INT = enum.auto()
 
-    def __str__(self):
-        if self == ParamType.NONE:
-            return "None"
-        else:
-            return super().__str__(self).lower()
-
     @classmethod
     def make(cls, obj):
         """Create a new ParamType or raise a JaqalError if not possible."""

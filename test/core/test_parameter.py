@@ -1,5 +1,6 @@
 import unittest
 
+from jaqalpaq import JaqalError
 from jaqalpaq.core.parameter import ParamType
 
 from jaqalpaq.core.register import Register, NamedQubit
@@ -86,3 +87,22 @@ class ParameterTester(unittest.TestCase):
                     param[0]
                 with self.assertRaises(Exception):
                     param[0:1]
+
+
+class ParamTypeTester(unittest.TestCase):
+    def test_types(self):
+        """Test the types property that excludes the NONE item"""
+        for typ in ParamType:
+            if typ != ParamType.NONE:
+                self.assertIn(typ, ParamType.types)
+            else:
+                self.assertNotIn(typ, ParamType.types)
+        for typ in ParamType.types:
+            self.assertIn(typ, ParamType)
+
+    def test_make(self):
+        """Test that the make classmethod raises a JaqalError or does the same
+        as the __call__ classmethod."""
+
+        with self.assertRaises(JaqalError):
+            ParamType.make("nonsense")
