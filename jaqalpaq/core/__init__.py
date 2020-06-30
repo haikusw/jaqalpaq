@@ -1,5 +1,5 @@
 from .block import BlockStatement, LoopStatement
-from .circuit import ScheduledCircuit
+from .circuit import Circuit
 from .constant import Constant
 from .gate import GateStatement
 from .gatedef import AbstractGate, GateDefinition
@@ -20,7 +20,7 @@ from .circuitbuilder import (
 __all__ = [
     "BlockStatement",
     "LoopStatement",
-    "ScheduledCircuit",
+    "Circuit",
     "Constant",
     "GateStatement",
     "AbstractGate",

@@ -54,7 +54,7 @@ class UsedQubitTester(unittest.TestCase):
 
     def test_circuit(self):
         # This doesn't fully exercise everything, like macros
-        circuit = core.ScheduledCircuit()
+        circuit = core.Circuit()
         block = common.make_random_block()
         circuit.body.statements.extend(block.statements)
         exp_qubits = self.make_exp_qubits_from_block(block)

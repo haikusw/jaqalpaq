@@ -1,4 +1,4 @@
-"""Expand all macros in place in a ScheduledCircuit."""
+"""Expand all macros in place in a Circuit."""
 
 from typing import Dict
 
@@ -10,7 +10,7 @@ import jaqalpaq.core as core
 def expand_macros(circuit):
     """Expand macros in the given circuit.
 
-    :param circuit: The ScheduledCircuit to expand macros in.
+    :param circuit: The Circuit to expand macros in.
 
     :returns: A new, normalized circuit. Although the circuit will be
     new, it may share structure with the input circuit, thus the input
@@ -28,12 +28,12 @@ class MacroExpander(Visitor):
         copied."""
         return obj
 
-    def visit_ScheduledCircuit(self, circuit):
-        """Return a new ScheduledCircuit with the same metadata and normalized
+    def visit_Circuit(self, circuit):
+        """Return a new Circuit with the same metadata and normalized
         gates."""
 
         self.macros = circuit.macros
-        new_circuit = core.circuit.ScheduledCircuit(native_gates=circuit.native_gates)
+        new_circuit = core.circuit.Circuit(native_gates=circuit.native_gates)
         new_circuit.constants.update(circuit.constants)
         new_circuit.registers.update(circuit.registers)
         new_circuit.body.statements.extend(self.visit(circuit.body).statements)

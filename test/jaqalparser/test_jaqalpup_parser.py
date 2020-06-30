@@ -4,7 +4,7 @@ from numbers import Number
 from jaqalpaq.core import (
     GateDefinition,
     Register,
-    ScheduledCircuit,
+    Circuit,
     Parameter,
     BlockStatement,
     LoopStatement,
@@ -325,7 +325,7 @@ class ParserTester(TestCase):
 
     @staticmethod
     def make_circuit(*, gates, registers=None, macros=None, constants=None, maps=None):
-        circuit = ScheduledCircuit()
+        circuit = Circuit()
         for gate in gates:
             circuit.body.statements.append(gate)
         if registers:

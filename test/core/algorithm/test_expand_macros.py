@@ -58,7 +58,7 @@ class ExpandMacrosTester(unittest.TestCase):
     def test_reject_wrong_argument_count(self):
         macro = build(("macro", "foo", "a", ("sequential_block", ("gate", "bar", "a"))))
         gate = build(("gate", "foo", -1, -2))
-        circuit = core.ScheduledCircuit()
+        circuit = core.Circuit()
         circuit.macros[macro.name] = macro
         circuit.body.statements.append(gate)
         with self.assertRaises(JaqalError):

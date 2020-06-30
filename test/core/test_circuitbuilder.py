@@ -206,7 +206,7 @@ class BuildTester(unittest.TestCase):
             ("register", "r", 3),
             ("gate", "foo", ("array_item", "r", 0)),
         )
-        circuit: core.ScheduledCircuit = build(sexpr)
+        circuit: core.Circuit = build(sexpr)
         exp_value = circuit.registers["r"][0]
         act_value = circuit.body.statements[0].parameters["p0"]
         self.assertEqual(exp_value, act_value)
@@ -284,7 +284,7 @@ class BuildTester(unittest.TestCase):
         x = Constant("x", 0)
         foo = core.Macro("foo", parameters=[Parameter("a", None)])
         foo.body.statements.append(gate_def(Parameter("a", None)))
-        exp_value = core.ScheduledCircuit(native_gates=native_gates)
+        exp_value = core.Circuit(native_gates=native_gates)
         exp_value.registers[r.name] = r
         exp_value.registers[q.name] = q
         exp_value.constants[x.name] = x

@@ -33,7 +33,7 @@ class UsedQubitIndicesVisitor(Visitor):
             self.merge_into(indices, self.visit(sub_obj, context=context))
         return indices
 
-    def visit_ScheduledCircuit(self, obj, context=None):
+    def visit_Circuit(self, obj, context=None):
         return self.visit(obj.body, context=context)
 
     def visit_GateStatement(self, obj, context=None):

@@ -8,7 +8,7 @@ import jaqalpaq.core as core
 def fill_in_let(circuit, override_dict=None):
     """Fill in the value in a let-statement directly into the circuit.
 
-    :param ScheduledCircuit circuit: The circuit to fill in let
+    :param Circuit circuit: The circuit to fill in let
     statement constants.
     :param dict override_dict: A dictionary mapping strings to ints or floats to use instead of the values in the Jaqal file.
 
@@ -35,8 +35,8 @@ class LetFiller(Visitor):
         mostly scalar arguments to gates."""
         return obj
 
-    def visit_ScheduledCircuit(self, circuit):
-        """Return a new ScheduledCircuit with all Constants replaced in the
+    def visit_Circuit(self, circuit):
+        """Return a new Circuit with all Constants replaced in the
         body. The new circuit will retain the same information in the
         circuit.constants attribute."""
         body = self.visit(circuit.body)

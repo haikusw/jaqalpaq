@@ -109,7 +109,7 @@ def convert_to_circuit(tree, inject_pulses=None, autoload_pulses=False):
     :param tree: A parse tree.
     :param inject_pulses: If given, use these pulses specifically.
     :param bool autoload_pulses: Whether to employ the usepulses statement for parsing.  Requires appropriate gate definitions.
-    :return: A ScheduledCircuit object that faithfully represents the input.
+    :return: A Circuit object that faithfully represents the input.
     """
     visitor = CoreTypesVisitor(
         inject_pulses=inject_pulses, autoload_pulses=autoload_pulses

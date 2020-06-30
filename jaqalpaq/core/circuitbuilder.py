@@ -6,7 +6,7 @@ from .macro import Macro
 from .register import Register, NamedQubit
 from .gate import GateStatement
 from .gatedef import GateDefinition, AbstractGate
-from .circuit import ScheduledCircuit, normalize_native_gates
+from .circuit import Circuit, normalize_native_gates
 from .parameter import Parameter
 from .block import BlockStatement, LoopStatement
 
@@ -96,7 +96,7 @@ class Builder:
         return gate_context
 
     def build_circuit(self, sexpression, context, gate_context):
-        """Build a ScheduledCircuit object."""
+        """Build a Circuit object."""
         # registers also include register aliases defined with the map statement
         registers = {}
         constants = {}
@@ -128,7 +128,7 @@ class Builder:
             else:
                 raise JaqalError(f"Cannot process object {obj} at circuit level")
 
-        circuit = ScheduledCircuit(native_gates=native_gates)
+        circuit = Circuit(native_gates=native_gates)
         circuit.registers.update(registers)
         circuit.constants.update(constants)
         circuit.macros.update(macros)
@@ -382,7 +382,7 @@ class BlockBuilder(BuilderBase):
         :param bool no_duplicate: If True, only add this gate if it is not a duplicate of the gate to go right before
         it (or it is the first gate).
 
-        Note: The old ScheduledCircuit also included a build_gate that did not add the gate. However this was only
+        Note: The old Circuit also included a build_gate that did not add the gate. However this was only
         used to add a gate to a block inside of a circuit. Since we now allow adding directly to blocks, there
         is no longer a need for this method.
         """
@@ -451,7 +451,7 @@ class ParallelBlockBuilder(BlockBuilder):
 
 class CircuitBuilder(BlockBuilder):
     """Object-oriented interface to the build() command. Build up a circuit from its components and the create a full
-    ScheduledCircuit on demand.
+    Circuit on demand.
 
     Unlike in legal Jaqal, we allow intermixing of body and header statements.
     """

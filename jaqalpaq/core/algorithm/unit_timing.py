@@ -33,11 +33,11 @@ class BlockNormalizer(Visitor):
         copied."""
         return obj
 
-    def visit_ScheduledCircuit(self, circuit):
-        """Return a new ScheduledCircuit with the same metadata and normalized
+    def visit_Circuit(self, circuit):
+        """Return a new Circuit with the same metadata and normalized
         gates."""
 
-        new_circuit = core.circuit.ScheduledCircuit(native_gates=circuit.native_gates)
+        new_circuit = core.circuit.Circuit(native_gates=circuit.native_gates)
         new_circuit.constants.update(circuit.constants)
         new_circuit.macros.update(circuit.macros)
         new_circuit.registers.update(circuit.registers)
