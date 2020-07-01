@@ -9,7 +9,7 @@ class BlockStatement:
     """
 
     def __init__(self, parallel=False, statements=None):
-        self.parallel = parallel
+        self._parallel = bool(parallel)
         if statements is None:
             self._statements = []
         else:
@@ -25,6 +25,11 @@ class BlockStatement:
             )
         except AttributeError:
             return False
+
+    @property
+    def parallel(self):
+        """True if this is a parallel block, False if sequential."""
+        return self._parallel
 
     @property
     def statements(self):
@@ -60,7 +65,7 @@ class LoopStatement:
     """
 
     def __init__(self, iterations, statements=None):
-        self.iterations = iterations
+        self._iterations = iterations
         if statements is None:
             self._statements = BlockStatement()
         else:
@@ -77,6 +82,12 @@ class LoopStatement:
             )
         except AttributeError:
             return False
+
+    @property
+    def iterations(self):
+        """The number of times this Loop will be executed. May be an integer
+        or a let constant or a Macro parameter."""
+        return self._iterations
 
     @property
     def statements(self):

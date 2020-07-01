@@ -369,7 +369,12 @@ class SExpression:
 
 class BuilderBase:
     def __init__(self, name):
-        self.expression = [name]
+        self._expression = [name]
+
+    @property
+    def expression(self):
+        """Return the expression being built, as a list."""
+        return self._expression
 
     def build(self, native_gates=None):
         return build(self.expression, native_gates)
