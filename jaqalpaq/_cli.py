@@ -1,6 +1,4 @@
 import sys, argparse, time
-import numpy.random
-from jaqalpaq.parser import parse_jaqal_string
 
 
 def main(argv=sys.argv[1:]):
@@ -84,10 +82,11 @@ def main(argv=sys.argv[1:]):
     else:
         txt = sys.stdin.read()
 
-    from .noiseless import run_jaqal_file, run_jaqal_circuit
-    from ._validator import validate_jaqal_string, generate_jaqal_validation
-    from jaqalpaq.parser import parse_jaqal_string
-    from jaqalpaq.core.result import ExecutionResult
+    import numpy.random
+    from .emulator.noiseless import run_jaqal_file, run_jaqal_circuit
+    from .emulator._validator import validate_jaqal_string, generate_jaqal_validation
+    from .parser import parse_jaqal_string
+    from .core.result import ExecutionResult
 
     try:
         seed = int(ns.seed[0])
