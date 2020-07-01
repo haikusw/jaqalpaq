@@ -18,3 +18,4 @@ Subpackages
    jaqalpaq.core
    jaqalpaq.generator
    jaqalpaq.parser
+   jaqalpaq.emulator
