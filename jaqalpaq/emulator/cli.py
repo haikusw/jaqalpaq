@@ -1,4 +1,5 @@
-import sys, argparse
+import sys, argparse, time
+import numpy.random
 from jaqalpaq.parser import parse_jaqal_string
 
 
@@ -56,6 +57,14 @@ def main(argv=sys.argv[1:]):
         action="store_true",
         help="Automatically invoke the post-mortem debugger on exception",
     )
+    parser.add_argument(
+        "--random-seed",
+        "-r",
+        default=(int(time.time()),),
+        dest="seed",
+        nargs=1,
+        help="Choose the random seed that numpy uses. Defaults to the current time.",
+    )
 
     ns = parser.parse_args(argv)
     try:
@@ -79,6 +88,14 @@ def main(argv=sys.argv[1:]):
     from ._validator import validate_jaqal_string, generate_jaqal_validation
     from jaqalpaq.parser import parse_jaqal_string
     from jaqalpaq.core.result import ExecutionResult
+
+    try:
+        seed = int(ns.seed[0])
+    except ValueError:
+        print("Invalid random seed provided.  Must be an integer.")
+        return 2
+
+    numpy.random.seed(seed)
 
     if ns.validate:
         try:

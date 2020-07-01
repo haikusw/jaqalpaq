@@ -25,6 +25,14 @@ class EmulatorWalker(SubcircuitsVisitor):
 def generate_probabilities(exe_res, *, prob_kwargs=None):
     """Attaches noiseless result probablities to an execution result object.
 
+    **NOTE**: Random seed is controlled by numpy.random.seed.  Consider calling
+
+    ```
+    numpy.random.seed(int(time.time()))
+    ```
+
+    for random behavior.
+
     :param exe_res: The execution result object to process.
     :param prob_kwargs: [undocumented] arguments to pass to subexperiment_probabilities
 
@@ -42,6 +50,14 @@ def generate_probabilities(exe_res, *, prob_kwargs=None):
 
 def run_jaqal_circuit(circ):
     """Execute a Jaqal Circuit in a noiseless emulator.
+
+    **NOTE**: Random seed is controlled by numpy.random.seed.  Consider calling
+
+    ```
+    numpy.random.seed(int(time.time()))
+    ```
+
+    for random behavior.
 
     :param circ: a Jaqalpaq Circuit object to be run.
 
@@ -66,6 +82,14 @@ def run_jaqal_circuit(circ):
 def run_jaqal_string(jaqal):
     """Execute a Jaqal string in a noiseless emulator.
 
+    **NOTE**: Random seed is controlled by numpy.random.seed.  Consider calling
+
+    ```
+    numpy.random.seed(int(time.time()))
+    ```
+
+    for random behavior.
+
     :param jaqal: The literal Jaqal program, in a string.
 
     :return: An ExecutionResult object.
@@ -77,6 +101,13 @@ def run_jaqal_string(jaqal):
 def run_jaqal_file(fname):
     """Execute a Jaqal program in a file in a noiseless emulator.
 
+    **NOTE**: Random seed is controlled by numpy.random.seed.  Consider calling
+
+    ```
+    numpy.random.seed(int(time.time()))
+    ```
+
+    for random behavior.
     :param fname: a string containing a path of a Jaqal file to execute
 
     :return: An ExecutionResult object.
