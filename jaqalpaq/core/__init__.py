@@ -11,7 +11,6 @@ from .parameter import (
 )
 from .register import Register, NamedQubit
 from .circuitbuilder import (
-    build,
     CircuitBuilder,
     SequentialBlockBuilder,
     ParallelBlockBuilder,
@@ -31,7 +30,6 @@ __all__ = [
     "Parameter",
     "Register",
     "NamedQubit",
-    "build",
     "CircuitBuilder",
     "SequentialBlockBuilder",
     "ParallelBlockBuilder",

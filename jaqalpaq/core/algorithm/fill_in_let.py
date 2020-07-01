@@ -52,7 +52,7 @@ class LetFiller(Visitor):
             *statements,
         ]
         inject_pulses = circuit.native_gates or None
-        return core.build(sexpr, inject_pulses=inject_pulses)
+        return core.circuitbuilder.build(sexpr, inject_pulses=inject_pulses)
 
     def visit_BlockStatement(self, block):
         if block.parallel:
