@@ -134,12 +134,38 @@ def main(argv=sys.argv[1:]):
             return 1
 
     if not ns.suppress:
-        exe = run_jaqal_circuit(circ)
+        try:
+            exe = run_jaqal_circuit(circ)
+        except Exception as ex:
+            if ns.debug:
+                import pdb, traceback
+
+                traceback.print_exc()
+                _, _, tb = sys.exc_info()
+                pdb.post_mortem(tb)
+                return 1
+            else:
+                print(f"Error during execution: {type(ex).__name__}: {ex}")
+                return 1
+
         if ns.output != "validation":
             print("\n".join(exe.output(fmt="str")), flush=True)
         out = sys.stderr
     else:
-        exe = ExecutionResult(circ)
+        try:
+            exe = ExecutionResult(circ)
+        except Exception as ex:
+            if ns.debug:
+                import pdb, traceback
+
+                traceback.print_exc()
+                _, _, tb = sys.exc_info()
+                pdb.post_mortem(tb)
+                return 1
+            else:
+                print(f"Error during execution: {type(ex).__name__}: {ex}")
+                return 1
+
         out = sys.stdout
 
     if ns.output == "validation":
