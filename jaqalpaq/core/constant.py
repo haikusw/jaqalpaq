@@ -4,7 +4,7 @@ from jaqalpaq import JaqalError
 
 class Constant(AnnotatedValue):
     """
-    Bases: :class:`qscout.core.AnnotatedValue`
+    Bases: :class:`AnnotatedValue`
 
     Represents a Jaqal let statement.
 
@@ -54,7 +54,7 @@ class Constant(AnnotatedValue):
 
     def resolve_value(self, context=None):
         """
-        Overrides: :meth:`qscout.core.AnnotatedValue.resolve_value`
+        Overrides: :meth:`AnnotatedValue.resolve_value`
 
         Unlike the superclass, ignores the context and simply returns the fixed value of
         the constant.

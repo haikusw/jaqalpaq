@@ -14,7 +14,7 @@ class Circuit:
     Represents an entire quantum program.
 
     :param native_gates: Set these gates as the native gates to be used in this
-        circuit. If not given, use the QSCOUT native gate set.
+        circuit. If not given, gate definitions are automatically generated.
     :type native_gates: Optional[dict] or Optional[list]
 
     """  # TODO: Flesh this out more, explain how it's used and how it maps to the structure of a Jaqal file.
