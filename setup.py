@@ -85,5 +85,5 @@ setup(
         "Operating System :: Unix",
     ],
     cmdclass={"build_sphinx": DoBuildDoc},
-    entry_points={"console_scripts": ["jaqal = jaqalpaq._cli:main"],},
+    entry_points={"console_scripts": ["jaqal-emulate = jaqalpaq._cli:main"],},
 )

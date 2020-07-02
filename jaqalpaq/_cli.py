@@ -3,7 +3,8 @@ import sys, argparse, time
 
 def main(argv=sys.argv[1:]):
     parser = argparse.ArgumentParser(
-        prog="jaqal", description="Execute a Jaqal program via noiseless emulator"
+        prog="jaqal-emulate",
+        description="Execute a Jaqal program via noiseless emulator",
     )
     parser.add_argument(
         "filename",
