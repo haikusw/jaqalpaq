@@ -38,9 +38,7 @@ class AbstractGate:
 
     @property
     def name(self):
-        """
-        The name of the gate.
-        """
+        """The name of the gate."""
         return self._name
 
     @property
@@ -113,21 +111,15 @@ class GateDefinition(AbstractGate):
 
     @property
     def ideal_unitary(self):
-        """
-        Returns the ideal unitary action of the gate on its target qubits.
-
-        Takes as parameters all classical arguments.
-        """
+        """The ideal unitary action of the gate on its target qubits"""
         return self._ideal_unitary
 
     def _ideal_unitary_pygsti(self, parms):
-        """
-        Returns the ideal unitary action of the gate on its target qubits.
+        """Ideal unitary action of the gate with pyGSTi special casing.
 
-        Takes as a parameter: a list of all classical arguments.
-
-        Is compatible with pygsti's build_from_parameterization
-        nonstd_gate_unitaries parameters.
+        :param parms: A list of all classical arguments to the gate.
+        :return: The ideal unitary action of the gate on its target qubits, or an
+            identity gate on the target qubit.
         """
         if parms:
             return self._ideal_unitary(*parms)
@@ -192,6 +184,7 @@ class IdleGateDefinition(GateDefinition):
 
     @property
     def _ideal_unitary(self):
+        """A unitary acting on the same qubits as the parent gate."""
         parent = self._parent_def
         if parent._ideal_unitary:
             import numpy
@@ -202,6 +195,10 @@ class IdleGateDefinition(GateDefinition):
 
     @property
     def used_qubits(self):
+        """Iterates over the qubits used by an idle gate: nothing.
+
+        The idle operation does not act on any qubits.
+        """
         yield from ()
 
 
@@ -218,6 +215,13 @@ class BusyGateDefinition(GateDefinition):
 
 
 def add_idle_gates(active_gates):
+    """Augments a list of gates with associated idle gates.
+
+    :param active_gates: A list of GateDefinition objects representing the active gates
+      available.
+    :return:  A list of GateDefinitions including both the active gates passed, and their
+      associated idle gates.
+    """
     gates = []
     for g in active_gates:
         gates.append(g)
