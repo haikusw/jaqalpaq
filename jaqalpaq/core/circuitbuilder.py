@@ -14,21 +14,24 @@ from jaqalpaq import JaqalError
 
 
 def build(expression, inject_pulses=None, autoload_pulses=False):
-    """Given an expression in a specific format, return the appropriate type, recursively constructed, from the core
-    types library.
+    """Given an expression in a specific format, return the appropriate type, recursively
+    constructed, from the core types library.
 
-    :param expression: A tuple or list acting like an S-expression. Also accepts core types and just returns them.
+    :param expression: A tuple or list acting like an S-expression. Also accepts core
+        types and just returns them.
     :param inject_pulses: If given, use these pulses specifically.
-    :param bool autoload_pulses: Whether to employ the usepulses statement for parsing.  Requires appropriate gate definitions.
+    :param bool autoload_pulses: Whether to employ the usepulses statement for parsing.
+        Requires appropriate gate definitions.
 
     :return: An appropriate core type object.
     :raises JaqalError: If an undefined identifier is used.
     :raises JaqalError: If an s-expression not of the following forms is given.
     :raises JaqalError: If the same name is defined twice.
 
-    Each expression must be an s-expression where the first element defines the type and the rest of the elements define
-    the arguments. The signatures are as follows where the first element is before the colon and the remaining are
-    space separated after the colon.
+    Each expression must be an s-expression where the first element defines the type and
+    the rest of the elements define the arguments. The signatures are as follows where
+    the first element is before the colon and the remaining are space separated after the
+    colon.
 
     circuit : \*elements
     macro : \*parameter_names block
@@ -41,11 +44,13 @@ def build(expression, inject_pulses=None, autoload_pulses=False):
     parallel_block : \*statements
     array_item : identifier index
 
-    In lieu of an s-expression, the appropriate type from the core library will also be accepted. This allows the user
-    to build up new expressions using partially built old ones.
+    In lieu of an s-expression, the appropriate type from the core library will also be
+    accepted. This allows the user to build up new expressions using partially built old
+    ones.
 
-    Note: jaqalpaq partially supports qualified namespaces in identifiers. This function assumes all
-    identifiers are one string, that is they are multiple legal identifiers joined by periods.
+    Note: jaqalpaq partially supports qualified namespaces in identifiers. This function
+    assumes all identifiers are one string, that is they are multiple legal identifiers
+    joined by periods.
 
     """
 
@@ -226,8 +231,9 @@ class Builder:
         return gate_def(*built_args)
 
     def get_gate_definition(self, name, arg_count, gate_context):
-        """Return the definition for the given gate. If no such definition exists, and we aren't requiring all gates
-        to be a native gate or macro, then create a new definition and return it."""
+        """Return the definition for the given gate. If no such definition exists, and we
+        aren't requiring all gates to be a native gate or macro, then create a new
+        definition and return it."""
         if name in gate_context:
             gate_def = gate_context[name]
             if not isinstance(gate_def, AbstractGate):
@@ -324,8 +330,9 @@ def as_integer(value):
 class SExpression:
     """Represent an s-expression as used internally in the builder object.
 
-    By processing the expression and not directly using the tuple or list we give ourselves the opportunity to do things
-    like add lisp-style keyword arguments or do other things without breaking existing code.
+    By processing the expression and not directly using the tuple or list we give
+    ourselves the opportunity to do things like add lisp-style keyword arguments or do
+    other things without breaking existing code.
     """
 
     @classmethod
@@ -371,7 +378,8 @@ class SExpression:
 
 
 class BlockBuilder:
-    """Base class for several other builder objects. Stores statements and other blocks in a block."""
+    """Base class for several other builder objects. Stores statements and other blocks
+    in a block."""
 
     def __init__(self, name):
         self._expression = [name]
@@ -404,12 +412,14 @@ class BlockBuilder:
 
         :param str name: The name of the gate.
         :param args: Any arguments to the gate.
-        :param bool no_duplicate: If True, only add this gate if it is not a duplicate of the gate to go right before
-        it (or it is the first gate).
+        :param bool no_duplicate: If True, only add this gate if it is not a duplicate of
+            the gate to go right before it (or it is the first gate).
 
-        Note: The old Circuit also included a build_gate that did not add the gate. However this was only
-        used to add a gate to a block inside of a circuit. Since we now allow adding directly to blocks, there
-        is no longer a need for this method.
+        .. note::
+            The old Circuit also included a build_gate that did not add the gate.
+            However this was only used to add a gate to a block inside of a circuit.
+            Since we now allow adding directly to blocks, there is no longer a need for
+            this method.
         """
         # Note: the gate expression will accept both core types and other s-expressions.
         gate_expression = ("gate", name, *args)
@@ -418,11 +428,12 @@ class BlockBuilder:
         self.expression.append(gate_expression)
 
     def block(self, parallel=False):
-        """Create, add, and return a new block builder to the statements stored in this block. Although it is not legal
-        in Jaqal to nest blocks of the same type (except at top level), this builder ignores that restriction.
+        """Create, add, and return a new block builder to the statements stored in this
+        block. Although it is not legal in Jaqal to nest blocks of the same type (except
+        at top level), this builder ignores that restriction.
 
-        To create a block builder without adding it to this block, use the appropriate class constructor directly. This
-        is useful when creating a macro or loop.
+        To create a block builder without adding it to this block, use the appropriate
+        class constructor directly. This is useful when creating a macro or loop.
 
         :param parallel: Set to False (default) for a sequential block, True for a
             parallel block.
@@ -436,19 +447,21 @@ class BlockBuilder:
         return builder
 
     def loop(self, iterations, block, unevaluated=False):
-        """
-        Creates a new :class:`LoopStatement` object, and adds it to the end of this block.
+        """Creates a new :class:`LoopStatement` object, and adds it to the end of this
+        block.
 
         :param int iterations: How many times to repeat the loop.
-        :param block: The contents of the loop. If a :class:`BlockStatement` is passed, it will
-            be used as the loop's body; otherwise, a new :class:`BlockStatement` will be
-            created with the list of instructions passed. A :class:`BlockBuilder` may also be passed.
+        :param block: The contents of the loop. If a :class:`BlockStatement` is passed,
+            it will be used as the loop's body; otherwise, a new :class:`BlockStatement`
+            will be created with the list of instructions passed. A :class:`BlockBuilder`
+            may also be passed.
         :type block: BlockStatement, BlockBuilder, or list
         :param bool unevaluated: If False, do not create a Register object to return.
         :returns: The new loop.
 
         .. warning::
-            If a :class:`BlockStatement` or :class:`BlockBuilder` is passed for ``gates``, then ``parallel`` will be ignored!
+            If a :class:`BlockStatement` or :class:`BlockBuilder` is passed for ``gates``,
+            then ``parallel`` will be ignored!
         """
 
         if isinstance(block, BlockBuilder):
@@ -482,8 +495,8 @@ class UnscheduledBlockBuilder(BlockBuilder):
 
 
 class CircuitBuilder(BlockBuilder):
-    """Object-oriented interface to the build() command. Build up a circuit from its components and then create a full
-    Circuit on demand.
+    """Object-oriented interface to the build() command. Build up a circuit from its
+    components and then create a full Circuit on demand.
 
     Unlike in legal Jaqal, we allow intermixing of body and header statements.
     """
@@ -522,8 +535,9 @@ class CircuitBuilder(BlockBuilder):
 
     def let(self, name, value, unevaluated=False):
         """
-        Creates a new :class:`Constant`, mapping the given name to the given value, and adds it to
-        the circuit. Equivalent to the Jaqal header statement :samp:`let {name} {value}`.
+        Creates a new :class:`Constant`, mapping the given name to the given value, and
+        adds it to the circuit. Equivalent to the Jaqal header statement
+        :samp:`let {name} {value}`.
 
         :param str name: The name of the new constant.
         :param value: The numeric value of the new constant.
@@ -547,7 +561,8 @@ class CircuitBuilder(BlockBuilder):
         :param str name: The name of the new register.
         :param source: The source register to map the new register onto, or its name.
         :type source: Register or str
-        :param idxs: Which qubits in the source register to map. If None, map the entire register.
+        :param idxs: Which qubits in the source register to map. If None, map the entire
+            register.
         :type idxs: slice, int, AnnotatedValue, str, or None
         :param bool unevaluated: If False, do not create a Register object to return.
         :returns: The new register.
@@ -572,11 +587,13 @@ class CircuitBuilder(BlockBuilder):
         :param str name: The name of the macro.
         :param list parameters: What arguments (numbers, qubits, etc) the macro should be
             called with. If None, the macro takes no parameters.
-        :param body: What statements the macro expands to when called. This may also be a BlockBuilder.
+        :param body: What statements the macro expands to when called. This may also be a
+            BlockBuilder.
         :param bool unevaluated: If False, do not create a Macro object to return.
         :returns: The new macro.
         :rtype: Macro
-        :raises JaqalError: if the name of the macro or any of its parameters is invalid (see :meth:`validate_identifier`).
+        :raises JaqalError: if the name of the macro or any of its parameters is invalid
+            (see :meth:`validate_identifier`).
         """
 
         parameters = parameters or []

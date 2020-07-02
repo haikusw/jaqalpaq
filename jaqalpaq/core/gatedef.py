@@ -6,11 +6,16 @@ from .gate import GateStatement
 
 class AbstractGate:
     """
-    The abstract base class for gate definitions. Everything here can be used whether the gate is defined by a macro in Jaqal, or is a gate defined by a pulse sequence in a gate definition file.
+    The abstract base class for gate definitions. Everything here can be used whether the
+    gate is defined by a macro in Jaqal, or is a gate defined by a pulse sequence in a
+    gate definition file.
 
     :param str name: The name of the gate.
-    :param parameters: What arguments (numbers, qubits, etc) the gate should be called with. If None, the gate takes no parameters.
-    :param function ideal_unitary: A function mapping a list of all classical arguments to a numpy 2D array representation of the gate's ideal action in the computational basis.
+    :param parameters: What arguments (numbers, qubits, etc) the gate should be called
+        with. If None, the gate takes no parameters.
+    :param function ideal_unitary: A function mapping a list of all classical arguments to
+        a numpy 2D array representation of the gate's ideal action in the computational
+        basis.
     :type parameters: list(Parameter) or None
     """
 
@@ -59,7 +64,8 @@ class AbstractGate:
         :rtype: GateStatement
         :raises JaqalError: If both keyword and positional arguments are passed.
         :raises JaqalError: If the wrong number of arguments are passed.
-        :raises JaqalError: If the parameter names don't match the parameters this gate takes.
+        :raises JaqalError: If the parameter names don't match the parameters this gate
+            takes.
         """
         params = OrderedDict()
         if args and not kwargs:
