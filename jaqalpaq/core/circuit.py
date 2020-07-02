@@ -26,7 +26,7 @@ class Circuit:
     :type native_gates: Optional[dict] or Optional[list]
     :raises JaqalError: If `native_gates` is a dict and any gate's name doesn't match its
         dictionary key.
-    :raises JaqalError: If any of the `native_gates` aren't :class:`GateDefinition`s; for
+    :raises JaqalError: If any of the `native_gates` aren't :class:`GateDefinition`.  For
         example, if a macro is passed as a native gate.
 
     """

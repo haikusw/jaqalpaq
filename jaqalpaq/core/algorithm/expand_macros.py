@@ -13,8 +13,8 @@ def expand_macros(circuit):
     :param circuit: The Circuit to expand macros in.
 
     :returns: A new, normalized circuit. Although the circuit will be
-    new, it may share structure with the input circuit, thus the input
-    should not be changed.
+        new, it may share structure with the input circuit, thus the input
+        should not be changed.
 
     """
 

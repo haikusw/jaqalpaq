@@ -8,13 +8,12 @@ import jaqalpaq.core as core
 def fill_in_let(circuit, override_dict=None):
     """Fill in the value in a let-statement directly into the circuit.
 
-    :param Circuit circuit: The circuit to fill in let
-    statement constants.
-    :param dict override_dict: A dictionary mapping strings to ints or floats to use instead of the values in the Jaqal file.
+    :param Circuit circuit: The circuit to fill in let statement constants.
+    :param dict override_dict: A dictionary mapping strings to ints or floats to use
+        instead of the values in the Jaqal file.
 
-    :returns: A new, normalized circuit. Although the circuit will be
-    new, it may share structure with the input circuit, thus the input
-    should not be changed.
+    :returns: A new, normalized circuit. Although the circuit will be new, it may share
+        structure with the input circuit, thus the input should not be changed.
     """
 
     visitor = LetFiller(override_dict)
