@@ -1,7 +1,7 @@
 """Python tools for Jaqal"""
 
 import sys
-from setuptools import setup
+from setuptools import setup, find_packages
 import os, shutil
 from os.path import dirname, join
 
@@ -57,13 +57,7 @@ setup(
     version=version,
     author="Benjamin C. A. Morrison, Jay Wesley Van Der Wall, Daniel Lobser, Antonio Russo, Kenneth Rudinger, Peter Maunz",
     author_email="qscout@sandia.gov",
-    packages=[
-        "jaqalpaq",
-        "jaqalpaq.core",
-        "jaqalpaq.generator",
-        "jaqalpaq.parser",
-        "jaqalpaq.emulator",
-    ],
+    packages=find_packages(include=["jaqalpaq", "jaqalpaq.*"]),
     package_dir={"": "."},
     install_requires=["lark-parser"],
     extras_require={
