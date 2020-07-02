@@ -367,7 +367,9 @@ class SExpression:
 #
 
 
-class BuilderBase:
+class BlockBuilder:
+    """Base class for several other builder objects. Stores statements and other blocks in a block."""
+
     def __init__(self, name):
         self._expression = [name]
 
@@ -376,15 +378,21 @@ class BuilderBase:
         """Return the expression being built, as a list."""
         return self._expression
 
-    def build(self, native_gates=None):
-        return build(self.expression, native_gates)
+    def build(self, inject_pulses=None, autoload_pulses=False):
+        """Create a circuit.
 
+        :param inject_pulses: If given, use these pulses specifically.
+        :param bool autoload_pulses: Whether to employ the usepulses statement for
+          parsing.  Requires appropriate gate definitions.
 
-class BlockBuilder(BuilderBase):
-    """Base class for several other builder objects. Stores statements and other blocks in a block."""
+        :return: An appropriate core type object.
 
-    def __init__(self, name):
-        super().__init__(name)
+        """
+        return build(
+            self.expression,
+            inject_pulses=inject_pulses,
+            autoload_pulses=autoload_pulses,
+        )
 
     def gate(self, name, *args, no_duplicate=False):
         """Add a gate to this block.
