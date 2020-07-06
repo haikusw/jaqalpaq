@@ -967,6 +967,13 @@ class TreeRewriteVisitor(ParseTreeVisitor, TreeManipulators):
 
 
 class JaqalParseError(JaqalError):
+    """
+    Bases: :exc:`jaqalpaq.JaqalError`
+
+    Represents parse errors, with :attr:`line` and :attr:`column` properties denoting
+    where in the input the error occurred.
+    """
+
     def __init__(self, message, line, column):
         self.message = message
         self.line = line

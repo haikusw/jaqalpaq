@@ -43,14 +43,24 @@ class GateStatement:
 
     @property
     def name(self):
+        """
+        The name of the gate being called.
+        """
         return self._gate_def.name
 
     @property
     def gate_def(self):
+        """
+        The :class:`GateDefinition` of the gate being called.
+        """
         return self._gate_def
 
     @property
     def used_qubits(self):
+        """
+        An iterator over the qubits acted on by this gate statement. This may
+        include the special symbol `all` indicating the gate operates on all qubits.
+        """
         for param in self.gate_def.used_qubits:
             if param is all:
                 yield all

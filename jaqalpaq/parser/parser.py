@@ -19,8 +19,9 @@ def parse_jaqal_file(
     """Parse a file written in Jaqal into core types.
 
     :param str filename: The name of the Jaqal file.
-    :param dict[str, float] override_dict:  An optional dictionary that overrides let statements in the Jaqal code.
+    :param override_dict:  An optional dictionary that overrides let statements in the Jaqal code.
         Note: all keys in this dictionary must exist as let statements or an error will be raised.
+    :type override_dict: dict[str, float]
     :param bool expand_macro: Replace macro invocations by their body while parsing.
     :param bool expand_let: Replace let constants by their value while parsing.
     :param bool expand_let_map: Replace let constants and mapped qubits while parsing. expand_let is ignored if this is True.
@@ -59,8 +60,9 @@ def parse_jaqal_string(
     """Parse a string written in Jaqal into core types.
 
     :param str jaqal: The Jaqal code.
-    :param dict[str, float] override_dict:  An optional dictionary that overrides let statements in the Jaqal code.
+    :param override_dict:  An optional dictionary that overrides let statements in the Jaqal code.
         Note: all keys in this dictionary must exist as let statements or an error will be raised.
+    :type override_dict: dict[str, float]
     :param bool expand_macro: Replace macro invocations by their body while parsing.
     :param bool expand_let: Replace let constants by their value while parsing.
     :param bool expand_let_map: Replace let constants and mapped qubits while parsing. expand_let is ignored if this is True.

@@ -7,11 +7,15 @@ from jaqalpaq.error import JaqalError
 
 def get_used_qubit_indices(obj, context=None):
     """Recursively find all qubits used in this object.
+
     :param obj: The instruction to query; defaults to the entire circuit.
     :type obj: BlockStatement or None
-    :param context: If using this method to inspect an instruction in a macro call, provides information about the current scope. Unless you know precisely what you're doing, you should most likely omit this.
+    :param context: If using this method to inspect an instruction in a macro call,
+        provides information about the current scope. Unless you know precisely what
+        you're doing, you should most likely omit this.
     :type context: dict
-    :returns: A dict mapping fundamental register names to sets of the indices within those registers which are used by the instruction.
+    :returns: A dict mapping fundamental register names to sets of the indices within
+        those registers which are used by the instruction.
     """
 
     visitor = UsedQubitIndicesVisitor()

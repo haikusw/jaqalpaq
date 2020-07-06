@@ -452,16 +452,12 @@ class BlockBuilder:
 
         :param int iterations: How many times to repeat the loop.
         :param block: The contents of the loop. If a :class:`BlockStatement` is passed,
-            it will be used as the loop's body; otherwise, a new :class:`BlockStatement`
-            will be created with the list of instructions passed. A :class:`BlockBuilder`
-            may also be passed.
-        :type block: BlockStatement, BlockBuilder, or list
-        :param bool unevaluated: If False, do not create a Register object to return.
+            it will be used as the loop's body. A :class:`BlockBuilder` may also be
+            passed, in which case the block it builds will be used as the loop's body.
+        :type block: BlockStatement, BlockBuilder
+        :param bool unevaluated: If False, do not create a LoopStatement object to return.
         :returns: The new loop.
-
-        .. warning::
-            If a :class:`BlockStatement` or :class:`BlockBuilder` is passed for ``gates``,
-            then ``parallel`` will be ignored!
+        :rtype: LoopStatement
         """
 
         if isinstance(block, BlockBuilder):
@@ -470,6 +466,7 @@ class BlockBuilder:
         if not unevaluated:
             loop = build(loop)
         self.expression.append(loop)
+        return loop
 
 
 class SequentialBlockBuilder(BlockBuilder):
@@ -518,7 +515,7 @@ class CircuitBuilder(BlockBuilder):
         """
         Allocates a new fundamental :class:`Register` of the given size, adding it to the
         circuit under the given name. Equivalent to the Jaqal header statement
-        :samp:`reg {name}[{size}]`.
+        :samp:`register {name}[{size}]`.
 
         :param str name: The name of the register.
         :param int size: How many qubits are in the register.

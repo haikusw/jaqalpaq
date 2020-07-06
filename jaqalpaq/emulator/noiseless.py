@@ -31,10 +31,10 @@ def generate_probabilities(exe_res, *, prob_kwargs=None):
     The sub-experiments of exe_res learn their noiseless result probabilities.
 
     .. note::
-        Random seed is controlled by numpy.random.seed.  Consider calling
-        ```
-        numpy.random.seed(int(time.time()))
-        ```
+        Random seed is controlled by numpy.random.seed.  Consider calling ::
+
+            numpy.random.seed(int(time.time()))
+
         for random behavior.
 
     """
@@ -55,10 +55,10 @@ def run_jaqal_circuit(circ):
     :return: An ExecutionResult object.
 
     .. note::
-        Random seed is controlled by numpy.random.seed.  Consider calling
-        ```
-        numpy.random.seed(int(time.time()))
-        ```
+        Random seed is controlled by numpy.random.seed.  Consider calling ::
+
+            numpy.random.seed(int(time.time()))
+
         for random behavior.
 
     """
@@ -85,10 +85,10 @@ def run_jaqal_string(jaqal):
     :return: An ExecutionResult object.
 
     .. note::
-        Random seed is controlled by numpy.random.seed.  Consider calling
-        ```
-        numpy.random.seed(int(time.time()))
-        ```
+        Random seed is controlled by numpy.random.seed.  Consider calling ::
+
+            numpy.random.seed(int(time.time()))
+
         for random behavior.
 
     """
@@ -103,10 +103,10 @@ def run_jaqal_file(fname):
     :return: An ExecutionResult object.
 
     .. note::
-        Random seed is controlled by numpy.random.seed.  Consider calling
-        ```
-        numpy.random.seed(int(time.time()))
-        ```
+        Random seed is controlled by numpy.random.seed.  Consider calling ::
+
+            numpy.random.seed(int(time.time()))
+
         for random behavior.
 
     """

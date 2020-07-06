@@ -74,7 +74,7 @@ class Circuit:
     @property
     def registers(self):
         """Read-only access to a dictionary mapping names to :class:`Register`
-        objects, corresponding to ``reg`` and ``map`` statements in the header of a Jaqal
+        objects, corresponding to ``register`` and ``map`` statements in the header of a Jaqal
         file."""
         return self._registers
 
@@ -86,7 +86,7 @@ class Circuit:
 
     def fundamental_registers(self):
         """
-        :returns: all of the circuit's registers that correspond to ``reg`` statements, that is, all those that are not aliases for some other register.
+        :returns: all of the circuit's registers that correspond to ``register`` statements, that is, all those that are not aliases for some other register.
         :rtype: list(Register)
         """
         return [r for r in self.registers.values() if r.fundamental]

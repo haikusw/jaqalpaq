@@ -10,13 +10,13 @@ from .constant import Constant
 
 class Register:
     """
-    Represents a qubit register, whether defined by a reg statement or a map
+    Represents a qubit register, whether defined by a register statement or a map
     statement. Can be indexed into (but not sliced) to obtain a specific :class:`NamedQubit`
     from the register.
 
     :param str name: The name by which the register can be referenced.
-    :param size: If the register is a fundamental register (defined by a reg statement),
-        specifies how many qubits are allocated for it. Must be omitted for
+    :param size: If the register is a fundamental register (defined by a register
+        statement), specifies how many qubits are allocated for it. Must be omitted for
         non-fundamental registers.
     :type size: int or None
     :param alias_from: If the register is defined by a map statement, specifies which
@@ -126,8 +126,8 @@ class Register:
     @property
     def fundamental(self):
         """
-        True if the register is defined by a reg statement, False if it's mapped from some
-        other register.
+        True if the register is defined by a register statement, False if it's mapped from
+        some other register.
         """
         return self.alias_from is None
 
@@ -313,7 +313,7 @@ class NamedQubit:
     @property
     def fundamental(self):
         """
-        Always false, because single qubits cannot be defined with reg statements.
+        Always false, because single qubits cannot be defined with register statements.
         """
         return False
 

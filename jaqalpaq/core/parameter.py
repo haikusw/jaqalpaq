@@ -109,8 +109,8 @@ class Parameter(AnnotatedValue):
     Represents a parameter that a gate or macro accepts. In addition to the functionality
     of the base class, it also supports type-checking. Furthermore, it can be indexed and
     sliced, if it represents a :class:`Register` parameter. Thus, it can be used within
-    the body of a macro exactly as if it were a register defined by a ``map`` or ``reg``
-    statement.
+    the body of a macro exactly as if it were a register defined by a ``map`` or
+    ``register`` statement.
     """
 
     def validate(self, value):
