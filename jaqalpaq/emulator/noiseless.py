@@ -25,8 +25,10 @@ class EmulatorWalker(SubcircuitsVisitor):
 def generate_probabilities(exe_res, *, prob_kwargs=None):
     """Attaches noiseless result probablities to an execution result object.
 
-    :param exe_res: The execution result object to process.
-    :param prob_kwargs: [undocumented] arguments to pass to subexperiment_probabilities
+    :param ExecutionResult exe_res: The execution result object to process.
+    :param prob_kwargs: Optional (undocumented) arguments to pass to
+        :meth:`subexperiment_probabilities`.
+    :type prob_kwargs: dict or None
 
     The sub-experiments of exe_res learn their noiseless result probabilities.
 
@@ -48,11 +50,11 @@ def generate_probabilities(exe_res, *, prob_kwargs=None):
 
 
 def run_jaqal_circuit(circ):
-    """Execute a Jaqal Circuit in a noiseless emulator.
+    """Execute a Jaqal :class:`Circuit` in a noiseless emulator.
 
-    :param circ: a Jaqalpaq Circuit object to be run.
+    :param Circuit circ: The Jaqalpaq circuit to be run.
 
-    :return: An ExecutionResult object.
+    :returns: An :class:`ExecutionResult` object.
 
     .. note::
         Random seed is controlled by numpy.random.seed.  Consider calling ::
@@ -80,9 +82,9 @@ def run_jaqal_circuit(circ):
 def run_jaqal_string(jaqal):
     """Execute a Jaqal string in a noiseless emulator.
 
-    :param jaqal: The literal Jaqal program, in a string.
+    :param str jaqal: The literal Jaqal program text.
 
-    :return: An ExecutionResult object.
+    :returns: An :class:`ExecutionResult` object.
 
     .. note::
         Random seed is controlled by numpy.random.seed.  Consider calling ::
@@ -98,9 +100,9 @@ def run_jaqal_string(jaqal):
 def run_jaqal_file(fname):
     """Execute a Jaqal program in a file in a noiseless emulator.
 
-    :param fname: a string containing a path of a Jaqal file to execute
+    :param str fname: The path to a Jaqal file to execute.
 
-    :return: An ExecutionResult object.
+    :returns: An :class:`ExecutionResult` object.
 
     .. note::
         Random seed is controlled by numpy.random.seed.  Consider calling ::
