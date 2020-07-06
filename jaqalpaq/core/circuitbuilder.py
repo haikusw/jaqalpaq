@@ -414,12 +414,6 @@ class BlockBuilder:
         :param args: Any arguments to the gate.
         :param bool no_duplicate: If True, only add this gate if it is not a duplicate of
             the gate to go right before it (or it is the first gate).
-
-        .. note::
-            The old Circuit also included a build_gate that did not add the gate.
-            However this was only used to add a gate to a block inside of a circuit.
-            Since we now allow adding directly to blocks, there is no longer a need for
-            this method.
         """
         # Note: the gate expression will accept both core types and other s-expressions.
         gate_expression = ("gate", name, *args)
