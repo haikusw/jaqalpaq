@@ -87,7 +87,6 @@ def main(argv=sys.argv[1:]):
     from .emulator.noiseless import run_jaqal_file, run_jaqal_circuit
     from .emulator._validator import validate_jaqal_string, generate_jaqal_validation
     from .parser import parse_jaqal_string
-    from .core.result import ExecutionResult
 
     try:
         seed = int(ns.seed[0])
@@ -153,7 +152,8 @@ def main(argv=sys.argv[1:]):
         out = sys.stderr
     else:
         try:
-            exe = ExecutionResult(circ)
+            # We do not yet have a mechanism to extract only probabilities
+            exe = run_jaqal_circuit(circ)
         except Exception as ex:
             if ns.debug:
                 import pdb, traceback
