@@ -59,10 +59,10 @@ def main(argv=sys.argv[1:]):
     parser.add_argument(
         "--random-seed",
         "-r",
-        default=(int(time.time()),),
+        default=(int(10 * time.time()) % (2 ** 32),),
         dest="seed",
         nargs=1,
-        help="Choose the random seed that numpy uses. Defaults to the current time.",
+        help="Choose the random seed that numpy uses. Defaults to a function of the current time.",
     )
 
     ns = parser.parse_args(argv)
