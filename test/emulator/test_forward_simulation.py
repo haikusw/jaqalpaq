@@ -1,18 +1,27 @@
 import unittest, pytest
+import os
 
 import jaqalpaq
 from jaqalpaq.core.circuitbuilder import CircuitBuilder
 import numpy as np
-from jaqalpaq.emulator import run_jaqal_string, run_jaqal_circuit
+from jaqalpaq.emulator import run_jaqal_string, run_jaqal_circuit, run_jaqal_file
 from jaqalpaq.generator import generate_jaqal_program
 import jaqalpaq.parser
 from jaqalpaq.core.circuit import normalize_native_gates
 from jaqalpaq.core.result import ExecutionResult, parse_jaqal_output_list
 from collections import OrderedDict
+from jaqalpaq.emulator._validator import (
+    generate_jaqal_validation,
+    validate_jaqal_string,
+)
 
 qscout = pytest.importorskip("qscout")
 
 from qscout.v1 import native_gates
+
+
+def example(*args):
+    return os.path.join("examples", "jaqal", *args)
 
 
 class ForwardSimulatorTester(unittest.TestCase):
@@ -406,3 +415,18 @@ loop 2 {
         self.assertEqual(true_output, [o.as_str for o in results.measurements])
         self.assertEqual(true_output, [o.as_str for o in exe.measurements])
         # self.assertEqual(true_output, [o.as_str for o in exe_reuse.measurements])
+
+    def test_load_jaqal_file(self):
+        fname = example("sequential_block_in_parallel_loop.jaqal")
+        exe = run_jaqal_file(fname)
+        newval = generate_jaqal_validation(exe)
+
+        with open(fname, "r") as f:
+            txt = [a for a in f.readlines() if a[:2] != "//"]
+
+        txt.append(newval)
+        txt = "".join(txt)
+
+        res = validate_jaqal_string(txt)
+
+        self.assertEqual(res, ["measurements agree", "probabilities agree"])
