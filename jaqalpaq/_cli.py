@@ -27,7 +27,7 @@ def main(argv=sys.argv[1:]):
         default=None,
         nargs="?",
         const="str",
-        help="Print distribution probabilities of outcomes to stderr.  Listed in lexical order.  Takes optional argument FORMAT `str` to print bitstrings, and `int` to print probabilities in integer order of outcomes, little-endian encoded. If set, defaults to `str`.",
+        help="Print distribution probabilities of outcomes to stderr.  Listed in lexical order.  Takes optional argument FORMAT `str` to print bitstrings, and `int` to print probabilities in a list, in integer order of outcomes, little-endian encoded. If set, defaults to `str`.  Ignored CUTOFF",
     )
     parser.add_argument(
         "--cutoff",
@@ -179,7 +179,7 @@ def main(argv=sys.argv[1:]):
         probs = []
         for ptm_circuit in exe.ptm_circuits:
             if ns.probs == "int":
-                probs.append(ptm_circuit.probabilities)
+                probs.append(list(ptm_circuit.probabilities))
                 continue
 
             prob = ptm_circuit.probabilities_strdict
@@ -188,7 +188,6 @@ def main(argv=sys.argv[1:]):
             probs.append(prob)
 
         if ns.output == "json":
-            # This should be identical to python for our use case.
             import json
 
             print(json.dumps(probs), file=out)
