@@ -201,5 +201,7 @@ def main(argv=sys.argv[1:]):
                     print("\n".join(f"{o}: {p}" for o, p in enumerate(prob)), file=out)
                 else:
                     print("\n".join(f"{o}: {p}" for o, p in prob.items()), file=out)
+            if len(probs) == 0:
+                print("WARNING: No measurements made")
         else:
             assert False
