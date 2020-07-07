@@ -62,7 +62,7 @@ setup(
     install_requires=["lark-parser"],
     extras_require={
         "tests": ["pytest"],
-        "docs": ["sphinx"],
+        "docs": ["sphinx", "sphinx-rtd-theme"],
         "pygsti-integration": ["pygsti"],
     },
     python_requires=">=3.6.5",
