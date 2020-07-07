@@ -1,24 +1,76 @@
-# Python Jaqal Programming Package (JaqalPaq)
-This is the part of QSCOUT's software stack that fits above the Jaqal level. Everything here should eventually output Jaqal. This is the place for compilation, compatibility, scheduling, and so forth.
-Key components that we should provide:
-* One or more higher-level internal representations. (Possibly one scheduled and one unscheduled?)
-* The ability to unambiguously output that internal representation to Jaqal.
-* The ability to automatically schedule gates in an efficient (but not necessarily optimal) manner given an unscheduled program.
-* The ability to decompose arbitrary unitary operations into native ion-trap gates.
-* The ability to convert the data structures used by many other quantum software toolchains to our internal representation. Ideally this will include:
-    * IBM's Qiskit/OpenQASM
-    * Rigetti's Quil/pyquil/quilc
-    * Google's Cirq
-    * Microsoft's Q#
-    * ETH Zurich's ProjectQ
-    * CQC's t|ket>
-* Extensions to some or all of the above toolchains to properly support ion-based quantum computation, as needed.
+JaqalPaq 1.0.0-beta
+---
 
-To make the software stack as modular as possible, and incidentally also decrease the risk of circular dependencies, we should follow the following philosophy of dependencies:
-* Any file at the top-level of the module should depend on only other files at the top-level.
-* Any file in the `jaqalpaq.core` submodule can depend on top-level files and other files in `jaqalpaq.core`.
-* Any file in another submodule can depend on top-level files, files from `jaqalpaq.core`, and other files in the same submodule.
-* Each submodule should function correctly even if every submodule other than that one and `jaqalpaq.core` were removed.
-* External dependencies may be required by the `jaqalpaq` package as a whole, or be required by only a single submodule.
-For example, each external toolchain's Python API, if one exists, should be required only by the compatibility module for that toolchain; but `numpy` is a reasonable requirement for the package as a whole.
-If an external toolchain's Python API is missing, the function of the rest of the software stack should be unaffected.
+
+# JaqalPaq
+
+JaqalPaq is a python package used to parse, manipulate, emulate, and generate quantum assembly code written in [Jaqal](https://qscout.sandia.gov/jaqal) (Just another quantum assembly language).  JaqalPaq can be installed with optional transpilers that convert code written in other quantum assembly languages to a version of Jaqal whose native gates are relevant for [QSCOUT](https://qscout.sandia.gov/) (Quantum Scientific Computing Open User Testbed).
+
+## Installation
+
+JaqalPaq is available on [GitLab](https://gitlab.com/jaqalpaq).  Use the package manager [pip](https://pip.pypa.io/en/stable/) to install it.
+
+```bash
+pip install jaqalpaq
+```
+
+To install the optional transpiler suite, use the following:
+
+```bash
+pip install jaqalpaq-extras
+```
+
+The JaqalPaq emulator can be programmed to emulate any native gate set.  However, it only comes bundled with an emulator for [QSCOUT](https://qscout.sandia.gov/) native operations, which are modeled as pure-state preparations, unitary transformations, and destructive measurements.  To install this capability, use the following:
+
+```bash
+pip install qscout-gatemodels
+```
+
+## Usage
+
+The following simple example is from ```examples/usage_example.py```
+
+
+```python
+import jaqalpaq
+from jaqalpaq.parser import parse_jaqal_file
+from jaqalpaq.emulator import run_jaqal_circuit
+from jaqalpaq.generator import generate_jaqal_program
+
+JaqalCircuitObject = parse_jaqal_file("jaqal/Sxx_circuit.jaqal")
+JaqalCircuitResults = run_jaqal_circuit(JaqalCircuitObject)
+print(f"Probabilities: {JaqalCircuitResults.subcircuits[0].probability_by_str}")
+JaqalProgram = generate_jaqal_program(JaqalCircuitObject)
+```
+
+The Jaqal file processed by this example, ```examples/jaqal/Sxx_circuit.jql```, is
+
+```python
+from qscout.v1.std usepulses *
+
+register q[2]
+
+prepare_all
+Sxx q[1] q[0]
+measure_all
+```
+
+More extensive examples, including detailed Jupyter notebooks implementing the variational quantum eigensolver (VQE) quantum algorithm for some simple molecules, can be found in the ```examples``` directory.
+
+For information on the JaqalPaq emulator's command-line interface, run the following in your shell:
+
+```bash
+jaqal-emulate --help
+```
+
+## Documentation
+
+Online documentation is hosted on [Read the Docs](https://jaqalpaq.readthedocs.io).
+
+
+## License
+[Apache 2.0](https://choosealicense.com/licenses/apache-2.0/)
+
+## Questions?
+
+For help and support, please contact [qscout@sandia.gov](mailto:qscout@sandia.gov).
