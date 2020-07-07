@@ -42,7 +42,7 @@ def generate_jaqal_validation(exe):
     emit("// EXPECTED MEASUREMENTS")
     emit(
         "\n".join(
-            " ".join(("//", mr.as_str, str(mr.as_int), str(mr.ptm_index),))
+            " ".join(("//", mr.as_str, str(mr.as_int), str(mr.ptm_circuit.index),))
             for mr in exe.measurements
         )
     )
@@ -172,7 +172,7 @@ def validate_jaqal_string(txt):
         for n, t_str in enumerate(true_str_list):
             assertEqual(t_str, exe.measurements[n].as_str)
             assertEqual(true_int_list[n], exe.measurements[n].as_int)
-            assertEqual(subexp_list[n], exe.measurements[n].ptm_index)
+            assertEqual(subexp_list[n], exe.measurements[n].ptm_circuit.index)
         validated.append("measurements agree")
 
     if "str_prob" in expected:

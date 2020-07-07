@@ -71,12 +71,6 @@ class MeasurementResult:
         return self._ptm_circuit
 
     @property
-    def ptm_index(self):
-        """The lexicographical index of the prepare_all/measure_all block in the parent
-        circuit"""
-        return self.ptm_circuit.index
-
-    @property
     def as_int(self):
         """The measured result encoded as a little-endian integer"""
         return self._result
@@ -85,6 +79,9 @@ class MeasurementResult:
     def as_str(self):
         """The measured result encoded as a string of qubit values"""
         return f"{self._result:b}".zfill(len(self.ptm_circuit.measured_qubits))[::-1]
+
+    def __repr__(self):
+        return f"<{type(self).__name__} {self.as_str}>"
 
 
 class PTMCircuit:
@@ -111,6 +108,9 @@ class PTMCircuit:
     def measured_qubits(self):
         """An ist of the qubits that are measured, in their display order."""
         return self._subcircuit.used_qubits
+
+    def __repr__(self):
+        return f"<{type(self).__name__}@{self._subcircuit.end}>"
 
 
 class ProbabilisticPTMCircuit(PTMCircuit):
