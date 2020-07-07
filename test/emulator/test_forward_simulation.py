@@ -7,7 +7,7 @@ from jaqalpaq.emulator import run_jaqal_string, run_jaqal_circuit
 from jaqalpaq.generator import generate_jaqal_program
 import jaqalpaq.parser
 from jaqalpaq.core.circuit import normalize_native_gates
-from jaqalpaq.core.result import ExecutionResult
+from jaqalpaq.core.result import ExecutionResult, parse_jaqal_output_list
 from collections import OrderedDict
 
 qscout = pytest.importorskip("qscout")
@@ -55,7 +55,7 @@ measure_all
                 "\n".join(("from qscout.v1.std usepulses *", self.jaqal_string))
             )
 
-            c_dict = res.probabilities(0, fmt="str")
+            c_dict = res.ptm_circuits[0].probabilities_strdict
             self.assertAlmostEqual(c_dict["000"], 0.5)
             self.assertAlmostEqual(c_dict["001"], 0)
             self.assertAlmostEqual(c_dict["010"], 0)
@@ -95,7 +95,7 @@ measure_all
             jaqal_text, inject_pulses=normalize_native_gates(native_gates.NATIVE_GATES)
         )
         res = run_jaqal_circuit(jaqal_prog)
-        output_probs = res.probabilities(0, fmt="str")
+        output_probs = res.ptm_circuits[0].probabilities_strdict
         self.assertAlmostEqual(output_probs["00000"], 0.5)
         self.assertAlmostEqual(output_probs["11111"], 0.5)
 
@@ -138,7 +138,7 @@ cnot q[0] q[1]
 measure_all
 """
         results = jaqalpaq.emulator.run_jaqal_string(jaqal_str)
-        probs = results.probabilities(0)
+        probs = results.ptm_circuits[0].probabilities_strdict
         true_probs = OrderedDict({"00": 0.5, "01": 0, "10": 0, "11": 0.5})
         for key in true_probs:
             self.assertAlmostEqual(probs[key], true_probs[key])
@@ -208,7 +208,7 @@ measure_all
 """
         results = jaqalpaq.emulator.run_jaqal_string(jaqal_str)
         prob_dicts = {
-            i: results.probabilities(i) for i in range(len(results.subexperiments))
+            i: p.probabilities_strdict for i, p in enumerate(results.ptm_circuits)
         }
         true_prob_dicts = {
             0: OrderedDict([("0", 1.0), ("1", 0.0)]),
@@ -221,7 +221,7 @@ measure_all
             7: OrderedDict([("0", 0.5), ("1", 0.5)]),
             8: OrderedDict([("0", 0.0), ("1", 1.0)]),
         }
-        for i in range(len(results.subexperiments)):
+        for i in range(len(results.ptm_circuits)):
             for key in true_prob_dicts[i].keys():
                 self.assertAlmostEqual(prob_dicts[i][key], true_prob_dicts[i][key])
 
@@ -242,7 +242,7 @@ Px q[1]
 }
 """
         results = jaqalpaq.emulator.run_jaqal_string(jaqal_str)
-        output = results.output()
+        output = [o.as_str for o in results.measurements]
         true_output = ["10", "10", "01", "01"]
         self.assertEqual(output, true_output)
 
@@ -269,25 +269,25 @@ Px q[2]
 measure_all
 """
         results = jaqalpaq.emulator.run_jaqal_string(jaqal_str)
-        output = results.output()
-        int_output = results.output(fmt="int")
+        output = [o.as_str for o in results.measurements]
+        int_output = [o.as_int for o in results.measurements]
         true_output = ["100", "010", "010", "100", "010", "010", "001"]
         true_int_output = [1, 2, 2, 1, 2, 2, 4]
         self.assertEqual(output, true_output)
         self.assertEqual(int_output, true_int_output)
 
-        int_output = results.output(s_idx=0, fmt="int")
-        output = results.output(s_idx=0)
+        int_output = [o.as_int for o in results.ptm_circuits[0].measurements]
+        output = [o.as_str for o in results.ptm_circuits[0].measurements]
         self.assertEqual(int_output, [1, 1])
         self.assertEqual(output, ["100", "100"])
 
-        int_output = results.output(s_idx=1, fmt="int")
-        output = results.output(s_idx=1)
+        int_output = [o.as_int for o in results.ptm_circuits[1].measurements]
+        output = [o.as_str for o in results.ptm_circuits[1].measurements]
         self.assertEqual(int_output, [2, 2, 2, 2])
         self.assertEqual(output, ["010", "010", "010", "010"])
 
-        int_output = results.output(s_idx=2, fmt="int")
-        output = results.output(s_idx=2)
+        int_output = [o.as_int for o in results.ptm_circuits[2].measurements]
+        output = [o.as_str for o in results.ptm_circuits[2].measurements]
         self.assertEqual(int_output, [4])
         self.assertEqual(output, ["001"])
 
@@ -317,7 +317,7 @@ measure_all
 
         results = jaqalpaq.emulator.run_jaqal_string(jaqal_str)
         prob_dicts = {
-            i: results.probabilities(i) for i in range(len(results.subexperiments))
+            i: p.probabilities_strdict for i, p in enumerate(results.ptm_circuits)
         }
         true_prob_dicts = {
             0: OrderedDict([("0", 0.9975923633363278), ("1", 0.0024076366636721458)]),
@@ -325,7 +325,7 @@ measure_all
             2: OrderedDict([("0", 0.978470167862337), ("1", 0.02152983213766301)]),
             3: OrderedDict([("0", 0.9619397662553992), ("1", 0.03806023374460075)]),
         }
-        for i in range(len(results.subexperiments)):
+        for i in range(len(results.ptm_circuits)):
             for key in true_prob_dicts[i].keys():
                 self.assertAlmostEqual(prob_dicts[i][key], true_prob_dicts[i][key])
 
@@ -363,7 +363,7 @@ loop 2 {
         }
 """
         results = jaqalpaq.emulator.run_jaqal_string(jaqal_str)
-        output = results.output()
+        output = [o.as_str for o in results.measurements]
         true_output = [
             "1000",
             "1100",
@@ -400,8 +400,9 @@ loop 2 {
 
         parsed_jaqal_str = jaqalpaq.parser.parse_jaqal_string(jaqal_str)
 
-        exe_reuse = ExecutionResult(results, output=true_output)
-        exe = ExecutionResult(parsed_jaqal_str, output=true_output)
-        self.assertEqual(true_output, results.output())
-        self.assertEqual(true_output, exe.output())
-        self.assertEqual(true_output, exe_reuse.output())
+        # We do not yet support reuse
+        # exe_reuse = parse_jaqal_output_list(results._circuit, true_output)
+        exe = parse_jaqal_output_list(parsed_jaqal_str, true_output)
+        self.assertEqual(true_output, [o.as_str for o in results.measurements])
+        self.assertEqual(true_output, [o.as_str for o in exe.measurements])
+        # self.assertEqual(true_output, [o.as_str for o in exe_reuse.measurements])

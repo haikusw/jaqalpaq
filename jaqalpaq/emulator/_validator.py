@@ -42,24 +42,17 @@ def generate_jaqal_validation(exe):
     emit("// EXPECTED MEASUREMENTS")
     emit(
         "\n".join(
-            " ".join(
-                (
-                    "//",
-                    exe.output(n),
-                    str(exe.output(n, fmt="int")),
-                    str(exe.get_s_idx(n)),
-                )
-            )
-            for n in range(exe.output_len)
+            " ".join(("//", mr.as_str, str(mr.as_int), str(mr.ptm_index),))
+            for mr in exe.measurements
         )
     )
 
     emit("\n// EXPECTED PROBABILITIES")
 
-    for s_idx, se in enumerate(exe.subexperiments):
-        emit(f"// SUBEXPERIMENT {s_idx}")
+    for ptm_index, se in enumerate(exe.ptm_circuits):
+        emit(f"// SUBEXPERIMENT {ptm_index}")
         for (n, ((s, ps), p)) in enumerate(
-            zip(exe.probabilities(s_idx).items(), exe.probabilities(s_idx, fmt="int"),)
+            zip(se.probabilities_strdict.items(), se.probabilities)
         ):
             assert ps == p
             emit(f"// {s} {n} {p}")
@@ -145,6 +138,12 @@ def parse_jaqal_validation(txt):
 
 
 def validate_jaqal_string(txt):
+    """[undocumented] validate a Jaqal program with validation comments
+
+    :param txt: a full Jaqal program, possibly with validation comments
+    :return: a list of validations performed
+
+    """
     expected = parse_jaqal_validation(txt)
 
     if "error" in expected:
@@ -167,28 +166,30 @@ def validate_jaqal_string(txt):
         true_int_list = expected["true_int_list"]
         subexp_list = expected["subexp_list"]
 
-        assertEqual(true_str_list, exe.output())
-        assertEqual(true_int_list, exe.output(fmt="int"))
+        assertEqual(true_str_list, [a.as_str for a in exe.measurements])
+        assertEqual(true_int_list, [a.as_int for a in exe.measurements])
 
         for n, t_str in enumerate(true_str_list):
-            assertEqual(t_str, exe.output(n))
-            assertEqual(true_int_list[n], exe.output(n, fmt="int"))
-            assertEqual(subexp_list[n], exe.get_s_idx(n))
+            assertEqual(t_str, exe.measurements[n].as_str)
+            assertEqual(true_int_list[n], exe.measurements[n].as_int)
+            assertEqual(subexp_list[n], exe.measurements[n].ptm_index)
         validated.append("measurements agree")
 
     if "str_prob" in expected:
         str_prob = expected["str_prob"]
-        for s_idx in range(len(exe.subexperiments)):
+        for n, act_P in enumerate(exe.ptm_circuits):
+            exp_P = str_prob[n]
             for (ka, va), (kb, vb) in zip(
-                str_prob[s_idx].items(), exe.probabilities(s_idx, fmt="str").items()
+                exp_P.items(), act_P.probabilities_strdict.items()
             ):
                 assertEqual(ka, kb)
                 assertAlmostEqual(va, vb)
 
         int_prob = expected["int_prob"]
-        for s_idx in range(len(exe.subexperiments)):
+        for n, act_P in enumerate(exe.ptm_circuits):
+            exp_P = int_prob[n]
             for (ka, va), (kb, vb) in zip(
-                int_prob[s_idx].items(), enumerate(exe.probabilities(s_idx, fmt="int")),
+                exp_P.items(), enumerate(act_P.probabilities),
             ):
                 assertEqual(ka, kb)
                 assertAlmostEqual(va, vb)

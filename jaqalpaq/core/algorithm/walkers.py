@@ -1,4 +1,5 @@
 from collections import defaultdict
+from itertools import chain
 
 from .used_qubit_visitor import UsedQubitIndicesVisitor
 from .visitor import Visitor
@@ -7,15 +8,16 @@ from jaqalpaq.core.block import BlockStatement, LoopStatement
 
 
 class Subcircuit:
-    """Describes start and stop location in a Circuita"""
+    """Describes start and stop location in a Circuit"""
 
-    def __init__(self, start=None, end=None):
+    def __init__(self, start=None, end=None, used_qubits=None):
         if start is None:
             self.start = []
         else:
             self.start = start
 
         self.end = end
+        self.used_qubits = used_qubits
 
     def __repr__(self):
         if self.end is None:
@@ -97,8 +99,8 @@ class SubcircuitSerializer(Visitor):
         return None
 
 
-class DiscoverSubexperiments(UsedQubitIndicesVisitor):
-    """Walks a Circuit, identifying subexperiments bounded by prepare_all and measure_all"""
+class DiscoverPTMCircuits(UsedQubitIndicesVisitor):
+    """Walks a Circuit, identifying subcircuits bounded by prepare_all and measure_all"""
 
     # While this *is* the behavior of DiscoverSubexperiments,
     # this flag does nothing.
@@ -113,6 +115,11 @@ class DiscoverSubexperiments(UsedQubitIndicesVisitor):
         self.m_gate = m_gate
 
     def visit_Circuit(self, circuit, context=None):
+        # All qubits will be used in every subcircuit, because it is bounded by
+        # prepare_all and measure_all.  In the future, we presumably will employ the used
+        # qubit functionality of the superclass, and separately report the measured
+        # qubits.  But we do not support partial measurements yet.
+        self.qubits = list(chain.from_iterable(circuit.fundamental_registers()))
         super().visit_Circuit(circuit, context=context)
 
         subcircuits = self.subcircuits
@@ -140,13 +147,16 @@ class DiscoverSubexperiments(UsedQubitIndicesVisitor):
 
     def visit_GateStatement(self, gate, context=None):
         if gate.name == self.p_gate:
-            # We allow for multiple prepare_all's in a row.
-            # But gates between those prepare_all's do nothing.
-            self.current = Subcircuit(self.address[:])
+            # We allow for multiple prepare_all's in a row. But gates between those
+            # prepare_all's do nothing. Notice also, we would not yet know what the
+            # measured or used qubits are, if we had partial measurements.  That would
+            # have to wait until the measurement.
+            c = self.current = Subcircuit(self.address[:])
         elif gate.name == self.m_gate:
             if self.current is None:
                 raise JaqalError(f"{self.p_gate} must follow a {self.m_gate}")
             self.current.end = self.address[:]
+            self.current.used_qubits = self.qubits
             self.subcircuits.append(self.current)
             self.current = None
         else:
@@ -162,7 +172,7 @@ class SubcircuitsVisitor(Visitor):
     def __init__(self, subcircuits):
         self.subcircuits = subcircuits
         self.address = []
-        self.s_idx = 0
+        self.index = 0
 
     def process_subcircuit(self):
         raise NotImplementedError()
@@ -170,7 +180,7 @@ class SubcircuitsVisitor(Visitor):
     def visit_Circuit(self, circuit):
         if len(self.subcircuits) == 0:
             return
-        self.objective = self.subcircuits[self.s_idx].start
+        self.objective = self.subcircuits[self.index].start
 
         return self.visit(circuit.body)
 
@@ -189,13 +199,13 @@ class SubcircuitsVisitor(Visitor):
             nxt = block.statements[n]
             if (len(address) + 1) == len(self.objective):
                 self.process_subcircuit()
-                self.s_idx += 1
-                if self.s_idx == len(self.subcircuits):
+                self.index += 1
+                if self.index == len(self.subcircuits):
                     # We've found all the subcircuits.  We're done!
                     self.objective = None
                     return
                 else:
-                    self.objective = self.subcircuits[self.s_idx].start
+                    self.objective = self.subcircuits[self.index].start
             else:
                 address.append(n)
                 self.visit(nxt)
@@ -203,7 +213,7 @@ class SubcircuitsVisitor(Visitor):
 
     def visit_LoopStatement(self, loop):
         # store the walk status
-        s_idx = self.s_idx
+        index = self.index
         address = self.address[:]
         objective = self.objective
 
@@ -212,5 +222,5 @@ class SubcircuitsVisitor(Visitor):
             # Restore the walk status at the start of every loop
             self.objective = objective
             self.address[:] = address[:]
-            self.s_idx = s_idx
+            self.index = index
             self.visit(loop.statements)

@@ -149,7 +149,7 @@ def main(argv=sys.argv[1:]):
                 return 1
 
         if ns.output != "validation":
-            print("\n".join(exe.output(fmt="str")), flush=True)
+            print("\n".join((o.as_str for o in exe.measurements)), flush=True)
         out = sys.stderr
     else:
         try:
@@ -177,13 +177,15 @@ def main(argv=sys.argv[1:]):
             ns.probs = "str"
 
         probs = []
-        for n in range(len(exe.subexperiments)):
-            prob = exe.probabilities(n, fmt=ns.probs)
+        for ptm_circuit in exe.ptm_circuits:
             if ns.probs == "int":
-                probs.append(list(prob))
-            elif ns.cutoff > 0:
+                probs.append(ptm_circuit.probabilities)
+                continue
+
+            prob = ptm_circuit.probabilities_strdict
+            if ns.cutoff > 0:
                 prob = dict([(k, v) for k, v in prob.items() if v >= ns.cutoff])
-                probs.append(prob)
+            probs.append(prob)
 
         if ns.output == "json":
             # This should be identical to python for our use case.

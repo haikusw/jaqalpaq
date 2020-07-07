@@ -64,9 +64,7 @@ def circuit_from_gatelist(gates, registers):
     )
 
 
-def subexperiment_probabilities(
-    circ, subcircuit, noisemodel=build_noiseless_native_model
-):
+def ptmcircuit_probabilities(circ, subcircuit, noisemodel=build_noiseless_native_model):
     """Generate the probabilities of outcomes of a subcircuit
 
     :param circ: The parent circuit
