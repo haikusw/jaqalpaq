@@ -39,7 +39,7 @@ class EmulatorWalker(TraceVisitor):
 
     def process_trace(self):
         subcircuit = self.subcircuits[self.index]
-        nxt = choice(2 ** self.qubits, p=subcircuit.probs_by_int)
+        nxt = choice(2 ** self.qubits, p=subcircuit.probability_by_int)
         mr = Readout(nxt, self.readout_index, subcircuit)
         self.res.append(mr)
         subcircuit._readouts.append(mr)
