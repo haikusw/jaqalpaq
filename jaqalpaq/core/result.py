@@ -27,9 +27,10 @@ class ExecutionResult:
     def __init__(self, subcircuits, readouts):
         """(internal) Initializes an ExecutionResult object.
 
-        :param List[Subcircuit] output:  The subcircuits bounded at the beginning by a prepare_all
-            statement, and at the end by a measure_all statement.
-        :param List[Readout] output:  The measurements made during the running of the Jaqal problem.
+        :param List[Subcircuit] output:  The subcircuits bounded at the beginning by a
+            prepare_all statement, and at the end by a measure_all statement.
+        :param List[Readout] output:  The measurements made during the running of the
+            Jaqal problem.
 
         """
         self._subcircuits = subcircuits
@@ -37,13 +38,13 @@ class ExecutionResult:
 
     @property
     def readouts(self):
-        """An indexable, iterable view of :class:`Readout`s, containing the time-ordered
-        measurements and auxiliary data."""
+        """An indexable, iterable view of :class:`Readout` objects, containing the
+        time-ordered measurements and auxiliary data."""
         return self._readouts
 
     @property
     def subcircuits(self):
-        """An indexable, iterable view of the :class:`Subcircuit`s, in lexicographical
+        """An indexable, iterable view of the :class:`Subcircuit` objects, in lexical
         order, containing the readouts due to that subcircuit, as well as additional
         auxiliary data."""
         return self._subcircuits
@@ -102,8 +103,8 @@ class Subcircuit:
 
     @property
     def readouts(self):
-        """An indexable, iterable view of :class:`Readout`s, containing the time-ordered
-        measurements and auxiliary data, restricted to this Subcircuit."""
+        """An indexable, iterable view of :class:`Readout` objects, containing the
+        time-ordered measurements and auxiliary data, restricted to this Subcircuit."""
         return self._readouts
 
     @property

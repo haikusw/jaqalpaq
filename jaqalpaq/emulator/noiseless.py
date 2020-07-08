@@ -69,11 +69,11 @@ def generate_probabilities(circ, traces):
 
 
 def run_jaqal_circuit(circuit):
-    """Execute a Jaqal :class:`Circuit` in a noiseless emulator.
+    """Execute a Jaqal :class:`~jaqalpaq.core.Circuit` in a noiseless emulator.
 
     :param Circuit circuit: The Jaqalpaq circuit to be run.
 
-    :returns: An :class:`ExecutionResult` object.
+    :rtype: ExecutionResult
 
     .. note::
         Random seed is controlled by numpy.random.seed.  Consider calling ::
@@ -96,7 +96,7 @@ def run_jaqal_string(jaqal):
 
     :param str jaqal: The literal Jaqal program text.
 
-    :returns: An :class:`ExecutionResult` object.
+    :rtype: ExecutionResult
 
     .. note::
         Random seed is controlled by numpy.random.seed.  Consider calling ::
@@ -114,7 +114,7 @@ def run_jaqal_file(fname):
 
     :param str fname: The path to a Jaqal file to execute.
 
-    :returns: An :class:`ExecutionResult` object.
+    :rtype: ExecutionResult
 
     .. note::
         Random seed is controlled by numpy.random.seed.  Consider calling ::
