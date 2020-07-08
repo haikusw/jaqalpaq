@@ -7,7 +7,7 @@ from jaqalpaq.parser import parse_jaqal_file, parse_jaqal_string
 from jaqalpaq.core.result import (
     ExecutionResult,
     ProbabilisticPTMCircuit,
-    MeasurementResult,
+    Readout,
 )
 from jaqalpaq.core.algorithm.visitor import Visitor
 from jaqalpaq.core.algorithm.walkers import TraceVisitor, DiscoverPTMCircuits
@@ -40,9 +40,9 @@ class EmulatorWalker(TraceVisitor):
     def process_trace(self):
         ptm_circuit = self.ptm_circuits[self.index]
         nxt = choice(2 ** self.qubits, p=ptm_circuit.probabilities)
-        mr = MeasurementResult(nxt, self.meas_index, ptm_circuit)
+        mr = Readout(nxt, self.meas_index, ptm_circuit)
         self.res.append(mr)
-        ptm_circuit._measurements.append(mr)
+        ptm_circuit._readouts.append(mr)
         self.meas_index += 1
 
 

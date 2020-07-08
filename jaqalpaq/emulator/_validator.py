@@ -39,11 +39,11 @@ def generate_jaqal_validation(exe):
     output = []
     emit = output.append
 
-    emit("// EXPECTED MEASUREMENTS")
+    emit("// EXPECTED READOUTS")
     emit(
         "\n".join(
             " ".join(("//", mr.as_str, str(mr.as_int), str(mr.ptm_circuit.index),))
-            for mr in exe.measurements
+            for mr in exe.readouts
         )
     )
 
@@ -122,7 +122,7 @@ def parse_jaqal_validation(txt):
             if section is not None:
                 raise ValueError("Malformed validation.")
 
-            if line == "EXPECTED MEASUREMENTS":
+            if line == "EXPECTED READOUTS":
                 section = "meas"
                 true_str_list = expected["true_str_list"] = []
                 true_int_list = expected["true_int_list"] = []
@@ -166,13 +166,13 @@ def validate_jaqal_string(txt):
         true_int_list = expected["true_int_list"]
         subexp_list = expected["subexp_list"]
 
-        assertEqual(true_str_list, [a.as_str for a in exe.measurements])
-        assertEqual(true_int_list, [a.as_int for a in exe.measurements])
+        assertEqual(true_str_list, [a.as_str for a in exe.readouts])
+        assertEqual(true_int_list, [a.as_int for a in exe.readouts])
 
         for n, t_str in enumerate(true_str_list):
-            assertEqual(t_str, exe.measurements[n].as_str)
-            assertEqual(true_int_list[n], exe.measurements[n].as_int)
-            assertEqual(subexp_list[n], exe.measurements[n].ptm_circuit.index)
+            assertEqual(t_str, exe.readouts[n].as_str)
+            assertEqual(true_int_list[n], exe.readouts[n].as_int)
+            assertEqual(subexp_list[n], exe.readouts[n].ptm_circuit.index)
         validated.append("measurements agree")
 
     if "str_prob" in expected:

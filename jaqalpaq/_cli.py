@@ -148,7 +148,7 @@ def main(argv=sys.argv[1:]):
                 return 1
 
         if ns.output != "validation":
-            print("\n".join((o.as_str for o in exe.measurements)), flush=True)
+            print("\n".join((o.as_str for o in exe.readouts)), flush=True)
         out = sys.stderr
     else:
         try:

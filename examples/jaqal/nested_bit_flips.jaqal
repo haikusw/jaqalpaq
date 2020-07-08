@@ -110,7 +110,7 @@ loop 2 {
             }
         }
 
-// EXPECTED MEASUREMENTS
+// EXPECTED READOUTS
 // 0000 0 0
 // 1000 1 1
 // 0100 2 2

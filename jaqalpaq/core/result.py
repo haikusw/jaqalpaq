@@ -7,10 +7,12 @@ from .algorithm.walkers import *
 def parse_jaqal_output_list(circuit, output):
     """Parse experimental output into an ExecutionResult
 
-    :param Circuit circuit: the circuit under consideration.
-    :param List[int or str] output: the measured qubits, encoded as a string of qubit
+    :param circuit: the circuit under consideration.
+    :type circuit: Circuit
+    :param output: the measured qubits, encoded as a string of qubit
         states, or as a little-endian integer (i.e., the state of qubit 0 is in the least
         significant bit; e.g., measuring `100` is encoded as 1, and `001` as 4.)
+    :type output: List[int or str]
     :return ExecutionResult: providing collated and uncollated access to the output.
     """
     circuit = expand_macros(fill_in_let(circuit))
@@ -23,23 +25,23 @@ def parse_jaqal_output_list(circuit, output):
 class ExecutionResult:
     "Captures the results of a Jaqal program's execution, on hardware or an emulator."
 
-    def __init__(self, ptm_circuits, measurements):
+    def __init__(self, ptm_circuits, readouts):
         """(internal) Initializes an ExecutionResult object.
 
         :param List[PTMCircuit] output:  The subcircuits bounded at the beginning by a
             prepare_all statement, and at the end by a measure_all statement.
-        :param List[MeasurementResult] output:  The measurements made during the running
-            of the Jaqal problem.
+        :param output:  The measurements made during the running of the Jaqal problem.
+        :type readouts: List[Readout]
 
         """
         self._ptm_circuits = ptm_circuits
-        self._measurements = measurements
+        self._readouts = readouts
 
     @property
-    def measurements(self):
-        """An indexable, iterable view of the :class:`MeasurementResult`s, containing the
-        collated measurements, and its associated :class:`PTMCircuit`."""
-        return self._measurements
+    def readouts(self):
+        """An indexable, iterable view of :class:`Readout`s, containing the time-ordered
+        measurements and auxiliary data."""
+        return self._readouts
 
     @property
     def ptm_circuits(self):
@@ -48,11 +50,11 @@ class ExecutionResult:
         return self._ptm_circuits
 
 
-class MeasurementResult:
+class Readout:
     """Encapsulate the result of measurement of some number of qubits."""
 
     def __init__(self, result, meas_index, ptm_circuit):
-        """(internal) Instantiate a MeasurementResult object
+        """(internal) Instantiate a Readout object
 
         Contains the actual results of a measurement.
         """
@@ -87,22 +89,22 @@ class MeasurementResult:
 class PTMCircuit:
     """Encapsulate one part of the circuit between a prepare_all and measure_all gate."""
 
-    def __init__(self, trace, index, measurements):
+    def __init__(self, trace, index, readouts):
         """(internal) Instantiate a PTMCircuit"""
         self._trace = trace
         self._index = int(index)
-        self._measurements = measurements
+        self._readouts = readouts
 
     @property
     def index(self):
-        """The index of this object in the parent circuit."""
+        """The lexical index of this object in the (unrolled) parent circuit."""
         return self._index
 
     @property
-    def measurements(self):
-        """An indexable, iterable view of the uncollated measurements associated with the
-        subcircuit"""
-        return self._measurements
+    def readouts(self):
+        """An indexable, iterable view of :class:`Readout`s, containing the time-ordered
+        measurements and auxiliary data, restricted to this PTMCircuit."""
+        return self._readouts
 
     @property
     def measured_qubits(self):
@@ -118,9 +120,9 @@ class ProbabilisticPTMCircuit(PTMCircuit):
 
     Also contains a probability distribution."""
 
-    def __init__(self, trace, index, measurements, probabilities):
+    def __init__(self, trace, index, readouts, probabilities):
         """(internal) Instantiate a PTMCircuit"""
-        super().__init__(trace, index, measurements)
+        super().__init__(trace, index, readouts)
         self._probabilities = probabilities
 
     @property
@@ -165,9 +167,9 @@ class OutputParser(TraceVisitor):
         nxt = next(self.data)
         if isinstance(nxt, str):
             nxt = int(nxt[::-1], 2)
-        mr = MeasurementResult(nxt, self.meas_index, ptm_circuit)
+        mr = Readout(nxt, self.meas_index, ptm_circuit)
         self.res.append(mr)
-        ptm_circuit._measurements.append(mr)
+        ptm_circuit._readouts.append(mr)
         self.meas_index += 1
 
 
@@ -175,5 +177,5 @@ __all__ = [
     "ExecutionResult",
     "parse_jaqal_output_list",
     "PTMCircuit",
-    "MeasurementResult",
+    "Readout",
 ]

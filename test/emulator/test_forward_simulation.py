@@ -251,7 +251,7 @@ Px q[1]
 }
 """
         results = jaqalpaq.emulator.run_jaqal_string(jaqal_str)
-        output = [o.as_str for o in results.measurements]
+        output = [o.as_str for o in results.readouts]
         true_output = ["10", "10", "01", "01"]
         self.assertEqual(output, true_output)
 
@@ -278,25 +278,25 @@ Px q[2]
 measure_all
 """
         results = jaqalpaq.emulator.run_jaqal_string(jaqal_str)
-        output = [o.as_str for o in results.measurements]
-        int_output = [o.as_int for o in results.measurements]
+        output = [o.as_str for o in results.readouts]
+        int_output = [o.as_int for o in results.readouts]
         true_output = ["100", "010", "010", "100", "010", "010", "001"]
         true_int_output = [1, 2, 2, 1, 2, 2, 4]
         self.assertEqual(output, true_output)
         self.assertEqual(int_output, true_int_output)
 
-        int_output = [o.as_int for o in results.ptm_circuits[0].measurements]
-        output = [o.as_str for o in results.ptm_circuits[0].measurements]
+        int_output = [o.as_int for o in results.ptm_circuits[0].readouts]
+        output = [o.as_str for o in results.ptm_circuits[0].readouts]
         self.assertEqual(int_output, [1, 1])
         self.assertEqual(output, ["100", "100"])
 
-        int_output = [o.as_int for o in results.ptm_circuits[1].measurements]
-        output = [o.as_str for o in results.ptm_circuits[1].measurements]
+        int_output = [o.as_int for o in results.ptm_circuits[1].readouts]
+        output = [o.as_str for o in results.ptm_circuits[1].readouts]
         self.assertEqual(int_output, [2, 2, 2, 2])
         self.assertEqual(output, ["010", "010", "010", "010"])
 
-        int_output = [o.as_int for o in results.ptm_circuits[2].measurements]
-        output = [o.as_str for o in results.ptm_circuits[2].measurements]
+        int_output = [o.as_int for o in results.ptm_circuits[2].readouts]
+        output = [o.as_str for o in results.ptm_circuits[2].readouts]
         self.assertEqual(int_output, [4])
         self.assertEqual(output, ["001"])
 
@@ -372,7 +372,7 @@ loop 2 {
         }
 """
         results = jaqalpaq.emulator.run_jaqal_string(jaqal_str)
-        output = [o.as_str for o in results.measurements]
+        output = [o.as_str for o in results.readouts]
         true_output = [
             "1000",
             "1100",
@@ -412,9 +412,9 @@ loop 2 {
         # We do not yet support reuse
         # exe_reuse = parse_jaqal_output_list(results._circuit, true_output)
         exe = parse_jaqal_output_list(parsed_jaqal_str, true_output)
-        self.assertEqual(true_output, [o.as_str for o in results.measurements])
-        self.assertEqual(true_output, [o.as_str for o in exe.measurements])
-        # self.assertEqual(true_output, [o.as_str for o in exe_reuse.measurements])
+        self.assertEqual(true_output, [o.as_str for o in results.readouts])
+        self.assertEqual(true_output, [o.as_str for o in exe.readouts])
+        # self.assertEqual(true_output, [o.as_str for o in exe_reuse.readouts])
 
     def test_load_jaqal_file(self):
         fname = example("sequential_block_in_parallel_loop.jaqal")

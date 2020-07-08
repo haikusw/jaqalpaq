@@ -20,7 +20,7 @@ measure_all
 >
 
 
-// EXPECTED MEASUREMENTS
+// EXPECTED READOUTS
 // 00 0 0
 // 00 0 1
 // 00 0 2
