@@ -83,7 +83,7 @@ class Readout:
         return f"{self._result:b}".zfill(len(self.subcircuit.measured_qubits))[::-1]
 
     def __repr__(self):
-        return f"<{type(self).__name__} {self.as_str}>"
+        return f"<{type(self).__name__} {self.as_str} index {self._index} from {self._subcircuit.index}>"
 
 
 class Subcircuit:
@@ -112,7 +112,7 @@ class Subcircuit:
         return self._trace.used_qubits
 
     def __repr__(self):
-        return f"<{type(self).__name__}@{self._trace.end}>"
+        return f"<{type(self).__name__} {self._index}@{self._trace.end}>"
 
 
 class ProbabilisticSubcircuit(Subcircuit):
