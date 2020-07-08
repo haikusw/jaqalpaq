@@ -64,7 +64,7 @@ measure_all
                 "\n".join(("from qscout.v1.std usepulses *", self.jaqal_string))
             )
 
-            c_dict = res.subcircuits[0].probabilities_strdict
+            c_dict = res.subcircuits[0].probs_by_str
             self.assertAlmostEqual(c_dict["000"], 0.5)
             self.assertAlmostEqual(c_dict["001"], 0)
             self.assertAlmostEqual(c_dict["010"], 0)
@@ -104,7 +104,7 @@ measure_all
             jaqal_text, inject_pulses=normalize_native_gates(native_gates.NATIVE_GATES)
         )
         res = run_jaqal_circuit(jaqal_prog)
-        output_probs = res.subcircuits[0].probabilities_strdict
+        output_probs = res.subcircuits[0].probs_by_str
         self.assertAlmostEqual(output_probs["00000"], 0.5)
         self.assertAlmostEqual(output_probs["11111"], 0.5)
 
@@ -147,7 +147,7 @@ cnot q[0] q[1]
 measure_all
 """
         results = jaqalpaq.emulator.run_jaqal_string(jaqal_str)
-        probs = results.subcircuits[0].probabilities_strdict
+        probs = results.subcircuits[0].probs_by_str
         true_probs = OrderedDict({"00": 0.5, "01": 0, "10": 0, "11": 0.5})
         for key in true_probs:
             self.assertAlmostEqual(probs[key], true_probs[key])
@@ -216,9 +216,7 @@ F1 q[0]
 measure_all
 """
         results = jaqalpaq.emulator.run_jaqal_string(jaqal_str)
-        prob_dicts = {
-            i: p.probabilities_strdict for i, p in enumerate(results.subcircuits)
-        }
+        prob_dicts = {i: p.probs_by_str for i, p in enumerate(results.subcircuits)}
         true_prob_dicts = {
             0: OrderedDict([("0", 1.0), ("1", 0.0)]),
             1: OrderedDict([("0", 0.5), ("1", 0.5)]),
@@ -325,9 +323,7 @@ measure_all
 """
 
         results = jaqalpaq.emulator.run_jaqal_string(jaqal_str)
-        prob_dicts = {
-            i: p.probabilities_strdict for i, p in enumerate(results.subcircuits)
-        }
+        prob_dicts = {i: p.probs_by_str for i, p in enumerate(results.subcircuits)}
         true_prob_dicts = {
             0: OrderedDict([("0", 0.9975923633363278), ("1", 0.0024076366636721458)]),
             1: OrderedDict([("0", 0.9903926402064304), ("1", 0.009607359793569742)]),

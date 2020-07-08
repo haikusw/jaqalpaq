@@ -128,17 +128,18 @@ class ProbabilisticSubcircuit(Subcircuit):
         self._probabilities = probabilities
 
     @property
-    def probabilities(self):
-        """Return the probability associated with each measurement result as a
-        list, ordered as "000", "001", "010", etc.
+    def probs_by_int(self):
+        """Return the probability associated with each measurement result as a list,
+        ordered by the integer representation of the result, with least significant bit
+        representing qubit 0.  I.e., "000" for 0b000, "100" for 0b001, "010" for 0b010,
+        etc.
         """
         return self._probabilities
 
     @property
-    def probabilities_strdict(self):
-        """Return the probability associated with each measurement result
-        formatted as a dictionary mapping result strings to their respective
-        probabilities."""
+    def probs_by_str(self):
+        """Return the probability associated with each measurement result formatted as a
+        dictionary mapping result strings to their respective probabilities."""
         qubits = len(self._trace.used_qubits)
         p = self._probabilities
         return OrderedDict([(f"{n:b}".zfill(qubits)[::-1], v) for n, v in enumerate(p)])

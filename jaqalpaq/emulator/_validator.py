@@ -52,7 +52,7 @@ def generate_jaqal_validation(exe):
     for sc_index, se in enumerate(exe.subcircuits):
         emit(f"// SUBEXPERIMENT {sc_index}")
         for (n, ((s, ps), p)) in enumerate(
-            zip(se.probabilities_strdict.items(), se.probabilities)
+            zip(se.probs_by_str.items(), se.probs_by_int)
         ):
             assert ps == p
             emit(f"// {s} {n} {p}")
@@ -179,9 +179,7 @@ def validate_jaqal_string(txt):
         str_prob = expected["str_prob"]
         for n, act_P in enumerate(exe.subcircuits):
             exp_P = str_prob[n]
-            for (ka, va), (kb, vb) in zip(
-                exp_P.items(), act_P.probabilities_strdict.items()
-            ):
+            for (ka, va), (kb, vb) in zip(exp_P.items(), act_P.probs_by_str.items()):
                 assertEqual(ka, kb)
                 assertAlmostEqual(va, vb)
 
@@ -189,7 +187,7 @@ def validate_jaqal_string(txt):
         for n, act_P in enumerate(exe.subcircuits):
             exp_P = int_prob[n]
             for (ka, va), (kb, vb) in zip(
-                exp_P.items(), enumerate(act_P.probabilities),
+                exp_P.items(), enumerate(act_P.probs_by_int),
             ):
                 assertEqual(ka, kb)
                 assertAlmostEqual(va, vb)

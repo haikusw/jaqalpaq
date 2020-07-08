@@ -179,10 +179,10 @@ def main(argv=sys.argv[1:]):
         probs = []
         for subcircuit in exe.subcircuits:
             if ns.probs == "int":
-                probs.append(list(subcircuit.probabilities))
+                probs.append(list(subcircuit.probs_by_int))
                 continue
 
-            prob = subcircuit.probabilities_strdict
+            prob = subcircuit.probs_by_str
             if ns.cutoff > 0:
                 prob = dict([(k, v) for k, v in prob.items() if v >= ns.cutoff])
             probs.append(prob)
