@@ -99,11 +99,10 @@ class TraceSerializer(Visitor):
         return None
 
 
-class DiscoverPTMCircuits(UsedQubitIndicesVisitor):
+class DiscoverSubcircuits(UsedQubitIndicesVisitor):
     """Walks a Circuit, identifying subcircuits bounded by prepare_all and measure_all"""
 
-    # While this *is* the behavior of DiscoverSubexperiments,
-    # this flag does nothing.
+    # While this *is* the behavior of DiscoverSubcircuits, this flag does nothing.
     validate_parallel = True
 
     def __init__(self, *args, p_gate="prepare_all", m_gate="measure_all", **kwargs):

@@ -64,7 +64,7 @@ measure_all
                 "\n".join(("from qscout.v1.std usepulses *", self.jaqal_string))
             )
 
-            c_dict = res.ptm_circuits[0].probabilities_strdict
+            c_dict = res.subcircuits[0].probabilities_strdict
             self.assertAlmostEqual(c_dict["000"], 0.5)
             self.assertAlmostEqual(c_dict["001"], 0)
             self.assertAlmostEqual(c_dict["010"], 0)
@@ -104,7 +104,7 @@ measure_all
             jaqal_text, inject_pulses=normalize_native_gates(native_gates.NATIVE_GATES)
         )
         res = run_jaqal_circuit(jaqal_prog)
-        output_probs = res.ptm_circuits[0].probabilities_strdict
+        output_probs = res.subcircuits[0].probabilities_strdict
         self.assertAlmostEqual(output_probs["00000"], 0.5)
         self.assertAlmostEqual(output_probs["11111"], 0.5)
 
@@ -147,7 +147,7 @@ cnot q[0] q[1]
 measure_all
 """
         results = jaqalpaq.emulator.run_jaqal_string(jaqal_str)
-        probs = results.ptm_circuits[0].probabilities_strdict
+        probs = results.subcircuits[0].probabilities_strdict
         true_probs = OrderedDict({"00": 0.5, "01": 0, "10": 0, "11": 0.5})
         for key in true_probs:
             self.assertAlmostEqual(probs[key], true_probs[key])
@@ -217,7 +217,7 @@ measure_all
 """
         results = jaqalpaq.emulator.run_jaqal_string(jaqal_str)
         prob_dicts = {
-            i: p.probabilities_strdict for i, p in enumerate(results.ptm_circuits)
+            i: p.probabilities_strdict for i, p in enumerate(results.subcircuits)
         }
         true_prob_dicts = {
             0: OrderedDict([("0", 1.0), ("1", 0.0)]),
@@ -230,7 +230,7 @@ measure_all
             7: OrderedDict([("0", 0.5), ("1", 0.5)]),
             8: OrderedDict([("0", 0.0), ("1", 1.0)]),
         }
-        for i in range(len(results.ptm_circuits)):
+        for i in range(len(results.subcircuits)):
             for key in true_prob_dicts[i].keys():
                 self.assertAlmostEqual(prob_dicts[i][key], true_prob_dicts[i][key])
 
@@ -285,18 +285,18 @@ measure_all
         self.assertEqual(output, true_output)
         self.assertEqual(int_output, true_int_output)
 
-        int_output = [o.as_int for o in results.ptm_circuits[0].readouts]
-        output = [o.as_str for o in results.ptm_circuits[0].readouts]
+        int_output = [o.as_int for o in results.subcircuits[0].readouts]
+        output = [o.as_str for o in results.subcircuits[0].readouts]
         self.assertEqual(int_output, [1, 1])
         self.assertEqual(output, ["100", "100"])
 
-        int_output = [o.as_int for o in results.ptm_circuits[1].readouts]
-        output = [o.as_str for o in results.ptm_circuits[1].readouts]
+        int_output = [o.as_int for o in results.subcircuits[1].readouts]
+        output = [o.as_str for o in results.subcircuits[1].readouts]
         self.assertEqual(int_output, [2, 2, 2, 2])
         self.assertEqual(output, ["010", "010", "010", "010"])
 
-        int_output = [o.as_int for o in results.ptm_circuits[2].readouts]
-        output = [o.as_str for o in results.ptm_circuits[2].readouts]
+        int_output = [o.as_int for o in results.subcircuits[2].readouts]
+        output = [o.as_str for o in results.subcircuits[2].readouts]
         self.assertEqual(int_output, [4])
         self.assertEqual(output, ["001"])
 
@@ -326,7 +326,7 @@ measure_all
 
         results = jaqalpaq.emulator.run_jaqal_string(jaqal_str)
         prob_dicts = {
-            i: p.probabilities_strdict for i, p in enumerate(results.ptm_circuits)
+            i: p.probabilities_strdict for i, p in enumerate(results.subcircuits)
         }
         true_prob_dicts = {
             0: OrderedDict([("0", 0.9975923633363278), ("1", 0.0024076366636721458)]),
@@ -334,7 +334,7 @@ measure_all
             2: OrderedDict([("0", 0.978470167862337), ("1", 0.02152983213766301)]),
             3: OrderedDict([("0", 0.9619397662553992), ("1", 0.03806023374460075)]),
         }
-        for i in range(len(results.ptm_circuits)):
+        for i in range(len(results.subcircuits)):
             for key in true_prob_dicts[i].keys():
                 self.assertAlmostEqual(prob_dicts[i][key], true_prob_dicts[i][key])
 

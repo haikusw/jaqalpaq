@@ -42,15 +42,15 @@ def generate_jaqal_validation(exe):
     emit("// EXPECTED READOUTS")
     emit(
         "\n".join(
-            " ".join(("//", mr.as_str, str(mr.as_int), str(mr.ptm_circuit.index),))
+            " ".join(("//", mr.as_str, str(mr.as_int), str(mr.subcircuit.index),))
             for mr in exe.readouts
         )
     )
 
     emit("\n// EXPECTED PROBABILITIES")
 
-    for ptm_index, se in enumerate(exe.ptm_circuits):
-        emit(f"// SUBEXPERIMENT {ptm_index}")
+    for sc_index, se in enumerate(exe.subcircuits):
+        emit(f"// SUBEXPERIMENT {sc_index}")
         for (n, ((s, ps), p)) in enumerate(
             zip(se.probabilities_strdict.items(), se.probabilities)
         ):
@@ -172,12 +172,12 @@ def validate_jaqal_string(txt):
         for n, t_str in enumerate(true_str_list):
             assertEqual(t_str, exe.readouts[n].as_str)
             assertEqual(true_int_list[n], exe.readouts[n].as_int)
-            assertEqual(subexp_list[n], exe.readouts[n].ptm_circuit.index)
+            assertEqual(subexp_list[n], exe.readouts[n].subcircuit.index)
         validated.append("measurements agree")
 
     if "str_prob" in expected:
         str_prob = expected["str_prob"]
-        for n, act_P in enumerate(exe.ptm_circuits):
+        for n, act_P in enumerate(exe.subcircuits):
             exp_P = str_prob[n]
             for (ka, va), (kb, vb) in zip(
                 exp_P.items(), act_P.probabilities_strdict.items()
@@ -186,7 +186,7 @@ def validate_jaqal_string(txt):
                 assertAlmostEqual(va, vb)
 
         int_prob = expected["int_prob"]
-        for n, act_P in enumerate(exe.ptm_circuits):
+        for n, act_P in enumerate(exe.subcircuits):
             exp_P = int_prob[n]
             for (ka, va), (kb, vb) in zip(
                 exp_P.items(), enumerate(act_P.probabilities),

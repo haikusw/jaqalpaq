@@ -6,13 +6,13 @@ from jaqalpaq import JaqalError
 from jaqalpaq.parser import parse_jaqal_file, parse_jaqal_string
 from jaqalpaq.core.result import (
     ExecutionResult,
-    ProbabilisticPTMCircuit,
+    ProbabilisticSubcircuit,
     Readout,
 )
 from jaqalpaq.core.algorithm.visitor import Visitor
-from jaqalpaq.core.algorithm.walkers import TraceVisitor, DiscoverPTMCircuits
+from jaqalpaq.core.algorithm.walkers import TraceVisitor, DiscoverSubcircuits
 from jaqalpaq.core.algorithm import expand_macros, fill_in_let
-from .pygsti.frontend import ptmcircuit_probabilities
+from .pygsti.frontend import subcircuit_probabilities
 
 
 class EmulatorWalker(TraceVisitor):
@@ -28,21 +28,21 @@ class EmulatorWalker(TraceVisitor):
 
         """
         super().__init__(traces)
-        self.ptm_circuits = []
+        self.subcircuits = []
         self.res = []
         self.meas_index = 0
         for n, (sc, prob) in enumerate(zip(self.traces, probabilities)):
-            self.ptm_circuits.append(ProbabilisticPTMCircuit(sc, n, [], prob))
+            self.subcircuits.append(ProbabilisticSubcircuit(sc, n, [], prob))
         # This is only valid because we must alway do measure_all.
         if self.traces:
             self.qubits = len(self.traces[0].used_qubits)
 
     def process_trace(self):
-        ptm_circuit = self.ptm_circuits[self.index]
-        nxt = choice(2 ** self.qubits, p=ptm_circuit.probabilities)
-        mr = Readout(nxt, self.meas_index, ptm_circuit)
+        subcircuit = self.subcircuits[self.index]
+        nxt = choice(2 ** self.qubits, p=subcircuit.probabilities)
+        mr = Readout(nxt, self.meas_index, subcircuit)
         self.res.append(mr)
-        ptm_circuit._readouts.append(mr)
+        subcircuit._readouts.append(mr)
         self.meas_index += 1
 
 
@@ -65,7 +65,7 @@ def generate_probabilities(circ, traces):
     """
     probabilities = []
     for sc in traces:
-        p = ptmcircuit_probabilities(circ, sc)
+        p = subcircuit_probabilities(circ, sc)
         probs = array([(int(k[0][::-1], 2), v) for k, v in p.items()])
         probabilities.append(probs[probs[:, 0].argsort()][:, 1].copy())
 
@@ -88,11 +88,11 @@ def run_jaqal_circuit(circuit):
 
     """
     circuit = expand_macros(fill_in_let(circuit))
-    visitor = DiscoverPTMCircuits()
+    visitor = DiscoverSubcircuits()
     traces = visitor.visit(circuit)
     w = EmulatorWalker(traces, generate_probabilities(circuit, traces))
     w.visit(circuit)
-    return ExecutionResult(w.ptm_circuits, w.res)
+    return ExecutionResult(w.subcircuits, w.res)
 
 
 def run_jaqal_string(jaqal):
