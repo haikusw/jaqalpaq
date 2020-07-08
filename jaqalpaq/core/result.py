@@ -9,9 +9,9 @@ def parse_jaqal_output_list(circuit, output):
 
     :param circuit: the circuit under consideration.
     :type circuit: Circuit
-    :param output: the measured qubits, encoded as a string of qubit
-        states, or as a little-endian integer (i.e., the state of qubit 0 is in the least
-        significant bit; e.g., measuring `100` is encoded as 1, and `001` as 4.)
+    :param output: the measured qubit state, encoded as a string of 1s and 0s, or as an
+        int with state of qubit 0 encoded as the least significant bit, and so on.
+        For example, Measuring `100` is encoded as 1, and `001` as 4.
     :type output: List[int or str]
     :return ExecutionResult: providing collated and uncollated access to the output.
     """
@@ -76,7 +76,8 @@ class Readout:
 
     @property
     def as_int(self):
-        """The measured result encoded as a little-endian integer"""
+        """The measured result encoded as an integer, with qubit 0 represented by the
+        least significant bit."""
         return self._result
 
     @property

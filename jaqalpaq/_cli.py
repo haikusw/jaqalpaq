@@ -27,7 +27,7 @@ def main(argv=sys.argv[1:]):
         default=None,
         nargs="?",
         const="str",
-        help="Print distribution probabilities of outcomes to stderr.  Listed in lexical order.  Takes optional argument FORMAT `str` to print bitstrings, and `int` to print probabilities in a list, in integer order of outcomes, little-endian encoded. If set, defaults to `str`.  Ignored CUTOFF",
+        help="Print distribution probabilities of outcomes to stderr.  Listed in lexical order.  Takes optional argument FORMAT `str` to print bitstrings, and `int` to print probabilities in a list, in integer order of outcomes, with qubit zero represented by the least significant bit. If set, defaults to `str`.",
     )
     parser.add_argument(
         "--cutoff",
