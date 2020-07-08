@@ -68,8 +68,7 @@ def subcircuit_probabilities(circ, trace, noisemodel=build_noiseless_native_mode
     """Generate the probabilities of outcomes of a subcircuit
 
     :param Circuit circ: The parent circuit
-    :param trace: the subcircut of circ to generate probabilities for
-    :type trace: Trace
+    :param Trace trace: the subcircut of circ to generate probabilities for
     :param noisemodel : [undocumented] The method to generate the noisemodel.
     :return: A pyGSTi outcome dictionary.
     """

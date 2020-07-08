@@ -21,10 +21,8 @@ class EmulatorWalker(TraceVisitor):
 
         Produce emulated output sampled from a given probability distribution.
 
-        :param traces: the prepare_all/measure_all subcircuits
-        :type traces: List[Trace]
-        :param probabilities: the probabilities of each outcome
-        :type probabilities: List[List[Float]]
+        :param List[Trace] traces: the prepare_all/measure_all subcircuits
+        :param List[List[Float]] probabilities: the probabilities of each outcome
 
         """
         super().__init__(traces)
@@ -49,11 +47,9 @@ class EmulatorWalker(TraceVisitor):
 def generate_probabilities(circ, traces):
     """(internal) Attaches noiseless result probablities to an execution result object.
 
-    :param circ: parent circuit
-    :type circ: Circuit
-    :param traces: The traces of circ that correspond to the prepare_all/measure_all
+    :param Circuit circ: parent circuit
+    :param List[Trace] traces: The traces of circ that correspond to the prepare_all/measure_all
         subcircuits to generate probabilities of.
-    :type traces: List[Trace]
 
     .. note::
         Random seed is controlled by numpy.random.seed.  Consider calling ::

@@ -7,8 +7,7 @@ from .algorithm.walkers import *
 def parse_jaqal_output_list(circuit, output):
     """Parse experimental output into an ExecutionResult
 
-    :param circuit: the circuit under consideration.
-    :type circuit: Circuit
+    :param Circuit circuit: the circuit under consideration.
     :param output: the measured qubit state, encoded as a string of 1s and 0s, or as an
         int with state of qubit 0 encoded as the least significant bit, and so on.
         For example, Measuring `100` is encoded as 1, and `001` as 4.
@@ -28,11 +27,9 @@ class ExecutionResult:
     def __init__(self, subcircuits, readouts):
         """(internal) Initializes an ExecutionResult object.
 
-        :param output:  The subcircuits bounded at the beginning by a prepare_all
+        :param List[Subcircuit] output:  The subcircuits bounded at the beginning by a prepare_all
             statement, and at the end by a measure_all statement.
-        :type output: List[Subcircuit]
-        :param output:  The measurements made during the running of the Jaqal problem.
-        :type readouts: List[Readout]
+        :param List[Readout] output:  The measurements made during the running of the Jaqal problem.
 
         """
         self._subcircuits = subcircuits
@@ -152,8 +149,7 @@ class OutputParser(TraceVisitor):
     def __init__(self, traces, output):
         """(internal) Prepares an OutputParser instance.
 
-        :param traces: the prepare_all/measure_all subcircuits
-        :type traces: List[Trace]
+        :param List[Trace] traces: the prepare_all/measure_all subcircuits
         :param output: the measurement results
         :type output: List[Str or Int]
 
