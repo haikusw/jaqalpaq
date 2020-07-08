@@ -7,8 +7,8 @@ from jaqalpaq import JaqalError
 from jaqalpaq.core.block import BlockStatement, LoopStatement
 
 
-class Subcircuit:
-    """Describes start and stop location in a Circuit"""
+class Trace:
+    """Describes a portion of a Circuit traced out by start and stop locations."""
 
     def __init__(self, start=None, end=None, used_qubits=None):
         if start is None:
@@ -21,22 +21,22 @@ class Subcircuit:
 
     def __repr__(self):
         if self.end is None:
-            return f"Subcircuit({self.start})"
+            return f"Trace({self.start})"
         else:
-            return f"Subcircuit({self.start}, {self.end})"
+            return f"Trace({self.start}, {self.end})"
 
 
-class SubcircuitSerializer(Visitor):
-    """Returns a serialized representation of all gates called during a subcircuit.
+class TraceSerializer(Visitor):
+    """Returns a serialized representation of all gates called during a circuit trace.
 
     Start locations lexically following stop locations are not supported.
 
     """
 
-    def __init__(self, subcircuit=None):
-        if subcircuit is not None:
-            self.start = subcircuit.start
-            self.end = subcircuit.end
+    def __init__(self, trace=None):
+        if trace is not None:
+            self.start = trace.start
+            self.end = trace.end
             self.started = False
         else:
             self.start = None
@@ -151,7 +151,7 @@ class DiscoverPTMCircuits(UsedQubitIndicesVisitor):
             # prepare_all's do nothing. Notice also, we would not yet know what the
             # measured or used qubits are, if we had partial measurements.  That would
             # have to wait until the measurement.
-            c = self.current = Subcircuit(self.address[:])
+            c = self.current = Trace(self.address[:])
         elif gate.name == self.m_gate:
             if self.current is None:
                 raise JaqalError(f"{self.p_gate} must follow a {self.m_gate}")
@@ -166,21 +166,21 @@ class DiscoverPTMCircuits(UsedQubitIndicesVisitor):
         return super().visit_GateStatement(gate, context=context)
 
 
-class SubcircuitsVisitor(Visitor):
-    """Call process_subcircuit at the start of every subcircuit in execution order."""
+class TraceVisitor(Visitor):
+    """Call process_trace at the start of every trace in execution order."""
 
-    def __init__(self, subcircuits):
-        self.subcircuits = subcircuits
+    def __init__(self, traces):
+        self.traces = traces
         self.address = []
         self.index = 0
 
-    def process_subcircuit(self):
+    def process_trace(self):
         raise NotImplementedError()
 
     def visit_Circuit(self, circuit):
-        if len(self.subcircuits) == 0:
+        if len(self.traces) == 0:
             return
-        self.objective = self.subcircuits[self.index].start
+        self.objective = self.traces[self.index].start
 
         return self.visit(circuit.body)
 
@@ -198,14 +198,14 @@ class SubcircuitsVisitor(Visitor):
             n = self.objective[len(address)]
             nxt = block.statements[n]
             if (len(address) + 1) == len(self.objective):
-                self.process_subcircuit()
+                self.process_trace()
                 self.index += 1
-                if self.index == len(self.subcircuits):
-                    # We've found all the subcircuits.  We're done!
+                if self.index == len(self.traces):
+                    # We've found all the traces.  We're done!
                     self.objective = None
                     return
                 else:
-                    self.objective = self.subcircuits[self.index].start
+                    self.objective = self.traces[self.index].start
             else:
                 address.append(n)
                 self.visit(nxt)

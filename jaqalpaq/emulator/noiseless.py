@@ -10,32 +10,34 @@ from jaqalpaq.core.result import (
     MeasurementResult,
 )
 from jaqalpaq.core.algorithm.visitor import Visitor
-from jaqalpaq.core.algorithm.walkers import SubcircuitsVisitor, DiscoverPTMCircuits
+from jaqalpaq.core.algorithm.walkers import TraceVisitor, DiscoverPTMCircuits
 from jaqalpaq.core.algorithm import expand_macros, fill_in_let
 from .pygsti.frontend import ptmcircuit_probabilities
 
 
-class EmulatorWalker(SubcircuitsVisitor):
-    def __init__(self, subcircuits, probabilities):
+class EmulatorWalker(TraceVisitor):
+    def __init__(self, traces, probabilities):
         """(internal) Instantiates an EmulationWalker.
 
         Produce emulated output sampled from a given probability distribution.
 
-        :param List[Subcircuit] subcircuits: the prepare_all/measure_all subcircuits
-        :param List[List[Float]] probabilities: the probabilities of each outcome
+        :param traces: the prepare_all/measure_all subcircuits
+        :type traces: List[Trace]
+        :param probabilities: the probabilities of each outcome
+        :type probabilities: List[List[Float]]
 
         """
-        super().__init__(subcircuits)
+        super().__init__(traces)
         self.ptm_circuits = []
         self.res = []
         self.meas_index = 0
-        for n, (sc, prob) in enumerate(zip(self.subcircuits, probabilities)):
+        for n, (sc, prob) in enumerate(zip(self.traces, probabilities)):
             self.ptm_circuits.append(ProbabilisticPTMCircuit(sc, n, [], prob))
         # This is only valid because we must alway do measure_all.
-        if self.subcircuits:
-            self.qubits = len(self.subcircuits[0].used_qubits)
+        if self.traces:
+            self.qubits = len(self.traces[0].used_qubits)
 
-    def process_subcircuit(self):
+    def process_trace(self):
         ptm_circuit = self.ptm_circuits[self.index]
         nxt = choice(2 ** self.qubits, p=ptm_circuit.probabilities)
         mr = MeasurementResult(nxt, self.meas_index, ptm_circuit)
@@ -44,15 +46,14 @@ class EmulatorWalker(SubcircuitsVisitor):
         self.meas_index += 1
 
 
-def generate_probabilities(circ, subcircuits):
+def generate_probabilities(circ, traces):
     """(internal) Attaches noiseless result probablities to an execution result object.
 
-    :param ExecutionResult exe_res: The execution result object to process.
-    :param prob_kwargs: Optional (undocumented) arguments to pass to
-        :meth:`subexperiment_probabilities`.
-    :type prob_kwargs: dict or None
-
-    The sub-experiments of exe_res learn their noiseless result probabilities.
+    :param circ: parent circuit
+    :type circ: Circuit
+    :param traces: The traces of circ that correspond to the prepare_all/measure_all
+        subcircuits to generate probabilities of.
+    :type traces: List[Trace]
 
     .. note::
         Random seed is controlled by numpy.random.seed.  Consider calling ::
@@ -63,7 +64,7 @@ def generate_probabilities(circ, subcircuits):
 
     """
     probabilities = []
-    for sc in subcircuits:
+    for sc in traces:
         p = ptmcircuit_probabilities(circ, sc)
         probs = array([(int(k[0][::-1], 2), v) for k, v in p.items()])
         probabilities.append(probs[probs[:, 0].argsort()][:, 1].copy())
@@ -88,8 +89,8 @@ def run_jaqal_circuit(circuit):
     """
     circuit = expand_macros(fill_in_let(circuit))
     visitor = DiscoverPTMCircuits()
-    subcircuits = visitor.visit(circuit)
-    w = EmulatorWalker(subcircuits, generate_probabilities(circuit, subcircuits))
+    traces = visitor.visit(circuit)
+    w = EmulatorWalker(traces, generate_probabilities(circuit, traces))
     w.visit(circuit)
     return ExecutionResult(w.ptm_circuits, w.res)
 

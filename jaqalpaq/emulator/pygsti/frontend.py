@@ -5,7 +5,7 @@ import pygsti.objects
 
 from jaqalpaq import JaqalError
 from jaqalpaq.core.constant import Constant
-from jaqalpaq.core.algorithm.walkers import SubcircuitSerializer
+from jaqalpaq.core.algorithm.walkers import TraceSerializer
 
 from .pygstimodel import build_noiseless_native_model
 
@@ -64,15 +64,16 @@ def circuit_from_gatelist(gates, registers):
     )
 
 
-def ptmcircuit_probabilities(circ, subcircuit, noisemodel=build_noiseless_native_model):
+def ptmcircuit_probabilities(circ, trace, noisemodel=build_noiseless_native_model):
     """Generate the probabilities of outcomes of a subcircuit
 
-    :param circ: The parent circuit
-    :param subcircuit: The Subcircuit object describing the portion to generate proba
-    :param noisemodel: [undocumented] The method to generate the noisemodel.
+    :param Circuit circ: The parent circuit
+    :param trace: the subcircut of circ to generate probabilities for
+    :type trace: Trace
+    :param noisemodel : [undocumented] The method to generate the noisemodel.
     :return: A pyGSTi outcome dictionary.
     """
-    s = SubcircuitSerializer(subcircuit)
+    s = TraceSerializer(trace)
     s.visit(circ)
     pc = circuit_from_gatelist(s.serialized, circ.fundamental_registers())
     model = noisemodel(circ.registers, circ.native_gates)

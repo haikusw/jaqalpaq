@@ -87,9 +87,9 @@ class MeasurementResult:
 class PTMCircuit:
     """Encapsulate one part of the circuit between a prepare_all and measure_all gate."""
 
-    def __init__(self, subcircuit, index, measurements):
+    def __init__(self, trace, index, measurements):
         """(internal) Instantiate a PTMCircuit"""
-        self._subcircuit = subcircuit
+        self._trace = trace
         self._index = int(index)
         self._measurements = measurements
 
@@ -107,10 +107,10 @@ class PTMCircuit:
     @property
     def measured_qubits(self):
         """An ist of the qubits that are measured, in their display order."""
-        return self._subcircuit.used_qubits
+        return self._trace.used_qubits
 
     def __repr__(self):
-        return f"<{type(self).__name__}@{self._subcircuit.end}>"
+        return f"<{type(self).__name__}@{self._trace.end}>"
 
 
 class ProbabilisticPTMCircuit(PTMCircuit):
@@ -118,9 +118,9 @@ class ProbabilisticPTMCircuit(PTMCircuit):
 
     Also contains a probability distribution."""
 
-    def __init__(self, subcircuit, index, measurements, probabilities):
+    def __init__(self, trace, index, measurements, probabilities):
         """(internal) Instantiate a PTMCircuit"""
-        super().__init__(subcircuit, index, measurements)
+        super().__init__(trace, index, measurements)
         self._probabilities = probabilities
 
     @property
@@ -135,30 +135,32 @@ class ProbabilisticPTMCircuit(PTMCircuit):
         """Return the probability associated with each measurement result
         formatted as a dictionary mapping result strings to their respective
         probabilities."""
-        qubits = len(self._subcircuit.used_qubits)
+        qubits = len(self._trace.used_qubits)
         p = self._probabilities
         return OrderedDict([(f"{n:b}".zfill(qubits)[::-1], v) for n, v in enumerate(p)])
 
 
-class OutputParser(SubcircuitsVisitor):
+class OutputParser(TraceVisitor):
     """(internal) Walks through execution ouput, sorting into PTMCircuits"""
 
-    def __init__(self, subcircuits, output):
+    def __init__(self, traces, output):
         """(internal) Prepares an OutputParser instance.
 
-        :param List[Subcircuit] subcircuits: the prepare_all/measure_all subcircuits
-        :param List[Str or Int] output: the measurement results
+        :param traces: the prepare_all/measure_all subcircuits
+        :type traces: List[Trace]
+        :param output: the measurement results
+        :type output: List[Str or Int]
 
         """
-        super().__init__(subcircuits)
+        super().__init__(traces)
         self.data = iter(output)
         self.ptm_circuits = []
         self.res = []
         self.meas_index = 0
-        for n, sc in enumerate(self.subcircuits):
+        for n, sc in enumerate(self.traces):
             self.ptm_circuits.append(PTMCircuit(sc, n, []))
 
-    def process_subcircuit(self):
+    def process_trace(self):
         ptm_circuit = self.ptm_circuits[self.index]
         nxt = next(self.data)
         if isinstance(nxt, str):
