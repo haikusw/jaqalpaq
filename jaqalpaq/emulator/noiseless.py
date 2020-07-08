@@ -30,7 +30,7 @@ class EmulatorWalker(TraceVisitor):
         super().__init__(traces)
         self.subcircuits = []
         self.res = []
-        self.meas_index = 0
+        self.readout_index = 0
         for n, (sc, prob) in enumerate(zip(self.traces, probabilities)):
             self.subcircuits.append(ProbabilisticSubcircuit(sc, n, [], prob))
         # This is only valid because we must alway do measure_all.
@@ -40,10 +40,10 @@ class EmulatorWalker(TraceVisitor):
     def process_trace(self):
         subcircuit = self.subcircuits[self.index]
         nxt = choice(2 ** self.qubits, p=subcircuit.probabilities)
-        mr = Readout(nxt, self.meas_index, subcircuit)
+        mr = Readout(nxt, self.readout_index, subcircuit)
         self.res.append(mr)
         subcircuit._readouts.append(mr)
-        self.meas_index += 1
+        self.readout_index += 1
 
 
 def generate_probabilities(circ, traces):

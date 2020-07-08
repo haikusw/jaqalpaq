@@ -55,19 +55,19 @@ class ExecutionResult:
 class Readout:
     """Encapsulate the result of measurement of some number of qubits."""
 
-    def __init__(self, result, meas_index, subcircuit):
+    def __init__(self, result, index, subcircuit):
         """(internal) Instantiate a Readout object
 
         Contains the actual results of a measurement.
         """
         self._result = result
-        self._meas_index = meas_index
+        self._index = index
         self._subcircuit = subcircuit
 
     @property
-    def meas_index(self):
+    def index(self):
         """The temporal index of this measurement in the parent circuit."""
-        return self._meas_index
+        return self._index
 
     @property
     def subcircuit(self):
@@ -160,7 +160,7 @@ class OutputParser(TraceVisitor):
         self.data = iter(output)
         self.subcircuits = []
         self.res = []
-        self.meas_index = 0
+        self.readout_index = 0
         for n, sc in enumerate(self.traces):
             self.subcircuits.append(Subcircuit(sc, n, []))
 
@@ -169,10 +169,10 @@ class OutputParser(TraceVisitor):
         nxt = next(self.data)
         if isinstance(nxt, str):
             nxt = int(nxt[::-1], 2)
-        mr = Readout(nxt, self.meas_index, subcircuit)
+        mr = Readout(nxt, self.readout_index, subcircuit)
         self.res.append(mr)
         subcircuit._readouts.append(mr)
-        self.meas_index += 1
+        self.readout_index += 1
 
 
 __all__ = [
