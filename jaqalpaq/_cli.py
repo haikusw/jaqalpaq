@@ -195,7 +195,7 @@ def main(argv=sys.argv[1:]):
             print(repr(probs), file=out)
         elif ns.output == "human":
             for n, prob in enumerate(probs):
-                print(f"Sub-experiment {n}:", file=out)
+                print(f"Subcircuit {n}:", file=out)
                 if ns.probs == "int":
                     print("\n".join(f"{o}: {p}" for o, p in enumerate(prob)), file=out)
                 else:

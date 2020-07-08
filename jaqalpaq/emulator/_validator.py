@@ -50,7 +50,7 @@ def generate_jaqal_validation(exe):
     emit("\n// EXPECTED PROBABILITIES")
 
     for sc_index, se in enumerate(exe.subcircuits):
-        emit(f"// SUBEXPERIMENT {sc_index}")
+        emit(f"// SUBCIRCUIT {sc_index}")
         for (n, ((s, ps), p)) in enumerate(
             zip(se.probability_by_str.items(), se.probability_by_int)
         ):
@@ -89,13 +89,13 @@ def parse_jaqal_validation(txt):
             continue
 
         if section == "meas":
-            true_str, true_int, subexp = line.split()
+            true_str, true_int, subcirc = line.split()
             true_str_list.append(true_str)
             true_int_list.append(int(true_int))
-            subexp_list.append(int(subexp))
+            subcirc_list.append(int(subcirc))
         elif section == "prob":
-            if line[:14] == "SUBEXPERIMENT ":
-                s_idx_n = int(line[14:].strip())
+            if line[:11] == "SUBCIRCUIT ":
+                s_idx_n = int(line[11:].strip())
                 if s_idx_n != s_idx + 1:
                     raise ValueError("Malformed validation.")
 
@@ -126,7 +126,7 @@ def parse_jaqal_validation(txt):
                 section = "meas"
                 true_str_list = expected["true_str_list"] = []
                 true_int_list = expected["true_int_list"] = []
-                subexp_list = expected["subexp_list"] = []
+                subcirc_list = expected["subcirc_list"] = []
             elif line == "EXPECTED PROBABILITIES":
                 section = "prob"
                 str_prob = expected["str_prob"] = {}
@@ -164,7 +164,7 @@ def validate_jaqal_string(txt):
     if "true_str_list" in expected:
         true_str_list = expected["true_str_list"]
         true_int_list = expected["true_int_list"]
-        subexp_list = expected["subexp_list"]
+        subcirc_list = expected["subcirc_list"]
 
         assertEqual(true_str_list, [a.as_str for a in exe.readouts])
         assertEqual(true_int_list, [a.as_int for a in exe.readouts])
@@ -172,7 +172,7 @@ def validate_jaqal_string(txt):
         for n, t_str in enumerate(true_str_list):
             assertEqual(t_str, exe.readouts[n].as_str)
             assertEqual(true_int_list[n], exe.readouts[n].as_int)
-            assertEqual(subexp_list[n], exe.readouts[n].subcircuit.index)
+            assertEqual(subcirc_list[n], exe.readouts[n].subcircuit.index)
         validated.append("measurements agree")
 
     if "str_prob" in expected:

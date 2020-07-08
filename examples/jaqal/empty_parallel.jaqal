@@ -11,7 +11,7 @@ measure_all
 // 00 0 0
 
 // EXPECTED PROBABILITIES
-// SUBEXPERIMENT 0
+// SUBCIRCUIT 0
 // 00 0 1.0
 // 10 1 0.0
 // 01 2 0.0
