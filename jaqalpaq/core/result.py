@@ -44,9 +44,9 @@ class ExecutionResult:
 
     @property
     def subcircuits(self):
-        """An indexable, iterable view of the :class:`Subcircuit` objects, in lexical
-        order, containing the readouts due to that subcircuit, as well as additional
-        auxiliary data."""
+        """An indexable, iterable view of the :class:`Subcircuit` objects, in
+        :term:`flat order`, containing the readouts due to that subcircuit, as well as
+        additional auxiliary data."""
         return self._subcircuits
 
 
@@ -98,7 +98,7 @@ class Subcircuit:
 
     @property
     def index(self):
-        """The lexical index of this object in the (unrolled) parent circuit."""
+        """The :term:`flat order` index of this object in the (unrolled) parent circuit."""
         return self._index
 
     @property
