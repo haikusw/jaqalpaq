@@ -422,7 +422,7 @@ loop 2 {
         newval = generate_jaqal_validation(exe)
 
         with open(fname, "r") as f:
-            txt = [a for a in f.readlines() if a[:2] != "//"]
+            txt = [a for a in f.readlines() if not a.startswith("//")]
 
         txt.append(newval)
         txt = "".join(txt)

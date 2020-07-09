@@ -75,7 +75,7 @@ def parse_jaqal_validation(txt):
         line = line.strip()
 
         # Resest on non-comments
-        if line[:2] != "//":
+        if not line.startswith("//"):
             section = None
             s_idx = -1
             continue
@@ -94,7 +94,7 @@ def parse_jaqal_validation(txt):
             true_int_list.append(int(true_int))
             subcirc_list.append(int(subcirc))
         elif section == "prob":
-            if line[:11] == "SUBCIRCUIT ":
+            if line.startswith("SUBCIRCUIT "):
                 s_idx_n = int(line[11:].strip())
                 if s_idx_n != s_idx + 1:
                     raise ValueError("Malformed validation.")
