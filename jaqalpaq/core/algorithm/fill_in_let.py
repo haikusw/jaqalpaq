@@ -14,6 +14,7 @@ def fill_in_let(circuit, override_dict=None):
 
     :returns: A new, normalized circuit. Although the circuit will be new, it may share
         structure with the input circuit, thus the input should not be changed.
+    :rtype: Circuit
     """
 
     visitor = LetFiller(override_dict)

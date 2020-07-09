@@ -15,10 +15,11 @@ def normalize_blocks_with_unitary_timing(circuit):
 
     This does not expand loops, macros, lets, or maps.
 
-    :param circuit: The circuit to normalize.
+    :param Circuit circuit: The circuit to normalize.
 
     :returns: A new, normalized circuit. Although the circuit will be new, it may share
         structure with the input circuit, thus the input should not be changed.
+    :rtype: Circuit
 
     """
 

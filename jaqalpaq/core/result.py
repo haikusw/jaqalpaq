@@ -5,14 +5,16 @@ from .algorithm.walkers import *
 
 
 def parse_jaqal_output_list(circuit, output):
-    """Parse experimental output into an ExecutionResult
+    """Parse experimental output into an :class:`ExecutionResult` providing collated and
+    uncollated access to the output.
 
-    :param Circuit circuit: the circuit under consideration.
-    :param output: the measured qubit state, encoded as a string of 1s and 0s, or as an
+    :param Circuit circuit: The circuit under consideration.
+    :param output: The measured qubit state, encoded as a string of 1s and 0s, or as an
         int with state of qubit 0 encoded as the least significant bit, and so on.
-        For example, Measuring `100` is encoded as 1, and `001` as 4.
-    :type output: List[int or str]
-    :return ExecutionResult: providing collated and uncollated access to the output.
+        For example, Measuring ``100`` is encoded as 1, and ``001`` as 4.
+    :type output: list[int or str]
+    :returns: The parsed output.
+    :rtype: ExecutionResult
     """
     circuit = expand_macros(fill_in_let(circuit))
     visitor = DiscoverSubcircuits()
@@ -27,9 +29,9 @@ class ExecutionResult:
     def __init__(self, subcircuits, readouts):
         """(internal) Initializes an ExecutionResult object.
 
-        :param List[Subcircuit] output:  The subcircuits bounded at the beginning by a
+        :param list[Subcircuit] output:  The subcircuits bounded at the beginning by a
             prepare_all statement, and at the end by a measure_all statement.
-        :param List[Readout] output:  The measurements made during the running of the
+        :param list[Readout] output:  The measurements made during the running of the
             Jaqal problem.
 
         """
@@ -80,7 +82,7 @@ class Readout:
 
     @property
     def as_str(self):
-        """The measured result encoded as a string of qubit values"""
+        """The measured result encoded as a string of qubit values."""
         return f"{self._result:b}".zfill(len(self.subcircuit.measured_qubits))[::-1]
 
     def __repr__(self):
@@ -150,9 +152,9 @@ class OutputParser(TraceVisitor):
     def __init__(self, traces, output):
         """(internal) Prepares an OutputParser instance.
 
-        :param List[Trace] traces: the prepare_all/measure_all subcircuits
+        :param list[Trace] traces: the prepare_all/measure_all subcircuits
         :param output: the measurement results
-        :type output: List[Str or Int]
+        :type output: list[Str or Int]
 
         """
         super().__init__(traces)

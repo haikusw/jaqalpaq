@@ -10,11 +10,12 @@ import jaqalpaq.core as core
 def expand_macros(circuit):
     """Expand macros in the given circuit.
 
-    :param circuit: The Circuit to expand macros in.
+    :param Circuit circuit: The circuit in which to expand macros.
 
     :returns: A new, normalized circuit. Although the circuit will be
         new, it may share structure with the input circuit, thus the input
         should not be changed.
+    :rtype: Circuit
 
     """
 
