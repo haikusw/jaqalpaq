@@ -1,7 +1,7 @@
 """Functions and data types creating and acting on parse trees."""
 
 from abc import ABC, abstractmethod
-from functools import wraps
+from functools import wraps, lru_cache
 import pathlib
 
 from lark import Lark, Transformer, Tree, Token
@@ -24,6 +24,7 @@ def parse_with_lark(text, *args, **kwargs):
         )
 
 
+@lru_cache(maxsize=16)
 def make_lark_parser(*args, **kwargs):
     """Create a lark parser with some default arguments."""
     kwargs_with_defaults = {"start": "start", "parser": "lalr", **kwargs}
