@@ -34,7 +34,8 @@ def make_lark_parser(*args, **kwargs):
 
 
 class PreprocessingLarkParser(Lark):
-    """Subclass of lark parsers that run preparsing steps."""
+    """Subclass of lark parsers that run preparsing steps. As this may be
+    cached it should be considered immutable once created."""
 
     def parse(self, *args, **kwargs):
         tree = super().parse(*args, **kwargs)
