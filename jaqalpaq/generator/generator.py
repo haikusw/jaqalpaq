@@ -59,69 +59,85 @@ def generate_jaqal_program(circ):
 
 
 def generate_jaqal_reg(register):
-    return (
-        "register " + register.name + "[" + generate_jaqal_value(register.size) + "]\n"
+    return "".join(
+        ("register ", register.name, "[", generate_jaqal_value(register.size), "]\n")
     )
 
 
 def generate_jaqal_let(const):
-    return "let " + const.name + " " + generate_jaqal_value(const.value) + "\n"
+    return "".join(("let ", const.name, " ", generate_jaqal_value(const.value), "\n"))
 
 
 def generate_jaqal_map(register):
     if isinstance(register, NamedQubit):
-        return (
-            "map "
-            + register.name
-            + " "
-            + register.alias_from.name
-            + "["
-            + generate_jaqal_value(register.alias_index)
-            + "]\n"
+        return "".join(
+            (
+                "map ",
+                register.name,
+                " ",
+                register.alias_from.name,
+                "[",
+                generate_jaqal_value(register.alias_index),
+                "]\n",
+            )
         )
     elif register.alias_slice is not None:
-        return (
-            "map "
-            + register.name
-            + " "
-            + register.alias_from.name
-            + "["
-            + notate_slice(register.alias_slice)
-            + "]\n"
+        return "".join(
+            (
+                "map ",
+                register.name,
+                " ",
+                register.alias_from.name,
+                "[",
+                notate_slice(register.alias_slice),
+                "]\n",
+            )
         )
     else:
-        return "map " + register.name + " " + register.alias_from.name + "\n"
+        return "".join(("map ", register.name, " ", register.alias_from.name, "\n"))
 
 
 def generate_jaqal_macro(macro):
-    return (
-        "macro "
-        + macro.name
-        + " "
-        + " ".join([parameter.name for parameter in macro.parameters])
-        + " "
-        + generate_jaqal_block(macro.body, 0, False)
-        + "\n"
+    return "".join(
+        (
+            "macro ",
+            macro.name,
+            " ",
+            " ".join([parameter.name for parameter in macro.parameters]),
+            " ",
+            generate_jaqal_block(macro.body, 0, False),
+            "\n",
+        )
     )
 
 
 def generate_jaqal_gate(statement, depth):
-    return (
-        "\t" * depth
-        + statement.name
-        + " "
-        + " ".join([generate_jaqal_value(val) for val in statement.parameters.values()])
-        + "\n"
+    return "".join(
+        (
+            "\t" * depth,
+            " ".join(
+                (
+                    statement.name,
+                    *(
+                        generate_jaqal_value(val)
+                        for val in statement.parameters.values()
+                    ),
+                )
+            ),
+            "\n",
+        )
     )
 
 
 def generate_jaqal_loop(statement, depth):
-    return (
-        "\t" * depth
-        + "loop "
-        + generate_jaqal_value(statement.iterations)
-        + " "
-        + generate_jaqal_block(statement.statements, depth, False)
+    return "".join(
+        (
+            "\t" * depth,
+            "loop ",
+            generate_jaqal_value(statement.iterations),
+            " ",
+            generate_jaqal_block(statement.statements, depth, False),
+        )
     )
 
 
