@@ -1,3 +1,6 @@
+# Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC (NTESS).
+# Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains
+# certain rights in this software.
 """Validate a parse tree to catch errors that aren't pure syntax errors but still exist at the language level."""
 
 from numbers import Integral

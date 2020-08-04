@@ -1,3 +1,6 @@
+# Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC (NTESS).
+# Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains
+# certain rights in this software.
 """Normalize gates in blocks under the assumption that they all have
 unitary timing (or are padded to be so)."""
 

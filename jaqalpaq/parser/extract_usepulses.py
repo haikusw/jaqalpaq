@@ -1,3 +1,6 @@
+# Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC (NTESS).
+# Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains
+# certain rights in this software.
 """Extract information on the usepulses statement used in a Jaqal file."""
 # As we are specifically not using the full intended power of the usepulses statement,
 # this module will be a very limited version. It will only support one such
