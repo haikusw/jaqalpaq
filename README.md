@@ -1,14 +1,20 @@
-JaqalPaq 1.0.0-beta
----
-
+JaqalPaq 1.0.0b0
+----------------
 
 # JaqalPaq
 
-JaqalPaq is a python package used to parse, manipulate, emulate, and generate quantum assembly code written in [Jaqal](https://qscout.sandia.gov/jaqal) (Just another quantum assembly language).  JaqalPaq can be installed with optional transpilers that convert code written in other quantum assembly languages to a version of Jaqal whose native gates are relevant for [QSCOUT](https://qscout.sandia.gov/) (Quantum Scientific Computing Open User Testbed).
+JaqalPaq is a python package used to parse, manipulate, emulate, and generate
+quantum assembly code written in [Jaqal](https://qscout.sandia.gov/jaqal)
+(Just another quantum assembly language).  JaqalPaq can be installed with
+optional transpilers that convert code written in other quantum assembly
+languages to a version of Jaqal whose native gates are relevant for
+[QSCOUT](https://qscout.sandia.gov/) (Quantum Scientific Computing Open User
+Testbed).
 
 ## Installation
 
-JaqalPaq is available on [GitLab](https://gitlab.com/jaqalpaq).  Use the package manager [pip](https://pip.pypa.io/en/stable/) to install it.
+JaqalPaq is available on [GitLab](https://gitlab.com/jaqal/jaqalpaq).  Use the
+package manager [pip](https://pip.pypa.io/en/stable/) to install it.
 
 ```bash
 pip install jaqalpaq
@@ -20,7 +26,13 @@ To install the optional transpiler suite, use the following:
 pip install jaqalpaq-extras
 ```
 
-The JaqalPaq emulator can be programmed to emulate any native gate set.  However, it only comes bundled with an emulator for [QSCOUT](https://qscout.sandia.gov/) native operations, which are modeled as pure-state preparations, unitary transformations, and destructive measurements.  To install this capability, use the following:
+The JaqalPaq emulator can be programmed to emulate any native gate set.
+However, we only currently provide an emulator for
+[QSCOUT](https://qscout.sandia.gov/) native operations, which are modeled as
+pure-state preparations, unitary transformations, and destructive
+measurements.  This is available on Gitlab in the
+[QSCOUT Gate Models](https://gitlab.com/jaqal/qscout-gatemodels)
+repository.  To install this capability, use the following
 
 ```bash
 pip install qscout-gatemodels
@@ -28,7 +40,7 @@ pip install qscout-gatemodels
 
 ## Usage
 
-The following simple example is from ```examples/usage_example.py```
+The following simple example is from `examples/usage_example.py`
 
 
 ```python
@@ -43,7 +55,7 @@ print(f"Probabilities: {JaqalCircuitResults.subcircuits[0].probability_by_str}")
 JaqalProgram = generate_jaqal_program(JaqalCircuitObject)
 ```
 
-The Jaqal file processed by this example, ```examples/jaqal/Sxx_circuit.jql```, is
+The Jaqal file processed by this example, `examples/jaqal/Sxx_circuit.jql`, is
 
 ```python
 from qscout.v1.std usepulses *
@@ -55,9 +67,12 @@ Sxx q[1] q[0]
 measure_all
 ```
 
-More extensive examples, including detailed Jupyter notebooks implementing the variational quantum eigensolver (VQE) quantum algorithm for some simple molecules, can be found in the ```examples``` directory.
+More extensive examples, including detailed Jupyter notebooks implementing the
+variational quantum eigensolver (VQE) quantum algorithm for some simple
+molecules, can be found in the `examples` directory.
 
-For information on the JaqalPaq emulator's command-line interface, run the following in your shell:
+For information on the JaqalPaq emulator's command-line interface, run the
+following in your shell:
 
 ```bash
 jaqal-emulate --help
