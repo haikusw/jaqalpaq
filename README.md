@@ -1,5 +1,5 @@
-JaqalPaq 1.0.0b0
-----------------
+JaqalPaq
+--------
 
 # JaqalPaq
 

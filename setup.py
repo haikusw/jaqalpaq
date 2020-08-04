@@ -49,7 +49,7 @@ else:
 
 name = "JaqalPaq"
 description = "Python tools for Jaqal"
-version = "1.0.0b0"
+version = "1.0.0b1"
 
 setup(
     name=name,
