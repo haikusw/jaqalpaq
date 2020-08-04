@@ -32,10 +32,11 @@ However, we only currently provide an emulator for
 pure-state preparations, unitary transformations, and destructive
 measurements.  This is available on Gitlab in the
 [QSCOUT Gate Models](https://gitlab.com/jaqal/qscout-gatemodels)
-repository.  To install this capability, use the following
+repository.  [pyGSTi](https://www.pygsti.info/) is used to perform forward
+simulations.  To install this capability, use the following
 
 ```bash
-pip install qscout-gatemodels
+pip install qscout-gatemodels pygsti
 ```
 
 ## Usage
