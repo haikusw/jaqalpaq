@@ -56,7 +56,7 @@ print(f"Probabilities: {JaqalCircuitResults.subcircuits[0].probability_by_str}")
 JaqalProgram = generate_jaqal_program(JaqalCircuitObject)
 ```
 
-The Jaqal file processed by this example, `examples/jaqal/Sxx_circuit.jql`, is
+The Jaqal file processed by this example, `examples/jaqal/Sxx_circuit.jaqal`, is
 
 ```python
 from qscout.v1.std usepulses *
