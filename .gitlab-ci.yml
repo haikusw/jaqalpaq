@@ -2,9 +2,7 @@ image: python:3.7
 
 before_script:
   - python --version
-  - export http_proxy=http://wwwproxy.sandia.gov:80
-  - export https_proxy=https://wwwproxy.sandia.gov:80
-  - export no_proxy=.sandia.gov
+  - echo "$CI_PROJECT_URL" | grep -q gitlab.sandia.gov && export http_proxy=http://wwwproxy.sandia.gov:80 https_proxy=https://wwwproxy.sandia.gov:80 no_proxy=.sandia.gov
 
 stages:
   - Static Analysis
@@ -23,7 +21,7 @@ pytest:
   stage: Test
   script:
     - pip install -e .[pygsti-integration,tests]
-    - ( unset https_proxy ; cd .. && rm -fr qscout-gatemodels && git clone --depth 1 https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.sandia.gov/jaqal/qscout-gatemodels.git/  )
+    - ( unset https_proxy ; cd .. && rm -fr qscout-gatemodels && git clone --depth 1 "$(echo "${CI_REPOSITORY_URL}" | sed 's/jaqalpaq.git/qscout-gatemodels.git/' )" )
     - ( cd ../qscout-gatemodels && pip install -e . )
     - pytest
 
@@ -31,6 +29,6 @@ sphinx:
   stage: Documentation
   script:
     - pip install -e.[docs]
-    - ( unset https_proxy ; cd .. && rm -fr jaqalpaq-extras && git clone --depth 1 https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.sandia.gov/jaqal/jaqalpaq-extras.git/  )
+    - ( unset https_proxy ; cd .. && rm -fr jaqalpaq-extras && git clone --depth 1 "$(echo "${CI_REPOSITORY_URL}" | sed 's/jaqalpaq.git/jaqalpaq-extras.git/' )" )
     - ( cd ../jaqalpaq-extras && pip install -e . )
     - python3 setup.py build_sphinx
