@@ -19,3 +19,5 @@ Subpackages
    jaqalpaq.generator
    jaqalpaq.parser
    jaqalpaq.emulator
+   jaqalpaq.scheduler
+   jaqalpaq.transpilers
