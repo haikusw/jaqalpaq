@@ -10,10 +10,11 @@ from jaqalpaq import JaqalError
 from jaqalpaq.core.constant import Constant
 from jaqalpaq.core.algorithm.walkers import TraceSerializer
 
-from .pygstimodel import build_noiseless_native_model
+from .model import build_noiseless_native_model
+from jaqalpaq.emulator.backend import IndependentSubcircuitsBackend
 
 
-def label_from_statement(gate):
+def pygsti_label_from_statement(gate):
     """Generate a pyGSTi label appropriate for a Jaqal gate
 
     :param gate: A Jaqal gate object
@@ -34,7 +35,7 @@ def label_from_statement(gate):
     return pygsti.objects.Label(name, qubits, args=args if args else None)
 
 
-def circuit_from_gatelist(gates, registers):
+def pygsti_circuit_from_gatelist(gates, registers):
     """Generate a pyGSTi circuit from a list of Jaqal gates, and the associated registers.
 
     :param gates: An iterable of Jaqal gates
@@ -49,7 +50,7 @@ def circuit_from_gatelist(gates, registers):
     end = False
     for gate in gates:
         if gate.name not in ["prepare_all", "measure_all"]:
-            lst.append(label_from_statement(gate))
+            lst.append(pygsti_label_from_statement(gate))
         else:
             if gate.name == "prepare_all":
                 if not start:
@@ -67,17 +68,23 @@ def circuit_from_gatelist(gates, registers):
     )
 
 
-def subcircuit_probabilities(circ, trace, noisemodel=build_noiseless_native_model):
-    """Generate the probabilities of outcomes of a subcircuit
+class UnitarySerializedEmulator(IndependentSubcircuitsBackend):
+    """Serialized emulator using pyGSTi circuit objects
 
-    :param Circuit circ: The parent circuit
-    :param Trace trace: the subcircut of circ to generate probabilities for
-    :param noisemodel : [undocumented] The method to generate the noisemodel.
-    :return: A pyGSTi outcome dictionary.
+    This object should be treated as an opaque symbol to be passed to run_jaqal_circuit.
     """
-    s = TraceSerializer(trace)
-    s.visit(circ)
-    pc = circuit_from_gatelist(s.serialized, circ.fundamental_registers())
-    model = noisemodel(circ.registers, circ.native_gates)
-    probs = model.probs(pc)
-    return probs
+
+    def _probability(self, trace):
+        """Generate the probabilities of outcomes of a subcircuit
+
+        :param Trace trace: the subcircut of circ to generate probabilities for
+        :return: A pyGSTi outcome dictionary.
+        """
+
+        circ = self.circuit
+        s = TraceSerializer(trace)
+        s.visit(circ)
+        pc = pygsti_circuit_from_gatelist(s.serialized, circ.fundamental_registers())
+        model = build_noiseless_native_model(circ.registers, circ.native_gates)
+        probs = np.array([(int(k[0][::-1], 2), v) for k, v in model.probs(pc).items()])
+        return probs[probs[:, 0].argsort()][:, 1].copy()

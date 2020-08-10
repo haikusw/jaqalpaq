@@ -8,7 +8,7 @@ import numpy as np
 from jaqalpaq import JaqalError
 from jaqalpaq.parser import JaqalParseError
 
-from .noiseless import run_jaqal_string
+from .frontend import run_jaqal_string
 
 
 def assertAlmostEqual(a, b):
