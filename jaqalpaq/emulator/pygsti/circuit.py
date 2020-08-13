@@ -5,7 +5,7 @@ from collections import defaultdict
 import numpy as np
 
 import pygsti
-import pygsti.objects
+from pygsti.objects import Circuit, CircuitLabel, Label
 
 from jaqalpaq import JaqalError
 from jaqalpaq.core import Macro
@@ -34,7 +34,7 @@ def pygsti_label_from_statement(gate):
                 args.append(param)
         else:
             args.append(param.name)
-    return pygsti.objects.Label(args)
+    return Label(args)
 
 
 def pygsti_circuit_from_gatelist(gates, registers):
@@ -65,9 +65,7 @@ def pygsti_circuit_from_gatelist(gates, registers):
                 else:
                     assert False, "You can't end a circuit twice!"
 
-    return pygsti.objects.Circuit(
-        lst, line_labels=[qubit.name for reg in registers for qubit in reg]
-    )
+    return Circuit(lst, line_labels=[qubit.name for reg in registers for qubit in reg])
 
 
 class UnitarySerializedEmulator(IndependentSubcircuitsBackend):
@@ -93,93 +91,102 @@ class UnitarySerializedEmulator(IndependentSubcircuitsBackend):
         return probs[probs[:, 0].argsort()][:, 1].copy()
 
 
-class NoisyVisitor(UsedQubitIndicesVisitor):
+class pyGSTiCircuitGeneratingVisitor(UsedQubitIndicesVisitor):
     validate_parallel = True
 
-    def __init__(self, get_operation, make_idle):
-        self.get_operation = get_operation
-        self.make_idle = make_idle
+    def idle_gate(self, indices, duration, parallel=None):
+        labels = self.labels(indices)
+        if len(labels) == 0:
+            return parallel
+
+        if parallel is None:
+            ops = []
+        else:
+            ops = [parallel]
+
+        for lbl in labels:
+            ops.append(Label(("Gidle", lbl, ";", duration)))
+
+        return Label(ops)
+
+    def visit_Circuit(self, obj, context=None):
+        op, indices, duration = super().visit_Circuit(obj, context=context)
+        return Circuit((op,), line_labels=self.llbls)
 
     def visit_LoopStatement(self, obj, context=None):
-        operation, indices, duration = self.visit(obj.statements, context=context)
-        return (
-            pygsti.objects.ComposedOp([operation] * obj.iterations),
-            indices,
-            duration * obj.iterations,
-        )
-        # Use "repeated op" in next version of pygsti when we update to it.
+        op, indices, duration = self.visit(obj.statements, context=context)
+        n = obj.iterations
+        return (CircuitLabel("", (op,), self.llbls, reps=n), indices, duration * n)
 
     def visit_BlockStatement(self, obj, context=None):
-        visitor = UsedQubitIndicesVisitor()
+        visitor = UsedQubitIndicesVisitor(trace=self.trace)
         visitor.all_qubits = self.all_qubits
+        try:
+            llbls = self.llbls
+        except AttributeError:
+            llbls = self.llbls = self.labels(self.all_qubits)
+
         indices = visitor.visit(obj, context=context)
+
         if obj.parallel:
             branches = [self.visit(sub_obj, context=context) for sub_obj in obj]
             duration = max([branch[2] for branch in branches])
-            operation = pygsti.objects.ComposedOp(
-                [
-                    pygsti.objects.ComposedOp(
-                        [branch[0]]
-                        + [
-                            pygsti.objects.EmbeddedOp(
-                                [self.labels(self.all_qubits)],
-                                [idx],
-                                self.make_idle(duration - branch[2]),
-                            )
-                            for idx in self.labels(branch[1])
-                        ]
+
+            ops = []
+            for sub_op, sub_indices, sub_duration in branches:
+                if sub_op is None:
+                    continue
+                idle_dur = duration - sub_duration
+                if idle_dur <= 0:
+                    ops.append(sub_op)
+                else:
+                    ops.append(
+                        CircuitLabel(
+                            "", (sub_op, self.idle_gate(sub_indices, idle_dur)), llbls
+                        )
                     )
-                    for branch in branches
-                ]
-            )
-            return (operation, indices, duration)
+
+            return (Label(ops), indices, duration)
         else:
-            operations = []
+            ops = []
             duration = 0
             for sub_obj in obj:
-                sub_operation, sub_indices, sub_duration = self.visit(
-                    sub_obj, context=context
-                )
-                if sub_operation is None:
+                sub_op, sub_indices, sub_duration = self.visit(sub_obj, context=context)
+                if sub_op is None:
                     continue
                 duration += sub_duration
-                operations.append(sub_operation)
-                for idx in self.labels(indices):
-                    if idx not in self.labels(sub_indices):
-                        operations.append(
-                            pygsti.objects.EmbeddedOp(
-                                [self.labels(self.all_qubits)],
-                                [idx],
-                                self.make_idle(sub_duration),
-                            )
-                        )
-            return (pygsti.objects.ComposedOp(operations), indices, duration)
+
+                inv_indices = indices.copy()
+                for reg in list(inv_indices.keys()):
+                    inv_indices[reg] = inv_indices[reg] - sub_indices[reg]
+
+                ops.append(self.idle_gate(inv_indices, sub_duration, parallel=sub_op))
+
+            return (CircuitLabel("", ops, llbls), indices, duration)
 
     def labels(self, indices):
-        return ["Q" + k + str(v) for k in indices for v in indices[k]]
+        return [f"{k}[{str(v)}]" for k in indices for v in indices[k]]
 
     def visit_GateStatement(self, obj, context=None):
         # Note: The code originally checked if a gate was a native gate, macro, or neither,
         # and raised an exception if neither. This assumes everything not a macro is a native gate.
-        indices = defaultdict(set)
         # Note: This could be more elegant with a is_macro method on gates
         if isinstance(obj.gate_def, Macro):
+            assert False
+            # This should never be called: we should expand macros before using this.
             context = context or {}
             macro_context = {**context, **obj.parameters}
             macro_body = obj.gate_def.body
             return self.visit(macro_body, macro_context)
         else:
+            indices = defaultdict(set)
             for param in obj.used_qubits:
                 if param is all:
                     self.merge_into(indices, self.all_qubits)
+                    # TODO: check prepare_all/measure_all here
                     return (None, indices, 0)
                 else:
                     self.merge_into(indices, self.visit(param, context=context))
-            op = self.get_operation(
-                obj.name,
-                [obj.parameters[v.name] for v in obj.gate_def.classical_parameters],
-            )
-            op = pygsti.objects.EmbeddedOp(
-                self.labels(self.all_qubits), self.labels(indices), op
-            )
-            return (op, indices, 1)
+            # TODO: Resolve macros and expand lets within this visitor.
+            #       The pygsti_label_from_statement will need to be passed context information.
+            return (pygsti_label_from_statement(obj), indices, 1)
