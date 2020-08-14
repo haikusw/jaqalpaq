@@ -117,20 +117,6 @@ class GateDefinition(AbstractGate):
         """The ideal unitary action of the gate on its target qubits"""
         return self._ideal_unitary
 
-    def _ideal_unitary_pygsti(self, parms):
-        """Ideal unitary action of the gate with pyGSTi special casing.
-
-        :param parms: A list of all classical arguments to the gate.
-        :return: The ideal unitary action of the gate on its target qubits, or an
-            identity gate on the target qubit.
-        """
-        if parms:
-            return self._ideal_unitary(*parms)
-        else:
-            import numpy
-
-            return numpy.identity(2 ** len(self.quantum_parameters))
-
     @property
     def used_qubits(self):
         """Return the parameters in this gate that are qubits. Subclasses may

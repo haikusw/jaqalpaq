@@ -7,6 +7,23 @@ import numpy as np
 from jaqalpaq import JaqalError
 
 
+def pygsti_unitary(g):
+    """Ideal unitary action of the gate with pyGSTi special casing.
+
+    :param parms: A list of all classical arguments to the gate.
+    :return: The ideal unitary action of the gate on its target qubits, or an
+        identity gate on the target qubit.
+    """
+
+    def _unitary_fun(parms):
+        if parms:
+            return g.ideal_unitary(*parms)
+        else:
+            return np.identity(2 ** len(g.quantum_parameters))
+
+    return _unitary_fun
+
+
 def build_noiseless_native_model(registers, gates):
     """Builds a noise model for each Jaqal gate
 
@@ -31,7 +48,7 @@ def build_noiseless_native_model(registers, gates):
             continue
 
         if len(g.classical_parameters) > 0:
-            unitaries[name] = g._ideal_unitary_pygsti
+            unitaries[name] = pygsti_unitary(g)
         else:
             unitaries[name] = g.ideal_unitary()
 
