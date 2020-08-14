@@ -21,18 +21,17 @@ def pygsti_label_from_statement(gate):
     :return: A pyGSTi Label object
 
     """
-    name = "G" + gate.name.lower()
-    qubits = []
-    args = []
+    args = [f"G{gate.name.lower()}"]
     for param, template in zip(gate.parameters.values(), gate.gate_def.parameters):
         if template.classical:
+            args.append(";")
             if type(param) == Constant:
                 args.append(param.value)
             else:
                 args.append(param)
         else:
-            qubits.append(param.name)
-    return pygsti.objects.Label(name, qubits, args=args if args else None)
+            args.append(param.name)
+    return pygsti.objects.Label(args)
 
 
 def pygsti_circuit_from_gatelist(gates, registers):
