@@ -55,6 +55,9 @@ def build_noiseless_native_model(registers, gates):
         if len(g.quantum_parameters) > 1:
             availability[name] = "all-permutations"
 
+    gate_names.append("Gidle")
+    unitaries["Gidle"] = lambda *args: np.identity(2)
+
     fundamental_registers = [r for r in registers.values() if r._alias_from is None]
     if len(fundamental_registers) > 1:
         print(
