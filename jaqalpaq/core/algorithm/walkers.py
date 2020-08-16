@@ -63,7 +63,6 @@ class DiscoverSubcircuits(UsedQubitIndicesVisitor):
         super().__init__(*args, **kwargs)
         self.current = None
         self.subcircuits = []
-        self.address = []
         self.p_gate = p_gate
         self.m_gate = m_gate
 
@@ -84,17 +83,25 @@ class DiscoverSubcircuits(UsedQubitIndicesVisitor):
         else:
             return subcircuits[:]
 
-    def visit_BlockStatement(self, block, context=None):
+    def visit_LoopStatement(self, obj, context=None):
+        return self.visit(obj.statements, context=context, reps=obj.iterations)
+
+    def visit_BlockStatement(self, block, context=None, reps=1):
         # Calling UsedQubitIndicesVisitor as super() is
         # far too inflexible for the purposes here.
         indices = defaultdict(set)
 
-        self.address.append(0)
-        for self.address[-1], stmt in enumerate(block.statements):
+        count = len(self.subcircuits)
+        had_started = self.current is not None
+
+        # XXX: using a trace restriction here is untested
+        for n, stmt in self.trace_statements(block.statements):
             self.merge_into(
                 indices, self.visit(stmt, context=context), disjoint=block.parallel
             )
-        self.address.pop()
+
+        if had_started and (reps > 1) and (len(self.subcircuits) != count):
+            raise JaqalError("measure_all -> prepare_all not supported in loops")
 
         return indices
 
