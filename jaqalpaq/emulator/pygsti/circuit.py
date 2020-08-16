@@ -111,13 +111,15 @@ class pyGSTiCircuitGeneratingVisitor(UsedQubitIndicesVisitor):
 
     def visit_Circuit(self, obj, context=None):
         op, indices, duration = super().visit_Circuit(obj, context=context)
-        return Circuit((op,), line_labels=self.llbls)
+        return Circuit(() if op is None else (op,), line_labels=self.llbls)
 
     def visit_LoopStatement(self, obj, context=None):
         if not self.started:
             return self.visit(obj.statements, context=context)
 
         op, indices, duration = self.visit(obj.statements, context=context)
+        if op is None:
+            return (None, indices, 0)
         n = obj.iterations
         return (CircuitLabel("", (op,), self.llbls, reps=n), indices, duration * n)
 
@@ -136,6 +138,10 @@ class pyGSTiCircuitGeneratingVisitor(UsedQubitIndicesVisitor):
                 self.visit(sub_obj, context=context)
                 for n, sub_obj in self.trace_statements(obj.statements)
             ]
+
+            if len(branches) == 0:
+                return (None, indices, 0)
+
             duration = max([branch[2] for branch in branches])
 
             ops = []
@@ -167,6 +173,9 @@ class pyGSTiCircuitGeneratingVisitor(UsedQubitIndicesVisitor):
                     inv_indices[reg] = inv_indices[reg] - sub_indices[reg]
 
                 ops.append(self.idle_gate(inv_indices, sub_duration, parallel=sub_op))
+
+            if len(ops) == 0:
+                return (None, indices, 0)
 
             return (CircuitLabel("", ops, llbls), indices, duration)
 
