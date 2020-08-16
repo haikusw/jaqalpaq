@@ -30,76 +30,27 @@ class Trace:
 
 
 class TraceSerializer(Visitor):
-    """Returns a serialized representation of all gates called during a circuit trace.
+    """Returns a serialized representation of all gates called during a circuit trace."""
 
-    Start locations lexically following stop locations are not supported.
-
-    """
-
-    def __init__(self, trace=None):
-        if trace is not None:
-            self.start = trace.start
-            self.end = trace.end
-            self.started = False
-        else:
-            self.start = None
-            self.end = None
-            self.started = True
-
-        self.address = []
-        self.serialized = []
+    def __init__(self, trace=None, **kwargs):
+        super().__init__(trace=trace, **kwargs)
 
     def visit_Circuit(self, circuit):
-        return self.visit(circuit.body)
+        yield from self.visit(circuit.body)
 
     def visit_BlockStatement(self, block):
-        address = self.address
-        if self.started:
-            n = 0
-            address.append(n)
-        else:
-            start = self.start
-            if start[: len(address)] != address:
-                assert start[: len(address)] > address
-                return None
-            n = start[len(address)]
-            address.append(n)
-            if start == address:
-                self.started = True
-
-        while n < len(block.statements):
-            if self.visit(block.statements[n]):
-                return True
-            n = address[-1] = n + 1
-        address.pop()
-
-        return None
+        for n, sub_obj in self.trace_statements(block.statements):
+            yield from self.visit(sub_obj)
 
     def visit_LoopStatement(self, loop):
         if self.started:
             for n in range(loop.iterations):
-                if self.visit(loop.statements):
-                    # We don't support structures like
-                    # prepare_all
-                    # ...
-                    # loop 4 {
-                    #  measure_all
-                    #  prepare_all
-                    #  ...
-                    # }
-                    raise JaqalError(
-                        "measure_all -> prepare_all not supported in loops"
-                    )
+                yield from self.visit(loop.statements)
         else:
-            return self.visit(loop.statements)
+            yield from self.visit(loop.statements)
 
     def visit_GateStatement(self, gate):
-        # We could instead do this with async to use constant additional space.
-        self.serialized.append(gate)
-        if self.end and (self.address == self.end):
-            return True
-
-        return None
+        yield gate
 
 
 class DiscoverSubcircuits(UsedQubitIndicesVisitor):

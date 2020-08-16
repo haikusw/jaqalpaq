@@ -40,13 +40,13 @@ class UsedQubitIndicesVisitor(Visitor):
     def visit_BlockStatement(self, obj, context=None):
         indices = defaultdict(set)
         if self.validate_parallel and obj.parallel:
-            for sub_obj in obj:
+            for n, sub_obj in self.trace_statements(obj.statements):
                 self.merge_into(
                     indices, self.visit(sub_obj, context=context), disjoint=True
                 )
             return indices
 
-        for sub_obj in obj:
+        for n, sub_obj in self.trace_statements(obj.statements):
             self.merge_into(indices, self.visit(sub_obj, context=context))
         return indices
 

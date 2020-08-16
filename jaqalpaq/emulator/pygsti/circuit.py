@@ -83,8 +83,9 @@ class UnitarySerializedEmulator(IndependentSubcircuitsBackend):
 
         circ = self.circuit
         s = TraceSerializer(trace)
-        s.visit(circ)
-        pc = pygsti_circuit_from_gatelist(s.serialized, circ.fundamental_registers())
+        pc = pygsti_circuit_from_gatelist(
+            list(s.visit(circ)), circ.fundamental_registers()
+        )
         model = build_noiseless_native_model(circ.registers, circ.native_gates)
         probs = np.array([(int(k[0][::-1], 2), v) for k, v in model.probs(pc).items()])
         return probs[probs[:, 0].argsort()][:, 1].copy()

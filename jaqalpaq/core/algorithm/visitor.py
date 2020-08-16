@@ -22,6 +22,45 @@ class Visitor:
         visitor.visit(gate)
     """
 
+    def __init__(self, *args, trace=None, **kwargs):
+        self.started = trace is None
+        self.trace = trace
+        self.address = []
+        super().__init__(*args, **kwargs)
+
+    def trace_statements(self, statements):
+        address = self.address
+        if self.started:
+            n = 0
+            address.append(n)
+        else:
+            start = self.trace.start
+            if start[: len(address)] != address:
+                assert start[: len(address)] > address
+                return
+            n = start[len(address)]
+            address.append(n)
+            if start == address:
+                self.started = True
+
+        len_address = len(address)
+
+        if self.trace and (address > self.trace.end):
+            # This is the measure -> prepare case
+            while n < len(statements):
+                yield n, statements[n]
+                assert len(address) == len_address
+                n = address[-1] = n + 1
+            n = address[-1] = 0
+
+        while n < len(statements):
+            yield n, statements[n]
+            assert len(address) == len_address
+            n = address[-1] = n + 1
+            if self.trace and (address > self.trace.end):
+                break
+        address.pop()
+
     def visit_default(self, obj, *args, **kwargs):
         """Method called when no method matches. Override to provide default behavior.
 
