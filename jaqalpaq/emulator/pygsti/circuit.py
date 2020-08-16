@@ -91,6 +91,36 @@ class UnitarySerializedEmulator(IndependentSubcircuitsBackend):
         return probs[probs[:, 0].argsort()][:, 1].copy()
 
 
+def pygsti_circuit_from_circuit(circuit, trace=None):
+    visitor = pyGSTiCircuitGeneratingVisitor(trace=trace)
+    return visitor.visit(circuit)
+
+
+class CircuitEmulator(IndependentSubcircuitsBackend):
+    """Emulator using pyGSTi circuit objects
+
+    This object should be treated as an opaque symbol to be passed to run_jaqal_circuit.
+    """
+
+    def __init__(self, *args, model=None, **kwargs):
+        self.model = model
+        super().__init__(*args, **kwargs)
+
+    def _probability(self, trace):
+        """Generate the probabilities of outcomes of a subcircuit
+
+        :param Trace trace: the subcircut of circ to generate probabilities for
+        :return: A pyGSTi outcome dictionary.
+        """
+
+        circ = self.circuit
+        pc = pygsti_circuit_from_circuit(circ, trace)
+        probs = np.array(
+            [(int(k[0][::-1], 2), v) for k, v in self.model.probs(pc).items()]
+        )
+        return probs[probs[:, 0].argsort()][:, 1].copy()
+
+
 class pyGSTiCircuitGeneratingVisitor(UsedQubitIndicesVisitor):
     validate_parallel = True
 
