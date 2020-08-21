@@ -24,7 +24,7 @@ def pygsti_label_from_statement(gate):
     :return: A pyGSTi Label object
 
     """
-    args = [f"G{gate.name.lower()}"]
+    args = [f"GJ{gate.name}"]
     for param, template in zip(gate.parameters.values(), gate.gate_def.parameters):
         if template.classical:
             args.append(";")

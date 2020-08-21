@@ -36,7 +36,7 @@ def build_noiseless_native_model(registers, gates):
     availability = {}
 
     for g in gates.values():
-        name = f"G{g.name.lower()}"
+        name = f"GJ{g.name}"
         gate_names.append(name)
 
         if len(g.quantum_parameters) == 0:
