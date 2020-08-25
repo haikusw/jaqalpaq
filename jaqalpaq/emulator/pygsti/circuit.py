@@ -74,14 +74,14 @@ class UnitarySerializedEmulator(IndependentSubcircuitsBackend):
     This object should be treated as an opaque symbol to be passed to run_jaqal_circuit.
     """
 
-    def _probability(self, trace):
+    def _probability(self, job, trace):
         """Generate the probabilities of outcomes of a subcircuit
 
         :param Trace trace: the subcircut of circ to generate probabilities for
         :return: A pyGSTi outcome dictionary.
         """
 
-        circ = self.circuit
+        circ = job.circuit
         s = TraceSerializer(trace)
         pc = pygsti_circuit_from_gatelist(
             list(s.visit(circ)), circ.fundamental_registers()
@@ -106,14 +106,14 @@ class CircuitEmulator(IndependentSubcircuitsBackend):
         self.model = model
         super().__init__(*args, **kwargs)
 
-    def _probability(self, trace):
+    def _probability(self, job, trace):
         """Generate the probabilities of outcomes of a subcircuit
 
         :param Trace trace: the subcircut of circ to generate probabilities for
         :return: A pyGSTi outcome dictionary.
         """
 
-        circ = self.circuit
+        circ = job.circuit
         pc = pygsti_circuit_from_circuit(circ, trace)
         probs = np.array(
             [(int(k[0][::-1], 2), v) for k, v in self.model.probs(pc).items()]
