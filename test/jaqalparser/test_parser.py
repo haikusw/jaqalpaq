@@ -279,7 +279,7 @@ class ParserTester(ParserTesterMixin, unittest.TestCase):
         exp_tree = self.make_program(
             self.make_header_statements(),
             self.make_body_statements(
-                self.make_gate_statement("g"), self.make_gate_statement("f"),
+                self.make_gate_statement("g"), self.make_gate_statement("f")
             ),
         )
         act_tree = self.simplify_tree(tree)

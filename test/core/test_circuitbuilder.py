@@ -290,7 +290,7 @@ class BuildTester(unittest.TestCase):
         exp_value.constants[x.name] = x
         exp_value.macros[foo.name] = foo
         exp_value.body.statements.append(foo(x))
-        loop_block = core.BlockStatement(statements=[gate_def(3),])
+        loop_block = core.BlockStatement(statements=[gate_def(3)])
         loop = core.LoopStatement(5, loop_block)
         exp_value.body.statements.append(loop)
         parallel_block = core.BlockStatement(parallel=True)

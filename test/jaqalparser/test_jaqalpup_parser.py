@@ -285,7 +285,7 @@ class ParserTester(TestCase):
 
     def test_return_usepulses(self):
         text = "from MyPulses.MyClass usepulses *"
-        exp_value = {"usepulses": {Identifier.parse("MyPulses.MyClass"): all,}}
+        exp_value = {"usepulses": {Identifier.parse("MyPulses.MyClass"): all}}
         _, act_value = parse_jaqal_string(
             text, return_usepulses=True, autoload_pulses=False
         )

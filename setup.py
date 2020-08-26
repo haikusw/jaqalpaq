@@ -16,7 +16,7 @@ setup(
     author_email="qscout@sandia.gov",
     packages=find_packages(include=["jaqalpaq", "jaqalpaq.*"]),
     package_dir={"": "."},
-    package_data={"jaqalpaq.parser": ["jaqal_grammar.lark"],},
+    package_data={"jaqalpaq.parser": ["jaqal_grammar.lark"]},
     install_requires=["lark-parser"],
     extras_require={
         "tests": ["pytest"],
@@ -40,5 +40,5 @@ setup(
         "Operating System :: MacOS :: MacOS X",
         "Operating System :: Unix",
     ],
-    entry_points={"console_scripts": ["jaqal-emulate = jaqalpaq._cli:main"],},
+    entry_points={"console_scripts": ["jaqal-emulate = jaqalpaq._cli:main"]},
 )

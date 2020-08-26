@@ -37,7 +37,7 @@ class InterfaceTester(TestCase):
         exp_result = [
             Loop(
                 5,
-                SequentialGateBlock([Loop(2, SequentialGateBlock([Gate("foo", [])])),]),
+                SequentialGateBlock([Loop(2, SequentialGateBlock([Gate("foo", [])]))]),
             )
         ]
         let_dict = {}
@@ -64,7 +64,7 @@ class InterfaceTester(TestCase):
             Gate("g0", []),
             Gate("g1", []),
             ParallelGateBlock(
-                [Gate("p0", []), Gate("p1", []), Gate("p2", []), Gate("q0", []),]
+                [Gate("p0", []), Gate("p1", []), Gate("p2", []), Gate("q0", [])]
             ),
             Gate("q1", []),
             Gate("g2", []),

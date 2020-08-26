@@ -7,9 +7,7 @@ import numpy as np
 from jaqalpaq import JaqalError
 
 
-def build_noiseless_native_model(
-    registers, gates,
-):
+def build_noiseless_native_model(registers, gates):
     """Builds a noise model for each Jaqal gate
 
     :param register: the Jaqal registers that the gates may act on

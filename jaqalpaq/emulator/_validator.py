@@ -45,7 +45,7 @@ def generate_jaqal_validation(exe):
     emit("// EXPECTED READOUTS")
     emit(
         "\n".join(
-            " ".join(("//", mr.as_str, str(mr.as_int), str(mr.subcircuit.index),))
+            " ".join(("//", mr.as_str, str(mr.as_int), str(mr.subcircuit.index)))
             for mr in exe.readouts
         )
     )
@@ -192,7 +192,7 @@ def validate_jaqal_string(txt):
         for n, act_P in enumerate(exe.subcircuits):
             exp_P = int_prob[n]
             for (ka, va), (kb, vb) in zip(
-                exp_P.items(), enumerate(act_P.probability_by_int),
+                exp_P.items(), enumerate(act_P.probability_by_int)
             ):
                 assertEqual(ka, kb)
                 assertAlmostEqual(va, vb)

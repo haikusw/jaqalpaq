@@ -63,7 +63,7 @@ def circuit_from_gatelist(gates, registers):
                     assert False, "You can't end a circuit twice!"
 
     return pygsti.objects.Circuit(
-        lst, line_labels=[qubit.name for reg in registers for qubit in reg],
+        lst, line_labels=[qubit.name for reg in registers for qubit in reg]
     )
 
 
