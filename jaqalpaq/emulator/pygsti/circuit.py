@@ -10,6 +10,7 @@ from pygsti.objects import Circuit, CircuitLabel, Label
 from jaqalpaq import JaqalError
 from jaqalpaq.core import Macro
 from jaqalpaq.core.constant import Constant
+from jaqalpaq.core.gatedef import IdleGateDefinition
 from jaqalpaq.core.algorithm.used_qubit_visitor import UsedQubitIndicesVisitor
 from jaqalpaq.core.algorithm.walkers import TraceSerializer
 
@@ -24,6 +25,9 @@ def pygsti_label_from_statement(gate):
     :return: A pyGSTi Label object
 
     """
+    if isinstance(gate.gate_def, IdleGateDefinition):
+        return None
+
     args = [f"GJ{gate.name}"]
     for param, template in zip(gate.parameters.values(), gate.gate_def.parameters):
         if template.classical:
@@ -51,19 +55,20 @@ def pygsti_circuit_from_gatelist(gates, registers):
     start = False
     end = False
     for gate in gates:
-        if gate.name not in ["prepare_all", "measure_all"]:
-            lst.append(pygsti_label_from_statement(gate))
+        if gate.name == "prepare_all":
+            if not start:
+                start = True
+            else:
+                assert False, "You can't start a circuit twice!"
+        elif gate.name == "measure_all":
+            if not end:
+                end = True
+            else:
+                assert False, "You can't end a circuit twice!"
         else:
-            if gate.name == "prepare_all":
-                if not start:
-                    start = True
-                else:
-                    assert False, "You can't start a circuit twice!"
-            elif gate.name == "measure_all":
-                if not end:
-                    end = True
-                else:
-                    assert False, "You can't end a circuit twice!"
+            label = pygsti_label_from_statement(gate)
+            if label is not None:
+                lst.append(label)
 
     return Circuit(lst, line_labels=[qubit.name for reg in registers for qubit in reg])
 
@@ -176,10 +181,12 @@ class pyGSTiCircuitGeneratingVisitor(UsedQubitIndicesVisitor):
 
             ops = []
             for sub_op, sub_indices, sub_duration in branches:
-                if sub_op is None:
-                    continue
                 idle_dur = duration - sub_duration
-                if idle_dur <= 0:
+
+                if sub_op is None:
+                    if duration > 0:
+                        ops.append(self.idle_gate(sub_indices, duration))
+                elif idle_dur <= 0:
                     ops.append(sub_op)
                 else:
                     ops.append(
@@ -194,8 +201,9 @@ class pyGSTiCircuitGeneratingVisitor(UsedQubitIndicesVisitor):
             duration = 0
             for n, sub_obj in self.trace_statements(obj.statements):
                 sub_op, sub_indices, sub_duration = self.visit(sub_obj, context=context)
-                if sub_op is None:
+                if (sub_duration <= 0) and (sub_op is None):
                     continue
+
                 duration += sub_duration
 
                 inv_indices = indices.copy()
@@ -225,13 +233,18 @@ class pyGSTiCircuitGeneratingVisitor(UsedQubitIndicesVisitor):
             return self.visit(macro_body, macro_context)
         else:
             indices = defaultdict(set)
+            if obj.name in ("prepare_all", "measure_all"):
+                # Special case handling of prepare/measure
+                return (None, indices, 0)
+
+            label = pygsti_label_from_statement(obj)
             for param in obj.used_qubits:
                 if param is all:
                     self.merge_into(indices, self.all_qubits)
                     # TODO: check prepare_all/measure_all here
-                    return (None, indices, 0)
+                    label = None
                 else:
                     self.merge_into(indices, self.visit(param, context=context))
             # TODO: Resolve macros and expand lets within this visitor.
             #       The pygsti_label_from_statement will need to be passed context information.
-            return (pygsti_label_from_statement(obj), indices, 1)
+            return (label, indices, 1)

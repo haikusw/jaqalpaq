@@ -166,6 +166,9 @@ class IdleGateDefinition(GateDefinition):
     Represents a gate that merely idles for some duration.
     """
 
+    # Idle gates are a scheduling mechanism.  Formally, they act on no qubits.
+    _ideal_unitary = None
+
     def __init__(self, gate, name=None):
         # Special case handling of prepare and measure gates
         if gate.name in ("prepare_all", "measure_all"):
@@ -173,17 +176,6 @@ class IdleGateDefinition(GateDefinition):
         self._parent_def = gate
         self._parameters = gate._parameters
         self._name = name if name else f"I_{gate.name}"
-
-    @property
-    def _ideal_unitary(self):
-        """A unitary acting on the same qubits as the parent gate."""
-        parent = self._parent_def
-        if parent._ideal_unitary:
-            import numpy
-
-            return lambda: numpy.identity(2 ** len(parent.quantum_parameters))
-        else:
-            return None
 
     @property
     def used_qubits(self):
