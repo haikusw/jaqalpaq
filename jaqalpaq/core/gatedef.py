@@ -136,7 +136,7 @@ class GateDefinition(AbstractGate):
         """Return the parameters in this gate that are qubits. Subclasses may
         return the special symbol `all` indicating they operate on all
         qubits. Otherwise this is identical to quantum_parameters."""
-        for p in self._parameters:
+        for p in self.parameters:
             try:
                 if not p.classical:
                     yield p
