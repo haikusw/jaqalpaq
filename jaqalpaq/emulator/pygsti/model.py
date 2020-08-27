@@ -36,21 +36,21 @@ def build_noiseless_native_model(registers, gates):
     availability = {}
 
     for g in gates.values():
-        name = f"GJ{g.name}"
-        gate_names.append(name)
-
-        if len(g.quantum_parameters) == 0:
-            # AER: We are special casing prepare and measurements right now
-            if g.name in ("prepare_all", "measure_all"):
-                unitaries[name] = np.identity(2)
-            else:
-                raise JaqalError(f"{g.name} not supported")
+        # Skip gates without defined action
+        if g.ideal_unitary is None:
             continue
 
+        if len(g.quantum_parameters) == 0:
+            raise JaqalError(f"{g.name} not supported")
+
         if len(g.classical_parameters) > 0:
-            unitaries[name] = pygsti_unitary(g)
+            obj = pygsti_unitary(g)
         else:
-            unitaries[name] = g.ideal_unitary()
+            obj = g.ideal_unitary()
+
+        name = f"GJ{g.name}"
+        gate_names.append(name)
+        unitaries[name] = obj
 
         if len(g.quantum_parameters) > 1:
             availability[name] = "all-permutations"
