@@ -96,8 +96,8 @@ class UnitarySerializedEmulator(IndependentSubcircuitsBackend):
         return probs[probs[:, 0].argsort()][:, 1].copy()
 
 
-def pygsti_circuit_from_circuit(circuit, trace=None):
-    visitor = pyGSTiCircuitGeneratingVisitor(trace=trace)
+def pygsti_circuit_from_circuit(circuit, **kwargs):
+    visitor = pyGSTiCircuitGeneratingVisitor(**kwargs)
     return visitor.visit(circuit)
 
 
@@ -107,8 +107,9 @@ class CircuitEmulator(IndependentSubcircuitsBackend):
     This object should be treated as an opaque symbol to be passed to run_jaqal_circuit.
     """
 
-    def __init__(self, *args, model=None, **kwargs):
+    def __init__(self, *args, model=None, gate_durations=None, **kwargs):
         self.model = model
+        self.gate_durations = gate_durations if gate_durations is not None else {}
         super().__init__(*args, **kwargs)
 
     def _probability(self, job, trace):
@@ -119,7 +120,9 @@ class CircuitEmulator(IndependentSubcircuitsBackend):
         """
 
         circ = job.circuit
-        pc = pygsti_circuit_from_circuit(circ, trace)
+        pc = pygsti_circuit_from_circuit(
+            circ, trace=trace, durations=self.gate_durations
+        )
         probs = np.array(
             [(int(k[0][::-1], 2), v) for k, v in self.model.probs(pc).items()]
         )
@@ -128,6 +131,10 @@ class CircuitEmulator(IndependentSubcircuitsBackend):
 
 class pyGSTiCircuitGeneratingVisitor(UsedQubitIndicesVisitor):
     validate_parallel = True
+
+    def __init__(self, *args, durations=None, **kwargs):
+        self.durations = durations
+        super().__init__(**kwargs)
 
     def idle_gate(self, indices, duration, parallel=None):
         labels = self.labels(indices)
@@ -247,4 +254,15 @@ class pyGSTiCircuitGeneratingVisitor(UsedQubitIndicesVisitor):
                     self.merge_into(indices, self.visit(param, context=context))
             # TODO: Resolve macros and expand lets within this visitor.
             #       The pygsti_label_from_statement will need to be passed context information.
-            return (label, indices, 1)
+            if isinstance(obj.gate_def, IdleGateDefinition):
+                name = obj.gate_def._parent_def.name
+            else:
+                name = obj.name
+
+            try:
+                duration = self.durations[name]
+            except KeyError:
+                # default to 0 duration
+                return (label, indices, 0)
+
+            return (label, indices, duration(*obj.parameters.values()))
