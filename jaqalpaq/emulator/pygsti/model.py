@@ -24,17 +24,14 @@ def pygsti_unitary(g):
     return _unitary_fun
 
 
-def build_noiseless_native_model(registers, gates):
-    """Builds a noise model for each Jaqal gate
+def build_ideal_unitaries_dict(gates, unitaries, availability):
+    """Build a dictionary of ideal unitaries suitable for pygsti model creation.
+    Adds key names of the form GJ<gate name> for each Jaqal gate
 
-    :param register: the Jaqal registers that the gates may act on
     :param gates: a dictionary of Jaqal gates
-    :return: a pyGSTi noise model object
+    :param unitaries: the dictionary to add to
+    :param availability: the availability dictionary
     """
-    gate_names = []
-    unitaries = {}
-    availability = {}
-
     for g in gates.values():
         # Skip gates without defined action
         if g.ideal_unitary is None:
@@ -49,14 +46,21 @@ def build_noiseless_native_model(registers, gates):
             obj = g.ideal_unitary()
 
         name = f"GJ{g.name}"
-        gate_names.append(name)
         unitaries[name] = obj
 
         if len(g.quantum_parameters) > 1:
             availability[name] = "all-permutations"
 
-    gate_names.append("Gidle")
-    unitaries["Gidle"] = lambda *args: np.identity(2)
+
+def build_noiseless_native_model(registers, gates):
+    """Build a noise model for each Jaqal gate
+
+    :param gates: a dictionary of Jaqal gates
+    :param register: the Jaqal registers that the gates may act on
+    :return: a pyGSTi noise model object
+    """
+    unitaries = {}
+    availability = {}
 
     fundamental_registers = [r for r in registers.values() if r._alias_from is None]
     if len(fundamental_registers) > 1:
@@ -70,9 +74,13 @@ def build_noiseless_native_model(registers, gates):
 
     num_qubits = len(physical_qubit_list)
 
+    build_ideal_unitaries_dict(gates, unitaries, availability)
+
+    unitaries["Gidle"] = lambda *args: np.identity(2)
+
     target_model = pygsti.construction.build_localnoise_model(
         nQubits=num_qubits,
-        gate_names=gate_names,
+        gate_names=list(unitaries.keys()),
         nonstd_gate_unitaries=unitaries,
         availability=availability,
         qubit_labels=physical_qubit_list,
