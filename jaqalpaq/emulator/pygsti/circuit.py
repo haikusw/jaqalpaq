@@ -37,15 +37,16 @@ def pygsti_label_from_statement(gate):
             else:
                 args.append(param)
         else:
-            args.append(param.name)
+            # quantum argument: a qubit
+            args.append(param.alias_index)
     return Label(args)
 
 
-def pygsti_circuit_from_gatelist(gates, registers):
-    """Generate a pyGSTi circuit from a list of Jaqal gates, and the associated registers.
+def pygsti_circuit_from_gatelist(gates, n_qubits):
+    """Generate a pyGSTi circuit from a list of Jaqal gates.
 
     :param gates: An iterable of Jaqal gates
-    :param registers: An iterable of fundamental registers
+    :param n_qubits: The number of qubits.
     :return: A pyGSTi Circuit object
 
     All lets must have been resolved, and all macros must have been expanded at this point.
@@ -70,7 +71,7 @@ def pygsti_circuit_from_gatelist(gates, registers):
             if label is not None:
                 lst.append(label)
 
-    return Circuit(lst, line_labels=[qubit.name for reg in registers for qubit in reg])
+    return Circuit(lst, line_labels=list(range(n_qubits)))
 
 
 class UnitarySerializedEmulator(IndependentSubcircuitsBackend):
@@ -87,11 +88,16 @@ class UnitarySerializedEmulator(IndependentSubcircuitsBackend):
         """
 
         circ = job.circuit
+        try:
+            (register,) = circ.fundamental_registers()
+        except ValueError:
+            raise NotImplementedError("Multiple fundamental registers unsupported.")
+
+        n_qubits = register.size
+
         s = TraceSerializer(trace)
-        pc = pygsti_circuit_from_gatelist(
-            list(s.visit(circ)), circ.fundamental_registers()
-        )
-        model = build_noiseless_native_model(circ.registers, circ.native_gates)
+        pc = pygsti_circuit_from_gatelist(list(s.visit(circ)), n_qubits)
+        model = build_noiseless_native_model(n_qubits, circ.native_gates)
         probs = np.array([(int(k[0][::-1], 2), v) for k, v in model.probs(pc).items()])
         return probs[probs[:, 0].argsort()][:, 1].copy()
 
@@ -225,7 +231,9 @@ class pyGSTiCircuitGeneratingVisitor(UsedQubitIndicesVisitor):
             return (CircuitLabel("", ops, llbls), indices, duration)
 
     def labels(self, indices):
-        return [f"{k}[{str(v)}]" for k in indices for v in indices[k]]
+        if len(indices) > 1:
+            raise NotImplementedError("Multiple fundamental registers unsupported.")
+        return [v for k in indices for v in indices[k]]
 
     def visit_GateStatement(self, obj, context=None):
         # Note: The code originally checked if a gate was a native gate, macro, or neither,

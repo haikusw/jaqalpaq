@@ -52,38 +52,26 @@ def build_ideal_unitaries_dict(gates, unitaries, availability):
             availability[name] = "all-permutations"
 
 
-def build_noiseless_native_model(registers, gates):
+def build_noiseless_native_model(n_qubits, gates):
     """Build a noise model for each Jaqal gate
 
     :param gates: a dictionary of Jaqal gates
-    :param register: the Jaqal registers that the gates may act on
+    :param n_qubits: the number of qubits in the model
     :return: a pyGSTi noise model object
     """
     unitaries = {}
     availability = {}
-
-    fundamental_registers = [r for r in registers.values() if r._alias_from is None]
-    if len(fundamental_registers) > 1:
-        print(
-            "Warning:  More than one physical register name in use; ordering may be borked."
-        )
-    physical_qubit_list = []
-    for r in fundamental_registers:
-        for q in r:
-            physical_qubit_list.append(q._name)
-
-    num_qubits = len(physical_qubit_list)
 
     build_ideal_unitaries_dict(gates, unitaries, availability)
 
     unitaries["Gidle"] = lambda *args: np.identity(2)
 
     target_model = pygsti.construction.build_localnoise_model(
-        nQubits=num_qubits,
+        nQubits=n_qubits,
         gate_names=list(unitaries.keys()),
         nonstd_gate_unitaries=unitaries,
         availability=availability,
-        qubit_labels=physical_qubit_list,
+        qubit_labels=list(range(n_qubits)),
         parameterization="static unitary",
     )
 
