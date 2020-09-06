@@ -2,7 +2,7 @@
 # Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains
 # certain rights in this software.
 from .frontend import *
-from .pygsti.circuit import UnitarySerializedEmulator
+from .pygsti import UnitarySerializedEmulator
 
 __all__ = [
     "run_jaqal_string",
