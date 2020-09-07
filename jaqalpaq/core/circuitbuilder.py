@@ -305,7 +305,7 @@ class Builder:
         if (filt is not all) and (filt != "*"):
             raise JaqalError("Only from ... usepulses * currently supported.")
 
-        for g in native_gates:
+        for g in native_gates.values():
             # inject_pulses overrides usepulses
             if self.inject_pulses and g.name in self.inject_pulses:
                 continue

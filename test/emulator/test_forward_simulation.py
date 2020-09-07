@@ -7,7 +7,6 @@ import numpy as np
 from jaqalpaq.emulator import run_jaqal_string, run_jaqal_circuit, run_jaqal_file
 from jaqalpaq.generator import generate_jaqal_program
 import jaqalpaq.parser
-from jaqalpaq.core.circuit import normalize_native_gates
 from jaqalpaq.core.result import ExecutionResult, parse_jaqal_output_list
 from collections import OrderedDict
 from jaqalpaq.emulator._validator import (
@@ -42,7 +41,7 @@ class ForwardSimulatorTester(unittest.TestCase):
 
         self.jaqal_c = jaqalpaq.parser.parse_jaqal_string(
             self.jaqal_string,
-            inject_pulses=normalize_native_gates(native_gates.NATIVE_GATES),
+            inject_pulses=native_gates.NATIVE_GATES,
         )
 
     def test_generate_jaqal_program(self):
@@ -101,7 +100,7 @@ CNOT q[3] q[4]
 measure_all
 """
         jaqal_prog = jaqalpaq.parser.parse_jaqal_string(
-            jaqal_text, inject_pulses=normalize_native_gates(native_gates.NATIVE_GATES)
+            jaqal_text, inject_pulses=native_gates.NATIVE_GATES
         )
         res = run_jaqal_circuit(jaqal_prog)
         output_probs = res.subcircuits[0].probability_by_str

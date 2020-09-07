@@ -181,6 +181,9 @@ class IdleGateDefinition(GateDefinition):
     """
 
     def __init__(self, gate, name=None):
+        # Special case handling of prepare and measure gates
+        if gate.name in ("prepare_all", "measure_all"):
+            raise JaqalError(f"Cannot make an idle gate for {gate.name}")
         self._parent_def = gate
         self._parameters = gate._parameters
         self._name = name if name else f"I_{gate.name}"
@@ -218,19 +221,23 @@ class BusyGateDefinition(GateDefinition):
 
 
 def add_idle_gates(active_gates):
-    """Augments a list of gates with associated idle gates.
+    """Augments a dictionary of gates with associated idle gates.
 
-    :param active_gates: A list of GateDefinition objects representing the active gates
-      available.
+    :param active_gates: A dictionary of GateDefinition objects representing the active
+      gates available.
     :return:  A list of GateDefinitions including both the active gates passed, and their
       associated idle gates.
     """
-    gates = []
-    for g in active_gates:
-        gates.append(g)
+    gates = {}
+    for n, g in active_gates.items():
+        gates[n] = g
 
-        # Special case handling of preparation and measurement
-        if g.name not in ("prepare_all", "measure_all"):
-            gates.append(IdleGateDefinition(g))
+        try:
+            g = IdleGateDefinition(g)
+        except JaqalError:
+            # Ignore gates that do not have corresponding idle gates
+            pass
+        else:
+            gates[g.name] = g
 
-    return tuple(gates)
+    return gates
