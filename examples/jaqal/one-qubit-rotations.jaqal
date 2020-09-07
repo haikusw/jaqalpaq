@@ -4,6 +4,7 @@ register q[1]
 
 prepare_all
 R q[0] 0.123 0.987
+I_R q[0] 0.321 0.4
 measure_all
 
 prepare_all
@@ -18,6 +19,7 @@ prepare_all
 Sx q[0]
 Rz q[0] 1.234
 Sxd q[0]
+I_Syd q[0]
 measure_all
 
 prepare_all
@@ -30,6 +32,7 @@ measure_all
 
 prepare_all
 Ry q[0] 0.321168
+I_Rz q[0] 10
 measure_all
 
 prepare_all

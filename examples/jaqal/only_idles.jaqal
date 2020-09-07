@@ -1,0 +1,19 @@
+from qscout.v1.std usepulses *
+
+register q[2]
+
+prepare_all
+I_Px q[0]
+I_MS q[0] q[1] 1 2
+measure_all
+
+
+// EXPECTED READOUTS
+// 00 0 0
+
+// EXPECTED PROBABILITIES
+// SUBCIRCUIT 0
+// 00 0 1.0
+// 10 1 0.0
+// 01 2 0.0
+// 11 3 0.0
