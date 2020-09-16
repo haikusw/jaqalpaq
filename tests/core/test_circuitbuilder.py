@@ -12,8 +12,8 @@ from jaqalpaq.core import (
 import jaqalpaq.core as core
 from jaqalpaq import JaqalError
 
-import test.core.randomize as randomize
-import test.core.common as common
+from . import randomize
+from . import common
 
 
 class BuildTester(unittest.TestCase):

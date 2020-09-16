@@ -14,8 +14,8 @@ setup(
     version=version,
     author="Benjamin C. A. Morrison, Jay Wesley Van Der Wall, Daniel Lobser, Antonio Russo, Kenneth Rudinger, Peter Maunz",
     author_email="qscout@sandia.gov",
-    packages=find_packages(include=["jaqalpaq", "jaqalpaq.*"]),
-    package_dir={"": "."},
+    packages=find_packages(include=["jaqalpaq", "jaqalpaq.*"], where="src"),
+    package_dir={"": "src"},
     package_data={"jaqalpaq.parser": ["jaqal_grammar.lark"]},
     install_requires=["lark-parser"],
     extras_require={
