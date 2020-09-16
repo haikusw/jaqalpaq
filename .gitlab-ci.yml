@@ -5,30 +5,16 @@ before_script:
   - echo "$CI_PROJECT_URL" | grep -q gitlab.sandia.gov && export http_proxy=http://wwwproxy.sandia.gov:80 https_proxy=https://wwwproxy.sandia.gov:80 no_proxy=.sandia.gov
 
 stages:
-  - Static Analysis
-  - Test
-  - Documentation
+  - Analysis and Tests
 
-syntax:
-  stage: Static Analysis
+Unified Tests:
+  stage: Analysis and Tests
   script:
     - ( unset https_proxy ; git fetch origin master )
     - if ! git diff --check origin/master HEAD ; then echo "See above whitespace errors." ; exit 1; fi
     - if find . -iname '*.py' -exec grep -l -P '\t' {} + ; then echo 'Above files have tabs.' ; exit 1 ; fi
     - pip install black && black --check .
-
-pytest:
-  stage: Test
-  script:
     - pip install -e .[pygsti-integration,tests]
     - ( unset https_proxy ; cd .. && rm -fr qscout-gatemodels && git clone --depth 1 "$(echo "${CI_REPOSITORY_URL}" | sed 's/jaqalpaq.git/qscout-gatemodels.git/' )" )
     - ( cd ../qscout-gatemodels && pip install -e . )
     - pytest
-
-sphinx:
-  stage: Documentation
-  script:
-    - pip install -e.[docs]
-    - ( unset https_proxy ; cd .. && rm -fr jaqalpaq-extras && git clone --depth 1 "$(echo "${CI_REPOSITORY_URL}" | sed 's/jaqalpaq.git/jaqalpaq-extras.git/' )" )
-    - ( cd ../jaqalpaq-extras && pip install -e . )
-    - python3 setup.py build_sphinx
