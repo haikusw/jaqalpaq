@@ -6,9 +6,9 @@ from collections import OrderedDict
 import numpy as np
 
 from jaqalpaq import JaqalError
-from jaqalpaq.parser import JaqalParseError
+from jaqalpaq.parser import JaqalParseError, parse_jaqal_string
 
-from .frontend import run_jaqal_string
+from .frontend import run_jaqal_circuit
 
 
 def assertAlmostEqual(a, b):
@@ -140,19 +140,56 @@ def parse_jaqal_validation(txt):
     return expected
 
 
-def validate_jaqal_string(txt):
+def validate_jaqal_string(txt, **kwargs):
     """[undocumented] validate a Jaqal program with validation comments
 
     :param txt: a full Jaqal program, possibly with validation comments
     :return: a list of validations performed
 
-    """
-    expected = parse_jaqal_validation(txt)
+    All keyword arguments are passed to run_jaqal_string
 
+    """
+
+    expected = parse_jaqal_validation(txt)
+    ret = validate_jaqal_parse(txt, expected)
+
+    if isinstance(ret, list):
+        return ret
+
+    return validate_jaqal_circuit(ret, expected, **kwargs)
+
+
+def validate_jaqal_parse(txt, expected):
     if "error" in expected:
         exc, exc_message = expected["error"]
         try:
-            exe = run_jaqal_string(txt)
+            return parse_jaqal_string(txt)
+            exe = run_jaqal_circuit(circ, **kwargs)
+        except Exception as e:
+            assertisinstance(e, exc)
+            if len(exc_message) > 0:
+                assertEqual(exc_message[0], str(e))
+        else:
+            raise ValueError("Expected an exception, but none thrown.")
+        return ["raised expected exception"]
+    else:
+        return parse_jaqal_string(txt)
+
+
+def validate_jaqal_circuit(circ, expected, **kwargs):
+    """[undocumented] validate a Jaqal program with validation comments
+
+    :param circ: a Jaqal circuit
+    :param expected: a dictionary produced by parse_jaqal_validation
+    :return: a list of validations performed
+
+    All keyword arguments are passed to run_jaqal_circuit
+
+    """
+    if "error" in expected:
+        exc, exc_message = expected["error"]
+        try:
+            exe = run_jaqal_circuit(circ, **kwargs)
         except Exception as e:
             assertisinstance(e, exc)
             if len(exc_message) > 0:
@@ -161,7 +198,7 @@ def validate_jaqal_string(txt):
             raise ValueError("Expected an exception, but none thrown.")
         return ["raised expected exception"]
 
-    exe = run_jaqal_string(txt)
+    exe = run_jaqal_circuit(circ, **kwargs)
 
     validated = []
     if "true_str_list" in expected:
