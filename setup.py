@@ -23,6 +23,7 @@ setup(
         "docs": [
             "sphinx",
             "sphinx-rtd-theme",
+            "pygsti",
             f"jaqalpaq-extras[qiskit,pyquil,cirq,projectq,pytket]=={version}",
         ],
         "pygsti-integration": ["pygsti"],
