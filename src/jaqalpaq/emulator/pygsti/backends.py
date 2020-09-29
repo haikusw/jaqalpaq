@@ -122,20 +122,27 @@ class AbstractNoisyNativeEmulator(CircuitEmulator):
         """
         gates = {}
         durations = {}
+        availability = {}
+
         for gate_name in type(self).__dict__:
             if not gate_name.startswith("gate_"):
                 continue
 
             name = gate_name[5:]
-            pm = getattr(self, gate_name)
-            jg = self.jaqal_gates[name]
             durations[name] = getattr(self, f"gateduration_{name}")
-            gates[f"GJ{name}"] = pygsti_independent_noisy_gate(jg, pm)
+
+            pygsti_name = f"GJ{name}"
+            jaqal_gate = self.jaqal_gates[name]
+            func = getattr(self, gate_name)
+            gates[pygsti_name] = pygsti_independent_noisy_gate(jaqal_gate, func)
+            if len(jaqal_gate.quantum_parameters) > 1:
+                availability[pygsti_name] = "all-permutations"
 
         gates["Gidle"] = JaqalOpFactory(self.idle)
 
         target_model = pygsti.construction.build_localnoise_model(
             nQubits=self.n_qubits,
+            availability=availability,
             gate_names=list(gates.keys()),
             custom_gates=gates,
             parameterization="full",

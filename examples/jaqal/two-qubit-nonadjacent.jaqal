@@ -1,0 +1,18 @@
+from qscout.v1.std usepulses *
+
+register q[3]
+
+prepare_all
+MS q[0] q[2] 0.123 0.987
+measure_all
+
+// EXPECTED PROBABILITIES
+// SUBCIRCUIT 0
+// 000 0 0.7755977328263766
+// 100 1 0.0
+// 010 2 0.0
+// 110 3 0.0
+// 001 4 0.0
+// 101 5 0.2244022671736234
+// 011 6 0.0
+// 111 7 0.0
