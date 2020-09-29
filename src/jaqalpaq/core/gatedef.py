@@ -104,6 +104,25 @@ class AbstractGate:
     def __call__(self, *args, **kwargs):
         return self.call(*args, **kwargs)
 
+    def copy(self, *, name=None, parameters=None, ideal_unitary=None):
+        """Returns a shallow copy of the gate or gate definition.
+
+        :param name: (optional) change the name in the copy.
+        :param parameters: (optional) change the parameters in the copy.
+        """
+
+        kls = type(self)
+        copy = kls.__new__(kls)
+        copy.__dict__ = self.__dict__.copy()
+        if name is not None:
+            copy._name = name
+        if parameters is not None:
+            copy._parameters = parameters
+        if ideal_unitary is not None:
+            copy._ideal_unitary = ideal_unitary
+
+        return copy
+
 
 class GateDefinition(AbstractGate):
     """
