@@ -13,10 +13,12 @@ from jaqalpaq.emulator._validator import (
     generate_jaqal_validation,
     validate_jaqal_string,
 )
+from jaqalpaq.emulator.pygsti.circuit import pygsti_circuit_from_circuit
 
 qscout = pytest.importorskip("qscout")
 
 from qscout.v1 import native_gates
+from qscout.v1.noisy import SNLToy1
 
 
 def example(*args):
@@ -429,3 +431,40 @@ loop 2 {
         res = validate_jaqal_string(txt)
 
         self.assertEqual(res, ["measurements agree", "probabilities agree"])
+
+    def test_stretched_gates(self):
+        jc = jaqalpaq.parser.parse_jaqal_string(
+            """
+            from qscout.v1.std usepulses *
+            from qscout.v1.std.stretched usepulses *
+
+            register u[3]
+
+            prepare_all
+
+            Rx u[0] 0.7
+            Rx_stretched u[0] 0.7 1.5
+
+            MS u[0] u[1] 0.1 0.3
+            MS_stretched u[0] u[2] 0.1 0.3 3
+
+            Rz_stretched u[2] 0.8 2.0
+
+            measure_all
+        """
+        )
+
+        backend = SNLToy1(3, stretched_gates="add")
+
+        pc = pygsti_circuit_from_circuit(jc, durations=backend.gate_durations)
+
+        (rx_dur,) = pc[0][1].args
+        (rx_stretched_dur,) = pc[1][1].args
+        self.assertAlmostEqual(rx_dur * 1.5, rx_stretched_dur)
+
+        (ms_dur,) = pc[2][1].args
+        (ms_stretched_dur,) = pc[3][1].args
+        self.assertAlmostEqual(ms_dur * 3, ms_stretched_dur)
+
+        (rz_dur,) = pc[4][1].args
+        self.assertAlmostEqual(rz_dur, 0)
