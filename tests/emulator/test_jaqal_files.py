@@ -65,3 +65,22 @@ class TestExecuteAnnotatedJaqalFile:
                 gate_durations=backend.gate_durations,
             ),
         )
+
+        backend = SNLToy1(
+            n,
+            depolarization=0,
+            rotation_error=0,
+            phase_error=0,
+            stretched_gates=1,
+        )
+
+        validate_jaqal_circuit(circ, expected, backend=backend)
+
+        validate_jaqal_circuit(
+            circ,
+            expected,
+            backend=CircuitEmulator(
+                model=build_noiseless_native_model(n, circ.native_gates),
+                gate_durations=backend.gate_durations,
+            ),
+        )
