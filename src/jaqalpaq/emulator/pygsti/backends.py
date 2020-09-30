@@ -174,10 +174,15 @@ class AbstractNoisyNativeEmulator(CircuitEmulator):
         """
 
         def _inner(op):
-            def newop(self, *args):
+            def newop(self, *args, **kwargs):
                 args = iter(args)
                 argv = [next(args) if param is None else param for param in params]
-                return op(self, *argv)
+                try:
+                    while True:
+                        argv.append(next(args))
+                except StopIteration:
+                    pass
+                return op(self, *argv, **kwargs)
 
             return newop
 
