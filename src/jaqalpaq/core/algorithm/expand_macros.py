@@ -10,10 +10,11 @@ from jaqalpaq.core.algorithm.visitor import Visitor
 import jaqalpaq.core as core
 
 
-def expand_macros(circuit):
+def expand_macros(circuit, preserve_definitions=False):
     """Expand macros in the given circuit.
 
     :param Circuit circuit: The circuit in which to expand macros.
+    :param bool preserve_definitions: If True, leave the definitions in.
 
     :returns: A new, normalized circuit. Although the circuit will be
         new, it may share structure with the input circuit, thus the input
@@ -22,11 +23,14 @@ def expand_macros(circuit):
 
     """
 
-    visitor = MacroExpander()
+    visitor = MacroExpander(preserve_definitions=preserve_definitions)
     return visitor.visit(circuit)
 
 
 class MacroExpander(Visitor):
+    def __init__(self, preserve_definitions=False):
+        self.preserve_definitions = preserve_definitions
+
     def visit_default(self, obj):
         """By default we leave all objects alone. Note that the object is not
         copied."""
@@ -38,6 +42,8 @@ class MacroExpander(Visitor):
 
         self.macros = circuit.macros
         new_circuit = core.circuit.Circuit(native_gates=circuit.native_gates)
+        if self.preserve_definitions:
+            new_circuit.macros.update(circuit.macros)
         new_circuit.constants.update(circuit.constants)
         new_circuit.registers.update(circuit.registers)
         new_circuit.body.statements.extend(self.visit(circuit.body).statements)

@@ -16,8 +16,7 @@ setup(
     author_email="qscout@sandia.gov",
     packages=find_packages(include=["jaqalpaq", "jaqalpaq.*"], where="src"),
     package_dir={"": "src"},
-    package_data={"jaqalpaq.parser": ["jaqal_grammar.lark"]},
-    install_requires=["lark-parser"],
+    install_requires=["sly"],
     extras_require={
         "tests": ["pytest"],
         "docs": [

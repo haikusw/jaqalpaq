@@ -85,6 +85,9 @@ class Register:
                 if alias_slice.stop > alias_from.size:
                     raise JaqalError("Index out of range.")
 
+    def __hash__(self):
+        return hash((self.__class__, self._name, self._size))
+
     def __repr__(self):
         if self.fundamental:
             return f"Register({repr(self.name)}, {self.size})"
@@ -289,6 +292,9 @@ class NamedQubit:
                 return
             if alias_index >= from_size:
                 raise JaqalError("Index out of range.")
+
+    def __hash__(self):
+        return hash((self.__class__, self._name, self._alias_from, self._alias_index))
 
     def __repr__(self):
         return f"NamedQubit({self.name}, {self.alias_from}, {self.alias_index})"

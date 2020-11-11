@@ -1,9 +1,9 @@
 # Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC (NTESS).
 # Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains
 # certain rights in this software.
-from .interface import Interface
-from .macro_context_visitor import MacroContextRewriteVisitor
-from .tree import TreeManipulators
+from .slyparse import JaqalLexer, JaqalParser, _monkeypatch_sly
+from jaqalpaq.core.algorithm import fill_in_let, expand_macros
+from jaqalpaq.core.algorithm.fill_in_map import fill_in_map
 
 from jaqalpaq.core.circuitbuilder import build
 from jaqalpaq import JaqalError
@@ -79,145 +79,44 @@ def parse_jaqal_string(
 
     """
 
-    # The interface will automatically expand macros and scrape let, map, and register metadata.
-    iface = Interface(jaqal, allow_no_usepulses=True)
-    # Do some minimal processing to fill in all let and map values. The interface does not
-    # automatically do this as they may rely on values from override_dict.
-    let_dict = iface.make_let_dict(override_dict)
-    tree = iface.tree
-    expand_let = expand_let or expand_let_map
-    if expand_macro:
-        tree = iface.resolve_macro(tree)
-    if expand_let:
-        tree = iface.resolve_let(tree, let_dict=let_dict)
-    if expand_let_map:
-        tree = iface.resolve_map(tree)
-    circuit = convert_to_circuit(
-        tree, inject_pulses=inject_pulses, autoload_pulses=autoload_pulses
-    )
+    _monkeypatch_sly()
 
-    if return_usepulses:
-        ret_extra = {"usepulses": iface.usepulses}
-        ret_value = (circuit, ret_extra)
-    else:
-        ret_value = circuit
+    sexpr, usepulses = parse_to_sexpression(jaqal, return_usepulses=True)
+    circuit = build(sexpr, inject_pulses=inject_pulses, autoload_pulses=autoload_pulses)
+
+    if expand_macro:
+        # preserve_definitions maintains old API behavior
+        circuit = expand_macros(circuit, preserve_definitions=True)
+
+    if expand_let_map:
+        circuit = fill_in_let(circuit, override_dict=override_dict)
+        circuit = fill_in_map(circuit)
+    elif expand_let:
+        circuit = fill_in_let(circuit, override_dict=override_dict)
 
     if sum(reg.fundamental for reg in circuit.registers.values()) > 1:
         raise JaqalError(f"Circuit has too many registers: {list(circuit.registers)}")
 
-    return ret_value
+    if return_usepulses:
+        return circuit, {"usepulses": usepulses}
+    else:
+        return circuit
 
 
-def convert_to_circuit(tree, inject_pulses=None, autoload_pulses=False):
-    """Convert a tree into a scheduled circuit.
+def parse_to_sexpression(jaqal, return_usepulses=False):
+    """Turn the input Jaqal string into an S-expression that can be fed to
+    the circuit builder.
 
-    :param tree: A parse tree.
-    :param inject_pulses: If given, use these pulses specifically.
-    :param bool autoload_pulses: Whether to employ the usepulses statement for parsing.  Requires appropriate gate definitions.
-    :return: A Circuit object that faithfully represents the input.
+    :param str jaqal: The Jaqal code.
+
+    :returns: A nested list of python primitives representing the circuit.
+
     """
-    visitor = CoreTypesVisitor(
-        inject_pulses=inject_pulses, autoload_pulses=autoload_pulses
-    )
-    return visitor.visit(tree)
 
-
-class CoreTypesVisitor(MacroContextRewriteVisitor, TreeManipulators):
-    def __init__(self, inject_pulses=None, autoload_pulses=False):
-        super().__init__()
-        self.inject_pulses = inject_pulses
-        self.autoload_pulses = autoload_pulses
-
-    def visit_program(self, header_statements, body_statements):
-        circuit_sexpr = ("circuit", *header_statements, *body_statements)
-        return build(
-            circuit_sexpr,
-            inject_pulses=self.inject_pulses,
-            autoload_pulses=self.autoload_pulses,
-        )
-
-    def visit_usepulses_statement(self, identifier, objects):
-        return ("usepulses", identifier, objects)
-
-    def visit_register_statement(self, array_declaration):
-        if self.in_macro:
-            raise JaqalError("Someone created an invalid parse tree")
-        name, size = self.deconstruct_array_declaration(array_declaration)
-        sexpr = ("register", name, size)
+    lexer = JaqalLexer()
+    parser = JaqalParser(source_text=jaqal)
+    sexpr = parser.parse(lexer.tokenize(jaqal))
+    if return_usepulses:
+        return sexpr, parser.usepulses
+    else:
         return sexpr
-
-    def visit_macro_definition(self, name, arguments, block):
-        # As an artifact of the way the parse tree is rebuilt, the block ends up
-        # being a parse tree with a single statement which is the s-expression block.
-        return ("macro", name, *arguments, block)
-
-    def visit_macro_gate_block(self, block):
-        # The macro gate block level is helpful in setting macro contexts but otherwise
-        # superfluous. We have to call the superclass for macro tracking.
-        super().visit_macro_gate_block(block)
-        return block
-
-    def visit_let_statement(self, identifier, number):
-        sexpr = ("let", identifier, number)
-        return sexpr
-
-    def visit_map_statement(self, target, source):
-        if self.is_array_slice(source):
-            src_name, src_slice_tuple = self.deconstruct_array_slice(source)
-            sexpr = ("map", target, src_name, *src_slice_tuple)
-        elif self.is_array_element(source):
-            src_name, src_index = self.deconstruct_array_element(source)
-            sexpr = ("map", target, src_name, src_index)
-        else:
-            sexpr = ("map", target, source)
-
-        return sexpr
-
-    def visit_parallel_gate_block(self, statements):
-        return ("parallel_block", *statements)
-
-    def visit_sequential_gate_block(self, statements):
-        return ("sequential_block", *statements)
-
-    def visit_loop_statement(self, repetition_count, block):
-        sexpr = ("loop", repetition_count, block)
-        return sexpr
-
-    def visit_gate_statement(self, gate_name, gate_args):
-        return ("gate", gate_name, *gate_args)
-
-    def visit_array_element_qual(self, identifier, index):
-        sexpr = ("array_item", identifier, index)
-        return sexpr
-
-    ##
-    # Reading parts of statements
-    #
-
-    def visit_let_identifier(self, identifier):
-        return identifier
-
-    def visit_let_or_map_identifier(self, identifier):
-        return identifier
-
-    ##
-    # Reading tokens
-    #
-
-    def visit_identifier(self, token):
-        return str(self.extract_identifier(token))
-
-    def visit_qualified_identifier(self, names):
-        return ".".join(names)
-
-    def visit_integer(self, token):
-        return self.extract_integer(token)
-
-    def visit_signed_integer(self, token):
-        return self.extract_signed_integer(token)
-
-    def visit_signed_number(self, token):
-        return self.extract_signed_number(token)
-
-    def visit_number(self, token):
-        return self.extract_number(token)

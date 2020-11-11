@@ -75,6 +75,10 @@ class Builder:
         self.inject_pulses = inject_pulses
         self.autoload_pulses = autoload_pulses
 
+        # Store created gates so we can reuse them. This can be a
+        # substantial savings on certain types of real world input.
+        self._memoized_gates = {}
+
     def build(self, expression, context=None, gate_context=None):
         """Build the appropriate thing based on the expression."""
         if context is None:
@@ -229,9 +233,15 @@ class Builder:
 
     def build_gate(self, sexpression, context, gate_context):
         gate_name, *gate_args = sexpression.args
-        gate_def = self.get_gate_definition(gate_name, len(gate_args), gate_context)
-        built_args = [self.build(arg, context, gate_context) for arg in gate_args]
-        return gate_def(*built_args)
+        memo_key = (gate_name, tuple(gate_args))
+        if memo_key in self._memoized_gates:
+            return self._memoized_gates[memo_key]
+        else:
+            gate_def = self.get_gate_definition(gate_name, len(gate_args), gate_context)
+            built_args = (self.build(arg, context, gate_context) for arg in gate_args)
+            gate = gate_def(*built_args)
+            self._memoized_gates[memo_key] = gate
+            return gate
 
     def get_gate_definition(self, name, arg_count, gate_context):
         """Return the definition for the given gate. If no such definition exists, and we

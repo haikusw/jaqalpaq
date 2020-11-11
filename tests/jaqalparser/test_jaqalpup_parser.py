@@ -491,4 +491,5 @@ class ErrorMessageTester(TestCase):
         except JaqalParseError as exc:
             # Lines and columns are 1-indexed
             self.assertEqual(exc.line, 1)
-            self.assertEqual(exc.column, 12)
+            # Column for this message is the start of the word "register"
+            self.assertEqual(exc.column, 1)

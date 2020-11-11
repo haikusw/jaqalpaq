@@ -5,3 +5,10 @@ __import__("pkg_resources").declare_namespace(__name__)
 
 from .error import JaqalError
 from .utilities import RESERVED_WORDS
+
+# This variable controls whether to monkeypatch the sly library to
+# remove some expensive checks. This has no side effects if the
+# jaqalpaq parser is working correctly and sly has not changed. Set
+# this to False before parsing any jaqal code if you are experiencing
+# unexplained error messages or other issues with parsing.
+_PARSER_SLY_TURBO = True

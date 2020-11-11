@@ -27,6 +27,9 @@ class Constant(AnnotatedValue):
             raise JaqalError(f"Invalid/non-numeric value {value} for constant {name}!")
         self._value = value
 
+    def __hash__(self):
+        return hash((self.__class__, self._name, self._kind, self._value))
+
     def __repr__(self):
         return f"Constant({repr(self.name)}, {self.value})"
 

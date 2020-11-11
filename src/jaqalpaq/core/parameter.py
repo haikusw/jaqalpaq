@@ -47,6 +47,9 @@ class AnnotatedValue:
         self._name = name
         self._kind = ParamType.make(kind)
 
+    def __hash__(self):
+        return hash((self.__class__, self._name, self._kind))
+
     def __repr__(self):
         return f"Parameter({repr(self.name)}, {self.kind})"
 
