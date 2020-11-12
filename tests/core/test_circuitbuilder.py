@@ -1,6 +1,6 @@
 import unittest
 
-from jaqalpaq.core.circuitbuilder import build
+from jaqalpaq.core.circuitbuilder import build, Builder, SExpression
 from jaqalpaq.core import (
     Parameter,
     Register,
@@ -269,6 +269,22 @@ class BuildTester(unittest.TestCase):
         circuit = build(sexpr, inject_pulses={"g": gate_def})
         act_value = circuit.body.statements[0]
         self.assertEqual(exp_value, act_value)
+
+    def test_build_gate_memo(self):
+        """Test that two identical gates in different contexts do not build to
+        the same gate."""
+        # This uses a non-public class because it's the most direct
+        # way to test what we're getting at.
+        builder = Builder(inject_pulses=None, autoload_pulses=False)
+        sexpr = SExpression.create(["gate", "foo", "a"])
+        gate_context = {}
+        context0 = {"a": Constant("a", 0)}
+        context1 = {"a": Constant("a", 1)}
+        gate0 = builder.build_gate(sexpr, context0, gate_context)
+        same_gate0 = builder.build_gate(sexpr, context0, gate_context)
+        self.assertIs(gate0, same_gate0)
+        gate1 = builder.build_gate(sexpr, context1, gate_context)
+        self.assertNotEqual(gate0, gate1)
 
     def test_unnormalized_native_gates(self):
         """Test using native gates that are not a dictionary."""

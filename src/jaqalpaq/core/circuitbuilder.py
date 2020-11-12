@@ -75,9 +75,7 @@ class Builder:
         self.inject_pulses = inject_pulses
         self.autoload_pulses = autoload_pulses
 
-        # Store created gates so we can reuse them. This can be a
-        # substantial savings on certain types of real world input.
-        self._memoized_gates = {}
+        self.gate_memo = GateMemoizer()
 
     def build(self, expression, context=None, gate_context=None):
         """Build the appropriate thing based on the expression."""
@@ -233,15 +231,13 @@ class Builder:
 
     def build_gate(self, sexpression, context, gate_context):
         gate_name, *gate_args = sexpression.args
-        memo_key = self._make_memo_key(gate_name, gate_args)
-        if memo_key in self._memoized_gates:
-            return self._memoized_gates[memo_key]
-        else:
+        gate, memo_key = self.gate_memo.get(gate_name, gate_args, context)
+        if gate is None:
             gate_def = self.get_gate_definition(gate_name, len(gate_args), gate_context)
             built_args = (self.build(arg, context, gate_context) for arg in gate_args)
             gate = gate_def(*built_args)
-            self._memoized_gates[memo_key] = gate
-            return gate
+            self.gate_memo.set(memo_key, gate)
+        return gate
 
     def _make_memo_key(self, gate_name, gate_args):
         return (gate_name, self._make_hashable(gate_args))
@@ -336,6 +332,48 @@ class Builder:
 
         # Separate imported context from local
         return ret
+
+
+class GateMemoizer:
+    """Helper class for memoizing gates within a context."""
+
+    def __init__(self):
+        self._table = {}
+
+    def get(self, gate_name, gate_args, context):
+        """Find a previously memoized gate with the same name and args, taking
+        the context into account. Return the gate and the key under
+        which it was found. Return None for the gate if it was not in
+        the memo table.
+
+        """
+
+        memo_key = self._make_gate_memo_key(gate_name, gate_args, context)
+        gate = self._table.get(memo_key)
+        return gate, memo_key
+
+    def set(self, memo_key, gate):
+        """Store the create gate in the memo table."""
+        self._table[memo_key] = gate
+
+    def _make_gate_memo_key(self, gate_name, gate_args, context):
+        """Create a key uniquely identifying the given gate within some
+        context."""
+        # We take the context into account by creating a tuple of
+        # corresponding values in the context or None if they don't
+        # appear in the current context.
+        def make_context_entry(arg):
+            if isinstance(arg, str):
+                return context.get(arg)
+            else:
+                return None
+
+        memo_key = (
+            gate_name,
+            tuple(gate_args),
+            tuple(make_context_entry(arg) for arg in gate_args),
+        )
+        return memo_key
 
 
 def as_integer(value):
