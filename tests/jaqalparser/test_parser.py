@@ -1,5 +1,6 @@
 """Test that the grammar properly parses Jaqal"""
 import unittest
+import random
 
 from jaqalpaq.parser.parser import parse_to_sexpression
 from jaqalpaq.parser.identifier import Identifier
@@ -235,6 +236,182 @@ class ParserTester(unittest.TestCase):
 
     def run_test(self, text, exp_sexpr):
         act_sexpr = parse_to_sexpression(text)
+        self.assertEqual(exp_sexpr, act_sexpr)
+
+
+class HeaderParserTester(unittest.TestCase):
+    """Test parsing just the header from a file."""
+
+    def test_parsing_header(self):
+        """Test parsing a header of zero or more statements followed by a body
+        of zero or more statements."""
+        header_text, header_sexpr = self.make_header()
+        body_text, _ = self.make_body()
+        text = header_text + body_text
+        sexpr = ["circuit"] + header_sexpr
+        self.run_test(text, sexpr)
+
+    def make_header(self):
+        """Return a header as text and an expected s-expression"""
+        text = ""
+        sexpr = []
+        count = self.make_statement_count()
+        for _ in range(count):
+            stmt_text, stmt_sexpr = self.make_header_statement()
+            text = text + stmt_text + "\n"
+            sexpr.append(stmt_sexpr)
+        return text, sexpr
+
+    def make_statement_count(self):
+        if random.uniform(0, 1) < 0.5:
+            return 0
+        else:
+            return random.randint(1, 5)
+
+    def make_header_statement(self):
+        """Return a random header statement."""
+        func = random.choice(
+            [
+                self.make_let_statement,
+                self.make_register_statement,
+                self.make_map_statement,
+                self.make_usepulses_statement,
+            ]
+        )
+        return func()
+
+    def make_let_statement(self):
+        """Make a random let statement."""
+        ident = self.make_identifier()
+        num = self.make_number()
+        text = f"let {ident} {num}"
+        sexpr = ["let", ident, num]
+        return text, sexpr
+
+    def make_register_statement(self):
+        """Make a random register statement."""
+        ident = self.make_identifier()
+        size = self.make_integer()
+        text = f"register {ident}[{size}]"
+        sexpr = ["register", ident, size]
+        return text, sexpr
+
+    def make_map_statement(self):
+        """Make a random map statement."""
+        # For simplicity we'll just do a whole-register map
+        dst_ident = self.make_identifier()
+        src_ident = self.make_identifier()
+        text = f"map {dst_ident} {src_ident}"
+        sexpr = ["map", dst_ident, src_ident]
+        return text, sexpr
+
+    def make_usepulses_statement(self):
+        """Make a random usepulses statement."""
+        module = self.make_identifier()
+        filename = self.make_identifier()
+        text = f"from {module}.{filename} usepulses *"
+        sexpr = ["usepulses", Identifier.parse(f"{module}.{filename}"), "*"]
+        return text, sexpr
+
+    def make_identifier(self):
+        """Return a random identifier."""
+        # This is a subset of possible identifiers since that's not
+        # really what we're testing here.
+        count = random.randint(1, 8)
+        letters = random.choices(
+            [chr(c) for c in range(ord("a"), ord("z") + 1)], k=count
+        )
+        return "".join(letters)
+
+    def make_number(self):
+        """Return a random number, either an integer or float."""
+        select = random.uniform(0, 1)
+        if select < 0.5:
+            return random.randint(-100, 100)
+        elif select < 0.6:
+            return float(random.randint(-100, 100))
+        else:
+            return self.make_float()
+
+    def make_integer(self):
+        return random.randint(1, 100)
+
+    def make_float(self):
+        return random.uniform(-100, 100)
+
+    def make_body(self):
+        text = ""
+        sexpr = []
+        count = self.make_statement_count()
+        for _ in range(count):
+            stmt_text, stmt_sexpr = self.make_body_statement()
+            text = text + stmt_text + "\n"
+            sexpr.append(stmt_sexpr)
+        return text, sexpr
+
+    def make_body_statement(self):
+        func = random.choice(
+            [
+                self.make_gate,
+                self.make_macro,
+                self.make_parallel_block,
+                self.make_sequential_block,
+                self.make_loop,
+            ]
+        )
+        return func()
+
+    def make_gate(self):
+        """Make a random gate."""
+        arg_count = random.randint(0, 4)
+        name = self.make_identifier()
+        args = [self.make_gate_arg() for _ in range(arg_count)]
+        text = f'{name} {" ".join(str(arg) for arg in args)}'
+        sexpr = ["gate", name, *args]
+        return text, sexpr
+
+    def make_gate_arg(self):
+        if random.uniform(0, 1) < 0.5:
+            return self.make_identifier()
+        else:
+            return self.make_number()
+
+    def make_macro(self):
+        """Make a random macro definition."""
+        param_count = random.randint(0, 4)
+        name = self.make_identifier()
+        params = [self.make_identifier() for _ in range(param_count)]
+        block_text, block_sexpr = self.make_sequential_block()
+        param_string = " ".join(str(param) for param in params)
+        text = f"macro {name} {param_string} {block_text}"
+        sexpr = ["macro", name, *params, block_sexpr]
+        return text, sexpr
+
+    def make_sequential_block(self):
+        gate_count = random.randint(0, 4)
+        gates = [self.make_gate() for _ in range(gate_count)]
+        gate_string = ";".join(g[0] for g in gates)
+        text = f"{{ {gate_string} }}"
+        sexpr = ["sequential_block", *[g[1] for g in gates]]
+        return text, sexpr
+
+    def make_parallel_block(self):
+        gate_count = random.randint(0, 4)
+        gates = [self.make_gate() for _ in range(gate_count)]
+        gate_string = "|".join(g[0] for g in gates)
+        text = f"< {gate_string} >"
+        sexpr = ["parallel_block", *[g[1] for g in gates]]
+        return text, sexpr
+
+    def make_loop(self):
+        count = random.randint(0, 10)
+        block_text, block_sexpr = self.make_sequential_block()
+        text = f"loop {count} {block_text}"
+        sexpr = ["loop", count, block_sexpr]
+        return text, sexpr
+
+    def run_test(self, text, exp_sexpr):
+        act_sexpr = parse_to_sexpression(text, header_only=True)
         self.assertEqual(exp_sexpr, act_sexpr)
 
 

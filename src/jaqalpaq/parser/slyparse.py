@@ -81,13 +81,16 @@ class JaqalLexer(Lexer):
 class JaqalParser(Parser):
     """Parse Jaqal into core types."""
 
-    def __init__(self, source_text=None, source="<string>"):
+    def __init__(self, source_text=None, source="<string>", header_only=False):
         """Create a new Jaqal parser.
 
         :param str source_text: The original source. Optional, but
         enables column tracking in error messages.
 
         :param str source: The source of the Jaqal text, e.g. the file name.
+
+        :param bool header_only: Whether to stop parsing once the
+        header is finished.
 
         """
         # This is set to true when the first body statement is
@@ -102,6 +105,13 @@ class JaqalParser(Parser):
         self._last_line = 1
         self._last_index = 1
 
+        self._header_only = header_only
+
+        # Store all top-level statements in an attribute so that we
+        # can interrupt parsing midway through a file and return
+        # partial results.
+        self.top_sexpression = ["circuit"]
+
         # A dictionary populated with the results of usepulses
         # statements.
         self.usepulses = {}
@@ -110,10 +120,7 @@ class JaqalParser(Parser):
 
     @_("seqpad top_statements")
     def start(self, tree):
-        sexpr = tree.top_statements
-        sexpr.appendleft("circuit")
-        sexpr = list(sexpr)
-        return sexpr
+        return self.top_sexpression
 
     @_("")
     def empty(self, _tree):
@@ -123,17 +130,15 @@ class JaqalParser(Parser):
 
     @_("top_statement seqsep top_statements")
     def top_statements(self, tree):
-        sexpr = tree.top_statements
-        sexpr.appendleft(tree.top_statement)
-        return sexpr
+        pass
 
     @_("top_statement")
     def top_statements(self, tree):
-        return deque([tree.top_statement])
+        pass
 
     @_("empty")
     def top_statements(self, _tree):
-        return deque()
+        pass
 
     # Define what a top-level statement is. Note that these are both
     # header and body statements, but we will forbid header statements
@@ -149,7 +154,7 @@ class JaqalParser(Parser):
     def top_statement(self, tree):
         if self._in_body:
             self.raise_error(f"Header statement {tree[0]} found after body statement")
-        return tree[0]
+        self.top_sexpression.append(tree[0])
 
     @_(
         "gate_statement",
@@ -159,8 +164,10 @@ class JaqalParser(Parser):
         "macro_definition",
     )
     def top_statement(self, tree):
+        if self._header_only:
+            raise HeaderParsingDone()
         self._in_body = True
-        return tree[0]
+        self.top_sexpression.append(tree[0])
 
     # Define what statements are allowed in sequential blocks
 
@@ -452,3 +459,11 @@ def _monkeypatch_sly():
             return
 
         del sly.yacc.YaccProduction.__setattr__
+
+
+class HeaderParsingDone(Exception):
+    """Exception raised to indicate that the header is complete. The
+    results can then be pulled from the 'top_sexpression' attribute of the
+    parser."""
+
+    pass
