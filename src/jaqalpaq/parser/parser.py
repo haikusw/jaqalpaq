@@ -157,7 +157,7 @@ def parse_jaqal_string_header(jaqal, return_usepulses=False):
     """
 
     sexpr, usepulses = parse_to_sexpression(
-        jaqal, return_usepulses=return_usepulses, header_only=False
+        jaqal, return_usepulses=return_usepulses, header_only=True
     )
     circuit = build(sexpr)
 
