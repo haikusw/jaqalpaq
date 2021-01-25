@@ -165,6 +165,23 @@ class BuildTester(unittest.TestCase):
         with self.assertRaises(JaqalError):
             build(sexpr, {})
 
+    def test_unhashable_gate(self):
+        """Test making a gate with lists instead of tuples. This has in the
+        past not worked well with the gate memoizer."""
+        sexpr = [
+            "circuit",
+            ["register", "r", 3],
+            ["gate", "foo", ["array_item", "r", 0]],
+        ]
+        exp_value = build(
+            ("circuit", ("register", "r", 3), ("gate", "foo", ("array_item", "r", 0)))
+        )
+        act_value = build(sexpr)
+        # The most likely failure case is not this asssertion but
+        # rather that we would throw an exception while building the
+        # sexpr in the first place.
+        self.assertEqual(exp_value, act_value)
+
     def test_build_macro_gate(self):
         sexpr = ("circuit", ("macro", "foo", ("sequential_block",)), ("gate", "foo"))
         circuit = build(sexpr, {})

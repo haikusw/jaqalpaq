@@ -233,7 +233,7 @@ class Builder:
 
     def build_gate(self, sexpression, context, gate_context):
         gate_name, *gate_args = sexpression.args
-        memo_key = (gate_name, tuple(gate_args))
+        memo_key = self._make_memo_key(gate_name, gate_args)
         if memo_key in self._memoized_gates:
             return self._memoized_gates[memo_key]
         else:
@@ -242,6 +242,16 @@ class Builder:
             gate = gate_def(*built_args)
             self._memoized_gates[memo_key] = gate
             return gate
+
+    def _make_memo_key(self, gate_name, gate_args):
+        return (gate_name, self._make_hashable(gate_args))
+
+    def _make_hashable(self, obj):
+        """Basically just replace all lists with tuples, recursively."""
+        if isinstance(obj, (list, tuple)):
+            return tuple(self._make_hashable(v) for v in obj)
+        else:
+            return obj
 
     def get_gate_definition(self, name, arg_count, gate_context):
         """Return the definition for the given gate. If no such definition exists, and we
