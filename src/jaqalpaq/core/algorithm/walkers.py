@@ -42,6 +42,15 @@ class TraceSerializer(Visitor):
         for n, sub_obj in self.trace_statements(block.statements):
             yield from self.visit(sub_obj)
 
+    def visit_BranchStatement(self, block):
+        for n, sub_obj in self.trace_statements(block.statements):
+            yield from self.visit(sub_obj)
+
+    def visit_CaseStatement(self, block):
+        yield block.state
+        for n, sub_obj in self.trace_statements(block.statements):
+            yield from self.visit(sub_obj)
+
     def visit_LoopStatement(self, loop):
         if self.started:
             for n in range(loop.iterations):
@@ -85,6 +94,12 @@ class DiscoverSubcircuits(UsedQubitIndicesVisitor):
 
     def visit_LoopStatement(self, obj, context=None):
         return self.visit(obj.statements, context=context, reps=obj.iterations)
+
+    def visit_CaseStatement(self, obj, context=None):
+        return self.visit(obj.statements, context=context, state=obj.state)
+
+    def visit_BranchStatement(self, obj, context=None):
+        return self.visit(obj.statements, context=context)
 
     def visit_BlockStatement(self, block, context=None, reps=1):
         # Calling UsedQubitIndicesVisitor as super() is
@@ -184,3 +199,43 @@ class TraceVisitor(Visitor):
             self.address[:] = address[:]
             self.index = index
             self.visit(loop.statements)
+
+    def visit_CaseStatement(self, case):
+        # store the walk status
+        index = self.index
+        address = self.address[:]
+        objective = self.objective
+
+        # loop over the classical parts
+        # Restore the walk status at the start of every loop
+        self.objective = objective
+        self.address[:] = address[:] + case.state
+        self.index = index
+        self.visit(case.statements)
+
+    def visit_BranchStatement(self, block):
+        first = True
+        address = self.address
+        while self.objective:
+            if address != self.objective[: len(address)]:
+                assert not first
+                assert address < self.objective[: len(address)]
+                return
+
+            first = False
+
+            n = self.objective[len(address)]
+            nxt = block.statements[n]
+            if (len(address) + 1) == len(self.objective):
+                self.process_trace()
+                self.index += 1
+                if self.index == len(self.traces):
+                    # We've found all the traces.  We're done!
+                    self.objective = None
+                    return
+                else:
+                    self.objective = self.traces[self.index].start
+            else:
+                address.append(n)
+                self.visit(nxt)
+                address.pop()

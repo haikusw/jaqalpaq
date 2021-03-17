@@ -67,6 +67,14 @@ class MapFiller(Visitor):
         sexpr = ["loop", self.visit(loop.iterations), self.visit(loop.statements)]
         return sexpr
 
+    def visit_BranchStatement(self, block):
+        sexpr = ["branch", *(self.visit(stmt) for stmt in block.statements)]
+        return sexpr
+
+    def visit_CaseStatement(self, case):
+        sexpr = ["case", *(self.visit(stmt) for stmt in case.statements)]
+        return sexpr
+
     def visit_GateStatement(self, gate):
         sexpr = [
             "gate",

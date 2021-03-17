@@ -70,6 +70,14 @@ class LetFiller(Visitor):
         sexpr = ["loop", self.visit(loop.iterations), self.visit(loop.statements)]
         return sexpr
 
+    def visit_CaseStatement(self, case):
+        sexpr = ["case", self.visit(case.state), self.visit(case.statements)]
+        return sexpr
+
+    def visit_BranchStatement(self, branch):
+        sexpr = ["branch", *[self.visit(s) for s in branch.statements]]
+        return sexpr
+
     def visit_GateStatement(self, gate):
         sexpr = [
             "gate",

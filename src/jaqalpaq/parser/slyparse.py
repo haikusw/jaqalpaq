@@ -31,6 +31,8 @@ class JaqalLexer(Lexer):
         IDENTIFIER,
         NUMBER,
         INT,
+        BININT,
+        BRANCH,
     }
 
     # Ignore whitespace, but not newlines
@@ -41,6 +43,7 @@ class JaqalLexer(Lexer):
     IDENTIFIER = r"[a-zA-Z_](\.?[a-zA-Z0-9_])*"
     NUMBER = r"[-+]?[0-9]*\.[0-9]+([eE][-+]?[0-9]+)?"
     INT = r"[-+]?[0-9]+"
+    BININT = r"'[0-1]+'"
 
     # Keywords
     IDENTIFIER["register"] = REG
@@ -52,6 +55,7 @@ class JaqalLexer(Lexer):
     IDENTIFIER["usepulses"] = USEPULSES
     IDENTIFIER["from"] = FROM
     IDENTIFIER["as"] = AS
+    IDENTIFIER["branch"] = BRANCH
 
     # Comments
     ignore_comment = r"//[^\n]*"
@@ -75,6 +79,10 @@ class JaqalLexer(Lexer):
 
     def NUMBER(self, token):
         token.value = float(token.value)
+        return token
+
+    def BININT(self, token):
+        token.value = int(token.value[1:-1], base=2)
         return token
 
 
@@ -162,6 +170,7 @@ class JaqalParser(Parser):
         "sequential_gate_block",
         "loop_statement",
         "macro_definition",
+        "branch_statement",
     )
     def top_statement(self, tree):
         if self._header_only:
@@ -297,6 +306,18 @@ class JaqalParser(Parser):
         # self.set_pos(tree)
         return ["loop", tree.let_or_int, tree.gate_block]
 
+    # Branch statement
+
+    @_("BRANCH branch_block")
+    def branch_statement(self, tree):
+        return ["branch", *tree.branch_block]
+
+    # Case statement
+
+    @_('BININT ":" gate_block')
+    def case_statement(self, tree):
+        return ["case", tree.BININT, tree.gate_block]
+
     # macro definition
 
     @_("MACRO macro_args gate_block")
@@ -362,6 +383,24 @@ class JaqalParser(Parser):
 
     @_("empty")
     def parallel_statements(self, tree):
+        return deque()
+
+    # Branches
+
+    @_('"{" seqpad case_statements "}"')
+    def branch_block(self, tree):
+        ret = tree.case_statements
+        # ret.appendleft("branch")
+        return ret
+
+    @_("case_statement seqsep case_statements")
+    def case_statements(self, tree):
+        ret = tree.case_statements
+        ret.appendleft(tree.case_statement)
+        return ret
+
+    @_("empty")
+    def case_statements(self, _tree):
         return deque()
 
     # Common rules

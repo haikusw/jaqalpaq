@@ -11,7 +11,7 @@ from .gate import GateStatement
 from .gatedef import GateDefinition, AbstractGate
 from .circuit import Circuit, normalize_native_gates
 from .parameter import Parameter
-from .block import BlockStatement, LoopStatement, UnscheduledBlockStatement
+from .block import BlockStatement, LoopStatement, UnscheduledBlockStatement, BranchStatement, CaseStatement
 
 from jaqalpaq import JaqalError
 
@@ -133,6 +133,8 @@ class Builder:
                 isinstance(obj, GateStatement)
                 or isinstance(obj, BlockStatement)
                 or isinstance(obj, LoopStatement)
+                or isinstance(obj, BranchStatement)
+                or isinstance(obj, CaseStatement)
             ):
                 statements.append(obj)
             elif isinstance(obj, dict):
@@ -268,6 +270,17 @@ class Builder:
         built_count = self.build(count, context, gate_context)
         built_block = self.build(block, context, gate_context)
         return LoopStatement(built_count, built_block)
+
+    def build_branch(self, sexpression, context, gate_context):
+        block = sexpression.args
+        built_block = [self.build(b, context, gate_context) for b in block]
+        return BranchStatement(built_block)
+
+    def build_case(self, sexpression, context, gate_context):
+        state, block = sexpression.args
+        built_state = self.build(state, context, gate_context)
+        built_block = self.build(block, context, gate_context)
+        return CaseStatement(built_state, built_block)
 
     def build_sequential_block(self, sexpression, context, gate_context):
         return self.build_block(sexpression, context, gate_context, is_parallel=False)
@@ -521,6 +534,19 @@ class BlockBuilder:
         self.expression.append(loop)
         return loop
 
+    def branch(self):
+        builder = BranchBlockBuilder()
+        self.expression.extend(builder.expression)
+        return builder
+
+    def case(self, state, block):
+        if isinstance(block, BlockBuilder):
+            block = block.expression
+        case = ("case", state, block)
+        case = build(case)
+        self.expression.append(case)
+        return case
+
 
 class SequentialBlockBuilder(BlockBuilder):
     """Build up a sequential code block."""
@@ -534,6 +560,20 @@ class ParallelBlockBuilder(BlockBuilder):
 
     def __init__(self):
         super().__init__("parallel_block")
+
+
+class BranchBlockBuilder(BlockBuilder):
+    """Build up a sequential code block."""
+
+    def __init__(self):
+        super().__init__("branch")
+
+
+class CaseBlockBuilder(BlockBuilder):
+    """Build up a sequential code block."""
+
+    def __init__(self):
+        super().__init__("case")
 
 
 # This is not API currently, but is used by jaqalpaq-extras for automatic scheduling.

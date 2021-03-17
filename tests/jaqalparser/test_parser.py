@@ -164,6 +164,13 @@ class ParserTester(unittest.TestCase):
         sexpr = ["circuit", ["loop", 1, ["sequential_block", ["gate", "g0", 1]]]]
         self.run_test(text, sexpr)
 
+    def test_branch_statement(self):
+        """Test creating a loop."""
+        text = "branch { \n'0100': { g0 1 } \n '1010':{ g1 2} \n}"
+        sexpr = ["circuit", ["branch", ["case", 0b0100, ["sequential_block", ["gate", "g0", 1]]],
+                                       ["case", 0b1010, ["sequential_block", ["gate", "g1", 2]]]]]
+        self.run_test(text, sexpr)
+
     def test_header(self):
         """Test a bunch of header statements together."""
         text = "register q[3]\nmap a q[0:3:2]\nlet pi 3.14; let reps 100\n"
