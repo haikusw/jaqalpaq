@@ -481,6 +481,30 @@ class ObjectOrientedBuilderTester(unittest.TestCase):
             builder,
         )
 
+    def test_nested_macros(self):
+        """Test that parameters are properly expanded in nested scopes."""
+        gate_def = GateDefinition("g", [Parameter("p", ParamType.QUBIT)])
+        native_gates = {"g": gate_def}
+        builder = core.circuitbuilder.CircuitBuilder(native_gates=native_gates)
+
+        (q,) = builder.register("r", 1)
+
+        inner_builder = core.circuitbuilder.SequentialBlockBuilder()
+        inner_builder.gate("g", "c")
+        builder.macro("inner", ["c"], inner_builder)
+
+        outer_builder = core.circuitbuilder.SequentialBlockBuilder()
+        outer_builder.gate("inner", "ctrl1")
+        builder.macro("outer", ["ctrl1"], outer_builder)
+
+        builder.gate("outer", q)
+
+        circuit = builder.build()
+        macro_inner = circuit.macros["inner"]
+        macro_outer = circuit.macros["outer"]
+
+        self.assertEqual(macro_inner, macro_outer.body.statements[0]._gate_def)
+
     ##
     # Helper methods
     #
