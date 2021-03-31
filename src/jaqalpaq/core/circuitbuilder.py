@@ -11,7 +11,8 @@ from .gate import GateStatement
 from .gatedef import GateDefinition, AbstractGate
 from .circuit import Circuit, normalize_native_gates
 from .parameter import Parameter
-from .block import BlockStatement, LoopStatement, UnscheduledBlockStatement, BranchStatement, CaseStatement
+from .block import BlockStatement, LoopStatement, UnscheduledBlockStatement
+from .branch import BranchStatement, CaseStatement
 
 from jaqalpaq import JaqalError
 
