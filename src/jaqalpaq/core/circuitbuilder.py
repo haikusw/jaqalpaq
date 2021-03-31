@@ -273,9 +273,9 @@ class Builder:
         return LoopStatement(built_count, built_block)
 
     def build_branch(self, sexpression, context, gate_context):
-        block = sexpression.args
-        built_block = [self.build(b, context, gate_context) for b in block]
-        return BranchStatement(built_block)
+        cases = sexpression.args
+        built_cases = [self.build(b, context, gate_context) for b in cases]
+        return BranchStatement(built_cases)
 
     def build_case(self, sexpression, context, gate_context):
         state, block = sexpression.args

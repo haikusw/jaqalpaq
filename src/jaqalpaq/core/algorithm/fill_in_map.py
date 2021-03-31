@@ -67,8 +67,8 @@ class MapFiller(Visitor):
         sexpr = ["loop", self.visit(loop.iterations), self.visit(loop.statements)]
         return sexpr
 
-    def visit_BranchStatement(self, block):
-        sexpr = ["branch", *(self.visit(stmt) for stmt in block.statements)]
+    def visit_BranchStatement(self, branch):
+        sexpr = ["branch", *(self.visit(case) for case in branch.cases)]
         return sexpr
 
     def visit_CaseStatement(self, case):

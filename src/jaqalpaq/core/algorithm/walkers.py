@@ -42,14 +42,11 @@ class TraceSerializer(Visitor):
         for n, sub_obj in self.trace_statements(block.statements):
             yield from self.visit(sub_obj)
 
-    def visit_BranchStatement(self, block):
-        for n, sub_obj in self.trace_statements(block.statements):
-            yield from self.visit(sub_obj)
+    def visit_BranchStatement(self, branch):
+        raise JaqalError("Branch statements not supported in trace serializing")
 
     def visit_CaseStatement(self, block):
-        yield block.state
-        for n, sub_obj in self.trace_statements(block.statements):
-            yield from self.visit(sub_obj)
+        raise JaqalError("Branch cases not supported in trace serializing")
 
     def visit_LoopStatement(self, loop):
         if self.started:
@@ -99,7 +96,7 @@ class DiscoverSubcircuits(UsedQubitIndicesVisitor):
         return self.visit(obj.statements, context=context, state=obj.state)
 
     def visit_BranchStatement(self, obj, context=None):
-        return self.visit(obj.statements, context=context)
+        return self.visit(obj.cases, context=context)
 
     def visit_BlockStatement(self, block, context=None, reps=1):
         # Calling UsedQubitIndicesVisitor as super() is
@@ -213,29 +210,5 @@ class TraceVisitor(Visitor):
         self.index = index
         self.visit(case.statements)
 
-    def visit_BranchStatement(self, block):
-        first = True
-        address = self.address
-        while self.objective:
-            if address != self.objective[: len(address)]:
-                assert not first
-                assert address < self.objective[: len(address)]
-                return
-
-            first = False
-
-            n = self.objective[len(address)]
-            nxt = block.statements[n]
-            if (len(address) + 1) == len(self.objective):
-                self.process_trace()
-                self.index += 1
-                if self.index == len(self.traces):
-                    # We've found all the traces.  We're done!
-                    self.objective = None
-                    return
-                else:
-                    self.objective = self.traces[self.index].start
-            else:
-                address.append(n)
-                self.visit(nxt)
-                address.pop()
+    def visit_BranchStatement(self, branch):
+        raise JaqalError("Tracing a circuit with a branch not supported")

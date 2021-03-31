@@ -75,7 +75,7 @@ class LetFiller(Visitor):
         return sexpr
 
     def visit_BranchStatement(self, branch):
-        sexpr = ["branch", *[self.visit(s) for s in branch.statements]]
+        sexpr = ["branch", *[self.visit(case) for case in branch.cases]]
         return sexpr
 
     def visit_GateStatement(self, gate):

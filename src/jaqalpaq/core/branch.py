@@ -8,42 +8,42 @@ class BranchStatement:
     """
     Represents a Jaqal branch statement containing case statements.
 
-    :param statements: The contents of the block; defaults to an empty block.
+    :param statements: The different branch cases; defaults to an empty list.
     :type statements: list[CaseStatement]
     """
 
-    def __init__(self, statements=None):
-        if statements is None:
-            self._statements = []
+    def __init__(self, cases=None):
+        if cases is None:
+            self._cases = []
         else:
-            self._statements = statements
+            self._cases = cases
 
     def __repr__(self):
-        return f"BranchStatement({self.statements})"
+        return f"BranchStatement({self.cases})"
 
     def __eq__(self, other):
         try:
-            return self.statements == other.statements
+            return self.cases == other.cases
         except AttributeError:
             return False
 
     @property
-    def statements(self):
+    def cases(self):
         """
         The contents of the block. In addition to read-only access through this property,
         a basic sequence protocol (``len()``, iteration, and indexing) is also
         supported to access the contents.
         """
-        return self._statements
+        return self._cases
 
     def __getitem__(self, key):
-        return self.statements[key]
+        return self.cases[key]
 
     def __iter__(self):
-        return iter(self.statements)
+        return iter(self.cases)
 
     def __len__(self):
-        return len(self.statements)
+        return len(self.cases)
 
 
 class CaseStatement:
