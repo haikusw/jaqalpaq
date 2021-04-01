@@ -1,11 +1,18 @@
 import unittest
 import itertools
 
+import jaqalpaq.core.branch
 from . import common
 
 
 class JaqalBranchTester(unittest.TestCase):
     """Test that a branch statement object behaves as expected."""
+
+    def setUp(self):
+        jaqalpaq.core.branch.USE_EXPERIMENTAL_BRANCH = True
+
+    def tearDown(self):
+        jaqalpaq.core.branch.USE_EXPERIMENTAL_BRANCH = False
 
     def test_create_branch(self):
         branch, body_count, case_statements = common.make_random_branch_statement(

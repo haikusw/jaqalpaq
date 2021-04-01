@@ -294,20 +294,26 @@ class ParserTester(TestCase):
 
     def test_branch_statement(self):
         """Test parsing a branch statement."""
-        text = "branch { \n'0': { foo }\n '1': { bar } \n }"
-        exp_result = self.make_circuit(
-            gates=[
-                self.make_branch(
-                    self.make_case(
-                        0, self.make_sequential_gate_block(self.make_gate("foo"))
-                    ),
-                    self.make_case(
-                        1, self.make_sequential_gate_block(self.make_gate("bar"))
-                    ),
-                )
-            ]
-        )
-        self.run_test(text, exp_result)
+        import jaqalpaq.core.branch
+
+        jaqalpaq.core.branch.USE_EXPERIMENTAL_BRANCH = True
+        try:
+            text = "branch { \n'0': { foo }\n '1': { bar } \n }"
+            exp_result = self.make_circuit(
+                gates=[
+                    self.make_branch(
+                        self.make_case(
+                            0, self.make_sequential_gate_block(self.make_gate("foo"))
+                        ),
+                        self.make_case(
+                            1, self.make_sequential_gate_block(self.make_gate("bar"))
+                        ),
+                    )
+                ]
+            )
+            self.run_test(text, exp_result)
+        finally:
+            jaqalpaq.core.branch.USE_EXPERIMENTAL_BRANCH = False
 
     ##
     # Helper methods

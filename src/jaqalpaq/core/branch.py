@@ -2,6 +2,10 @@
 # Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains
 # certain rights in this software.
 from .block import BlockStatement
+from ..error import JaqalError
+
+# Set this to True before parsing anything with branches
+USE_EXPERIMENTAL_BRANCH = False
 
 
 class BranchStatement:
@@ -13,6 +17,10 @@ class BranchStatement:
     """
 
     def __init__(self, cases=None):
+        if not USE_EXPERIMENTAL_BRANCH:
+            raise JaqalError(
+                "Branches are an experimental feature not yet officially supported. Set USE_EXPERIMENTAL_BRANCH to True to use them anyway."
+            )
         if cases is None:
             self._cases = []
         else:
