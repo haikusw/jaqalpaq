@@ -66,10 +66,7 @@ class CaseStatement:
 
     def __eq__(self, other):
         try:
-            return (
-                    self.state == other.state
-                    and self.statements == other.statements
-            )
+            return self.state == other.state and self.statements == other.statements
         except AttributeError:
             return False
 
@@ -96,5 +93,3 @@ class CaseStatement:
 
     def __len__(self):
         return len(self.statements)
-
-

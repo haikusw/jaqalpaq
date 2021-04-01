@@ -399,6 +399,10 @@ class JaqalParser(Parser):
         ret.appendleft(tree.case_statement)
         return ret
 
+    @_("case_statement")
+    def case_statements(self, tree):
+        return deque([tree.case_statement])
+
     @_("empty")
     def case_statements(self, _tree):
         return deque()

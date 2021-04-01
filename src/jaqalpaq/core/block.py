@@ -110,4 +110,3 @@ class LoopStatement:
 
     def __len__(self):
         return len(self.statements)
-

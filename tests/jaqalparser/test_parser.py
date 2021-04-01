@@ -165,8 +165,22 @@ class ParserTester(unittest.TestCase):
         self.run_test(text, sexpr)
 
     def test_branch_statement(self):
-        """Test creating a loop."""
+        """Test creating a branch statement."""
         text = "branch { \n'0100': { g0 1 } \n '1010':{ g1 2} \n}"
+        sexpr = ["circuit", ["branch", ["case", 0b0100, ["sequential_block", ["gate", "g0", 1]]],
+                                       ["case", 0b1010, ["sequential_block", ["gate", "g1", 2]]]]]
+        self.run_test(text, sexpr)
+
+    def test_branch_statement_no_newlines(self):
+        """Test creating a branch statement without using newlines."""
+        text = "branch { '0100': { g0 1 }; '1010':{ g1 2}; }"
+        sexpr = ["circuit", ["branch", ["case", 0b0100, ["sequential_block", ["gate", "g0", 1]]],
+                                       ["case", 0b1010, ["sequential_block", ["gate", "g1", 2]]]]]
+        self.run_test(text, sexpr)
+
+    def test_branch_statement_no_final_separator(self):
+        """Test creating a branch with no separator after the final case."""
+        text = "branch { '0100': { g0 1 }; '1010':{ g1 2} }"
         sexpr = ["circuit", ["branch", ["case", 0b0100, ["sequential_block", ["gate", "g0", 1]]],
                                        ["case", 0b1010, ["sequential_block", ["gate", "g1", 2]]]]]
         self.run_test(text, sexpr)

@@ -13,6 +13,7 @@ from jaqalpaq.core import (
     NamedQubit,
     AnnotatedValue,
 )
+from jaqalpaq.core.branch import BranchStatement, CaseStatement
 from jaqalpaq.parser import parse_jaqal_string, JaqalParseError
 from jaqalpaq.parser.identifier import Identifier
 from jaqalpaq import JaqalError
@@ -291,6 +292,19 @@ class ParserTester(TestCase):
         )
         self.assertEqual(act_value, exp_value)
 
+    def test_branch_statement(self):
+        """Test parsing a branch statement."""
+        text = "branch { \n'0': { foo }\n '1': { bar } \n }"
+        exp_result = self.make_circuit(
+            gates=[self.make_branch(
+                self.make_case(0, self.make_sequential_gate_block(
+                    self.make_gate('foo'))),
+                self.make_case(1, self.make_sequential_gate_block(
+                    self.make_gate('bar'))))
+                   ]
+        )
+        self.run_test(text, exp_result)
+
     ##
     # Helper methods
     #
@@ -478,6 +492,15 @@ class ParserTester(TestCase):
         if not isinstance(named_qubit, NamedQubit):
             raise TypeError(f"Register entry {name} not a named qubit")
         return named_qubit
+
+    def make_branch(self, *cases):
+        """Return a BranchStatement with the given cases."""
+        return BranchStatement(list(cases))
+
+    def make_case(self, state, block):
+        """Return a CaseStatement conditioned on the given state. The state is
+        represented as a str of '1' and '0's."""
+        return CaseStatement(state, block)
 
 
 class ErrorMessageTester(TestCase):
