@@ -13,6 +13,7 @@ from jaqalpaq.core import (
     GateStatement,
     LoopStatement,
 )
+from jaqalpaq.core.branch import BranchStatement, CaseStatement
 from .randomize import random_identifier, random_whole, random_integer, random_float
 
 VALID_GATE_ARG_TYPES = [ParamType.FLOAT, ParamType.INT, ParamType.QUBIT]
@@ -318,3 +319,34 @@ def make_random_loop_statement(
         return loop
     else:
         return loop, iterations, block
+
+
+def make_random_branch_statement(*, cases=None, body_count=None, return_params=False):
+    """Make a branch statement with a random number of cases and gates in
+    those cases."""
+    if cases is None:
+        cases = random_whole()
+    if body_count is None:
+        body_count = random_integer(lower=0, upper=16)
+    case_statements = [make_random_case(count=body_count) for _ in range(cases)]
+    branch = BranchStatement(case_statements)
+    if not return_params:
+        return branch
+    else:
+        return branch, body_count, case_statements
+
+
+def make_random_case(*, count=None, bit_count=None, return_params=False):
+    """Make a random case designed for branch statements."""
+    if count is None:
+        count = random_integer(lower=0, upper=16)
+    if bit_count is None:
+        # This determines the size of the state select
+        bit_count = random_integer(lower=1, upper=4)
+    state = random_integer(lower=0, upper=(1 << bit_count) - 1)
+    statements = [make_random_gate_statement() for _ in range(count)]
+    case = CaseStatement(state=state, statements=statements)
+    if not return_params:
+        return case
+    else:
+        return case, state, statements
