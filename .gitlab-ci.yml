@@ -2,7 +2,7 @@ image: python:3.7
 
 before_script:
   - python --version
-  - echo "$CI_PROJECT_URL" | grep -q gitlab.sandia.gov && export http_proxy=http://wwwproxy.sandia.gov:80 https_proxy=https://wwwproxy.sandia.gov:80 no_proxy=.sandia.gov
+  - echo "$CI_PROJECT_URL" | grep -q gitlab.sandia.gov && export http_proxy=http://user:pass@proxy.sandia.gov:80 https_proxy=https://user:pass@proxy.sandia.gov:80 no_proxy=.sandia.gov
 
 stages:
   - Analysis and Tests
