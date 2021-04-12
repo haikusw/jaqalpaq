@@ -239,16 +239,6 @@ class Builder:
             self.gate_memo.set(memo_key, gate)
         return gate
 
-    def _make_memo_key(self, gate_name, gate_args):
-        return (gate_name, self._make_hashable(gate_args))
-
-    def _make_hashable(self, obj):
-        """Basically just replace all lists with tuples, recursively."""
-        if isinstance(obj, (list, tuple)):
-            return tuple(self._make_hashable(v) for v in obj)
-        else:
-            return obj
-
     def get_gate_definition(self, name, arg_count, gate_context):
         """Return the definition for the given gate. If no such definition exists, and we
         aren't requiring all gates to be a native gate or macro, then create a new
@@ -370,10 +360,18 @@ class GateMemoizer:
 
         memo_key = (
             gate_name,
-            tuple(gate_args),
+            self._make_hashable(gate_args),
             tuple(make_context_entry(arg) for arg in gate_args),
         )
         return memo_key
+
+    @classmethod
+    def _make_hashable(cls, obj):
+        """Basically just replace all lists with tuples, recursively."""
+        if isinstance(obj, (list, tuple)):
+            return tuple(cls._make_hashable(v) for v in obj)
+        else:
+            return obj
 
 
 def as_integer(value):
