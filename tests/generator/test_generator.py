@@ -57,18 +57,15 @@ class GeneratorTester(TestCase):
     def test_randomized_rotations(self):
         from random import uniform
         from math import pi
-        from tempfile import TemporaryDirectory
-        import os.path
 
-        with TemporaryDirectory() as tempdir:
-            with open(os.path.join(tempdir, "randomness_example.jql"), "w") as f:
-                f.write("register q[1]\n\n")
-                for idx in range(100):
-                    angle = uniform(0.0, 2.0) * pi
-                    f.write("prepare_all\n")
-                    f.write("Rx q[0] %f\n" % angle)
-                    f.write("measure_all\n\n")
-            self.run_test(os.path.join(tempdir, "randomness_example.jql"))
+        lines = []
+        lines.append("register q[1]\n")
+        for idx in range(100):
+            angle = uniform(0.0, 2.0) * pi
+            lines.append("prepare_all")
+            lines.append("Rx q[0] %f" % angle)
+            lines.append("measure_all\n")
+        self.run_test_string("\n".join(lines))
 
     def test_let_in_register(self):
         self.run_test_string("let len 3; register q[len]")
