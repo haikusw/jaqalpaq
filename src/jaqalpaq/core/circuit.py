@@ -40,9 +40,10 @@ class Circuit:
         self._registers = {}
         self._native_gates = normalize_native_gates(native_gates)
         self._body = BlockStatement()
+        self._usepulses = []
 
     def __repr__(self):
-        return f"Circuit(constants={self._constants}, macros={self._macros}, native_gates={self._native_gates}, registers={self._registers}, body={self._body})"
+        return f"Circuit(usepulses={self._usepulses}, constants={self._constants}, macros={self._macros}, native_gates={self._native_gates}, registers={self._registers}, body={self._body})"
 
     def __eq__(self, other):
         try:
@@ -52,6 +53,7 @@ class Circuit:
                 and self.native_gates == other.native_gates
                 and self.registers == other.registers
                 and self.body == other.body
+                and self.usepulses == self.usepulses
             )
         except AttributeError:
             return False
@@ -86,6 +88,12 @@ class Circuit:
         """Read-only access to a :class:`BlockStatement` object that contains the main body of
         the program."""
         return self._body
+
+    @property
+    def usepulses(self):
+        """Read-only access to a list of :class:`UsePulsesStatement` objects,
+        corresponding to ``from ? usepulses ?`` statements in a Jaqal file."""
+        return self._usepulses
 
     def fundamental_registers(self):
         """

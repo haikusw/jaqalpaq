@@ -2,7 +2,6 @@
 # Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains
 # certain rights in this software.
 from typing import Dict
-from importlib import import_module
 
 from .constant import Constant
 from .macro import Macro
@@ -14,6 +13,7 @@ from .parameter import Parameter
 from .block import BlockStatement, LoopStatement, UnscheduledBlockStatement
 from .branch import BranchStatement, CaseStatement
 from .algorithm.visitor import Visitor
+from .usepulses import UsePulsesStatement
 
 from jaqalpaq import JaqalError
 
@@ -48,6 +48,7 @@ def build(expression, inject_pulses=None, autoload_pulses=False):
     sequential_block : \*statements
     parallel_block : \*statements
     array_item : identifier index
+    usepulses : identifier [all]
 
     In lieu of an s-expression, the appropriate type from the core library will also be
     accepted. This allows the user to build up new expressions using partially built old
@@ -117,6 +118,7 @@ class Builder:
         constants = {}
         macros = {}
         statements = []
+        usepulses = []
         native_gates = gate_context.copy()
 
         for expr in sexpression.args:
@@ -140,9 +142,19 @@ class Builder:
                 or isinstance(obj, CaseStatement)
             ):
                 statements.append(obj)
-            elif isinstance(obj, dict):
-                # this comes from build_usepulses
-                native_gates.update(obj)
+            elif isinstance(obj, UsePulsesStatement):
+                usepulses.append(obj)
+                if self.autoload_pulses:
+                    newgates = obj.load_pulses()
+
+                    for g in newgates.values():
+                        # inject_pulses overrides usepulses
+                        if self.inject_pulses and g.name in self.inject_pulses:
+                            continue
+
+                        # but later usepulses override earlier imports
+                        gate_context[g.name] = g
+                        native_gates[g.name] = g
             else:
                 raise JaqalError(f"Cannot process object {obj} at circuit level")
 
@@ -151,6 +163,7 @@ class Builder:
         circuit.constants.update(constants)
         circuit.macros.update(macros)
         circuit.body.statements.extend(statements)
+        circuit.usepulses.extend(usepulses)
         return circuit
 
     def add_to_context(self, context, name, obj):
@@ -314,30 +327,13 @@ class Builder:
         return built_identifier[built_index]
 
     def build_usepulses(self, sexpression, context, gate_context):
-        # Process a from ... usepulses * statement if autoload_pulses
-        ret = {}
-        if not self.autoload_pulses:
-            return ret
-
         name, filt = sexpression.args
 
-        module = import_module(str(name))
-        native_gates = module.NATIVE_GATES
-
+        # XXX: Parse this list of gates to import when we fully implement usepulses
         if (filt is not all) and (filt != "*"):
             raise JaqalError("Only from ... usepulses * currently supported.")
 
-        for g in native_gates.values():
-            # inject_pulses overrides usepulses
-            if self.inject_pulses and g.name in self.inject_pulses:
-                continue
-
-            # but later usepulses override earlier imports
-            gate_context[g.name] = g
-            ret[g.name] = g
-
-        # Separate imported context from local
-        return ret
+        return UsePulsesStatement(name, all)
 
 
 def rebuild_macro_in_context(macro, context, gate_context):

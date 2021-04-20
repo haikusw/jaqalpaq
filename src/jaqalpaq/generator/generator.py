@@ -36,6 +36,10 @@ def generate_jaqal_program(circ):
     :rtype: str
     """
     program = []
+    for usepulses in circ.usepulses:
+        program.append(generate_jaqal_usepulses(usepulses))
+    if circ.usepulses:
+        program.append("\n")
     for const in circ.constants.values():
         program.append(generate_jaqal_let(const))
     if circ.constants:
@@ -59,6 +63,12 @@ def generate_jaqal_program(circ):
         elif isinstance(statement, BlockStatement):
             program.append(generate_jaqal_block(statement, 0, True))
     return "".join(program)
+
+
+def generate_jaqal_usepulses(usepulses):
+    # Todo: represent names when it is a list
+    assert usepulses.names is all
+    return f"from {usepulses.module} usepulses *\n"
 
 
 def generate_jaqal_reg(register):
