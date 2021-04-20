@@ -35,30 +35,30 @@ def generate_jaqal_program(circ):
     :returns: The text of a Jaqal program that describes that circuit.
     :rtype: str
     """
-    program = ""
+    program = []
     for const in circ.constants.values():
-        program += generate_jaqal_let(const)
+        program.append(generate_jaqal_let(const))
     if circ.constants:
-        program += "\n"
+        program.append("\n")
     for register in circ.registers.values():
         if register.fundamental:
-            program += generate_jaqal_reg(register)
-    program += "\n"
+            program.append(generate_jaqal_reg(register))
+    program.append("\n")
     for register in circ.registers.values():
         if not register.fundamental:
-            program += generate_jaqal_map(register)
+            program.append(generate_jaqal_map(register))
     if len(circ.registers) > 1:
-        program += "\n"
+        program.append("\n")
     for macro in circ.macros.values():
-        program += generate_jaqal_macro(macro)
+        program.append(generate_jaqal_macro(macro))
     for statement in circ.body:
         if isinstance(statement, GateStatement):
-            program += generate_jaqal_gate(statement, 0)
+            program.append(generate_jaqal_gate(statement, 0))
         elif isinstance(statement, LoopStatement):
-            program += generate_jaqal_loop(statement, 0)
+            program.append(generate_jaqal_loop(statement, 0))
         elif isinstance(statement, BlockStatement):
-            program += generate_jaqal_block(statement, 0, True)
-    return program
+            program.append(generate_jaqal_block(statement, 0, True))
+    return "".join(program)
 
 
 def generate_jaqal_reg(register):
