@@ -1,3 +1,4 @@
+from re import sub, DOTALL
 from unittest import TestCase
 
 from jaqalpaq.generator import generate_jaqal_program
@@ -9,11 +10,45 @@ class GeneratorTester(TestCase):
         with open(program) as fd:
             self.run_test_string(fd.read())
 
+    def normalize_jaqal(self, text):
+        # replace tabs
+        text = sub("\t", " ", text)
+
+        # remove comments
+        text = sub("//.*", "", text)
+        text = sub(r"/\*.*\*/", "", text, flags=DOTALL)
+
+        # expand parallel blocks
+        text = sub(r"\|", "\n", text)
+        text = sub("<", "\n<\n", text)
+        text = sub(">", "\n>\n", text)
+
+        # expand serial blocks
+        text = sub(";", "\n", text)
+        text = sub("{", "\n{\n", text)
+        text = sub("}", "\n}\n", text)
+
+        # drop zeros at the ends of numbers
+        text = sub("(?<=[0123456789])0+(?= |\n)", "\n", text)
+
+        # ignore register statements (ambiguous order in header)
+        text = sub("(^|\n) *register .*(\n|$)", "\n", text)
+
+        # remove repeated whitespace
+        text = sub(" +", " ", text)
+        text = sub(" *\n *", "\n", text)
+        text = sub("\n+", "\n", text)
+        text = sub("^( |\n)*", "", text)
+        text = sub("( |\n)*$", "", text)
+
+        return text
+
     def run_test_string(self, text):
         circuit1 = parse_jaqal_string(text, autoload_pulses=False)
         generated = generate_jaqal_program(circuit1)
         circuit2 = parse_jaqal_string(generated, autoload_pulses=False)
         self.assertEqual(circuit1, circuit2)
+        self.assertEqual(self.normalize_jaqal(text), self.normalize_jaqal(generated))
 
     def test_map_registers(self):
         self.run_test("examples/jaqal/spec_samples/registers.jaqal")
