@@ -149,6 +149,18 @@ class BuildTester(unittest.TestCase):
         act_value = build(sexpr, native_gates)
         self.assertEqual(exp_value, act_value)
 
+    def test_build_usepulses(self):
+        sexpr0 = ("usepulses", "__invalid__module__test0", all)
+        sexpr1 = ("usepulses", "__invalid__module__test1", "*")
+        up0 = build(sexpr0)
+        up1 = build(sexpr1)
+        self.assertNotEqual(up0, up1)
+
+        self.assertEqual(up0.names, all)
+        self.assertEqual(up1.names, all)
+        self.assertEqual(up0.module, "__invalid__module__test0")
+        self.assertEqual(up1.module, "__invalid__module__test1")
+
     def test_fail_anonymous_gate(self):
         """Test that we fail when using an anonymous gate if we only allow native gates."""
         sexpr = ("gate", "foo")
