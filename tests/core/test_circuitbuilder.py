@@ -338,7 +338,7 @@ class ObjectOrientedBuilderTester(unittest.TestCase):
     """Test the object-oriented tester. Evaluate all things immediately where the option exists."""
 
     def test_add_gate_to_block(self):
-        """Test adding a gate to a sequential block. """
+        """Test adding a gate to a sequential block."""
         builder = core.circuitbuilder.SequentialBlockBuilder()
         builder.gate("foo", 3.14, 1)
         self.run_test(("sequential_block", ("gate", "foo", 3.14, 1)), builder)
