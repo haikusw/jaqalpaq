@@ -13,6 +13,7 @@ from .circuit import Circuit, normalize_native_gates
 from .parameter import Parameter
 from .block import BlockStatement, LoopStatement, UnscheduledBlockStatement
 from .branch import BranchStatement, CaseStatement
+from .algorithm.visitor import Visitor
 
 from jaqalpaq import JaqalError
 
@@ -128,6 +129,7 @@ class Builder:
                 constants[obj.name] = obj
                 self.add_to_context(context, obj.name, obj)
             elif isinstance(obj, Macro):
+                obj = rebuild_macro_in_context(obj, context)
                 macros[obj.name] = obj
                 self.add_to_context(gate_context, obj.name, obj)
             elif (
@@ -336,6 +338,97 @@ class Builder:
 
         # Separate imported context from local
         return ret
+
+
+def rebuild_macro_in_context(macro, context):
+    """Rebuild a built macro with the given context. This allows this
+    macro to refer to other macros that were unknown to it when it was
+    originally built.
+
+    Return a new Macro object, sharing as much substructure as
+    possible with the input. If the input requires no rebuilding, it
+    will be returned unchanged.
+
+    """
+
+    visitor = RebuildMacroInContextVisitor(context)
+    _changed, new_macro = visitor.visit(macro)
+    return new_macro
+
+
+class RebuildMacroInContextVisitor(Visitor):
+    """Rebuild a macro in some context. The only changes that need to be
+    made are to create a new gate if the old one referenced a macro in
+    the context. All other statements merely repackage changed
+    gates. Anything not listed is not possible in a macro or too low
+    level (e.g. identifiers).
+
+    """
+
+    def __init__(self, context):
+        self.context = context
+
+    def visit_Macro(self, macro):
+        changed, new_body = self.visit(macro.body)
+        if changed:
+            return changed, Macro(macro.name, macro.parameters, new_body)
+        else:
+            return changed, macro
+
+    def visit_BlockStatement(self, block):
+        changed = False
+        new_statements = []
+        for stmt in block.statements:
+            stmt_changed, new_stmt = self.visit(stmt)
+            changed = changed or stmt_changed
+            new_statements.append(new_stmt)
+        if changed:
+            return changed, BlockStatement(
+                parallel=block.parallel, statements=new_statements
+            )
+        else:
+            return changed, block
+
+    def visit_LoopStatement(self, loop):
+        changed, new_statements = self.visit(loop.statements)
+        if changed:
+            return changed, LoopStatement(loop.iterations, new_statements)
+        else:
+            return changed, loop
+
+    def visit_BranchStatement(self, branch):
+        changed = False
+        new_cases = []
+        for case in branch.cases:
+            case_changed, new_case = self.visit(case)
+            changed = changed or case_changed
+            new_cases.append(new_case)
+        if changed:
+            return changed, BranchStatement(cases=new_cases)
+        else:
+            return changed, branch
+
+    def visit_CaseStatement(self, case):
+        changed, new_statements = self.visit(case.statements)
+        if changed:
+            return changed, CaseStatement(case.state, new_statements)
+        else:
+            return changed, case
+
+    def visit_GateStatement(self, gate):
+        gate_def = self.context.gates.get(gate.name)
+        if gate_def is None:
+            # Shouldn't happen but really none of our business here.
+            return False, gate
+        if isinstance(gate_def, Macro):
+            if gate_def == gate.gate_def:
+                return False, gate
+
+            args = gate.parameters.values()
+            new_gate = gate_def(*args)
+            return True, new_gate
+        else:
+            return False, gate
 
 
 class GateMemoizer:
