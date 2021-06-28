@@ -2,13 +2,17 @@
 # Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains
 # certain rights in this software.
 
+import os
 import socket
 import json
 import math
+import select
 
 import jaqalpaq.parser
 from jaqalpaq.generator import generate_jaqal_program
-from jaqalpaq.core.result import Readout, Subcircuit
+from jaqalpaq.core.result import (
+    Readout, Subcircuit, ProbabilisticSubcircuit, ExecutionResult
+)
 from jaqalpaq import JaqalError
 
 
@@ -31,18 +35,32 @@ def run_jaqal_circuit(circ):
 def send_jaqal(jaqal):
     """Send the jaqal text to the host."""
     sock = _get_host_socket()
-    sock.send(jaqal)
+    sock.send(jaqal.encode())
 
 
 def receive_response():
     """Wait until we receive a response from the Jaqal we sent."""
-    # The response is serialized JSON. Each entry in the array is a measurement in the Jaqal file, and each entry in those entries represents 
-    resp_text = socket.recv()
+    # The response is serialized JSON. Each entry in the array is a measurement in the Jaqal file, and each entry in those entries represents
+    sock = _get_host_socket()
+    resp_list = []
+    polling_timeout = 0.1
+    started = False
+    while True:
+        block_size = 4096  # size recommended by Python docs
+        events = select.select([sock], [], [sock], polling_timeout)
+        if any(events):
+            packet = sock.recv(block_size)
+            resp_list.append(packet.decode())
+            started = True
+        elif started:
+            break
+    resp_text = ''.join(resp_list)
 
     # Deserialize the JSON into a list of lists of floats
     try:
         results = json.loads(resp_text)
     except Exception as exc:
+        print(resp_text)
         raise JaqalError(f"Bad response: {exc}") from exc
 
     # Validate the format of the returned JSON
@@ -53,7 +71,8 @@ def receive_response():
     readouts = []
     subcircuits = []
     for pidx, probs in enumerate(results):
-        readout = IpcReadout()
+        # TODO: Is this right??
+        readout = IpcReadout(None, None, None)
         readouts.append(readout)
         subcircuits.append(IpcSubcircuit(None, pidx, readout, probs))
 
@@ -118,7 +137,7 @@ class IpcReadout(Readout):
 class IpcSubcircuit(ProbabilisticSubcircuit):
 
     def __init__(self, trace, index, readouts, probabilities):
-        super().__init__(self, trace, index, readouts, probabilities)
+        super().__init__(trace, index, readouts, probabilities)
 
     @property
     def measured_qubits(self):
