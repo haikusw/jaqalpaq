@@ -17,6 +17,7 @@ from jaqalpaq import JaqalError
 # communicate with another process over a local tcp socket on the
 # given port.
 
+
 def run_jaqal_circuit(circuit, emulator_backend=None):
     """Execute a Jaqal :class:`~jaqalpaq.core.Circuit` using either an
     emulator or by communicating over IPC with another process.
@@ -33,11 +34,13 @@ def run_jaqal_circuit(circuit, emulator_backend=None):
     """
 
     runner_type, runner_port = _get_runner()
-    if runner_type == 'emulator':
+    if runner_type == "emulator":
         import jaqalpaq.emulator
+
         return run_jaqal_circuit(circuit, backend=emulator_backend)
-    elif runner_type == 'ipc':
+    elif runner_type == "ipc":
         import jaqalpaq.ipc
+
         return jaqalpaq.ipc.run_jaqal_circuit(circuit)
     else:
         raise JaqalError("Internal error: unknown runner")
@@ -59,11 +62,13 @@ def run_jaqal_string(jaqal, emulator_backend=None):
     """
 
     runner_type, runner_port = _get_runner()
-    if runner_type == 'emulator':
+    if runner_type == "emulator":
         import jaqalpaq.emulator
+
         return run_jaqal_string(jaqal, backend=emulator_backend)
-    elif runner_type == 'ipc':
+    elif runner_type == "ipc":
         import jaqalpaq.ipc
+
         return jaqalpaq.ipc.run_jaqal_string(jaqal)
     else:
         raise JaqalError("Internal error: unknown runner")
@@ -85,11 +90,13 @@ def run_jaqal_file(fname, emulator_backend=None):
     """
 
     runner_type, runner_port = _get_runner()
-    if runner_type == 'emulator':
+    if runner_type == "emulator":
         import jaqalpaq.emulator
+
         return jaqalpaq.emulator.run_jaqal_file(fname, backend=emulator_backend)
-    elif runner_type == 'ipc':
+    elif runner_type == "ipc":
         import jaqalpaq.ipc
+
         return jaqalpaq.ipc.run_jaqal_file(fname)
     else:
         raise JaqalError("Internal error: unknown runner")
@@ -98,11 +105,11 @@ def run_jaqal_file(fname, emulator_backend=None):
 def _get_runner():
     """Return whether we should use the emulator or ipc, and if the
     latter, what port to use."""
-    if os.environ.get('JAQALPAQ_RUN_EMULATOR', '').startswith(('1', 't', 'T')):
-        return 'emulator', None
+    if os.environ.get("JAQALPAQ_RUN_EMULATOR", "").startswith(("1", "t", "T")):
+        return "emulator", None
     try:
-        port = int(os.environ['JAQALPAQ_RUN_PORT'])
+        port = int(os.environ["JAQALPAQ_RUN_PORT"])
     except:
-        return 'emulator', None
+        return "emulator", None
     else:
-        return 'ipc', port
+        return "ipc", port

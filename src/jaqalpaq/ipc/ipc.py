@@ -11,7 +11,10 @@ import select
 import jaqalpaq.parser
 from jaqalpaq.generator import generate_jaqal_program
 from jaqalpaq.core.result import (
-    Readout, Subcircuit, ProbabilisticSubcircuit, ExecutionResult
+    Readout,
+    Subcircuit,
+    ProbabilisticSubcircuit,
+    ExecutionResult,
 )
 from jaqalpaq import JaqalError
 
@@ -23,7 +26,7 @@ def run_jaqal_string(jaqal):
 
 
 def run_jaqal_file(fname):
-    with open(fname, 'r') as fd:
+    with open(fname, "r") as fd:
         return run_jaqal_string(fd.read())
 
 
@@ -54,7 +57,7 @@ def receive_response():
             started = True
         elif started:
             break
-    resp_text = ''.join(resp_list)
+    resp_text = "".join(resp_list)
 
     # Deserialize the JSON into a list of lists of floats
     try:
@@ -108,6 +111,7 @@ def validate_response(results):
 # we can't use it directly, but can probably create a new visitor and
 # model a new function on this.
 
+
 class IpcReadout(Readout):
     """Encapsulate the result of measurement of some number of qubits over
     IPC. Ideally this would not differ from readouts generated through
@@ -135,7 +139,6 @@ class IpcReadout(Readout):
 
 
 class IpcSubcircuit(ProbabilisticSubcircuit):
-
     def __init__(self, trace, index, readouts, probabilities):
         super().__init__(trace, index, readouts, probabilities)
 
@@ -153,6 +156,7 @@ class IpcSubcircuit(ProbabilisticSubcircuit):
         p = self._probabilities
         return OrderedDict([(f"{n:b}"[::-1], v) for n, v in enumerate(p)])
 
+
 ##
 # Private helper functions
 #
@@ -166,7 +170,7 @@ def _get_host_socket():
     global _host_socket
 
     if _host_socket is None:
-        address = ('localhost', _get_port())
+        address = ("localhost", _get_port())
         try:
             _host_socket = socket.create_connection(address)
         except Exception as exc:
@@ -178,13 +182,15 @@ def _get_host_socket():
 def _get_port():
     """Return the port to connect to the host or raise an exception if it
     has not been configured."""
-    port_str = os.environ.get('JAQALPAQ_RUN_PORT')
+    port_str = os.environ.get("JAQALPAQ_RUN_PORT")
     if port_str is None:
-        raise JaqalError('JAQALPAQ_RUN_PORT must be set')
+        raise JaqalError("JAQALPAQ_RUN_PORT must be set")
     try:
         port = int(port_str)
     except ValueError:
-        raise JaqalError(f'Could not read a port from the value of JAQALPAQ_RUN_PORT: {port_str}')
+        raise JaqalError(
+            f"Could not read a port from the value of JAQALPAQ_RUN_PORT: {port_str}"
+        )
     return port
 
 
