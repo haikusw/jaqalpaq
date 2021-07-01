@@ -74,7 +74,6 @@ def receive_response():
     readouts = []
     subcircuits = []
     for pidx, probs in enumerate(results):
-        # TODO: Is this right??
         readout = IpcReadout(None, None, None)
         readouts.append(readout)
         subcircuits.append(IpcSubcircuit(None, pidx, readout, probs))
@@ -95,21 +94,9 @@ def validate_response(results):
         ret.append(probs)
     return ret
 
-
 ##
 # Redefined results classes
 #
-
-# TODO: The classes here are not fully implemented, but retain all the
-# proper methods so they may be completed later. Right now the clients
-# are only expected to rely on a subset of the total functionality,
-# specifically the probability_by_int method of subcircuits (actually
-# implemented in ProbabilisticSubcircuit).
-
-# TODO: result.py has a function parse_jaqal_output_list that we
-# should take advantage of to fill in most of the rest. Unfortunately,
-# we can't use it directly, but can probably create a new visitor and
-# model a new function on this.
 
 
 class IpcReadout(Readout):
