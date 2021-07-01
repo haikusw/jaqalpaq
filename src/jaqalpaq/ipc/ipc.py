@@ -94,6 +94,7 @@ def validate_response(results):
         ret.append(probs)
     return ret
 
+
 ##
 # Redefined results classes
 #
