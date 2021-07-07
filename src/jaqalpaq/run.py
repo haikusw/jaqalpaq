@@ -39,9 +39,9 @@ def run_jaqal_circuit(circuit, emulator_backend=None):
 
         return run_jaqal_circuit(circuit, backend=emulator_backend)
     elif runner_type == "ipc":
-        import jaqalpaq.ipc
+        import jaqalpaq.ipc.ipc
 
-        return jaqalpaq.ipc.run_jaqal_circuit(circuit)
+        return jaqalpaq.ipc.ipc.run_jaqal_circuit(circuit)
     else:
         raise JaqalError("Internal error: unknown runner")
 
@@ -67,9 +67,9 @@ def run_jaqal_string(jaqal, emulator_backend=None):
 
         return run_jaqal_string(jaqal, backend=emulator_backend)
     elif runner_type == "ipc":
-        import jaqalpaq.ipc
+        import jaqalpaq.ipc.ipc
 
-        return jaqalpaq.ipc.run_jaqal_string(jaqal)
+        return jaqalpaq.ipc.ipc.run_jaqal_string(jaqal)
     else:
         raise JaqalError("Internal error: unknown runner")
 
@@ -95,9 +95,9 @@ def run_jaqal_file(fname, emulator_backend=None):
 
         return jaqalpaq.emulator.run_jaqal_file(fname, backend=emulator_backend)
     elif runner_type == "ipc":
-        import jaqalpaq.ipc
+        import jaqalpaq.ipc.ipc
 
-        return jaqalpaq.ipc.run_jaqal_file(fname)
+        return jaqalpaq.ipc.ipc.run_jaqal_file(fname)
     else:
         raise JaqalError("Internal error: unknown runner")
 
