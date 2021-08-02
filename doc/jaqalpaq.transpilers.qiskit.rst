@@ -9,12 +9,12 @@ jaqalpaq.transpilers.qiskit package
 qiskit.circuit.QuantumCircuit extensions
 ----------------------------------------
 
-Importing the jaqalpaq.qiskit package also patches the :class:`qiskit.circuit.QuantumCircuit` object,
-adding the following four methods. This follows the standard Qiskit API, allowing
-users to add trapped-ion gates to circuits using the same syntax as gates from the Qiskit
-standard extension.
+Importing the jaqalpaq.qiskit package also patches the
+:class:`qiskit.circuit.QuantumCircuit` object, adding the following four methods. This
+follows the standard Qiskit API, allowing users to add trapped-ion gates to circuits using
+the same syntax as gates from the Qiskit standard extension.
 
-.. function:: qiskit.circuit.QuantumCircuit.ms2(theta, phi, a, b)
+.. function:: qiskit.circuit.QuantumCircuit.jaqalms(theta, phi, a, b)
 
     Add a two-parameter Mølmer-Sørensen gate to a circuit.
 
@@ -25,25 +25,27 @@ standard extension.
     :param b: The second qubit to act on.
     :type b: qiskit.circuit.Bit, qiskit.circuit.Register, int, slice, list, or range
 
-.. function:: qiskit.circuit.QuantumCircuit.r(theta, phi, q)
+.. function:: qiskit.circuit.QuantumCircuit.jaqalr(theta, phi, q)
 
-    Add a single-qubit gate representing arbitrary rotation around an axis in the X-Y plane to a circuit.
+    Add a single-qubit gate representing arbitrary rotation around an axis in the X-Y
+    plane to a circuit. Note that this is essentially a different parametrization of
+    Qiskit's U2 gate.
 
     :param float theta: The angle that sets the planar axis to rotate around.
     :param float phi: The angle by which the gate rotates the state.
     :param q: The qubit to act on.
     :type q: qiskit.circuit.Bit, qiskit.circuit.Register, int, slice, list, or range
 
-.. function:: qiskit.circuit.QuantumCircuit.sx(q)
+.. function:: qiskit.circuit.QuantumCircuit.sy(q)
 
-    Add a sqrt(X) gate to a circuit.
+    Add a sqrt(Y) gate to a circuit.
 
     :param q: The qubit to act on.
     :type q: qiskit.circuit.Bit, qiskit.circuit.Register, int, slice, list, or range
 
-.. function:: qiskit.circuit.QuantumCircuit.sy(q)
+.. function:: qiskit.circuit.QuantumCircuit.sydg(q)
 
-    Add a sqrt(Y) gate to a circuit.
+    Add an inverse sqrt(Y) gate to a circuit.
 
     :param q: The qubit to act on.
     :type q: qiskit.circuit.Bit, qiskit.circuit.Register, int, slice, list, or range
