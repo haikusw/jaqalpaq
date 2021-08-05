@@ -8,8 +8,16 @@ from os import devnull
 from sly import Lexer, Parser
 
 from .identifier import Identifier
-from jaqalpaq import JaqalError, _PARSER_SLY_TURBO
+from jaqalpaq import JaqalError
 import sly.yacc
+
+# We attempt to ``monkeypatch'' the sly library to remove some expensive checks.
+# This has no side effects if the JaqalPaq parser is working correctly and sly has
+# not changed.
+#
+# If the API changes, we present a warning --- that warning can be disabled by
+# setting this to false:
+_SLY_TURBO_WARNING = True
 
 
 class JaqalLexer(Lexer):
@@ -495,13 +503,18 @@ def _monkeypatch_sly():
 
     """
 
-    if _PARSER_SLY_TURBO:
-        if not hasattr(_monkeypatch_sly, "_called_once"):
-            _monkeypatch_sly._called_once = True
-        else:
-            return
+    if not hasattr(_monkeypatch_sly, "_called_once"):
+        _monkeypatch_sly._called_once = True
+    else:
+        return
 
+    try:
         del sly.yacc.YaccProduction.__setattr__
+    except AttributeError:
+        if _SLY_TURBO_WARNING:
+            print("Warning: An internal sly behavior has changed, which may result")
+            print("slower parsing of large Jaqal source files.  To disable this, ")
+            print("jaqalpaq.core.parser.slyparse._SLY_TURBO_WARNING to False.")
 
 
 class HeaderParsingDone(Exception):
