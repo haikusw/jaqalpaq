@@ -27,7 +27,8 @@ Unified Tests:
     - pip install black && black --check .
     - cd ..
     - rm -fr qscout-gatemodels && git clone --depth 1 "$(echo "${CI_REPOSITORY_URL}" | sed 's/jaqalpaq.git/qscout-gatemodels.git/')"
-    - ( cd jaqalpaq && pip install -e .[pygsti-integration,tests] )
-    - ( cd qscout-gatemodels && pip install -e . )
+    - LOCAL_JAQALPAQ=./jaqalpaq LOCAL_JAQALPAQ_EXTRAS="" LOCAL_QSCOUT_GATEMODELS=./qscout-gatemodels
+      JAQALPAQ_OPTS="pygsti-integration,tests"
+      ./jaqalpaq/install.sh
     - cd jaqalpaq
     - pytest
