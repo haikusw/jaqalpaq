@@ -1,0 +1,28 @@
+#!/bin/bash
+set -e
+
+if [ -z "$1" ] ; then
+    tmpfile="$(mktemp)"
+else
+    tmpfile="$1"
+fi
+rm -f ${tmpfile}
+touch $tmpfile
+line="$(grep -nF '[options.data_files]' setup.cfg | awk -F: '{print $1}')"
+rest="$(tail -n +"$line" setup.cfg |grep -n '^$'|head -n1|awk -F: '{print $1}')"
+
+head -n "$line" setup.cfg >"$tmpfile"
+prevpath=""
+find examples tests \( -type d -name '__pycache__' -prune \) -o -type f -exec bash -c 'prefix=${0%/*} ; echo "${#prefix},${0}"' {} \; | sort -fn | cut -d , -f 2- | while read -r line ; do
+    thepath="${line%/*}"
+    if [ "$thepath" != "$prevpath" ] ; then
+        echo "share/jaqalpaq/$thepath =" >>"$tmpfile"
+        prevpath="$thepath"
+    fi
+    echo "    ${line}" >>"$tmpfile"
+done
+tail -n +$((line + rest-1)) setup.cfg | tail -n "${rest}" >>"$tmpfile"
+
+if [ -z "$1" ] ; then
+    mv "${tmpfile}" setup.cfg
+fi

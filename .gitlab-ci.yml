@@ -19,6 +19,11 @@ Unified Tests:
     - git fetch origin master
     - if ! git diff --check origin/master HEAD ; then echo "See above whitespace errors." ; exit 1; fi
     - if find . -iname '*.py' -exec grep -l -P '\t' {} + ; then echo 'Above files have tabs.' ; exit 1 ; fi
+    - devel/refresh-data-files setup.cfg.new
+    - if ! diff -q setup.cfg.new setup.cfg ; then
+        echo "Run devel/refresh-data-files to refresh examples list." ;
+        exit 1 ;
+      fi
     - pip install black && black --check .
     - cd ..
     - rm -fr qscout-gatemodels && git clone --depth 1 "$(echo "${CI_REPOSITORY_URL}" | sed 's/jaqalpaq.git/qscout-gatemodels.git/')"
