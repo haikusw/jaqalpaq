@@ -12,6 +12,7 @@ before_script:
 
 stages:
   - Analysis and Tests
+  - Reproducibility
 
 Unified Tests:
   stage: Analysis and Tests
@@ -32,3 +33,40 @@ Unified Tests:
       ./jaqalpaq/install.sh
     - cd jaqalpaq
     - pytest
+
+Notebooks:
+  stage: Reproducibility
+  only:
+    - web
+  script:
+    - git fetch origin master
+    - cd ..
+    - rm -fr qscout-gatemodels && git clone --depth 1 "$(echo "${CI_REPOSITORY_URL}" | sed 's/jaqalpaq.git/qscout-gatemodels.git/')"
+    - rm -fr jaqalpaq-extras && git clone --depth 1 "$(echo "${CI_REPOSITORY_URL}" | sed 's/jaqalpaq.git/jaqalpaq-extras.git/')"
+    - LOCAL_JAQALPAQ=./jaqalpaq LOCAL_JAQALPAQ_EXTRAS=./jaqalpaq-extras LOCAL_QSCOUT_GATEMODELS=./qscout-gatemodels
+      JAQALPAQ_OPTS="pygsti-integration,notebooks" JAQALPAQ_EXTRAS_OPTS="qiskit,pyquil,cirq,projectq,pytket,tutorial"
+      ./jaqalpaq/install.sh
+    - pip install nbconvert ipykernel
+    - ipython kernel install --user
+    - cd jaqalpaq
+    - find examples -name '*.ipynb' ! -name '*.nbconvert.ipynb' -exec devel/ipynb-execute {} --ExecutePreprocessor.kernel_name=python3 \;
+    - find examples -name '*.nbconvert.ipynb' -print0 | xargs -0 tar -cf executed-notebooks.tar
+    - find examples -name '*.ipynb' ! -name '*.nbconvert.ipynb' -print0 | (
+        didfail=0 ;
+        while IFS= read -r -d '' line ; do
+          newf="${line%%.ipynb}.nbconvert.ipynb" ;
+          if ! [ -f "$newf" ] ; then
+            didfail=1 ;
+            echo "${line} failed to build" ;
+          elif ! devel/ipynb-diff "${line}" "${newf}" -q ; then
+            didfail=1 ;
+            echo "${line} changed" ;
+          fi ;
+        done ;
+        exit "$didfail" ;
+      )
+  artifacts:
+    when: always
+    paths:
+      - executed-notebooks.tar
+    expire_in: 1 week

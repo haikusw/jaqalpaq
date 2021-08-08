@@ -1,0 +1,27 @@
+#!/bin/bash
+set -e
+
+[ -n "$TIMEOUT" ] || TIMEOUT=1800
+
+IPYTHONDIR="$(mktemp -d)"
+mkdir -p "${IPYTHONDIR}/profile_default/startup"
+# Multithreading and varying random seeds will introduce nondeterminism
+# into these notebook evaluations.  Though tiny, they can cumulatively
+# result in dramatic differences in program behavior.
+cat >"${IPYTHONDIR}/profile_default/startup/deterministic.py" <<EOF
+from numpy.random import seed
+seed(0)
+del seed
+try:
+    from pyscf.lib import num_threads
+except Exception:
+    pass
+else:
+    num_threads(1)
+    del num_threads
+EOF
+
+export IPYTHONDIR
+jupyter nbconvert --to notebook --execute --ExecutePreprocessor.timeout=$TIMEOUT "$@"
+
+rm -r "$IPYTHONDIR"
