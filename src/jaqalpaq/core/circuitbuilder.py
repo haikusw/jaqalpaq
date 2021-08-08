@@ -129,7 +129,7 @@ class Builder:
                 constants[obj.name] = obj
                 self.add_to_context(context, obj.name, obj)
             elif isinstance(obj, Macro):
-                obj = rebuild_macro_in_context(obj, context)
+                obj = rebuild_macro_in_context(obj, context, gate_context)
                 macros[obj.name] = obj
                 self.add_to_context(gate_context, obj.name, obj)
             elif (
@@ -340,7 +340,7 @@ class Builder:
         return ret
 
 
-def rebuild_macro_in_context(macro, context):
+def rebuild_macro_in_context(macro, context, gate_context):
     """Rebuild a built macro with the given context. This allows this
     macro to refer to other macros that were unknown to it when it was
     originally built.
@@ -351,7 +351,7 @@ def rebuild_macro_in_context(macro, context):
 
     """
 
-    visitor = RebuildMacroInContextVisitor(context)
+    visitor = RebuildMacroInContextVisitor(context, gate_context)
     _changed, new_macro = visitor.visit(macro)
     return new_macro
 
@@ -365,8 +365,9 @@ class RebuildMacroInContextVisitor(Visitor):
 
     """
 
-    def __init__(self, context):
+    def __init__(self, context, gate_context):
         self.context = context
+        self.gate_context = gate_context
 
     def visit_Macro(self, macro):
         changed, new_body = self.visit(macro.body)
@@ -416,7 +417,7 @@ class RebuildMacroInContextVisitor(Visitor):
             return changed, case
 
     def visit_GateStatement(self, gate):
-        gate_def = self.context.gates.get(gate.name)
+        gate_def = self.gate_context.get(gate.name)
         if gate_def is None:
             # Shouldn't happen but really none of our business here.
             return False, gate
