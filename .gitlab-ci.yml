@@ -9,6 +9,7 @@ before_script:
         echo -e '[easy_install]\nindex_url = '"${repo}" >~/.pydistutils.cfg ;
         unset https_proxy ;
     fi
+  - pip install --upgrade pip wheel
 
 stages:
   - Analysis and Tests
