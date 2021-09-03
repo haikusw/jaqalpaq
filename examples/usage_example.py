@@ -1,6 +1,6 @@
 import jaqalpaq
 from jaqalpaq.parser import parse_jaqal_file
-from jaqalpaq.emulator import run_jaqal_circuit
+from jaqalpaq.run import run_jaqal_circuit
 from jaqalpaq.generator import generate_jaqal_program
 
 JaqalCircuitObject = parse_jaqal_file("jaqal/Sxx_circuit.jaqal")
