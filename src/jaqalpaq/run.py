@@ -37,7 +37,7 @@ def run_jaqal_circuit(circuit, emulator_backend=None):
     if runner_type == "emulator":
         import jaqalpaq.emulator
 
-        return run_jaqal_circuit(circuit, backend=emulator_backend)
+        return jaqalpaq.emulator.run_jaqal_circuit(circuit, backend=emulator_backend)
     elif runner_type == "ipc":
         import jaqalpaq.ipc.ipc
 
@@ -65,7 +65,7 @@ def run_jaqal_string(jaqal, emulator_backend=None):
     if runner_type == "emulator":
         import jaqalpaq.emulator
 
-        return run_jaqal_string(jaqal, backend=emulator_backend)
+        return jaqalpaq.emulator.run_jaqal_string(jaqal, backend=emulator_backend)
     elif runner_type == "ipc":
         import jaqalpaq.ipc.ipc
 
