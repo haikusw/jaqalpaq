@@ -114,7 +114,7 @@ class Subcircuit:
 
     @property
     def measured_qubits(self):
-        """An ist of the qubits that are measured, in their display order."""
+        """A list of the qubits that are measured, in their display order."""
         return self._trace.used_qubits
 
     def __repr__(self):

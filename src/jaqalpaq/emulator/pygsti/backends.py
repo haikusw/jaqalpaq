@@ -123,7 +123,7 @@ class AbstractNoisyNativeEmulator(CircuitEmulator):
         Both the gate and gateduration functions must take a signature identical to
           each other and their corresponding Jaqal gate.  Currently, all qubit parameters
           will be passed None, but future versions may pass a description of the qubit
-          to simulate (allowing qubit-dependend noise models).
+          to simulate (allowing qubit-dependent noise models).
 
         If _stretched gates are to be automatically supported, the gate_ and
           gateduration_ methods must take an optional parameter stretch with default value

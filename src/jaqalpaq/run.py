@@ -13,7 +13,7 @@ from jaqalpaq import JaqalError
 # unconditionally.
 #
 # JAQALPAQ_RUN_PORT -- If This variable is set, and
-# JAQALPAQ_RUN_EMULATOR does not indicate to use the eulator,
+# JAQALPAQ_RUN_EMULATOR does not indicate to use the emulator,
 # communicate with another process over a local tcp socket on the
 # given port.
 

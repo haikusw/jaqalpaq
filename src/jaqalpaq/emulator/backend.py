@@ -48,7 +48,7 @@ class IndependentSubcircuitsEmulatorWalker(TraceVisitor):
         self.results = []
         self.readout_index = 0
         self.subcircuits = subcircuits
-        # This is only valid because we must alway do measure_all.
+        # This is only valid because we must always do measure_all.
         if self.traces:
             self.qubits = len(self.traces[0].used_qubits)
 

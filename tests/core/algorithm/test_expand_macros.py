@@ -72,13 +72,13 @@ class ExpandMacrosTester(unittest.TestCase):
 
     def test_non_argument_register(self):
         """Text expanding a macro containing a register that is not part of a
-        paramter."""
+        parameter."""
         text = "register q[3]; macro foo a { g a q[0] }; foo 3.14"
         exp_text = "register q[3]; g 3.14 q[0]"
         self.run_test(text, exp_text)
 
     def test_register_index_argument(self):
-        """Text expanding a macro containing a register indexed by a paramter."""
+        """Text expanding a macro containing a register indexed by a parameter."""
         text = "register q[3]; macro foo a { g q[a] }; foo 2"
         exp_text = "register q[3]; g q[2]"
         self.run_test(text, exp_text)

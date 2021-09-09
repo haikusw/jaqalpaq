@@ -36,7 +36,7 @@ def main(argv=sys.argv[1:]):
         "--cutoff",
         dest="cutoff",
         default=1e-12,
-        help="Do not display probabilties less than CUTOFF.  Defaults to 1e-12.  Ignored if FORMAT is `int`",
+        help="Do not display probabilities less than CUTOFF.  Defaults to 1e-12.  Ignored if FORMAT is `int`",
     )
     parser.add_argument(
         "--output",
@@ -44,13 +44,13 @@ def main(argv=sys.argv[1:]):
         default=None,
         choices=["human", "python", "json", "validation"],
         nargs=1,
-        help="Determines if `human` readible probability, `python` dictionary, or `json` output.  [undocumented] validation template",
+        help="Determines if `human` readable probability, `python` dictionary, or `json` output.  [undocumented] validation template",
     )
     parser.add_argument(
         "--validate",
         dest="validate",
         action="store_true",
-        help="[undocumented] Performs a validation of jaqal versus the expressed expected results.",
+        help="[undocumented] Performs a validation of Jaqal versus the expressed expected results.",
     )
     parser.add_argument(
         "--debug-traces",

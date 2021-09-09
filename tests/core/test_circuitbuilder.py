@@ -189,7 +189,7 @@ class BuildTester(unittest.TestCase):
             ("circuit", ("register", "r", 3), ("gate", "foo", ("array_item", "r", 0)))
         )
         act_value = build(sexpr)
-        # The most likely failure case is not this asssertion but
+        # The most likely failure case is not this assertion but
         # rather that we would throw an exception while building the
         # sexpr in the first place.
         self.assertEqual(exp_value, act_value)

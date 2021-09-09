@@ -77,7 +77,7 @@ def parse_jaqal_validation(txt):
     for line in txt.split("\n"):
         line = line.strip()
 
-        # Resest on non-comments
+        # Reset on non-comments
         if not line.startswith("//"):
             section = None
             s_idx = -1
@@ -85,7 +85,7 @@ def parse_jaqal_validation(txt):
 
         line = line[2:].strip()
 
-        # Resest on empty comments
+        # Reset on empty comments
         if len(line) == 0:
             section = None
             s_idx = -1
