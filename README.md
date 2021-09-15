@@ -20,8 +20,8 @@ the Apache 2.0 License.
 >
 > ```bash
 > pip install --upgrade Cython numpy pip wheel
-> pip install ipykernel JaqalPaq[pygsti-integration] QSCOUT-gatemodels
-> ipython kernel install --user --name=jaqal
+> pip install ipykernel JaqalPaq'[pygsti-integration]' QSCOUT-gatemodels
+> ipython kernel install --name=jaqal
 > ```
 
 ### Step 0: Prepare base dependencies
@@ -112,7 +112,7 @@ virtual environment by running
 
 ```bash
 pip install ipykernel
-ipython kernel install --user --name=preferred-name
+ipython kernel install --name=preferred-name
 ```
 
 > **NOTE**: Restart the Jupyter server.  A new kernel will be available.
