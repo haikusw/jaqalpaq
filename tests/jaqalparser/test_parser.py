@@ -4,6 +4,7 @@ import random
 
 from jaqalpaq.parser.parser import parse_to_sexpression
 from jaqalpaq.parser.identifier import Identifier
+from jaqalpaq import RESERVED_WORDS
 
 
 class ParserTester(unittest.TestCase):
@@ -356,11 +357,14 @@ class HeaderParserTester(unittest.TestCase):
         """Return a random identifier."""
         # This is a subset of possible identifiers since that's not
         # really what we're testing here.
-        count = random.randint(1, 8)
-        letters = random.choices(
-            [chr(c) for c in range(ord("a"), ord("z") + 1)], k=count
-        )
-        return "".join(letters)
+        while True:
+            count = random.randint(1, 8)
+            letters = random.choices(
+                [chr(c) for c in range(ord("a"), ord("z") + 1)], k=count
+            )
+            ident = "".join(letters)
+            if ident not in RESERVED_WORDS:
+                return ident
 
     def make_number(self):
         """Return a random number, either an integer or float."""
