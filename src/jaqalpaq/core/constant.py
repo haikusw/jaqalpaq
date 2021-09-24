@@ -33,6 +33,9 @@ class Constant(AnnotatedValue):
     def __repr__(self):
         return f"Constant({repr(self.name)}, {self.value})"
 
+    def __str__(self):
+        return self.name
+
     def __eq__(self, other):
         try:
             return self.name == other.name and self.value == other.value

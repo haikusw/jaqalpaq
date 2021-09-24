@@ -104,3 +104,6 @@ class GeneratorTester(TestCase):
 
     def test_let_in_register(self):
         self.run_test_string("let len 3; register q[len]")
+
+    def test_let_in_register_qubit(self):
+        self.run_test_string("let i 1; register q[2]; Rx q[i] 1")
