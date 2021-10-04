@@ -41,6 +41,7 @@ class JaqalLexer(Lexer):
         INT,
         BININT,
         BRANCH,
+        SUBCIRCUIT,
     }
 
     # Ignore whitespace, but not newlines
@@ -64,6 +65,7 @@ class JaqalLexer(Lexer):
     IDENTIFIER["from"] = FROM
     IDENTIFIER["as"] = AS
     IDENTIFIER["branch"] = BRANCH
+    IDENTIFIER["subcircuit"] = SUBCIRCUIT
 
     # Comments
     ignore_comment = r"//[^\n]*"
@@ -176,6 +178,7 @@ class JaqalParser(Parser):
         "gate_statement",
         "parallel_gate_block",
         "sequential_gate_block",
+        "subcircuit_gate_block",
         "loop_statement",
         "macro_definition",
         "branch_statement",
@@ -186,9 +189,14 @@ class JaqalParser(Parser):
         self._in_body = True
         self.top_sexpression.append(tree[0])
 
-    # Define what statements are allowed in sequential blocks
+    # Define what statements are allowed in sequential blocks.
 
-    @_("gate_statement", "parallel_gate_block", "loop_statement")
+    @_(
+        "gate_statement",
+        "parallel_gate_block",
+        "loop_statement",
+        "subcircuit_gate_block",
+    )
     def inner_seq_statement(self, tree):
         # No need to set self._in_body as we've definitely already set
         # it.
@@ -348,12 +356,16 @@ class JaqalParser(Parser):
 
     # Sequential block
 
-    @_('"{" seqpad sequential_statements "}"')
+    @_("curly_brace_block")
     def sequential_gate_block(self, tree):
-        # self.set_pos(tree)
-        ret = tree.sequential_statements
+        ret = tree.curly_brace_block
         ret.appendleft("sequential_block")
         return list(ret)
+
+    @_('"{" seqpad sequential_statements "}"')
+    def curly_brace_block(self, tree):
+        ret = tree.sequential_statements
+        return ret
 
     @_("inner_seq_statement seqsep sequential_statements")
     def sequential_statements(self, tree):
@@ -392,6 +404,22 @@ class JaqalParser(Parser):
     @_("empty")
     def parallel_statements(self, tree):
         return deque()
+
+    # Subcircuit block
+
+    @_("SUBCIRCUIT curly_brace_block")
+    def subcircuit_gate_block(self, tree):
+        ret = tree.curly_brace_block
+        ret.appendleft("")  # represent empty iteration count
+        ret.appendleft("subcircuit_block")
+        return list(ret)
+
+    @_("SUBCIRCUIT let_or_int curly_brace_block")
+    def subcircuit_gate_block(self, tree):
+        ret = tree.curly_brace_block
+        ret.appendleft(tree.let_or_int)
+        ret.appendleft("subcircuit_block")
+        return list(ret)
 
     # Branches
 
