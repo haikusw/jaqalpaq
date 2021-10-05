@@ -392,6 +392,11 @@ class ObjectOrientedBuilderTester(unittest.TestCase):
             builder,
         )
 
+    def test_add_usepulses_to_circuit(self):
+        builder = core.circuitbuilder.CircuitBuilder()
+        builder.usepulses("abc.xyz", all)
+        self.run_test(("circuit", ("usepulses", "abc.xyz", all)), builder)
+
     def test_add_register_to_circuit(self):
         builder = core.circuitbuilder.CircuitBuilder()
         builder.register("r", 3)

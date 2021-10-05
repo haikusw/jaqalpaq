@@ -695,6 +695,22 @@ class CircuitBuilder(BlockBuilder):
             )
         return super().build(self.native_gates)
 
+    def usepulses(self, module, names=all, unevaluated=False):
+        """Allocates a new :class:`UsePulsesStatement` representing the given
+        pulse file.
+
+        :param str module: the . delineated module path
+        :param list[str] names: either the special value `all`, or a list of tokens to import
+        :param bool unevaluated: If False, do not create a UsePulsesStatement object to return.
+        :returns: The new usepulses import.
+        """
+
+        usepulses = ("usepulses", module, names)
+        if not unevaluated:
+            usepulses = build(usepulses)
+        self.expression.append(usepulses)
+        return usepulses
+
     def register(self, name, size, unevaluated=False):
         """
         Allocates a new fundamental :class:`Register` of the given size, adding it to the
