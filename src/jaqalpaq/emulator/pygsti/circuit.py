@@ -4,7 +4,8 @@
 from collections import defaultdict
 
 import pygsti
-from pygsti.objects import Circuit, CircuitLabel, Label
+from pygsti.baseobjs import Label, CircuitLabel
+from pygsti.circuits import Circuit
 
 from jaqalpaq import JaqalError
 from jaqalpaq.core import Macro

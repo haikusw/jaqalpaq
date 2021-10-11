@@ -2,8 +2,13 @@
 # Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains
 # certain rights in this software.
 from numpy import array
+import itertools
 
 import pygsti
+from pygsti.modelmembers.states import ComputationalBasisState
+from pygsti.modelmembers.povms import ComputationalBasisPOVM
+from pygsti.modelmembers.operations import opfactory, ComposedOp
+from pygsti.processors.processorspec import QubitProcessorSpec
 
 from jaqalpaq.core.algorithm.walkers import TraceSerializer
 from jaqalpaq.emulator.backend import IndependentSubcircuitsBackend
@@ -13,6 +18,7 @@ from .model import (
     build_noiseless_native_model,
     pygsti_independent_noisy_gate,
     JaqalOpFactory,
+    DummyUnitaryGate,
 )
 
 
@@ -25,7 +31,7 @@ class pyGSTiEmulator(IndependentSubcircuitsBackend):
 
     def _probs_from_model(self, model, pc):
         res = []
-        for k, v in model.probs(pc).items():
+        for k, v in model.probabilities(pc).items():
             if (v < 0) and (v > -self.ZERO_CUTOFF):
                 v = 0
             res.append((int(k[0][::-1], 2), v))
@@ -137,6 +143,7 @@ class AbstractNoisyNativeEmulator(CircuitEmulator):
         durations = {}
         availability = {}
         jaqal_gates = self.jaqal_gates
+        dummy_unitaries = {}
 
         if self.stretched_gates not in (None, "add"):
 
@@ -153,6 +160,9 @@ class AbstractNoisyNativeEmulator(CircuitEmulator):
             func = getattr(self, gate_name)
             dur = getattr(self, f"gateduration_{name}")
 
+            num_qubits = len(jaqal_gate.quantum_parameters)
+            dummy_unitary = DummyUnitaryGate(num_qubits)
+
             if self.stretched_gates == "add":
                 stretched_pygsti_name = f"{pygsti_name}_stretched"
                 stretched_name = f"{name}_stretched"
@@ -160,8 +170,14 @@ class AbstractNoisyNativeEmulator(CircuitEmulator):
                 gates[stretched_pygsti_name] = pygsti_independent_noisy_gate(
                     self.jaqal_gates[stretched_name], func
                 )
-                if len(jaqal_gate.quantum_parameters) > 1:
+                if num_qubits > 1:
                     availability[stretched_pygsti_name] = "all-permutations"
+                else:
+                    availability[stretched_pygsti_name] = [
+                        (sslbl,) for sslbl in range(self.n_qubits)
+                    ]
+
+                dummy_unitaries[stretched_pygsti_name] = dummy_unitary(None)
             elif self.stretched_gates == None:
                 pass
             else:
@@ -170,18 +186,37 @@ class AbstractNoisyNativeEmulator(CircuitEmulator):
 
             durations[name] = dur
             gates[pygsti_name] = pygsti_independent_noisy_gate(jaqal_gate, func)
-            if len(jaqal_gate.quantum_parameters) > 1:
+
+            if num_qubits > 1:
                 availability[pygsti_name] = "all-permutations"
+            else:
+                availability[pygsti_name] = [(sslbl,) for sslbl in range(self.n_qubits)]
+
+            dummy_unitaries[pygsti_name] = dummy_unitary(None)
 
         gates["Gidle"] = JaqalOpFactory(self.idle)
+        availability["Gidle"] = [(sslbl,) for sslbl in range(self.n_qubits)]
 
-        target_model = pygsti.construction.build_localnoise_model(
-            nQubits=self.n_qubits,
-            availability=availability,
+        dummy_unitary = DummyUnitaryGate(1)
+        dummy_unitaries["Gidle"] = dummy_unitary(None)
+
+        # Make pspec with dummy unitaries of correct size (regardless of unitary or process mx)
+        pspec = QubitProcessorSpec(
+            self.n_qubits,
             gate_names=list(gates.keys()),
-            custom_gates=gates,
-            parameterization="full",
+            nonstd_gate_unitaries=dummy_unitaries,
+            availability=availability,
+        )
+
+        target_model = pygsti.models.LocalNoiseModel(
+            pspec,
+            gatedict=gates,
+            prep_layers=[
+                ComputationalBasisState([0] * pspec.num_qubits, evotype="densitymx")
+            ],
+            povm_layers=[ComputationalBasisPOVM(pspec.num_qubits, evotype="densitymx")],
             evotype="densitymx",
+            simulator="matrix",
         )
 
         return target_model, durations
