@@ -158,6 +158,10 @@ def generate_jaqal_block(statement, depth, indent_first_line):
     output = ""
     if indent_first_line:
         output += "\t" * depth
+    if statement.subcircuit:
+        output += "subcircuit "
+        if statement.iterations != 1:
+            output += f"{statement.iterations} "
     if statement.parallel:
         output += "<\n"
     else:

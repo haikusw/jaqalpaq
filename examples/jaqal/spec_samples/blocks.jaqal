@@ -16,3 +16,9 @@ register q[3]
     Rx q[1] 0.1
     Sx q[2]
 >
+subcircuit {
+  Sx q[0]
+}
+subcircuit 500 {
+  Rx q[1] 0
+}
