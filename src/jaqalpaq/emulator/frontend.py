@@ -2,7 +2,7 @@
 # Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains
 # certain rights in this software.
 from jaqalpaq.parser import parse_jaqal_file, parse_jaqal_string
-from jaqalpaq.core.algorithm import expand_macros, fill_in_let
+from jaqalpaq.core.algorithm import expand_macros, fill_in_let, expand_subcircuits
 from .pygsti import UnitarySerializedEmulator
 
 
@@ -26,7 +26,8 @@ def run_jaqal_circuit(circuit, backend=None):
     if backend is None:
         backend = UnitarySerializedEmulator()
 
-    return backend(expand_macros(fill_in_let(circuit))).execute()
+    expanded = expand_macros(fill_in_let(expand_subcircuits(circuit)))
+    return backend(expanded).execute()
 
 
 def run_jaqal_string(jaqal, backend=None):

@@ -75,6 +75,29 @@ measure_all
             self.assertAlmostEqual(c_dict["110"], 0.5)
             self.assertAlmostEqual(c_dict["111"], 0)
 
+    def test_emulate_subcircuit(self):
+        jaqal_string = """let pi2 1.5707963267948966
+
+register q[3]
+
+subcircuit {
+  MS q[1] q[0] pi2 pi2
+}
+"""
+        res = run_jaqal_string(
+            "\n".join(("from qscout.v1.std usepulses *", jaqal_string))
+        )
+
+        c_dict = res.subcircuits[0].probability_by_str
+        self.assertAlmostEqual(c_dict["000"], 0.5)
+        self.assertAlmostEqual(c_dict["001"], 0)
+        self.assertAlmostEqual(c_dict["010"], 0)
+        self.assertAlmostEqual(c_dict["011"], 0)
+        self.assertAlmostEqual(c_dict["100"], 0)
+        self.assertAlmostEqual(c_dict["101"], 0)
+        self.assertAlmostEqual(c_dict["110"], 0.5)
+        self.assertAlmostEqual(c_dict["111"], 0)
+
     def test_five_qubit_GHZ(self):
         jaqal_text = """
 register q[5]
