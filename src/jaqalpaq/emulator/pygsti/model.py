@@ -12,7 +12,8 @@ from pygsti.modelmembers.operations import (
 from pygsti.modelmembers.povms import ComputationalBasisPOVM
 from pygsti.modelmembers.states import ComputationalBasisState
 from pygsti.models import LocalNoiseModel
-from pygsti.processors import QubitProcessorSpec, UnitaryGateFunction
+from pygsti.processors import QubitProcessorSpec
+from pygsti.baseobjs import UnitaryGateFunction
 
 from jaqalpaq.error import JaqalError
 
