@@ -2,6 +2,7 @@
 # Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains
 # certain rights in this software.
 from typing import Dict
+from contextlib import contextmanager
 
 from .constant import Constant
 from .macro import Macro
@@ -47,6 +48,7 @@ def build(expression, inject_pulses=None, autoload_pulses=False):
     gate : \*arguments
     sequential_block : \*statements
     parallel_block : \*statements
+    subcircuit_block : \*statements
     array_item : identifier index
     usepulses : identifier [all]
 
@@ -170,6 +172,27 @@ class Builder:
         if name in context:
             raise JaqalError(f"Object {obj} already exists in context")
         context[name] = obj
+
+    @contextmanager
+    def in_block_context(self, context, name):
+        """Mark us as being in a certain kind of block context."""
+        context_name = f"__in_context_{name}__"
+        old_value = context.get(context_name)
+        context[context_name] = True
+        try:
+            yield
+        finally:
+            if old_value is None:
+                del context[context_name]
+            else:
+                context[context_name] = old_value
+
+    def is_in_block_context(self, context, names):
+        """Return if we are in any block context given in names."""
+        if isinstance(names, str):
+            names = [names]
+        names = [f"__in_context_{name}__" for name in names]
+        return any(context.get(name, False) for name in names)
 
     def build_register(self, sexpression, context, gate_context):
         """Create a qubit register."""
@@ -304,6 +327,21 @@ class Builder:
     def build_parallel_block(self, sexpression, context, gate_context):
         return self.build_block(sexpression, context, gate_context, is_parallel=True)
 
+    def build_subcircuit_block(self, sexpression, context, gate_context):
+        if self.is_in_block_context(context, ["subcircuit", "parallel"]):
+            raise JaqalError("Nesting subcircuit in subcircuit or parallel block")
+        args = list(sexpression.args)
+        with self.in_block_context(context, "subcircuit"):
+            statements = [self.build(arg, context, gate_context) for arg in args[1:]]
+            count = args[0]
+            if count == "":
+                built_count = 1
+            else:
+                built_count = self.build(count, context, gate_context)
+        return BlockStatement(
+            statements=statements, subcircuit=True, iterations=built_count
+        )
+
     def build_unscheduled_block(self, sexpression, context, gate_context):
         # This is not API, and is strictly for internal use (by extras) at the moment.
         statements = [
@@ -314,9 +352,11 @@ class Builder:
     def build_block(self, sexpression, context, gate_context, is_parallel=False):
         # Note: Unlike at the circuit level statements here can't affect the context (i.e. we can't define
         # a macro inside of a block).
-        statements = [
-            self.build(arg, context, gate_context) for arg in sexpression.args
-        ]
+        typename = "parallel" if is_parallel else "sequential"
+        with self.in_block_context(context, typename):
+            statements = [
+                self.build(arg, context, gate_context) for arg in sexpression.args
+            ]
         return BlockStatement(parallel=is_parallel, statements=statements)
 
     def build_array_item(self, sexpression, context, gate_context):
@@ -603,6 +643,20 @@ class BlockBuilder:
         self.expression.append(builder.expression)
         return builder
 
+    def subcircuit(self, iterations=None):
+        """Create, add, and return a new block builder to the statements stored in this block. Although it is not legal in Jaqal to nest certain blocks, this builder ignores these restrictions.
+
+        To create a subcircuit builder without adding it to this block, use the SubcircuitBlockBuilder class directly.
+
+        :param iterations: The number of times to run this on the
+        hardware to accumulate statistics.
+        :type iterations: int, str, AnnotatedValue, or None
+        """
+
+        builder = SubcircuitBlockBuilder()
+        self.expression.append(builder.expression)
+        return builder
+
     def loop(self, iterations, block, unevaluated=False):
         """Creates a new :class:`LoopStatement` object, and adds it to the end of this
         block.
@@ -651,6 +705,14 @@ class ParallelBlockBuilder(BlockBuilder):
 
     def __init__(self):
         super().__init__("parallel_block")
+
+
+class SubcircuitBlockBuilder(BlockBuilder):
+    """Build up a subcircuit code block."""
+
+    def __init__(self, iterations=None):
+        super().__init__("subcircuit_block")
+        self.expression.append(iterations)
 
 
 class BranchBlockBuilder(BlockBuilder):
