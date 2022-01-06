@@ -105,6 +105,21 @@ class ParserTester(unittest.TestCase):
         sexpr = ["circuit", ["sequential_block", ["gate", "g"], ["gate", "f"]]]
         self.run_test(text, sexpr)
 
+    def test_subcircuit_gate_block_no_iterations(self):
+        text = "subcircuit {\n  g\n  f\n}"
+        sexpr = ["circuit", ["subcircuit_block", "", ["gate", "g"], ["gate", "f"]]]
+        self.run_test(text, sexpr)
+
+    def test_subcircuit_gate_block_int_iterations(self):
+        text = "subcircuit 200 {\n  g\n  f\n}"
+        sexpr = ["circuit", ["subcircuit_block", 200, ["gate", "g"], ["gate", "f"]]]
+        self.run_test(text, sexpr)
+
+    def test_subcircuit_gate_block_let_iterations(self):
+        text = "subcircuit N {\n  g\n  f\n}"
+        sexpr = ["circuit", ["subcircuit_block", "N", ["gate", "g"], ["gate", "f"]]]
+        self.run_test(text, sexpr)
+
     def test_parallel_gate_block(self):
         """Test a parallel gate block with a separator."""
         text = "<g 0 | h 1>"

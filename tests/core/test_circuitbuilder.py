@@ -221,6 +221,15 @@ class BuildTester(unittest.TestCase):
         self.assertEqual(block.statements[1].name, "bar")
         self.assertEqual(block.statements[1].parameters["p0"], 123)
 
+    def test_build_subcircuit(self):
+        sexpr = ("subcircuit_block", 100, ("gate", "foo"))
+        block: core.BlockStatement = build(sexpr)
+        self.assertEqual(1, len(block))
+        self.assertFalse(block.parallel)
+        self.assertEqual(block.iterations, 100)
+        self.assertTrue(block.subcircuit)
+        self.assertEqual(block.statements[0].name, "foo")
+
     def test_build_loop(self):
         count = randomize.random_whole()
         sexpr = ("loop", count, ("sequential_block", ("gate", "foo")))

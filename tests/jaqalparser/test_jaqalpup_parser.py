@@ -163,6 +163,93 @@ class ParserTester(TestCase):
         )
         self.run_test(text, exp_result)
 
+    def test_subcircuit_block_no_iterations(self):
+        text = "subcircuit { foo; bar }"
+        exp_result = self.make_circuit(
+            gates=[
+                self.make_subcircuit_gate_block(
+                    1, self.make_gate("foo"), self.make_gate("bar")
+                )
+            ]
+        )
+        self.run_test(text, exp_result)
+
+    def test_subcircuit_block_int_iterations(self):
+        text = "subcircuit 300 { foo; bar }"
+        exp_result = self.make_circuit(
+            gates=[
+                self.make_subcircuit_gate_block(
+                    300, self.make_gate("foo"), self.make_gate("bar")
+                )
+            ]
+        )
+        self.run_test(text, exp_result)
+
+    def test_subcircuit_block_let_iterations(self):
+        text = "let a 500; subcircuit a { foo; bar }"
+        a = self.make_constant("a", 500)
+        exp_result = self.make_circuit(
+            constants={"a": a},
+            gates=[
+                self.make_subcircuit_gate_block(
+                    a, self.make_gate("foo"), self.make_gate("bar")
+                )
+            ],
+        )
+        self.run_test(text, exp_result)
+
+    def test_subcircuit_block_in_parallel(self):
+        text = "<subcircuit { foo; bar }>"
+        with self.assertRaises(JaqalError):
+            parse_jaqal_string(text, inject_pulses=None, autoload_pulses=False)
+
+    def test_subcircuit_block_in_subcircuit(self):
+        text = "subcircuit { subcircuit { foo; bar } }"
+        with self.assertRaises(JaqalError):
+            parse_jaqal_string(text, inject_pulses=None, autoload_pulses=False)
+
+    def test_subcircuit_indirectly_in_parallel(self):
+        text = "< { subcircuit { foo } } >"
+        with self.assertRaises(JaqalError):
+            parse_jaqal_string(text, inject_pulses=None, autoload_pulses=False)
+
+    def test_subcircuit_indirectly_in_subcircuit(self):
+        text = "subcircuit { loop 1 { subcircuit { foo } } }"
+        with self.assertRaises(JaqalError):
+            parse_jaqal_string(text, inject_pulses=None, autoload_pulses=False)
+
+    def test_subcircuit_in_macro(self):
+        text = "macro foo a b {\n  subcircuit {\n    bar\n  }\n}"
+        exp_result = self.make_circuit(
+            macros={
+                "foo": self.make_macro(
+                    "foo",
+                    ["a", "b"],
+                    self.make_subcircuit_gate_block(
+                        1,
+                        self.make_gate("bar"),
+                    ),
+                ),
+            },
+            gates=[],
+        )
+        self.run_test(text, exp_result)
+
+    def test_subcircuit_in_loop(self):
+        text = "loop 2 {\n  subcircuit 3 {\n    foo 4\n  }\n}\n"
+        exp_result = self.make_circuit(
+            gates=[
+                self.make_loop(
+                    self.make_subcircuit_gate_block(
+                        3,
+                        self.make_gate("foo", 4),
+                    ),
+                    count=2,
+                ),
+            ],
+        )
+        self.run_test(text, exp_result)
+
     def test_registers(self):
         """Test that the registers are properly read."""
         text = "register r[7]"
@@ -430,6 +517,11 @@ class ParserTester(TestCase):
 
     def make_sequential_gate_block(self, *gates):
         return BlockStatement(parallel=False, statements=list(gates))
+
+    def make_subcircuit_gate_block(self, iterations, *gates):
+        return BlockStatement(
+            subcircuit=True, iterations=iterations, statements=list(gates)
+        )
 
     def make_loop(self, *gates, count):
         return LoopStatement(count, self.make_sequential_gate_block(*gates))
