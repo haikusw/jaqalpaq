@@ -1,30 +1,47 @@
 # Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC (NTESS).
 # Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains
 # certain rights in this software.
+
+from jaqalpaq import JaqalError
+
+
 class BlockStatement:
     """
     Represents a Jaqal block statement; either sequential or parallel. Can contain other
     blocks, loop statements, and gate statements.
 
-    :param bool parallel: Set to False (default) for a sequential block or True for a parallel block.
+    :param bool parallel: Set to False (default) for a sequential block or True for a
+        parallel block.
+    :param bool subcircuit: Set to False (default) for a standard sequential or parallel
+        block of statements. Set to True to include an implicit prepare and measure as
+        the first and last statements of this block.
+    :param bool iterations: The number of times a subcircuit block is run on the
+        hardware. Not used for non-subcircuit blocks.
     :param statements: The contents of the block; defaults to an empty block.
     :type statements: list(GateStatement, LoopStatement, BlockStatement)
     """
 
-    def __init__(self, parallel=False, statements=None):
+    def __init__(self, parallel=False, subcircuit=False, iterations=1, statements=None):
         self._parallel = bool(parallel)
+        self._subcircuit = bool(subcircuit)
+        self._iterations = iterations
+        if not self._subcircuit and self._iterations != 1:
+            raise JaqalError("Only subcircuits may have iterations != 1")
         if statements is None:
             self._statements = []
         else:
             self._statements = statements
 
     def __repr__(self):
-        return f"BlockStatement(parallel={self.parallel}, {self.statements})"
+        return f"BlockStatement(parallel={self.parallel}, subcircuit={self.subcircuit}, iterations={self.iterations}, {self.statements})"
 
     def __eq__(self, other):
         try:
             return (
-                self.parallel == other.parallel and self.statements == other.statements
+                self.parallel == other.parallel
+                and self.subcircuit == other.subcircuit
+                and self.iterations == other.iterations
+                and self.statements == other.statements
             )
         except AttributeError:
             return False
@@ -33,6 +50,17 @@ class BlockStatement:
     def parallel(self):
         """True if this is a parallel block, False if sequential."""
         return self._parallel
+
+    @property
+    def subcircuit(self):
+        """True if this is a subcircuit block, False otherwise."""
+        return self._subcircuit
+
+    @property
+    def iterations(self):
+        """The number of times this block is run on the hardware. Only valid
+        for subcircuit blocks; it will always return 1 otherwise."""
+        return self._iterations
 
     @property
     def statements(self):
