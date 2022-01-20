@@ -37,6 +37,7 @@ class JaqalLexer(Lexer):
         AS,
         NL,
         IDENTIFIER,
+        DOTIDENTIFIER,
         NUMBER,
         INT,
         BININT,
@@ -50,6 +51,7 @@ class JaqalLexer(Lexer):
 
     # Identifiers and numbers
     IDENTIFIER = r"[a-zA-Z_](\.?[a-zA-Z0-9_])*"
+    DOTIDENTIFIER = r"\.([a-zA-Z_](\.?[a-zA-Z0-9_])*)?"
     NUMBER = r"[-+]?[0-9]*\.[0-9]+([eE][-+]?[0-9]+)?"
     INT = r"[-+]?[0-9]+"
     BININT = r"'[0-1]+'"
@@ -279,6 +281,13 @@ class JaqalParser(Parser):
     def usepulses_statement(self, tree):
         self.set_pos(tree)
         ident = Identifier.parse(tree.IDENTIFIER)
+        self.usepulses[ident] = all
+        return ["usepulses", ident, "*"]
+
+    @_('FROM DOTIDENTIFIER USEPULSES "*"')
+    def usepulses_statement(self, tree):
+        self.set_pos(tree)
+        ident = Identifier.parse(tree.DOTIDENTIFIER)
         self.usepulses[ident] = all
         return ["usepulses", ident, "*"]
 

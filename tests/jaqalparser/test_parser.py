@@ -55,6 +55,11 @@ class ParserTester(unittest.TestCase):
         sexpr = ["circuit", ["usepulses", Identifier.parse("foo"), "*"]]
         self.run_test(text, sexpr)
 
+    def test_usepulses_relative(self):
+        text = "from .foo.bar usepulses *"
+        sexpr = ["circuit", ["usepulses", Identifier.parse(".foo.bar"), "*"]]
+        self.run_test(text, sexpr)
+
     def test_gate_no_args(self):
         """Test a gate with no arguments."""
         text = "g"
