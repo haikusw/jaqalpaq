@@ -1,4 +1,6 @@
 import unittest
+import warnings
+from pathlib import Path
 
 from jaqalpaq import JaqalError
 from jaqalpaq.parser import parse_jaqal_string
@@ -19,6 +21,42 @@ class UsepulsesTester(unittest.TestCase):
         self.assertEqual(repr(usepulses), "UsePulsesStatement('tests.core.gpf1', '*')")
         self.assertEqual(str(usepulses.module), "tests.core.gpf1")
         self.assertEqual(usepulses.names, all)
+
+    def test_usepulses_relative(self):
+        """Test that usepulses correctly loads pulses into NATIVE_GATES
+        when referenced relatively"""
+        try:
+            from gpf1 import ng1
+        except ImportError:
+            pass
+        else:
+            warnings.warn('Unexepected module named "gpf1" will interfere with tests.')
+            return
+
+        text = "from .gpf1 usepulses *"
+        jc = parse_jaqal_string(text, autoload_pulses=True, filename=__file__)
+        from gpf1 import NATIVE_GATES as ng1
+
+        self.assertTrue(jc.native_gates["testgate"] is ng1["testgate"])
+
+        (usepulses,) = jc.usepulses
+
+        self.assertEqual(repr(usepulses), "UsePulsesStatement('.gpf1', '*')")
+        self.assertEqual(str(usepulses.module), ".gpf1")
+        self.assertEqual(usepulses.names, all)
+
+    def test_usepulses_reload(self):
+        """Test that usepulses correctly reloads pulses into NATIVE_GATES
+        when referenced relatively"""
+        text = "from .gpf1 usepulses *"
+        jc = parse_jaqal_string(text, autoload_pulses=True, filename=__file__)
+        self.assertTrue("testgate" in jc.native_gates)
+        self.assertTrue("reloadedtestgate" not in jc.native_gates)
+
+        second = Path(__file__).parent / "reload" / "fake.jaqal"
+        jc2 = parse_jaqal_string(text, autoload_pulses=True, filename=str(second))
+        self.assertTrue("testgate" not in jc2.native_gates)
+        self.assertTrue("reloadedtestgate" in jc2.native_gates)
 
     def test_multiple_usepulses(self):
         """Test multiple usepulses statements cause the correct overwrite."""

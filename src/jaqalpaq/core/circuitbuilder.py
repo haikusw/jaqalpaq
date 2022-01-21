@@ -19,7 +19,7 @@ from .usepulses import UsePulsesStatement
 from jaqalpaq import JaqalError
 
 
-def build(expression, inject_pulses=None, autoload_pulses=False):
+def build(expression, inject_pulses=None, autoload_pulses=False, filename=None):
     """Given an expression in a specific format, return the appropriate type, recursively
     constructed, from the core types library.
 
@@ -28,6 +28,8 @@ def build(expression, inject_pulses=None, autoload_pulses=False):
     :param inject_pulses: If given, use these pulses specifically.
     :param bool autoload_pulses: Whether to employ the usepulses statement for parsing.
         Requires appropriate gate definitions.
+    :param str filename: The effective location of the Jaqal file, used for relative
+        imports.
 
     :return: An appropriate core type object.
     :raises JaqalError: If an undefined identifier is used.
@@ -62,7 +64,9 @@ def build(expression, inject_pulses=None, autoload_pulses=False):
 
     """
 
-    builder = Builder(inject_pulses=inject_pulses, autoload_pulses=autoload_pulses)
+    builder = Builder(
+        inject_pulses=inject_pulses, autoload_pulses=autoload_pulses, filename=filename
+    )
     return builder.build(expression)
 
 
@@ -74,11 +78,12 @@ def build(expression, inject_pulses=None, autoload_pulses=False):
 class Builder:
     """Helper class to recursively build a circuit (or type within it) from s-expressions."""
 
-    def __init__(self, *, inject_pulses, autoload_pulses):
+    def __init__(self, *, inject_pulses, autoload_pulses, filename):
         if inject_pulses is not None:
             inject_pulses = normalize_native_gates(inject_pulses)
         self.inject_pulses = inject_pulses
         self.autoload_pulses = autoload_pulses
+        self.filename = filename
 
         self.gate_memo = GateMemoizer()
 
@@ -147,16 +152,8 @@ class Builder:
             elif isinstance(obj, UsePulsesStatement):
                 usepulses.append(obj)
                 if self.autoload_pulses:
-                    newgates = obj.load_pulses()
-
-                    for g in newgates.values():
-                        # inject_pulses overrides usepulses
-                        if self.inject_pulses and g.name in self.inject_pulses:
-                            continue
-
-                        # but later usepulses override earlier imports
-                        gate_context[g.name] = g
-                        native_gates[g.name] = g
+                    obj.update_gates(gate_context, inject_pulses=self.inject_pulses)
+                    obj.update_gates(native_gates, inject_pulses=self.inject_pulses)
             else:
                 raise JaqalError(f"Cannot process object {obj} at circuit level")
 
@@ -373,7 +370,7 @@ class Builder:
         if (filt is not all) and (filt != "*"):
             raise JaqalError("Only from ... usepulses * currently supported.")
 
-        return UsePulsesStatement(name, all)
+        return UsePulsesStatement(name, all, filename=self.filename)
 
 
 def rebuild_macro_in_context(macro, context, gate_context):
@@ -592,7 +589,7 @@ class BlockBuilder:
         """Return the expression being built, as a list."""
         return self._expression
 
-    def build(self, inject_pulses=None, autoload_pulses=False):
+    def build(self, inject_pulses=None, autoload_pulses=False, filename=None):
         """Create a circuit.
 
         Recursively construct an immutable core object of the appropriate type, as
@@ -601,6 +598,8 @@ class BlockBuilder:
         :param inject_pulses: If given, use these pulses specifically.
         :param bool autoload_pulses: Whether to employ the usepulses statement for
             parsing.  Requires appropriate gate definitions.
+        :param str filename: The effective location of the Jaqal file, used for
+            relative imports.
         :return: An appropriate core type object.
 
         """
@@ -608,6 +607,7 @@ class BlockBuilder:
             self.expression,
             inject_pulses=inject_pulses,
             autoload_pulses=autoload_pulses,
+            filename=filename,
         )
 
     def gate(self, name, *args, no_duplicate=False):

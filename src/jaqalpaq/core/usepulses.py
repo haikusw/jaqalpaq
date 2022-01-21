@@ -1,8 +1,6 @@
 # Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC (NTESS).
 # Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains
 # certain rights in this software.
-from importlib import import_module
-
 from jaqalpaq import JaqalError
 
 
@@ -14,8 +12,11 @@ class UsePulsesStatement:
     :param list[str] names: either the special value `all`, or a list of tokens to import
     """
 
-    def __init__(self, module, names):
+    _gates = None
+
+    def __init__(self, module, names, *, filename=None):
         self._module = module
+        self._filename = filename
 
         if names is all or names == "*":
             self._names = all
@@ -50,14 +51,36 @@ class UsePulsesStatement:
         return self._names
 
     def load_pulses(self):
-        module = import_module(str(self._module))
-        native_gates = module.NATIVE_GATES
+        # Deprecated
+        try:
+            self._gates
+        except AttributeError:
+            self.load()
 
-        if self._names is all:
-            return native_gates
+        native_gates = {}
+        self.update_gates(native_gates)
+        return native_gates
 
-        # Todo: filter the native gates based on self._names
-        raise JaqalError("Only from ... usepulses * currently supported.")
+    def update_gates(self, gates, inject_pulses=False):
+        if not self._gates:
+            self._load()
+
+        if self._names is not all:
+            # Todo: filter the native gates based on self._names
+            raise JaqalError("Only from ... usepulses * currently supported.")
+
+        for g in self._gates.values():
+            # inject_pulses overrides usepulses
+            if inject_pulses and g.name in inject_pulses:
+                continue
+
+            # but later usepulses override earlier imports
+            gates[g.name] = g
+
+    def _load(self):
+        from jaqalpaq._import import jaqal_import
+
+        self._gates = jaqal_import(str(self._module), "NATIVE_GATES", self._filename)
 
     def __hash__(self):
         return hash((self.__class__, self._module, self._names))

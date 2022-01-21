@@ -47,6 +47,7 @@ def parse_jaqal_file(
             return_usepulses=return_usepulses,
             inject_pulses=inject_pulses,
             autoload_pulses=autoload_pulses,
+            filename=filename,
         )
 
 
@@ -59,6 +60,7 @@ def parse_jaqal_string(
     return_usepulses=False,
     inject_pulses=None,
     autoload_pulses=True,
+    filename=None,
 ):
     """Parse a string written in Jaqal into core types.
 
@@ -72,6 +74,8 @@ def parse_jaqal_string(
     :param bool return_usepulses: Whether to both add a second return value and populate it with the usepulses statement.
     :param inject_pulses: If given, use these pulses specifically.
     :param bool autoload_pulses: Whether to employ the usepulses statement for parsing.  Requires appropriate gate definitions.
+    :param str filename: The (effective) name of the Jaqal file, used for relative
+        imports.
     :return: The circuit representation of the file and usepulses if
         requested. usepulses is stored in a dict under the key
         'usepulses'. It is itself a dict mapping :class:`Identifier`
@@ -82,7 +86,13 @@ def parse_jaqal_string(
     _monkeypatch_sly()
 
     sexpr, usepulses = parse_to_sexpression(jaqal, return_usepulses=True)
-    circuit = build(sexpr, inject_pulses=inject_pulses, autoload_pulses=autoload_pulses)
+
+    circuit = build(
+        sexpr,
+        inject_pulses=inject_pulses,
+        autoload_pulses=autoload_pulses,
+        filename=filename,
+    )
 
     if expand_macro:
         # preserve_definitions maintains old API behavior

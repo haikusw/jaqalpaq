@@ -296,7 +296,7 @@ class BuildTester(unittest.TestCase):
         the same gate."""
         # This uses a non-public class because it's the most direct
         # way to test what we're getting at.
-        builder = Builder(inject_pulses=None, autoload_pulses=False)
+        builder = Builder(inject_pulses=None, autoload_pulses=False, filename=None)
         sexpr = SExpression.create(["gate", "foo", "a"])
         gate_context = {}
         context0 = {"a": Constant("a", 0)}
