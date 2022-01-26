@@ -644,12 +644,15 @@ class BlockBuilder:
         return builder
 
     def subcircuit(self, iterations=None):
-        """Create, add, and return a new block builder to the statements stored in this block. Although it is not legal in Jaqal to nest certain blocks, this builder ignores these restrictions.
+        """Create, add, and return a new block builder to the statements stored in this
+        block. Although it is not legal in Jaqal to nest certain blocks, this builder
+        ignores these restrictions.
 
-        To create a subcircuit builder without adding it to this block, use the SubcircuitBlockBuilder class directly.
+        To create a subcircuit builder without adding it to this block, use the
+        SubcircuitBlockBuilder class directly.
 
         :param iterations: The number of times to run this on the
-        hardware to accumulate statistics.
+            hardware to accumulate statistics.
         :type iterations: int, str, AnnotatedValue, or None
         """
 

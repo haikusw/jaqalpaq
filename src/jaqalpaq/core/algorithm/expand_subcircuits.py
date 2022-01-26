@@ -11,14 +11,14 @@ def expand_subcircuits(circuit, prepare_def=None, measure_def=None):
     :param Circuit circuit: The circuit in which to expand subcircuits.
 
     :param str or GateDefinition prepare_def: The definition of the
-    gate to place in the beginning of each subcircuit. If a string is
-    provided, look up in the circuit's native gates. If not given,
-    create a new definition using this string or 'prepare_all'.
+        gate to place in the beginning of each subcircuit. If a string is
+        provided, look up in the circuit's native gates. If not given,
+        create a new definition using this string or 'prepare_all'.
 
     :param str or GateDefinition measure_def: The definition of the
-    gate to place at the end of each subcircuit. If a string is
-    provided, look up in the circuit's native gates. If not given,
-    create a new definition using this string or 'measure_all'.
+        gate to place at the end of each subcircuit. If a string is
+        provided, look up in the circuit's native gates. If not given,
+        create a new definition using this string or 'measure_all'.
 
     """
 
