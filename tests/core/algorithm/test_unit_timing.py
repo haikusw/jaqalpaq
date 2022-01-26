@@ -1,6 +1,6 @@
 import unittest
 
-from jaqalpaq import JaqalError
+from jaqalpaq.error import JaqalError
 from jaqalpaq.parser import parse_jaqal_string
 from jaqalpaq.core.algorithm.unit_timing import normalize_blocks_with_unitary_timing
 

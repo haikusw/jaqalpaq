@@ -10,7 +10,7 @@ from jaqalpaq.core import (
     ParamType,
 )
 import jaqalpaq.core as core
-from jaqalpaq import JaqalError
+from jaqalpaq.error import JaqalError
 
 from . import randomize
 from . import common

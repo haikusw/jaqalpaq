@@ -16,7 +16,7 @@ from jaqalpaq.core import (
 from jaqalpaq.core.branch import BranchStatement, CaseStatement
 from jaqalpaq.parser import parse_jaqal_string, JaqalParseError
 from jaqalpaq.parser.identifier import Identifier
-from jaqalpaq import JaqalError
+from jaqalpaq.error import JaqalError
 
 
 class ParserTester(TestCase):

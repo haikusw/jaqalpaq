@@ -1,6 +1,6 @@
 import unittest
 
-from jaqalpaq import JaqalError
+from jaqalpaq.error import JaqalError
 from jaqalpaq.core.algorithm.fill_in_let import fill_in_let
 from jaqalpaq.parser import parse_jaqal_string
 from jaqalpaq.core.circuitbuilder import build

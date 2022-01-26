@@ -8,7 +8,7 @@ from os import devnull
 from sly import Lexer, Parser
 
 from .identifier import Identifier
-from jaqalpaq import JaqalError
+from jaqalpaq.error import JaqalError
 import sly.yacc
 
 # We attempt to ``monkeypatch'' the sly library to remove some expensive checks.

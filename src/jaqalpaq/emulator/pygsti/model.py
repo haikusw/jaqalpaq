@@ -9,7 +9,7 @@ from pygsti.modelmembers.povms import ComputationalBasisPOVM
 from pygsti.models import LocalNoiseModel
 from pygsti.processors import QubitProcessorSpec, UnitaryGateFunction
 
-from jaqalpaq import JaqalError
+from jaqalpaq.error import JaqalError
 
 
 class JaqalOpFactory(OpFactory):

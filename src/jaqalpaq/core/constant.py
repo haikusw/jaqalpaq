@@ -2,7 +2,7 @@
 # Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains
 # certain rights in this software.
 from .parameter import AnnotatedValue, ParamType
-from jaqalpaq import JaqalError
+from jaqalpaq.error import JaqalError
 
 
 class Constant(AnnotatedValue):

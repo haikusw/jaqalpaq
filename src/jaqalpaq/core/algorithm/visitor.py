@@ -3,7 +3,7 @@
 # certain rights in this software.
 """Define the infrastructure for visiting Jaqal core types"""
 
-from jaqalpaq import JaqalError
+from jaqalpaq.error import JaqalError
 
 
 class Visitor:

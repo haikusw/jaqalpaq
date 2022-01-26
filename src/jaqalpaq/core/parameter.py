@@ -3,7 +3,7 @@
 # certain rights in this software.
 import enum
 
-from jaqalpaq import JaqalError
+from jaqalpaq.error import JaqalError
 
 
 class ParamMeta(enum.EnumMeta):

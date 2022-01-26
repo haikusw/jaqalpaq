@@ -4,7 +4,7 @@
 from itertools import zip_longest
 import math
 
-from jaqalpaq import JaqalError
+from jaqalpaq.error import JaqalError
 
 
 class GateStatement:

@@ -3,7 +3,7 @@
 # certain rights in this software.
 from collections import OrderedDict
 
-from jaqalpaq import JaqalError
+from jaqalpaq.error import JaqalError
 from .gate import GateStatement
 
 

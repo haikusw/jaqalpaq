@@ -1,6 +1,6 @@
 import unittest
 
-from jaqalpaq import JaqalError
+from jaqalpaq.error import JaqalError
 from jaqalpaq.core.parameter import ParamType
 
 from jaqalpaq.core.register import Register, NamedQubit

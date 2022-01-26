@@ -16,7 +16,7 @@ from .branch import BranchStatement, CaseStatement
 from .algorithm.visitor import Visitor
 from .usepulses import UsePulsesStatement
 
-from jaqalpaq import JaqalError
+from jaqalpaq.error import JaqalError
 
 
 def build(expression, inject_pulses=None, autoload_pulses=False, filename=None):

@@ -7,7 +7,7 @@ import pygsti
 from pygsti.baseobjs import Label, CircuitLabel
 from pygsti.circuits import Circuit
 
-from jaqalpaq import JaqalError
+from jaqalpaq.error import JaqalError
 from jaqalpaq.core import Macro
 from jaqalpaq.core.constant import Constant
 from jaqalpaq.core.gatedef import IdleGateDefinition

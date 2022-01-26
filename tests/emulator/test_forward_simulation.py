@@ -2,6 +2,7 @@ import unittest, pytest
 import os
 
 import jaqalpaq
+import jaqalpaq.error
 from jaqalpaq.core.circuitbuilder import CircuitBuilder
 import numpy as np
 from jaqalpaq.emulator import run_jaqal_string, run_jaqal_circuit, run_jaqal_file
@@ -133,7 +134,7 @@ measure_all
         self.assertAlmostEqual(output_probs["11111"], 0.5)
 
     def test_JaqalError(self):
-        with pytest.raises(jaqalpaq.JaqalError):
+        with pytest.raises(jaqalpaq.error.JaqalError):
             jaqal_str = """
 from qscout.v1.std usepulses *
 register q[1]

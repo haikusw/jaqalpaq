@@ -2,7 +2,7 @@ import unittest
 import warnings
 from pathlib import Path
 
-from jaqalpaq import JaqalError
+from jaqalpaq.error import JaqalError
 from jaqalpaq.parser import parse_jaqal_string
 import jaqalpaq.core as core
 

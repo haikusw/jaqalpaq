@@ -2,9 +2,10 @@ jaqalpaq package
 ================
 
 .. automodule:: jaqalpaq
-   :members: JaqalError
    :undoc-members:
    :show-inheritance:
+
+.. autoclass:: jaqalpaq.error.JaqalError
 
 .. data:: jaqalpaq.utilities.RESERVED_WORDS
 

@@ -2,7 +2,7 @@ import unittest
 import random
 
 from jaqalpaq.core.algorithm.visitor import Visitor
-from jaqalpaq import JaqalError
+from jaqalpaq.error import JaqalError
 
 
 class JaqalVisitorTester(unittest.TestCase):

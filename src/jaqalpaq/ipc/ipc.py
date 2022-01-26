@@ -16,7 +16,7 @@ from jaqalpaq.core.result import (
     ProbabilisticSubcircuit,
     ExecutionResult,
 )
-from jaqalpaq import JaqalError
+from jaqalpaq.error import JaqalError
 
 
 def run_jaqal_string(jaqal):

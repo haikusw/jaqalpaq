@@ -5,7 +5,7 @@
 
 from typing import Dict
 
-from jaqalpaq import JaqalError
+from jaqalpaq.error import JaqalError
 from jaqalpaq.core.algorithm.visitor import Visitor
 import jaqalpaq.core as core
 

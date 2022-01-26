@@ -4,7 +4,7 @@
 
 import os
 
-from jaqalpaq import JaqalError
+from jaqalpaq.error import JaqalError
 
 # We use environment variables to alter the behavior of these functions.
 #

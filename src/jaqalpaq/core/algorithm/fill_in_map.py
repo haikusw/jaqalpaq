@@ -3,7 +3,7 @@
 # certain rights in this software.
 """Substitute a map alias directly into a circuit."""
 
-from jaqalpaq import JaqalError
+from jaqalpaq.error import JaqalError
 from jaqalpaq.core.algorithm.visitor import Visitor
 import jaqalpaq.core as core
 

@@ -6,7 +6,7 @@ from jaqalpaq.core.algorithm import fill_in_let, expand_macros
 from jaqalpaq.core.algorithm.fill_in_map import fill_in_map
 
 from jaqalpaq.core.circuitbuilder import build
-from jaqalpaq import JaqalError
+from jaqalpaq.error import JaqalError
 
 
 def parse_jaqal_file(

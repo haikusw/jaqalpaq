@@ -5,7 +5,7 @@ from collections import OrderedDict
 
 import numpy as np
 
-from jaqalpaq import JaqalError
+from jaqalpaq.error import JaqalError
 from jaqalpaq.parser import JaqalParseError, parse_jaqal_string
 
 from .frontend import run_jaqal_circuit

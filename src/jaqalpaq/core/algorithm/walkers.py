@@ -6,7 +6,7 @@ from itertools import chain
 
 from .used_qubit_visitor import UsedQubitIndicesVisitor
 from .visitor import Visitor
-from jaqalpaq import JaqalError
+from jaqalpaq.error import JaqalError
 from jaqalpaq.core.block import BlockStatement, LoopStatement
 
 

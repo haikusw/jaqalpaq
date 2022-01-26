@@ -3,7 +3,7 @@
 # certain rights in this software.
 """Fill in the value in a let-statement directly into a tree"""
 
-from jaqalpaq import JaqalError
+from jaqalpaq.error import JaqalError
 from jaqalpaq.core.algorithm.visitor import Visitor
 import jaqalpaq.core as core
 

@@ -31,7 +31,7 @@ installed separately from the  `JaqalPaq-extras repository
   objects and their counterparts in other popular quantum software development frameworks.
 
 Additionally, the top-level :mod:`jaqalpaq` package provides a few useful imports that
-don't fit within the scope of any of the above subpackages: the :exc:`jaqalpaq.JaqalError`
+don't fit within the scope of any of the above subpackages: the :exc:`jaqalpaq.error.JaqalError`
 class and a collection of :data:`RESERVED_WORDS`.
 
 
