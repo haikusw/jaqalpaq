@@ -2,8 +2,6 @@ jaqalpaq package
 ================
 
 .. automodule:: jaqalpaq
-   :undoc-members:
-   :show-inheritance:
 
 .. autoclass:: jaqalpaq.error.JaqalError
 
