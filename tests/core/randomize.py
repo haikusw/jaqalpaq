@@ -1,7 +1,7 @@
 import random
 import sys
 
-from jaqalpaq import RESERVED_WORDS
+from jaqalpaq.utilities import RESERVED_WORDS
 
 
 def make_char_range(start_char, end_char):

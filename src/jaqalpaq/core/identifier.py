@@ -3,7 +3,7 @@
 # certain rights in this software.
 import re
 
-from jaqalpaq import RESERVED_WORDS
+from jaqalpaq.utilities import RESERVED_WORDS
 
 valid_identifier_regex = re.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 

@@ -8,7 +8,8 @@ from .gatedef import GateDefinition
 from .macro import Macro
 from .register import Register, NamedQubit
 from .identifier import is_identifier_valid
-from jaqalpaq import RESERVED_WORDS, JaqalError
+from jaqalpaq import JaqalError
+from jaqalpaq.utilities import RESERVED_WORDS
 import re
 
 

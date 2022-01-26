@@ -4,7 +4,7 @@ import random
 
 from jaqalpaq.parser.parser import parse_to_sexpression
 from jaqalpaq.parser.identifier import Identifier
-from jaqalpaq import RESERVED_WORDS
+from jaqalpaq.utilities import RESERVED_WORDS
 
 
 class ParserTester(unittest.TestCase):
