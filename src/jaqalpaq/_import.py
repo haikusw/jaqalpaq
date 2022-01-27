@@ -116,3 +116,8 @@ def jaqal_import(
             ret = importlib.import_module(submod_name)
 
         return ret
+
+
+def get_jaqal_gates(jaqal_module, jaqal_filename=None):
+    jg = jaqal_import(str(jaqal_module), "jaqal_gates", jaqal_filename=jaqal_filename)
+    return jg.ALL_GATES

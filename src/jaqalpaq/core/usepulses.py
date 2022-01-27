@@ -78,9 +78,9 @@ class UsePulsesStatement:
             gates[g.name] = g
 
     def _load(self):
-        from jaqalpaq._import import jaqal_import
+        from jaqalpaq._import import get_jaqal_gates
 
-        self._gates = jaqal_import(str(self._module), "NATIVE_GATES", self._filename)
+        self._gates = get_jaqal_gates(self._module, jaqal_filename=self._filename)
 
     def __hash__(self):
         return hash((self.__class__, self._module, self._names))

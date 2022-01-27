@@ -18,8 +18,8 @@ from jaqalpaq.emulator.pygsti.circuit import pygsti_circuit_from_circuit
 
 qscout = pytest.importorskip("qscout")
 
-from qscout.v1 import native_gates
-from qscout.v1.noisy import SNLToy1
+from qscout.v1.std import jaqal_gates
+from qscout.v1.std.noisy import SNLToy1
 
 
 def example(*args):
@@ -29,7 +29,7 @@ def example(*args):
 class ForwardSimulatorTester(unittest.TestCase):
     def setUp(self):
 
-        builder = CircuitBuilder(native_gates.NATIVE_GATES)
+        builder = CircuitBuilder(jaqal_gates.ALL_GATES)
 
         pi2 = builder.let("pi2", np.pi / 2)
         q = builder.register("q", 3)
@@ -44,7 +44,7 @@ class ForwardSimulatorTester(unittest.TestCase):
 
         self.jaqal_c = jaqalpaq.parser.parse_jaqal_string(
             self.jaqal_string,
-            inject_pulses=native_gates.NATIVE_GATES,
+            inject_pulses=jaqal_gates.ALL_GATES,
         )
 
     def test_generate_jaqal_program(self):
@@ -126,7 +126,7 @@ CNOT q[3] q[4]
 measure_all
 """
         jaqal_prog = jaqalpaq.parser.parse_jaqal_string(
-            jaqal_text, inject_pulses=native_gates.NATIVE_GATES
+            jaqal_text, inject_pulses=jaqal_gates.ALL_GATES
         )
         res = run_jaqal_circuit(jaqal_prog)
         output_probs = res.subcircuits[0].probability_by_str

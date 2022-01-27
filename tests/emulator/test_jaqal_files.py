@@ -15,8 +15,7 @@ from jaqalpaq.emulator.pygsti.model import build_noiseless_native_model
 
 qscout = pytest.importorskip("qscout")
 
-from qscout.v1 import native_gates
-from qscout.v1.noisy import SNLToy1
+from qscout.v1.std.noisy import SNLToy1
 
 
 def example(*args):

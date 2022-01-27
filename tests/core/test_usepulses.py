@@ -9,12 +9,12 @@ import jaqalpaq.core as core
 
 class UsepulsesTester(unittest.TestCase):
     def test_usepulses(self):
-        """Test that usepulses correctly loads pulses into NATIVE_GATES."""
+        """Test that usepulses correctly loads pulses into native_gates."""
         text = "from tests.core.gpf1 usepulses *"
         jc = parse_jaqal_string(text, autoload_pulses=True)
-        from tests.core.gpf1 import NATIVE_GATES as ng1
+        from tests.core.gpf1 import jaqal_gates as ng1
 
-        self.assertTrue(jc.native_gates["testgate"] is ng1["testgate"])
+        self.assertTrue(jc.native_gates["testgate"] is ng1.ALL_GATES["testgate"])
 
         (usepulses,) = jc.usepulses
 
@@ -26,7 +26,7 @@ class UsepulsesTester(unittest.TestCase):
         """Test that usepulses correctly loads pulses into NATIVE_GATES
         when referenced relatively"""
         try:
-            from gpf1 import ng1
+            import gpf1
         except ImportError:
             pass
         else:
@@ -35,9 +35,9 @@ class UsepulsesTester(unittest.TestCase):
 
         text = "from .gpf1 usepulses *"
         jc = parse_jaqal_string(text, autoload_pulses=True, filename=__file__)
-        from gpf1 import NATIVE_GATES as ng1
+        from gpf1 import jaqal_gates as ng1
 
-        self.assertTrue(jc.native_gates["testgate"] is ng1["testgate"])
+        self.assertTrue(jc.native_gates["testgate"] is ng1.ALL_GATES["testgate"])
 
         (usepulses,) = jc.usepulses
 
@@ -66,12 +66,12 @@ class UsepulsesTester(unittest.TestCase):
         """
         jc = parse_jaqal_string(text, autoload_pulses=True)
         jc2 = parse_jaqal_string(text, autoload_pulses=True)
-        from tests.core.gpf1 import NATIVE_GATES as ng1
-        from tests.core.gpf2 import NATIVE_GATES as ng2
+        from tests.core.gpf1 import jaqal_gates as ng1
+        from tests.core.gpf2 import jaqal_gates as ng2
 
-        self.assertIs(jc.native_gates["testgate"], ng2["testgate"])
-        self.assertEqual(len(ng2["testgate"].parameters), 2)
-        self.assertEqual(len(ng1["testgate"].parameters), 1)
+        self.assertIs(jc.native_gates["testgate"], ng2.ALL_GATES["testgate"])
+        self.assertEqual(len(ng2.ALL_GATES["testgate"].parameters), 2)
+        self.assertEqual(len(ng1.ALL_GATES["testgate"].parameters), 1)
 
         up0, up1 = jc.usepulses
         self.assertNotEqual(up0, up1)
@@ -89,9 +89,9 @@ class UsepulsesTester(unittest.TestCase):
             from tests.core.gpf1 usepulses *
         """
         jc = parse_jaqal_string(text, autoload_pulses=True)
-        from tests.core.gpf1 import NATIVE_GATES as ng1
-        from tests.core.gpf2 import NATIVE_GATES as ng2
+        from tests.core.gpf1 import jaqal_gates as ng1
+        from tests.core.gpf2 import jaqal_gates as ng2
 
-        self.assertIs(jc.native_gates["testgate"], ng1["testgate"])
-        self.assertEqual(len(ng1["testgate"].parameters), 1)
-        self.assertEqual(len(ng2["testgate"].parameters), 2)
+        self.assertIs(jc.native_gates["testgate"], ng1.ALL_GATES["testgate"])
+        self.assertEqual(len(ng1.ALL_GATES["testgate"].parameters), 1)
+        self.assertEqual(len(ng2.ALL_GATES["testgate"].parameters), 2)
