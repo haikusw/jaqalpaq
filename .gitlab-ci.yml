@@ -1,5 +1,10 @@
 image: python:3.7
 
+variables:
+  TEST_REPRODUCE: $TEST_REPRODUCE
+  QSCOUT_BRANCH: $QSCOUT_BRANCH
+  JAQALPAQ_EXTRAS_BRANCH: $JAQALPAQ_EXTRAS_BRANCH
+
 before_script:
   - python --version
   - if echo "$CI_PROJECT_URL" | grep -q cee-gitlab.sandia.gov ; then
@@ -28,7 +33,7 @@ Unified Tests:
       fi
     - pip install black && black --check .
     - cd ..
-    - rm -fr qscout-gatemodels && git clone --depth 1 "$(echo "${CI_REPOSITORY_URL}" | sed 's/jaqalpaq.git/qscout-gatemodels.git/')"
+    - rm -fr qscout-gatemodels && git clone --depth 1 "$(echo "${CI_REPOSITORY_URL}" | sed 's/jaqalpaq.git/qscout-gatemodels.git/')" -b "${QSCOUT_BRANCH}"
     - LOCAL_JAQALPAQ=./jaqalpaq LOCAL_JAQALPAQ_EXTRAS="" LOCAL_QSCOUT_GATEMODELS=./qscout-gatemodels
       JAQALPAQ_OPTS="pygsti-integration,tests"
       ./jaqalpaq/install.sh
@@ -38,12 +43,13 @@ Unified Tests:
 Notebooks:
   stage: Reproducibility
   only:
-    - web
+    variables:
+      - $TEST_REPRODUCE == "1"
   script:
     - git fetch origin master
     - cd ..
-    - rm -fr qscout-gatemodels && git clone --depth 1 "$(echo "${CI_REPOSITORY_URL}" | sed 's/jaqalpaq.git/qscout-gatemodels.git/')"
-    - rm -fr jaqalpaq-extras && git clone --depth 1 "$(echo "${CI_REPOSITORY_URL}" | sed 's/jaqalpaq.git/jaqalpaq-extras.git/')"
+    - rm -fr qscout-gatemodels && git clone --depth 1 "$(echo "${CI_REPOSITORY_URL}" | sed 's/jaqalpaq.git/qscout-gatemodels.git/')" -b "${QSCOUT_BRANCH}"
+    - rm -fr jaqalpaq-extras && git clone --depth 1 "$(echo "${CI_REPOSITORY_URL}" | sed 's/jaqalpaq.git/jaqalpaq-extras.git/')" -b "${JAQALPAQ_EXTRAS_BRANCH}"
     - LOCAL_JAQALPAQ=./jaqalpaq LOCAL_JAQALPAQ_EXTRAS=./jaqalpaq-extras LOCAL_QSCOUT_GATEMODELS=./qscout-gatemodels
       JAQALPAQ_OPTS="pygsti-integration,notebooks" JAQALPAQ_EXTRAS_OPTS="qiskit,pyquil,cirq,projectq,pytket,tutorial"
       ./jaqalpaq/install.sh
