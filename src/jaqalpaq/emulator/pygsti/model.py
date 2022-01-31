@@ -61,7 +61,7 @@ class JaqalOpFactory(OpFactory):
 
             mat = np.array(self.jaqal_fun(*argv))
 
-        if mat.shape == (4 ** self.num_qubits, 4 ** self.num_qubits):
+        if mat.shape == (4**self.num_qubits, 4**self.num_qubits):
             return StaticArbitraryOp(mat, evotype=self._evotype)
 
         return StaticUnitaryOp(mat, evotype=self._evotype)
@@ -70,10 +70,10 @@ class JaqalOpFactory(OpFactory):
 class DummyUnitaryGate(UnitaryGateFunction):
     def __init__(self, num_qubits):
         self.num_qubits = num_qubits
-        self.shape = (2 ** self.num_qubits, 2 ** self.num_qubits)
+        self.shape = (2**self.num_qubits, 2**self.num_qubits)
 
     def __call__(self, arg):
-        return -1 * np.eye(2 ** self.num_qubits, dtype="complex")
+        return -1 * np.eye(2**self.num_qubits, dtype="complex")
 
 
 def pygsti_independent_noisy_gate(gate, fun):

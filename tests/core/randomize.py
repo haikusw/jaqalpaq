@@ -56,7 +56,7 @@ def random_float():
         exponent = random.randint(sys.float_info.min_10_exp, sys.float_info.max_10_exp)
         sign = random.choice([-1, 1])
         try:
-            value = sign * mantissa * 10 ** exponent
+            value = sign * mantissa * 10**exponent
         except OverflowError:
             print(f"Could not create float {sign}*{mantissa}**{exponent}")
             raise
