@@ -1,7 +1,7 @@
 # Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC (NTESS).
 # Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains
 # certain rights in this software.
-from numpy import array
+from numpy import zeros
 import itertools
 
 import pygsti
@@ -27,17 +27,14 @@ class pyGSTiEmulator(IndependentSubcircuitsBackend):
     Collects common helper functions required by pyGSTi backends.
     """
 
-    ZERO_CUTOFF = 1e-13
-
     def _probs_from_model(self, model, pc):
-        res = []
-        for k, v in model.probabilities(pc).items():
-            if (v < 0) and (v > -self.ZERO_CUTOFF):
-                v = 0
-            res.append((int(k[0][::-1], 2), v))
+        prob_dict = model.probabilities(pc)
+        probs = zeros(len(prob_dict), dtype=float)
+        for k, v in prob_dict.items():
+            k = int(k[0][::-1], 2)
+            probs[k] = v
 
-        probs = array(res)
-        return probs[probs[:, 0].argsort()][:, 1].copy()
+        return probs
 
 
 class UnitarySerializedEmulator(pyGSTiEmulator):

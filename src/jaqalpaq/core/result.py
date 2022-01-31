@@ -1,6 +1,7 @@
 # Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC (NTESS).
 # Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains
 # certain rights in this software.
+import warnings
 from collections import OrderedDict
 
 from .algorithm import fill_in_let, expand_macros
@@ -126,10 +127,73 @@ class ProbabilisticSubcircuit(Subcircuit):
 
     Also contains a probability distribution."""
 
+    # Keep the original, unconditioned probabilities?
+    KEEP_RAW = False
+
+    # Warn if a probability is greater than CUTOFF_WARN, and
+    # throw an exception if it's above CUTOFF_FAIL.
+    CUTOFF_FAIL = 2e-6
+    CUTOFF_WARN = 1e-13
+    assert CUTOFF_WARN <= CUTOFF_FAIL
+
     def __init__(self, trace, index, readouts, probabilities):
         """(internal) Instantiate a Subcircuit"""
         super().__init__(trace, index, readouts)
-        self._probabilities = probabilities
+        # Don't require numpy in the experiment
+        import numpy
+
+        p = numpy.asarray(probabilities)
+        self._raw_probabilities = p.copy() if self.KEEP_RAW else None
+
+        # We normalize the probabilities if they are outside the range [0,1]
+        p_clipped = numpy.clip(p, 0, 1)
+        clip_err = numpy.abs(p_clipped - p).max()
+
+        p = p_clipped
+
+        # We also normalize their sum.
+        total = p.sum()
+        total_err = numpy.abs(total - 1)
+        if total_err > 0:
+            p /= total
+
+        self._probabilities = p
+
+        #
+        # This is done to account for minor numerical error. If the change
+        # is significant, you should be suspicious of the results.
+        #
+
+        err = max(total_err, clip_err)
+        if err > self.CUTOFF_WARN:
+            msg = f"Error in probabilities {err} in {self}"
+            if err > self.CUTOFF_FAIL:
+                raise RuntimeError(msg)
+            warnings.warn(msg, category=RuntimeWarning)
+
+    @property
+    def raw_probability_by_int(self):
+        """Return the probability associated with each measurement result as a list,
+        ordered by the integer representation of the result, with least significant bit
+        representing qubit 0.  I.e., "000" for 0b000, "100" for 0b001, "010" for 0b010,
+        etc.
+
+        Depending on the emulation backend, probabilities may not sum to 1.
+        """
+        if not self._raw_probabilities:
+            raise RuntimeError("Raw probabilities are unavailable for {self}.")
+        return self._raw_probabilities
+
+    @property
+    def raw_probability_by_str(self):
+        """Return the probability associated with each measurement result formatted as a
+        dictionary mapping result strings to their respective probabilities.
+
+        Depending on the emulation backend, probabilities may not sum to 1.
+        """
+        p = self.raw_probability_by_int
+        qubits = len(self._trace.used_qubits)
+        return OrderedDict([(f"{n:b}".zfill(qubits)[::-1], v) for n, v in enumerate(p)])
 
     @property
     def probability_by_int(self):
