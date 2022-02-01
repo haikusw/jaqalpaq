@@ -54,7 +54,7 @@ Notebooks:
       JAQALPAQ_OPTS="pygsti-integration,notebooks" JAQALPAQ_EXTRAS_OPTS="qiskit,pyquil,cirq,projectq,pytket,tutorial"
       ./jaqalpaq/install.sh
     - pip install nbconvert ipykernel
-    - ipython kernel install --user
+    - ipython kernel install --name=python3 --user
     - cd jaqalpaq
     - find examples -name '*.ipynb' ! -name '*.nbconvert.ipynb' -exec devel/ipynb-execute {} --ExecutePreprocessor.kernel_name=python3 \;
     - find examples -name '*.nbconvert.ipynb' -print0 | xargs -0 tar -cf executed-notebooks.tar
