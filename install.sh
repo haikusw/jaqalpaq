@@ -60,6 +60,10 @@ fi
 declare -a args
 args=()
 
+if [ -n "${LOCAL_PYGSTI}" ] ; then
+    args+=(-e "${LOCAL_PYGSTI}")
+fi
+
 if [ -n "${LOCAL_JAQALPAQ+x}" ] ; then
     [ -n "$LOCAL_JAQALPAQ" ] &&
         args+=(-e "${LOCAL_JAQALPAQ}${JAQALPAQ_OPTS}")

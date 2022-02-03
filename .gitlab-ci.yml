@@ -4,9 +4,26 @@ variables:
   TEST_REPRODUCE: $TEST_REPRODUCE
   QSCOUT_BRANCH: $QSCOUT_BRANCH
   JAQALPAQ_EXTRAS_BRANCH: $JAQALPAQ_EXTRAS_BRANCH
+  PYGSTI_COMMIT: $PYGSTI_COMMIT
 
 before_script:
   - python --version
+  - if [ "${PYGSTI_COMMIT}" != "NONE" ] ; then
+        cd .. ;
+        ls -l ;
+        export LOCAL_PYGSTI="./pyGSTi" ;
+        [ -d pyGSTi ] || git clone "https://github.com/pyGSTio/pyGSTi.git" ;
+        cd pyGSTi ;
+        git --version ;
+        git ls-remote ;
+        git reset --hard HEAD ;
+        git fetch -p -t -f -v --all ;
+        git ls-remote origin ;
+        git status ;
+        git checkout --detach "${PYGSTI_COMMIT}" ;
+        git clean -x -f -d ;
+        cd ../jaqalpaq ;
+    fi
   - if echo "$CI_PROJECT_URL" | grep -q cee-gitlab.sandia.gov ; then
         repo="https://nexus.web.sandia.gov/repository/pypi-proxy/simple" &&
         pip config set global.index "$repo" &&
