@@ -191,10 +191,6 @@ class IndependentSubcircuitsBackend(AbstractBackend):
         job = IndependentSubcircuitsJob(self, circ)
         visitor = DiscoverSubcircuits()
         job.traces = traces = visitor.visit(circ)
-        subcircuits = job.subcircuits = []
-        for n, tr in enumerate(traces):
-            subcircuits.append(
-                ProbabilisticSubcircuit(tr, n, [], self._probability(job, tr))
-            )
+        job.subcircuits = [self._make_subcircuit(job, *tr) for tr in enumerate(traces)]
 
         return job

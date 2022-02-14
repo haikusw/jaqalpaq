@@ -5,6 +5,7 @@ from numpy import zeros
 import itertools
 
 from jaqalpaq.core.algorithm.walkers import TraceSerializer
+from jaqalpaq.core.result import ProbabilisticSubcircuit
 from jaqalpaq.emulator.backend import IndependentSubcircuitsBackend, ExtensibleBackend
 
 from .circuit import pygsti_circuit_from_gatelist, pygsti_circuit_from_circuit
@@ -16,14 +17,12 @@ class pyGSTiEmulator(IndependentSubcircuitsBackend):
     Collects common helper functions required by pyGSTi backends.
     """
 
-    def _probs_from_model(self, model, pc):
-        prob_dict = model.probabilities(pc)
-        probs = zeros(len(prob_dict), dtype=float)
-        for k, v in prob_dict.items():
-            k = int(k[0][::-1], 2)
-            probs[k] = v
-
-        return probs
+    # This allows access to the pyGSTi circuit and model objects
+    # used to generate probabilities.
+    #
+    # WARNING: THE ORDER OF QUBITS IS INVERTED RELATIVE TO JAQALPAQ!!!
+    #
+    KEEP_PYGSTI_OBJECTS = False
 
 
 class UnitarySerializedEmulator(pyGSTiEmulator):
@@ -32,7 +31,7 @@ class UnitarySerializedEmulator(pyGSTiEmulator):
     This object should be treated as an opaque symbol to be passed to run_jaqal_circuit.
     """
 
-    def _probability(self, job, trace):
+    def _make_subcircuit(self, job, index, trace):
         """Generate the probabilities of outcomes of a subcircuit
 
         :param Trace trace: the subcircut of circ to generate probabilities for
@@ -45,7 +44,19 @@ class UnitarySerializedEmulator(pyGSTiEmulator):
         s = TraceSerializer(trace)
         pc = pygsti_circuit_from_gatelist(list(s.visit(circ)), n_qubits)
         model = build_noiseless_native_model(n_qubits, circ.native_gates)
-        return self._probs_from_model(model, pc)
+
+        prob_dict = model.probabilities(pc)
+        probs = zeros(len(prob_dict), dtype=float)
+        for k, v in prob_dict.items():
+            k = int(k[0][::-1], 2)
+            probs[k] = v
+
+        subcircuit = ProbabilisticSubcircuit(trace, index, [], probs)
+        if self.KEEP_PYGSTI_OBJECTS:
+            subcircuit._model = model
+            subcircuit._pc = pc
+
+        return subcircuit
 
 
 class CircuitEmulator(pyGSTiEmulator):
@@ -59,7 +70,7 @@ class CircuitEmulator(pyGSTiEmulator):
         self.gate_durations = gate_durations if gate_durations is not None else {}
         super().__init__(*args, **kwargs)
 
-    def _probability(self, job, trace):
+    def _make_subcircuit(self, job, index, trace):
         """Generate the probabilities of outcomes of a subcircuit
 
         :param Trace trace: the subcircut of circ to generate probabilities for
@@ -69,7 +80,19 @@ class CircuitEmulator(pyGSTiEmulator):
         pc = pygsti_circuit_from_circuit(
             job.circuit, trace=trace, durations=self.gate_durations
         )
-        return self._probs_from_model(self.model, pc)
+
+        prob_dict = self.model.probabilities(pc)
+        probs = zeros(len(prob_dict), dtype=float)
+        for k, v in prob_dict.items():
+            k = int(k[0][::-1], 2)
+            probs[k] = v
+
+        subcircuit = ProbabilisticSubcircuit(trace, index, [], probs)
+        if self.KEEP_PYGSTI_OBJECTS:
+            subcircuit._model = self.model
+            subcircuit._pc = pc
+
+        return subcircuit
 
 
 class AbstractNoisyNativeEmulator(ExtensibleBackend, CircuitEmulator):
