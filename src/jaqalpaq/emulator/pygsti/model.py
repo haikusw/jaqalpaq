@@ -121,7 +121,7 @@ def pygsti_ideal_unitary(gate):
     return _unitary_fun
 
 
-def build_processor_spec(n_qubits, gates):
+def build_processor_spec(n_qubits, gates, evotype="densitymx"):
     """Build a ProcessorSpec of ideal unitaries suitable for pygsti model creation.
     Adds key names of the form GJ<gate name> for each Jaqal gate
 
@@ -148,9 +148,9 @@ def build_processor_spec(n_qubits, gates):
         # Cast to either a PyGSTi StaticUnitaryOp or OpFactory to avoid autoconstruction logic
         if callable(obj):
             # For the ideal unitary, only pass classical arguments to underlying function
-            obj = JaqalOpFactory(obj, gate=g, pass_args=("classical",))
+            obj = JaqalOpFactory(obj, gate=g, pass_args=("classical",), evotype=evotype)
         else:
-            obj = StaticUnitaryOp(obj, evotype="densitymx")
+            obj = StaticUnitaryOp(obj, evotype=evotype)
 
         name = f"GJ{g.name}"
         unitaries[name] = obj
@@ -164,7 +164,9 @@ def build_processor_spec(n_qubits, gates):
         dummy_unitaries[name] = dummy_unitary(None)
 
     if "Gidle" not in unitaries:
-        unitaries["Gidle"] = JaqalOpFactory(lambda *args: np.identity(2, "complex"))
+        unitaries["Gidle"] = JaqalOpFactory(
+            lambda *args: np.identity(2, "complex"), evotype=evotype
+        )
         availability["Gidle"] = [(sslbl,) for sslbl in range(n_qubits)]
 
         dummy_unitary = DummyUnitaryGate(1)
@@ -188,7 +190,7 @@ def build_noiseless_native_model(n_qubits, gates, evotype="densitymx"):
     :param evotype: pyGSTi evolution type
     :return: a pyGSTi noise model object
     """
-    pspec, gatedict = build_processor_spec(n_qubits, gates)
+    pspec, gatedict = build_processor_spec(n_qubits, gates, evotype=evotype)
 
     target_model = LocalNoiseModel(
         pspec,
