@@ -187,12 +187,13 @@ def build_processor_spec(n_qubits, gates, evotype="densitymx"):
     return pspec, unitaries
 
 
-def build_noiseless_native_model(n_qubits, gates, evotype="densitymx"):
-    """Build a noise model for each Jaqal gate
+def build_noiseless_native_model(n_qubits, gates, evotype="statevec"):
+    """Build a (noiseless) noise model for each Jaqal gate
 
     :param n_qubits: the number of qubits in the model
     :param gates: a dictionary of Jaqal gates
-    :param evotype: pyGSTi evolution type
+    :param evotype: the pyGSTi evolution type to use for the model.  The default is
+        "statevec", which is sufficient for noiseless simulation.
     :return: a pyGSTi noise model object
     """
     pspec, gatedict = build_processor_spec(n_qubits, gates, evotype=evotype)
@@ -204,6 +205,11 @@ def build_noiseless_native_model(n_qubits, gates, evotype="densitymx"):
         povm_layers=[ComputationalBasisPOVM(pspec.num_qubits, evotype=evotype)],
         evotype=evotype,
     )
+
+    # Right now, pyGSTi does not have a forward-map state-vector simulator.
+    # You can make this work by setting:
+
+    # target_model.sim = "matrix"
 
     return target_model
 

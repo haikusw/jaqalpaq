@@ -1,8 +1,13 @@
 # Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC (NTESS).
 # Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains
 # certain rights in this software.
-from numpy import zeros
 import itertools
+
+import numpy
+from scipy.sparse import dia_matrix
+
+from pygsti.modelmembers.operations import ComposedOp
+from pygsti.protocols import ModelFreeformSimulator
 
 from jaqalpaq.core.algorithm.walkers import TraceSerializer
 from jaqalpaq.core.result import ProbabilisticSubcircuit
@@ -45,12 +50,24 @@ class UnitarySerializedEmulator(pyGSTiEmulator):
         pc = pygsti_circuit_from_gatelist(list(s.visit(circ)), n_qubits)
         model = build_noiseless_native_model(n_qubits, circ.native_gates)
 
-        prob_dict = model.probabilities(pc)
-        probs = zeros(len(prob_dict), dtype=float)
-        for k, v in prob_dict.items():
-            probs[int(k[0], 2)] = v
+        # Todo: currently, pyGSTi does not implement the statevector simulator.
+        # We fake it here.
+        op = model.circuit_operator(pc)
+        if isinstance(op, ComposedOp) and (not op.factorops):
+            # pyGSTi defaults to a PTM representation for an trivial product.
+            # Just build the identity ourselves in that case:
+            sz = 2**n_qubits
+            U = dia_matrix((numpy.ones(sz), [0]), shape=(sz, sz))
+        else:
+            U = op.to_sparse()
+
+        vec = U.getcol(0)
+
+        # Todo: keep this sparse
+        probs = numpy.abs(vec.toarray().flatten()) ** 2
 
         subcircuit = ProbabilisticSubcircuit(trace, index, [], probs)
+        subcircuit.statevec = vec
         if self.KEEP_PYGSTI_OBJECTS:
             subcircuit._model = model
             subcircuit._pc = pc
@@ -83,14 +100,18 @@ class CircuitEmulator(pyGSTiEmulator):
             circ, trace=trace, durations=self.gate_durations, n_qubits=n_qubits
         )
 
-        prob_dict = self.model.probabilities(pc)
-        probs = zeros(len(prob_dict), dtype=float)
+        model = self.model
+        mfs = ModelFreeformSimulator(None)
+        rho, prob_dict = mfs.compute_final_state(model, pc, include_probabilities=True)
+
+        probs = numpy.zeros(len(prob_dict), dtype=float)
         for k, v in prob_dict.items():
-            probs[int(k[0], 2)] = v
+            probs[int(k, 2)] = v
 
         subcircuit = ProbabilisticSubcircuit(trace, index, [], probs)
+        subcircuit.rho = rho
         if self.KEEP_PYGSTI_OBJECTS:
-            subcircuit._model = self.model
+            subcircuit._model = model
             subcircuit._pc = pc
 
         return subcircuit
