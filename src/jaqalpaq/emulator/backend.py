@@ -33,6 +33,28 @@ class AbstractBackend:
         """
         raise NotImplementedError()
 
+    def get_n_qubits(self, circ=None):
+        """Returns the number of qubits the backend will simulate/emulate.
+
+        Specifically, it will be the number of qubits in the considered circuit.
+
+        :param circ: The circuit object being emulated/simulated.
+        """
+
+        if circ is None:
+            raise ValueError(
+                f"A circuit must be passed to {type(self).__name__}.get_n_qubits"
+            )
+
+        registers = circ.fundamental_registers()
+
+        try:
+            (register,) = registers
+        except ValueError:
+            raise NotImplementedError("Multiple fundamental registers unsupported.")
+
+        return register.size
+
 
 class IndependentSubcircuitsEmulatorWalker(TraceVisitor):
     def __init__(self, traces, subcircuits):

@@ -51,12 +51,7 @@ class UnitarySerializedEmulator(pyGSTiEmulator):
         """
 
         circ = job.circuit
-        try:
-            (register,) = circ.fundamental_registers()
-        except ValueError:
-            raise NotImplementedError("Multiple fundamental registers unsupported.")
-
-        n_qubits = register.size
+        n_qubits = self.get_n_qubits(circ)
 
         s = TraceSerializer(trace)
         pc = pygsti_circuit_from_gatelist(list(s.visit(circ)), n_qubits)
@@ -114,6 +109,13 @@ class AbstractNoisyNativeEmulator(CircuitEmulator):
         self.stretched_gates = stretched_gates
         model, durations = self.build_model()
         super().__init__(model=model, gate_durations=durations, **kwargs)
+
+    def get_n_qubits(self, circ=None):
+        """Returns the number of qubits the backend will be simulating.
+
+        :param circ: The circuit object being emulated/simulated.
+        """
+        return self.n_qubits
 
     def build_model(self):
         """
