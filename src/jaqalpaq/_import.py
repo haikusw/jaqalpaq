@@ -66,7 +66,9 @@ def _jaqal_import_module_relative_to_file(mod_name, jaqal_filename):
     return module
 
 
-def jaqal_import(mod_name, obj_name, jaqal_filename, reload_module="relative_only"):
+def jaqal_import(
+    mod_name, obj_name, jaqal_filename, reload_module="relative_only", full_reload=True
+):
     assert reload_module in (True, False, "relative_only")
 
     if mod_name.startswith("."):
@@ -83,7 +85,13 @@ def jaqal_import(mod_name, obj_name, jaqal_filename, reload_module="relative_onl
     module = sys.modules.get(mod_name)
 
     if module and reload_module:
-        if relative:
+        if full_reload:
+            del sys.modules[mod_name]
+            for k in sys.modules.keys():
+                if k.startswith(f"{mod_name}."):
+                    del sys.modules[k]
+            module = None
+        elif relative:
             module = None
         else:
             importlib.reload(module)
