@@ -48,8 +48,7 @@ class UnitarySerializedEmulator(pyGSTiEmulator):
         prob_dict = model.probabilities(pc)
         probs = zeros(len(prob_dict), dtype=float)
         for k, v in prob_dict.items():
-            k = int(k[0][::-1], 2)
-            probs[k] = v
+            probs[int(k[0], 2)] = v
 
         subcircuit = ProbabilisticSubcircuit(trace, index, [], probs)
         if self.KEEP_PYGSTI_OBJECTS:
@@ -77,15 +76,17 @@ class CircuitEmulator(pyGSTiEmulator):
         :return: A pyGSTi outcome dictionary.
         """
 
+        circ = job.circuit
+        n_qubits = self.get_n_qubits(circ)
+
         pc = pygsti_circuit_from_circuit(
-            job.circuit, trace=trace, durations=self.gate_durations
+            circ, trace=trace, durations=self.gate_durations, n_qubits=n_qubits
         )
 
         prob_dict = self.model.probabilities(pc)
         probs = zeros(len(prob_dict), dtype=float)
         for k, v in prob_dict.items():
-            k = int(k[0][::-1], 2)
-            probs[k] = v
+            probs[int(k[0], 2)] = v
 
         subcircuit = ProbabilisticSubcircuit(trace, index, [], probs)
         if self.KEEP_PYGSTI_OBJECTS:
