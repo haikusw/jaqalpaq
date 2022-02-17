@@ -56,6 +56,89 @@ class AbstractBackend:
         return register.size
 
 
+class ExtensibleBackend(AbstractBackend):
+    """Abstract mixin providing an interface for extending a backend.
+
+    Every gate to be emulated should have a corresponding gate_{name} and
+      gateduration_{name} method defined.
+    """
+
+    def __init__(self, n_qubits, stretched_gates=None, **kwargs):
+        """(abstract) Perform part of the construction of a noisy model.
+
+        :param n_qubits: The number of qubits to simulate
+        :param stretched_gates: (default False)  Add stretched gates to the model:
+          - If None, do not modify the gates.
+          - If 'add', add gates with '_stretched' appended that take an extra parameter,
+            a stretch factor.
+          - Otherwise, stretched_gates must be the numerical stretch factor that is
+            applied to all gates (no extra stretched gates are added
+        """
+        self.n_qubits = n_qubits
+        self.stretched_gates = stretched_gates
+        model, durations = self.build_model()
+        super().__init__(model=model, gate_durations=durations, **kwargs)
+
+    def get_n_qubits(self, circ=None):
+        """Returns the number of qubits the backend will be simulating.
+
+        :param circ: The circuit object being emulated/simulated.
+        """
+        return self.n_qubits
+
+    def set_defaults(self, kwargs, **values):
+        """Helper function to set default values.
+        For every value passed as a keyword argument or in kwargs, set it in the object's
+          namespace, with values in kwargs taking precedence.
+
+        :param kwargs: a dictionary of your function's keyword arguments
+        """
+        for k, v in values.items():
+            setattr(self, k, kwargs.pop(k, v))
+
+    @staticmethod
+    def _curry(params, *ops):
+        """Helper function to make defining related gates easier.
+        Curry every function in ops, using the signature description in params.  For
+          every non-None entry of params, pass that value to the function.
+
+        :param params: List of parameters to pass to each op in ops, with None allowing
+          passthrough of values in the new function
+        :param ops: List of functions to curry
+        :return List[functions]: A list of curried functions
+        """
+
+        def _inner(op):
+            def newop(self, *args, **kwargs):
+                args = iter(args)
+                argv = [next(args) if param is None else param for param in params]
+                argv.extend(args)
+                return op(self, *argv, **kwargs)
+
+            return newop
+
+        newops = []
+        for op in ops:
+            newops.append(_inner(op))
+
+        return newops
+
+    def collect_gate_models(self):
+        gate_models = {}
+
+        for gate_name in type(self).__dict__:
+            if not gate_name.startswith("gate_"):
+                continue
+
+            name = gate_name[5:]
+            gate_models[name] = (
+                getattr(self, gate_name),
+                getattr(self, f"gateduration_{name}"),
+            )
+
+        return gate_models
+
+
 class IndependentSubcircuitsEmulatorWalker(TraceVisitor):
     def __init__(self, traces, subcircuits):
         """(internal) Instantiates an EmulationWalker.
