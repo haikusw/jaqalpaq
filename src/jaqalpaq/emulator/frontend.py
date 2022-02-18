@@ -3,7 +3,7 @@
 # certain rights in this software.
 from jaqalpaq.parser import parse_jaqal_file, parse_jaqal_string
 from jaqalpaq.core.algorithm import expand_macros, fill_in_let, expand_subcircuits
-from .pygsti import UnitarySerializedEmulator
+from .unitary import UnitarySerializedEmulator
 
 
 def run_jaqal_circuit(circuit, backend=None):
