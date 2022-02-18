@@ -46,9 +46,6 @@ if [ "${DISABLE_CYTHON=0}" = "0" ] ; then
         echo "Alternatively, you can set \$DISABLE_CYTHON=1"
         exit 1
     fi
-
-    # pyGSTi has an unstated pre-dependency on Cython and numpy
-    pip install Cython numpy
 else
     echo "Cython extensions are disabled."
     echo "Set PYGSTI_NO_CYTHON_WARNING to suppress further warnings."
