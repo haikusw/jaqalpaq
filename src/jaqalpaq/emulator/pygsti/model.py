@@ -256,8 +256,8 @@ def build_noisy_native_model(
         jaqal_gate = jaqal_gates[name]
         pygsti_name = pygsti_gate_name(jaqal_gate)
 
-        num_qubits = len(jaqal_gate.quantum_parameters)
-        dummy_unitary = DummyUnitaryGate(num_qubits)
+        gate_qubit_count = len(jaqal_gate.quantum_parameters)
+        dummy_unitary = DummyUnitaryGate(gate_qubit_count)
 
         if stretched_gates == "add":
             stretched_pygsti_name = f"{pygsti_name}_stretched"
@@ -266,7 +266,7 @@ def build_noisy_native_model(
             gates[stretched_pygsti_name] = pygsti_independent_noisy_gate(
                 jaqal_gates[stretched_name], func
             )
-            if num_qubits > 1:
+            if gate_qubit_count > 1:
                 availability[stretched_pygsti_name] = "all-permutations"
             else:
                 availability[stretched_pygsti_name] = [
@@ -283,7 +283,7 @@ def build_noisy_native_model(
         durations[name] = dur
         gates[pygsti_name] = pygsti_independent_noisy_gate(jaqal_gate, func)
 
-        if num_qubits > 1:
+        if gate_qubit_count > 1:
             availability[pygsti_name] = "all-permutations"
         else:
             availability[pygsti_name] = [(sslbl,) for sslbl in range(n_qubits)]
