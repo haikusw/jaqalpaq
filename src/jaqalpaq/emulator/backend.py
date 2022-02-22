@@ -1,6 +1,8 @@
 # Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC (NTESS).
 # Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains
 # certain rights in this software.
+import abc
+
 from numpy.random import choice
 
 from jaqalpaq.core.result import ExecutionResult, Readout
@@ -18,20 +20,20 @@ class AbstractJob:
     def __repr__(self):
         return f"<{type(self)} of {self.backend}>"
 
+    @abc.abstractmethod
     def execute(self):
         """Executes the job on the backend"""
-        raise NotImplementedError()
 
 
 class AbstractBackend:
     """Abstract Emulator Backend"""
 
+    @abc.abstractmethod
     def __call__(self, circ):
         """Creates a job object for circ
 
         :param Circuit circ: circuit to run
         """
-        raise NotImplementedError()
 
     def get_n_qubits(self, circ=None):
         """Returns the number of qubits the backend will simulate/emulate.
