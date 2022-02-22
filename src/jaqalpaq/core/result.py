@@ -30,7 +30,7 @@ def parse_jaqal_output_list(circuit, output):
 class ExecutionResult:
     "Captures the results of a Jaqal program's execution, on hardware or an emulator."
 
-    def __init__(self, subcircuits, readouts):
+    def __init__(self, subcircuits, readouts=None):
         """(internal) Initializes an ExecutionResult object.
 
         :param list[Subcircuit] output:  The subcircuits bounded at the beginning by a

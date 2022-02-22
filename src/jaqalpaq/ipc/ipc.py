@@ -69,17 +69,20 @@ def receive_response():
     # Validate the format of the returned JSON
     results = validate_response(results)
 
+    qubit_count = math.log2(len(results[0][1]))
+    if 2**qubit_count != len(results[0][1]):
+        import warnings
+
+        warnings.warn("Invalid frequencies")
+
     # Create a readout and subcircuit for each inner list. This isn't
     # quite right but is good enough for what we're doing.
-    readouts = []
     subcircuits = []
-    for pidx, probs in enumerate(results):
-        readout = IpcReadout(None, None, None)
-        readouts.append(readout)
-        subcircuits.append(IpcSubcircuit(None, pidx, readout, probs))
+    for pidx, rfreqs in enumerate(results):
+        subcircuits.append(IpcSubcircuit(pidx, qubit_count, rfreq))
 
     # Combine into an ExecutionResult object
-    er = ExecutionResult(subcircuits, readouts)
+    er = ExecutionResult(subcircuits)
     return er
 
 
@@ -100,49 +103,17 @@ def validate_response(results):
 #
 
 
-class IpcReadout(Readout):
-    """Encapsulate the result of measurement of some number of qubits over
-    IPC. Ideally this would not differ from readouts generated through
-    other means, but IPC does not fully support all features.
-
-    Currently, IPC does not return individual measurement results but
-    merely their aggregation over many runs.
-
-    """
-
-    @property
-    def index(self):
-        raise NotImplementedError()
-
-    @property
-    def subcircuit(self):
-        raise NotImplementedError()
+class IpcSubcircuit(RelativeFrequencySubcircuit):
+    def __init__(self, index, qubit_count, relative_frequencies):
+        super().__init__(None, index, relative_frequencies=relative_frequencies)
+        self._qubit_count = qubit_count
 
     @property
     def measured_qubits(self):
-        raise NotImplementedError()
+        return [None for i in range(self._qubit_count)]
 
     def __repr__(self):
         return f"<{type(self).__name__}>"
-
-
-class IpcSubcircuit(ProbabilisticSubcircuit):
-    def __init__(self, trace, index, readouts, probabilities):
-        super().__init__(trace, index, readouts, probabilities)
-
-    @property
-    def measured_qubits(self):
-        raise NotImplementedError()
-
-    def __repr__(self):
-        return f"<{type(self).__name__}>"
-
-    @property
-    def probability_by_str(self):
-        # This assumes that all probabilities are the same size, which
-        # will be true as long as we don't have partial measurements.
-        p = self._probabilities
-        return OrderedDict([(f"{n:b}"[::-1], v) for n, v in enumerate(p)])
 
 
 ##
