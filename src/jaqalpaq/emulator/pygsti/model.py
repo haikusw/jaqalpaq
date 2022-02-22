@@ -17,6 +17,11 @@ from pygsti.processors import QubitProcessorSpec, UnitaryGateFunction
 from jaqalpaq.error import JaqalError
 
 
+def pygsti_gate_name(gate):
+    """Returns the canonical pyGSTi gate name of a Jaqal gate."""
+    return f"GJ{gate.name}"
+
+
 class JaqalOpFactory(OpFactory):
     """Jaqal gate factory
     Takes a function describing a Jaqal gate (with identical call signature) and optional
@@ -157,16 +162,16 @@ def build_processor_spec(n_qubits, gates, evotype="densitymx"):
         else:
             obj = StaticUnitaryOp(obj, evotype=evotype)
 
-        name = f"GJ{g.name}"
-        unitaries[name] = obj
+        pygsti_name = pygsti_gate_name(g)
+        unitaries[pygsti_name] = obj
 
         if len(g.quantum_parameters) > 1:
-            availability[name] = "all-permutations"
+            availability[pygsti_name] = "all-permutations"
         else:
-            availability[name] = [(sslbl,) for sslbl in range(n_qubits)]
+            availability[pygsti_name] = [(sslbl,) for sslbl in range(n_qubits)]
 
         dummy_unitary = DummyUnitaryGate(len(g.quantum_parameters))
-        dummy_unitaries[name] = dummy_unitary(None)
+        dummy_unitaries[pygsti_name] = dummy_unitary(None)
 
     if "Gidle" not in unitaries:
         unitaries["Gidle"] = JaqalOpFactory(
@@ -248,8 +253,8 @@ def build_noisy_native_model(
             return lambda *args: unstretched(*args, stretch=stretched_gates)
 
     for name, (func, dur) in gate_models.items():
-        pygsti_name = f"GJ{name}"
         jaqal_gate = jaqal_gates[name]
+        pygsti_name = pygsti_gate_name(jaqal_gate)
 
         num_qubits = len(jaqal_gate.quantum_parameters)
         dummy_unitary = DummyUnitaryGate(num_qubits)
