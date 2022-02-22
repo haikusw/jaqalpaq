@@ -9,11 +9,39 @@ from pygsti.modelmembers.operations import ComposedOp
 from pygsti.protocols import ModelFreeformSimulator
 
 from jaqalpaq.core.algorithm.walkers import TraceSerializer
-from jaqalpaq.core.result import ProbabilisticSubcircuit
+from jaqalpaq.core.result import ProbabilisticSubcircuit, ReadoutSubcircuit
 from jaqalpaq.emulator.backend import IndependentSubcircuitsBackend, ExtensibleBackend
 
 from .circuit import pygsti_circuit_from_circuit
 from .model import build_noisy_native_model
+
+
+class pyGSTiSubcircuit(ProbabilisticSubcircuit, ReadoutSubcircuit):
+    """Encapsulate one part of the circuit between a prepare_all and measure_all gate.
+
+    This tracks the output of a pyGSTi-generated simulation run, which provides access
+    to emulated measurement outcomes, their relative frequency, the *ideal* measurement
+    probabilities, and the ideal density matrix.
+
+    Additionally, you can also store the pyGSTi "circuit" and "model" objects used for
+    the simulation by setting pyGSTiSubcircuit.KEEP_PYGSTI_OBJECTS = True.
+
+    WARNING: THE ORDER OF QUBITS IN THE PYGSTI CIRCUIT AND MODEL OBJECTS IS REVERSED
+        RELATIVE TO JAQALPAQ CONVENTION!
+    """
+
+    KEEP_PYGSTI_OBJECTS = False
+
+    _pygsti_circuit = None
+    _pygsti_model = None
+
+    def __init__(self, *args, pyGSTi_circuit, pyGSTi_model, density_matrix, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._density_matrix = density_matrix
+
+        if self.KEEP_PYGSTI_OBJECTS:
+            self._pygsti_circuit = pyGSTi_circuit
+            self._pygsti_model = pyGSTi_model
 
 
 class CircuitEmulator(IndependentSubcircuitsBackend):
@@ -21,13 +49,6 @@ class CircuitEmulator(IndependentSubcircuitsBackend):
 
     This object should be treated as an opaque symbol to be passed to run_jaqal_circuit.
     """
-
-    # This allows access to the pyGSTi circuit and model objects
-    # used to generate probabilities.
-    #
-    # WARNING: THE ORDER OF QUBITS IS INVERTED RELATIVE TO JAQALPAQ!!!
-    #
-    KEEP_PYGSTI_OBJECTS = False
 
     def __init__(self, *args, model=None, gate_durations=None, **kwargs):
         self.model = model
@@ -56,13 +77,14 @@ class CircuitEmulator(IndependentSubcircuitsBackend):
         for k, v in prob_dict.items():
             probs[int(k, 2)] = v
 
-        subcircuit = ProbabilisticSubcircuit(trace, index, [], probs)
-        subcircuit.rho = rho
-        if self.KEEP_PYGSTI_OBJECTS:
-            subcircuit._model = model
-            subcircuit._pc = pc
-
-        return subcircuit
+        return pyGSTiSubcircuit(
+            trace,
+            index,
+            pyGSTi_circuit=pc,
+            pyGSTi_model=model,
+            density_matrix=rho,
+            probabilities=probs,
+        )
 
 
 class AbstractNoisyNativeEmulator(ExtensibleBackend, CircuitEmulator):

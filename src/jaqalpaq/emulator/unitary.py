@@ -4,8 +4,25 @@
 import numpy
 
 from jaqalpaq.core.algorithm.walkers import TraceSerializer
-from jaqalpaq.core.result import ProbabilisticSubcircuit
+from jaqalpaq.core.result import ProbabilisticSubcircuit, ReadoutSubcircuit
 from jaqalpaq.emulator.backend import IndependentSubcircuitsBackend
+
+
+class EmulatorSubcircuit(ProbabilisticSubcircuit, ReadoutSubcircuit):
+    """Encapsulate one part of the circuit between a prepare_all and measure_all gate.
+
+    This tracks the output of a unitary, forward-map simulation run, which provides access
+    to emulated measurement outcomes, their relative frequency, the *ideal* measurement
+    probabilities, and the ideal state vector before measurement.
+    """
+
+    def __init__(self, *args, state_vector, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._state_vector = state_vector
+
+    @property
+    def state_vector(self):
+        return self._state_vector
 
 
 class UnitarySerializedEmulator(IndependentSubcircuitsBackend):
@@ -128,7 +145,8 @@ class UnitarySerializedEmulator(IndependentSubcircuitsBackend):
 
         probs = numpy.abs(vec) ** 2
 
-        subcircuit = ProbabilisticSubcircuit(trace, index, [], probs)
-        subcircuit.statevec = vec
+        subcircuit = EmulatorSubcircuit(
+            trace, index, probabilities=probs, state_vector=vec
+        )
 
         return subcircuit

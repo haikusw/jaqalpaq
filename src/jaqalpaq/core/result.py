@@ -59,14 +59,13 @@ class ExecutionResult:
 class Readout:
     """Encapsulate the result of measurement of some number of qubits."""
 
-    def __init__(self, result, index, subcircuit):
+    def __init__(self, result, index):
         """(internal) Instantiate a Readout object
 
         Contains the actual results of a measurement.
         """
         self._result = result
         self._index = index
-        self._subcircuit = subcircuit
 
     @property
     def index(self):
@@ -96,22 +95,15 @@ class Readout:
 class Subcircuit:
     """Encapsulate one part of the circuit between a prepare_all and measure_all gate."""
 
-    def __init__(self, trace, index, readouts):
+    def __init__(self, trace, index):
         """(internal) Instantiate a Subcircuit"""
         self._trace = trace
         self._index = int(index)
-        self._readouts = readouts
 
     @property
     def index(self):
         """The :term:`flat order` index of this object in the (unrolled) parent circuit."""
         return self._index
-
-    @property
-    def readouts(self):
-        """An indexable, iterable view of :class:`Readout` objects, containing the
-        time-ordered measurements and auxiliary data, restricted to this Subcircuit."""
-        return self._readouts
 
     @property
     def measured_qubits(self):
@@ -122,10 +114,83 @@ class Subcircuit:
         return f"<{type(self).__name__} {self._index}@{self._trace.end}>"
 
 
+class RelativeFrequencySubcircuit(Subcircuit):
+    """Encapsulate one part of the circuit between a prepare_all and measure_all gate.
+
+    Additionally, track the relative frequencies of each measurement result.
+    """
+
+    def __init__(self, *args, relative_frequencies=None, **kwargs):
+        # Don't require numpy in the experiment
+        import numpy
+
+        super().__init__(*args, **kwargs)
+        if relative_frequencies is None:
+            self._relative_frequencies = numpy.zeros(2 ** len(self.measured_qubits))
+        else:
+            self._relative_frequencies = relative_frequencies
+
+    @property
+    def relative_frequency_by_int(self):
+        """Return the relative frequency of each measurement result as a list,
+        ordered by the integer representation of the result, with least significant bit
+        representing qubit 0.  I.e., "000" for 0b000, "100" for 0b001, "010" for 0b010,
+        etc.
+        """
+        return self._relative_frequencies
+
+    @property
+    def relative_frequency_by_str(self):
+        """Return the probability associated with each measurement result formatted as a
+        dictionary mapping result strings to their respective probabilities."""
+        qubits = len(self._trace.used_qubits)
+        rf = self._relative_frequencies
+        return OrderedDict(
+            [(f"{n:b}".zfill(qubits)[::-1], v) for n, v in enumerate(rf)]
+        )
+
+
+class ReadoutSubcircuit(RelativeFrequencySubcircuit):
+    """Encapsulate one part of the circuit between a prepare_all and measure_all gate.
+
+    Additionally, track the specific measurement results, and their relative frequencies.
+    """
+
+    def __init__(self, trace, index, *, readouts=None, **kwargs):
+        if readouts is None:
+            self._readouts = []
+        else:
+            self._readouts = readouts
+
+        assert "relative_frequencies" not in kwargs
+
+        super().__init__(trace, index, relative_frequencies=None, **kwargs)
+        if readouts:
+            self._recalculate_relative_frequencies()
+
+    def _recalculate_relative_frequencies(self):
+        rf = self._relative_frequencies
+        rf[:] = 0
+        for ro in self.readouts:
+            rf[ro.as_int] += 1
+
+    def accept_readout(self, readout):
+        readout._subcircuit = self
+        self._readouts.append(readout)
+        self._relative_frequencies[readout.as_int] += 1
+
+    @property
+    def readouts(self):
+        """An indexable, iterable view of :class:`Readout` objects, containing the
+        time-ordered measurements and auxiliary data, restricted to this Subcircuit."""
+        return self._readouts
+
+
 class ProbabilisticSubcircuit(Subcircuit):
     """Encapsulate one part of the circuit between a prepare_all and measure_all gate.
 
-    Also contains a probability distribution."""
+    Also track the theoretical probability distribution of measurement results.
+    """
 
     # Warn if a probability is greater than CUTOFF_WARN, and
     # throw an exception if it's above CUTOFF_FAIL.
@@ -133,9 +198,9 @@ class ProbabilisticSubcircuit(Subcircuit):
     CUTOFF_WARN = 1e-13
     assert CUTOFF_WARN <= CUTOFF_FAIL
 
-    def __init__(self, trace, index, readouts, probabilities):
+    def __init__(self, *args, probabilities, **kwargs):
         """(internal) Instantiate a Subcircuit"""
-        super().__init__(trace, index, readouts)
+        super().__init__(*args, **kwargs)
         # Don't require numpy in the experiment
         import numpy
 
@@ -202,16 +267,16 @@ class OutputParser(TraceVisitor):
         self.res = []
         self.readout_index = 0
         for n, sc in enumerate(self.traces):
-            self.subcircuits.append(Subcircuit(sc, n, []))
+            self.subcircuits.append(ReadoutSubcircuit(sc, n))
 
     def process_trace(self):
         subcircuit = self.subcircuits[self.index]
         nxt = next(self.data)
         if isinstance(nxt, str):
             nxt = int(nxt[::-1], 2)
-        mr = Readout(nxt, self.readout_index, subcircuit)
+        mr = Readout(nxt, self.readout_index)
+        subcircuit.accept_readout(mr)
         self.res.append(mr)
-        subcircuit._readouts.append(mr)
         self.readout_index += 1
 
 

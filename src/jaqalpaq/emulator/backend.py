@@ -160,9 +160,9 @@ class IndependentSubcircuitsEmulatorWalker(TraceVisitor):
     def process_trace(self):
         subcircuit = self.subcircuits[self.index]
         nxt = choice(2**self.qubits, p=subcircuit.probability_by_int)
-        mr = Readout(nxt, self.readout_index, subcircuit)
+        mr = Readout(nxt, self.readout_index)
+        subcircuit.accept_readout(mr)
         self.results.append(mr)
-        subcircuit._readouts.append(mr)
         self.readout_index += 1
 
 
