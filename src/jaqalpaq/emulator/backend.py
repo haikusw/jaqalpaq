@@ -88,14 +88,17 @@ class ExtensibleBackend(AbstractBackend):
         """
         return self.n_qubits
 
-    def set_defaults(self, kwargs, **values):
-        """Helper function to set default values.
-        For every value passed as a keyword argument or in kwargs, set it in the object's
-          namespace, with values in kwargs taking precedence.
+    def set_defaults(self, kwargs, **defaults):
+        """Set parameters from a list of defaults and function kwargs.
 
-        :param kwargs: a dictionary of your function's keyword arguments
+        For every value passed as a keyword argument (into **defaults), set it in the
+          object's namespace.  Values in kwargs overrided the default.  Values used from
+          kwargs are removed from kwargs.
+
+        :param kwargs: a dictionary of your function's keyword arguments, mutated to
+          only contain unused values.
         """
-        for k, v in values.items():
+        for k, v in defaults.items():
             setattr(self, k, kwargs.pop(k, v))
 
     @staticmethod
