@@ -211,10 +211,11 @@ def build_noiseless_native_model(n_qubits, gates, evotype="statevec"):
         evotype=evotype,
     )
 
-    # Right now, pyGSTi does not have a forward-map state-vector simulator.
-    # You can make this work by setting:
+    if evotype == "statevec":
+        import warnings
 
-    # target_model.sim = "matrix"
+        warnings.warn('Setting sim="matrix".  Emulation will be SLOW.')
+        target_model.sim = "matrix"
 
     return target_model
 
