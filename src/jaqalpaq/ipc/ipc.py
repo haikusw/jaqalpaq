@@ -15,6 +15,7 @@ from jaqalpaq.core.result import (
     Subcircuit,
     ProbabilisticSubcircuit,
     ExecutionResult,
+    RelativeFrequencySubcircuit,
 )
 from jaqalpaq.error import JaqalError
 
@@ -69,8 +70,8 @@ def receive_response():
     # Validate the format of the returned JSON
     results = validate_response(results)
 
-    qubit_count = math.log2(len(results[0][1]))
-    if 2**qubit_count != len(results[0][1]):
+    qubit_count = math.log2(len(results[0]))
+    if 2**qubit_count != len(results[0]):
         import warnings
 
         warnings.warn("Invalid frequencies")
@@ -79,7 +80,7 @@ def receive_response():
     # quite right but is good enough for what we're doing.
     subcircuits = []
     for pidx, rfreqs in enumerate(results):
-        subcircuits.append(IpcSubcircuit(pidx, qubit_count, rfreq))
+        subcircuits.append(IpcSubcircuit(pidx, qubit_count, rfreqs))
 
     # Combine into an ExecutionResult object
     er = ExecutionResult(subcircuits)
