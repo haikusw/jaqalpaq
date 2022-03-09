@@ -35,18 +35,13 @@ class AbstractBackend:
         :param Circuit circ: circuit to run
         """
 
-    def get_n_qubits(self, circ=None):
+    def get_n_qubits(self, circ):
         """Returns the number of qubits the backend will simulate/emulate.
 
         Specifically, it will be the number of qubits in the considered circuit.
 
         :param circ: The circuit object being emulated/simulated.
         """
-
-        if circ is None:
-            raise ValueError(
-                f"A circuit must be passed to {type(self).__name__}.get_n_qubits"
-            )
 
         registers = circ.fundamental_registers()
 
@@ -81,11 +76,14 @@ class ExtensibleBackend(AbstractBackend):
         model, durations = self.build_model()
         super().__init__(model=model, gate_durations=durations, **kwargs)
 
-    def get_n_qubits(self, circ=None):
+    def get_n_qubits(self, circ):
         """Returns the number of qubits the backend will be simulating.
 
         :param circ: The circuit object being emulated/simulated.
         """
+        circuit_qubits = super().get_n_qubits(circ)
+        if circuit_qubits > self.n_qubits:
+            raise ValueError(f"{self} emulates fewer qubits than {circ} uses")
         return self.n_qubits
 
     def set_defaults(self, kwargs, **defaults):
