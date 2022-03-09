@@ -61,7 +61,7 @@ class TestExecuteAnnotatedJaqalFile:
             expected,
             backend=CircuitEmulator(
                 model=build_noiseless_native_model(
-                    n, circ.native_gates, evotype="densitymx"
+                    n, circ.native_gates, evotype="default"
                 ),
                 gate_durations=backend.gate_durations,
             ),
@@ -82,7 +82,7 @@ class TestExecuteAnnotatedJaqalFile:
             expected,
             backend=CircuitEmulator(
                 model=build_noiseless_native_model(
-                    n, circ.native_gates, evotype="densitymx"
+                    n, circ.native_gates, evotype="default"
                 ),
                 gate_durations=backend.gate_durations,
             ),

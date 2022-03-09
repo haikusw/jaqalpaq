@@ -40,7 +40,7 @@ class JaqalOpFactory(OpFactory):
         :return: a PyGSTi OpFactory describing the Jaqal gate
         """
         if "evotype" not in kwargs:
-            kwargs["evotype"] = "densitymx"
+            kwargs["evotype"] = "default"
 
         self.num_qubits = 1 if gate is None else len(gate.quantum_parameters)
         kwargs["state_space"] = self.num_qubits
@@ -132,7 +132,7 @@ def pygsti_ideal_unitary(gate):
     return _unitary_fun
 
 
-def build_processor_spec(n_qubits, gates, evotype="densitymx"):
+def build_processor_spec(n_qubits, gates, evotype="default"):
     """Build a ProcessorSpec of ideal unitaries suitable for pygsti model creation.
     Adds key names of the form GJ<gate name> for each Jaqal gate
 
@@ -222,7 +222,12 @@ def build_noiseless_native_model(n_qubits, gates, evotype="statevec"):
 
 
 def build_noisy_native_model(
-    jaqal_gates, gate_models, idle_model, n_qubits, stretched_gates=None
+    jaqal_gates,
+    gate_models,
+    idle_model,
+    n_qubits,
+    stretched_gates=None,
+    evotype="default",
 ):
     """
     Parse the dictionary of the **current** class for entries named gate_{name},
@@ -309,11 +314,9 @@ def build_noisy_native_model(
     target_model = LocalNoiseModel(
         pspec,
         gatedict=gates,
-        prep_layers=[
-            ComputationalBasisState([0] * pspec.num_qubits, evotype="densitymx")
-        ],
-        povm_layers=[ComputationalBasisPOVM(pspec.num_qubits, evotype="densitymx")],
-        evotype="densitymx",
+        prep_layers=[ComputationalBasisState([0] * pspec.num_qubits, evotype=evotype)],
+        povm_layers=[ComputationalBasisPOVM(pspec.num_qubits, evotype=evotype)],
+        evotype=evotype,
         simulator="matrix",
     )
 
