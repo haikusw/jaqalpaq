@@ -5,7 +5,6 @@ import itertools
 
 from numpy import zeros
 
-from pygsti.modelmembers.operations import ComposedOp
 from pygsti.protocols import ModelFreeformSimulator
 
 from jaqalpaq.core.algorithm.walkers import TraceSerializer

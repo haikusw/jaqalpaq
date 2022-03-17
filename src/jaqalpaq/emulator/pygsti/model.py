@@ -4,7 +4,6 @@
 import numpy as np
 
 from pygsti.modelmembers.operations import (
-    ComposedOp,
     OpFactory,
     StaticUnitaryOp,
     StaticArbitraryOp,
