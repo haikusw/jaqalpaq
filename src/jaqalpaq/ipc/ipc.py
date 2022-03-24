@@ -10,13 +10,7 @@ import select
 
 import jaqalpaq.parser
 from jaqalpaq.generator import generate_jaqal_program
-from jaqalpaq.core.result import (
-    Readout,
-    Subcircuit,
-    ProbabilisticSubcircuit,
-    ExecutionResult,
-    RelativeFrequencySubcircuit,
-)
+from jaqalpaq.core.result import ExecutionResult, RelativeFrequencySubcircuit
 from jaqalpaq.error import JaqalError
 
 
@@ -44,7 +38,8 @@ def send_jaqal(jaqal):
 
 def receive_response():
     """Wait until we receive a response from the Jaqal we sent."""
-    # The response is serialized JSON. Each entry in the array is a measurement in the Jaqal file, and each entry in those entries represents
+    # The response is serialized JSON. Each entry in the array is a measurement
+    # in the Jaqal file, and each entry in those entries represents
     sock = _get_host_socket()
     resp_list = []
     polling_timeout = 0.1
