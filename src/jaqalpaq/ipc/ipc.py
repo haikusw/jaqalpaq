@@ -8,7 +8,6 @@ import json
 import math
 import select
 
-import jaqalpaq.parser
 from jaqalpaq.generator import generate_jaqal_program
 from jaqalpaq.core.result import ExecutionResult, RelativeFrequencySubcircuit
 from jaqalpaq.error import JaqalError
@@ -129,7 +128,7 @@ def _get_host_socket():
         try:
             _host_socket = socket.create_connection(address)
         except Exception as exc:
-            raise JaqalException(f"Could not connect to host: {exc}")
+            raise JaqalError(f"Could not connect to host: {exc}")
 
     return _host_socket
 
