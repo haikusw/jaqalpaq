@@ -84,7 +84,7 @@ class GeneratorTester(TestCase):
         self.run_test("examples/jaqal/spec_samples/two_qubit_gate.jaqal")
 
     def test_hadamard_macro(self):
-        self.run_test("examples/jaqal/hadamard.jaqal")
+        self.run_test("examples/jaqal/bell_prep.jaqal")
 
     def test_single_qubit_gs(self):
         self.run_test("examples/jaqal/single_qubit_gst.jaqal")

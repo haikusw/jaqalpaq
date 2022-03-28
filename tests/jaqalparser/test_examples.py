@@ -25,8 +25,8 @@ class ExampleFileTester(unittest.TestCase):
 
     def test_hadamard(self):
         """Test Hadamard example"""
-        jaqal_filename = example_dir / "hadamard.jaqal"
-        sexp_filename = example_dir / "hadamard.py"
+        jaqal_filename = example_dir / "bell_prep.jaqal"
+        sexp_filename = example_dir / "bell_prep.py"
         self.implement_file_test(jaqal_filename, sexp_filename)
 
     def test_gst(self):
