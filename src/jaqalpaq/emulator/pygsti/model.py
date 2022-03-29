@@ -229,22 +229,36 @@ def build_noisy_native_model(
     evotype="default",
 ):
     """
-    Parse the dictionary of the **current** class for entries named gate_{name},
-      convert them to pyGSTi-appropriate objects using pygsti_independent_noisy_gate,
-      and then submit them to build_localnoise_model to produce a pyGSTi local noise
-      model.  Furthermore, collect corresponding gateduration_{name} objects into a
-      dictionary.
-
-    Both the gate and gateduration functions must take a signature identical to
-      each other and their corresponding Jaqal gate.  Currently, all qubit parameters
-      will be passed None, but future versions may pass a description of the qubit
-      to simulate (allowing qubit-dependent noise models).
-
-    If _stretched gates are to be automatically supported, the gate_ and
-      gateduration_ methods must take an optional parameter stretch with default value
-      of 1, giving the stretched version of the gate.  The stretched version of the
-      Jaqal gates must exist in jaqal_gates.  The stretch factor is the final
-      parameter of the gate.
+    :param jaqal_gates: A dictionary of JaqalPaq gate objects (with their names as keys).
+      This must be a superset of the gates to process in gate_models.
+    :param gate_models: A dictionary of (gatemodel, gateduration) pairs (with Jaqal gate
+      names as keys).  gatemodel is a function that is passed to
+      pygsti_independent_noisy_gate, which converts it to a pyGSTi-compatible expression
+      of the noisy gate.  gateduration is a function that (just like its sibling,
+      gatemodel) takes the same arguments as the corresponding Jaqal gate, and returns
+      the duration that gate will take.
+    :param idle_model: A function that produces the behavior of the system when idling
+      for a given duration.
+    :param n_qubits: The number of qubits the quantum computer is running
+    :param stretched_gates: Whether and how to add gate stretching.  Gate stretching is
+      a mechanism to create (or modify) Jaqal gates to provide access to an additional
+      nonnegative real-valued parameter called the "stretch factor" that causes the
+      duration of the gate to be multiplied by this factor.  This argument is passed as
+      the last parameter to the jaqal gate.  Both gateduration, and gatemodel functions
+      must also accept this parameter as a named, OPTIONAL last positional parameter,
+      `stretch`.  This is a convenience behavior to avoid the need to manually modify
+      and/or duplicate all the Jaqal gates, and gatemodel and gateduration functions.
+      If set to None (the default), do not add or modify the gates to provide stretched
+      gates.  If set to "add", each gate that ends in `_streched` will also use the
+      (gatemodel, gateduration) pair without the `_stretched` suffix. There MUST BE
+      GATES with the `_stretched` suffix already in jaqal_gates (see
+      jaqalpaq.core.stretch for a mechanism to automate the creation of those Jaqal gate
+      objects).  If set to any other value, that value is passed as the keyword
+      parameter "stretch", to both gate and gateduration, (i.e., uniformly all gates are
+      given the same stretch factor, and the API exposed to the Jaqal code is not
+      modified in any way, only the behavior).
+    :param evotype: What kind of object pyGSTi simulates (e.g., density matrix or state
+      vector).  See pyGSTi documentation for details.
 
     :return tuple: of pyGSTi local noise model and dictionary (of duration functions)
     """
@@ -253,7 +267,13 @@ def build_noisy_native_model(
     availability = {}
     dummy_unitaries = {}
 
-    if stretched_gates not in (None, "add"):
+    do_stretch = lambda x: x
+    if stretched_gates is None:
+        patterns = ("{}",)
+    elif stretched_gates == "add":
+        patterns = ("{}", "{}_stretched")
+    else:
+        patterns = ("{}",)
 
         def do_stretch(unstretched):
             return lambda *args: unstretched(*args, stretch=stretched_gates)
@@ -265,36 +285,28 @@ def build_noisy_native_model(
         gate_qubit_count = len(jaqal_gate.quantum_parameters)
         dummy_unitary = DummyUnitaryGate(gate_qubit_count)
 
-        if stretched_gates == "add":
-            stretched_pygsti_name = f"{pygsti_name}_stretched"
-            stretched_name = f"{name}_stretched"
-            durations[stretched_name] = dur
-            gates[stretched_pygsti_name] = pygsti_independent_noisy_gate(
-                jaqal_gates[stretched_name], func
+        func = do_stretch(func)
+        dur = do_stretch(dur)
+
+        for pattern in patterns:
+            pygsti_name_spec = pattern.format(pygsti_name)
+            name_spec = pattern.format(name)
+            jaqal_gate_spec = jaqal_gates[name]
+
+            durations[name_spec] = dur
+            # This calls the SAME FUNCTION for both ${NAME}_stretched and
+            # ${NAME} .  CONVENTION (and the definition of ${NAME}_stretched
+            # in jaqal_gates) determines what the additional parameters are.
+            gates[pygsti_name_spec] = pygsti_independent_noisy_gate(
+                jaqal_gates[name_spec], func
             )
+
             if gate_qubit_count > 1:
-                availability[stretched_pygsti_name] = "all-permutations"
+                availability[pygsti_name_spec] = "all-permutations"
             else:
-                availability[stretched_pygsti_name] = [
-                    (sslbl,) for sslbl in range(n_qubits)
-                ]
+                availability[pygsti_name_spec] = [(sslbl,) for sslbl in range(n_qubits)]
 
-            dummy_unitaries[stretched_pygsti_name] = dummy_unitary(None)
-        elif stretched_gates == None:
-            pass
-        else:
-            func = do_stretch(func)
-            dur = do_stretch(dur)
-
-        durations[name] = dur
-        gates[pygsti_name] = pygsti_independent_noisy_gate(jaqal_gate, func)
-
-        if gate_qubit_count > 1:
-            availability[pygsti_name] = "all-permutations"
-        else:
-            availability[pygsti_name] = [(sslbl,) for sslbl in range(n_qubits)]
-
-        dummy_unitaries[pygsti_name] = dummy_unitary(None)
+            dummy_unitaries[pygsti_name_spec] = dummy_unitary(None)
 
     gates["Gidle"] = JaqalOpFactory(idle_model)
     availability["Gidle"] = [(sslbl,) for sslbl in range(n_qubits)]
