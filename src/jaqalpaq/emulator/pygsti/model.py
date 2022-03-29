@@ -273,6 +273,9 @@ def build_noisy_native_model(
     elif stretched_gates == "add":
         patterns = ("{}", "{}_stretched")
     else:
+        if (float(stretched_gates) != stretched_gates) or (stretched_gates < 0):
+            raise JaqalError("stretched_gates should be a nonnegative real number.")
+
         patterns = ("{}",)
 
         def do_stretch(unstretched):
