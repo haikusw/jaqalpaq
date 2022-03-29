@@ -127,6 +127,14 @@ class ExtensibleBackend(AbstractBackend):
         return newops
 
     def collect_gate_models(self):
+        """Return a dictionary of tuples of gate models and gate durations.
+
+        This combs through the class's definition for all parameters named gate_*, and
+          adds a corresponding entry in the returned dictionary, keyed by the associated
+          gate name, of the gate model (i.e., the noisy process model) and the duration
+          that the gate operates.
+        : return dict: A dictionary of the models of the gates
+        """
         gate_models = {}
 
         for gate_name in type(self).__dict__:
