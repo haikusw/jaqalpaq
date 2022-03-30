@@ -48,9 +48,12 @@ def receive_response():
         events = select.select([sock], [], [sock], polling_timeout)
         if any(events):
             packet = sock.recv(block_size)
-            resp_list.append(packet.decode())
-            started = True
-        elif started:
+            if packet:
+                resp_list.append(packet.decode())
+                started = True
+                continue
+
+        if started:
             break
     resp_text = "".join(resp_list)
 
