@@ -55,6 +55,7 @@ Unified Tests:
       JAQALPAQ_OPTS="pygsti-integration,tests"
       ./jaqalpaq/install.sh
     - cd jaqalpaq
+    - rm -f /tmp/ipc_test
     - pytest
 
 Notebooks:
