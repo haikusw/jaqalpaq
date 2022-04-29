@@ -166,9 +166,13 @@ def parse_jaqal_string_header(jaqal, return_usepulses=False):
 
     """
 
-    sexpr, usepulses = parse_to_sexpression(
+    res_tuple = parse_to_sexpression(
         jaqal, return_usepulses=return_usepulses, header_only=True
     )
+    if return_usepulses:
+        sexpr, usepulses = res_tuple
+    else:
+        sexpr, usepulses = res_tuple, None
     circuit = build(sexpr)
 
     if return_usepulses:

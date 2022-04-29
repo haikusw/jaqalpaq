@@ -15,6 +15,7 @@ from jaqalpaq.core import (
 )
 from jaqalpaq.core.branch import BranchStatement, CaseStatement
 from jaqalpaq.parser import parse_jaqal_string, JaqalParseError
+from jaqalpaq.parser.parser import parse_jaqal_string_header
 from jaqalpaq.parser.identifier import Identifier
 from jaqalpaq.error import JaqalError
 
@@ -401,6 +402,25 @@ class ParserTester(TestCase):
             self.run_test(text, exp_result)
         finally:
             jaqalpaq.core.branch.USE_EXPERIMENTAL_BRANCH = False
+
+    def test_parse_header_only(self):
+        """Test parsing only the header of a jaqal string."""
+        text = "let x 5\nG 1"
+        exp_result = self.make_circuit(
+            gates=[], constants={"x": self.make_constant("x", 5)}
+        )
+        act_result, _ = parse_jaqal_string_header(text, return_usepulses=True)
+        self.assertEqual(exp_result, act_result)
+
+    def test_parse_header_only_no_usepulses(self):
+        """Test parsing only the header of a jaqal string without returning
+        the usepulses."""
+        text = "let x 5\nG 1"
+        exp_result = self.make_circuit(
+            gates=[], constants={"x": self.make_constant("x", 5)}
+        )
+        act_result = parse_jaqal_string_header(text)
+        self.assertEqual(exp_result, act_result)
 
     ##
     # Helper methods
