@@ -1,0 +1,30 @@
+#!/bin/bash
+set -ex
+HIVE="$(readlink -f "$(dirname "$0")/../..")"
+
+PACKAGES=(jaqalpaq jaqalpaq-extras jaqalpaw qscout-gatemodels)
+tmp="/tmp/build-jaqal"
+mkdir -p "$tmp"
+
+broadcast() {
+    for i in "${PACKAGES[@]}" ; do
+        cd "${HIVE}/$i"
+        "$@"
+    done
+}
+
+build() {
+    loc="${tmp}/$(basename "$PWD")"
+    mkdir -p "${tmp}/dist"
+    mkdir "$loc"
+    git archive HEAD | tar -xC "$loc"
+    cd "$loc"
+    python3 -m build "$@"
+    mv -t "${tmp}/dist" dist/*
+}
+
+if [ -n "$*" ] ; then
+    "$@"
+else
+    broadcast build
+fi
