@@ -38,10 +38,18 @@ Windows users are encouraged to install under WSL2.  You may also consider
 installation.
 
 We also recommend having a functional C compiler and Python headers installed.
-Check for headers by running
+Depending on your Python version and platform, this may be entirely
+unneccessary.  You can confirm the presence of these headers by running
 
 ```bash
 python3-config --includes
+```
+
+When properly configured, this will output a list of include directives that
+will be passed to your compiler, e.g.,
+
+```
+-I/usr/include/python3.6m
 ```
 
 On apt-based systems, these dependencies can be installed by running (as root)
@@ -126,20 +134,7 @@ jupyter kernelspec remove pip-jaqal
 > **NOTE**: Unlike every other command, this must be performed from the
 > environment in which Jupyter is installed, and NOT the JaqalPaq environment.
 
-### Step 2: (recommended) Emulator pre-dependencies
-
-JaqalPaq includes an emulator that can provide measurement probabilities for
-any native gate set.  This capability requires
-[pyGSTi](https://www.pygsti.info/), which pre-depends on Cython and numpy:
-
-```bash
-pip install Cython numpy
-```
-
-> **NOTE**: pyGSTi will produce warnings if you do not have Python development
-> headers installed as recommended in Step 0.
-
-### Step 3: Install JaqalPaq
+### Step 2: Install JaqalPaq and friends
 
 JaqalPaq packages are provided with [pip](https://pip.pypa.io/en/stable/).
 
