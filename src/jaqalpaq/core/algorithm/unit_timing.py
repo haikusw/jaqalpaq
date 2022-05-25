@@ -8,7 +8,8 @@ from itertools import zip_longest
 
 from jaqalpaq.error import JaqalError
 from jaqalpaq.core.algorithm.visitor import Visitor
-import jaqalpaq.core as core
+from jaqalpaq.core.circuit import Circuit
+from jaqalpaq.core.block import BlockStatement, LoopStatement
 
 
 def normalize_blocks_with_unitary_timing(circuit):
@@ -40,14 +41,14 @@ class BlockNormalizer(Visitor):
         """Return a new Circuit with the same metadata and normalized
         gates."""
 
-        new_circuit = core.circuit.Circuit(native_gates=circuit.native_gates)
+        new_circuit = Circuit(native_gates=circuit.native_gates)
         new_circuit.constants.update(circuit.constants)
         new_circuit.macros.update(circuit.macros)
         new_circuit.registers.update(circuit.registers)
         new_circuit.body.statements.extend(self.visit(circuit.body).statements)
         return new_circuit
 
-    def visit_BlockStatement(self, obj: core.BlockStatement):
+    def visit_BlockStatement(self, obj: BlockStatement):
         """Normalize a block by first normalizing every statement or block
         inside it, If this is a parallel block, it is converted to a
         serial block with one or more serial blocks. If it is a serial
@@ -64,13 +65,11 @@ class BlockNormalizer(Visitor):
                 if len(parallel_chunk) == 1:
                     (block,) = parallel_chunk
                 else:
-                    block = core.BlockStatement(
-                        parallel=True, statements=parallel_chunk
-                    )
+                    block = BlockStatement(parallel=True, statements=parallel_chunk)
                 new_statements.append(block)
         else:
             new_statements = list(self.iter_unroll_blocks(visited_statements))
-        new_block = core.BlockStatement(statements=new_statements)
+        new_block = BlockStatement(statements=new_statements)
         return new_block
 
     def iter_chunk_blocks(self, statements):
@@ -82,12 +81,12 @@ class BlockNormalizer(Visitor):
             non_none = list(filter(lambda x: x is not None, ch))
             chunk = []
             for stmt in non_none:
-                if isinstance(stmt, core.BlockStatement):
+                if isinstance(stmt, BlockStatement):
                     assert stmt.parallel, "Normalization Failed"
                     chunk.extend(stmt.statements)
                 else:
                     chunk.append(stmt)
-                if isinstance(stmt, core.LoopStatement):
+                if isinstance(stmt, LoopStatement):
                     raise JaqalError(
                         "A Loop is embedded somewhere within a parallel block. This is legal Jaqal, but cannot be handled here. Unroll loops first."
                     )

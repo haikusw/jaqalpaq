@@ -7,7 +7,12 @@ from typing import Dict
 
 from jaqalpaq.error import JaqalError
 from jaqalpaq.core.algorithm.visitor import Visitor
-import jaqalpaq.core as core
+from jaqalpaq.core.circuit import Circuit
+from jaqalpaq.core.block import BlockStatement, LoopStatement
+from jaqalpaq.core.gatedef import GateStatement
+from jaqalpaq.core.macro import Macro
+from jaqalpaq.core.register import Register, NamedQubit
+from jaqalpaq.core.parameter import AnnotatedValue, Parameter
 
 
 def expand_macros(circuit, preserve_definitions=False):
@@ -41,7 +46,7 @@ class MacroExpander(Visitor):
         gates."""
 
         self.macros = circuit.macros
-        new_circuit = core.circuit.Circuit(native_gates=circuit.native_gates)
+        new_circuit = Circuit(native_gates=circuit.native_gates)
         if self.preserve_definitions:
             new_circuit.macros.update(circuit.macros)
         new_circuit.constants.update(circuit.constants)
@@ -50,20 +55,20 @@ class MacroExpander(Visitor):
         return new_circuit
 
     def visit_LoopStatement(self, loop):
-        return core.LoopStatement(loop.iterations, self.visit(loop.statements))
+        return LoopStatement(loop.iterations, self.visit(loop.statements))
 
     def visit_BlockStatement(self, block):
         new_statements = []
         for stmt in block.statements:
             new_stmt = self.visit(stmt)
             if (
-                isinstance(new_stmt, core.BlockStatement)
+                isinstance(new_stmt, BlockStatement)
                 and new_stmt.parallel == block.parallel
             ):
                 new_statements.extend(new_stmt.statements)
             else:
                 new_statements.append(new_stmt)
-        return core.BlockStatement(parallel=block.parallel, statements=new_statements)
+        return BlockStatement(parallel=block.parallel, statements=new_statements)
 
     def visit_GateStatement(self, gate):
         return replace_gate(gate, self.macros)
@@ -85,9 +90,7 @@ def replace_gate(gate, macros):
 
 
 class GateReplacer(Visitor):
-    def __init__(
-        self, arguments: Dict[str, core.AnnotatedValue], macros: Dict[str, core.Macro]
-    ):
+    def __init__(self, arguments: Dict[str, AnnotatedValue], macros: Dict[str, Macro]):
         self.arguments = arguments
         self.macros = macros
         self.parameters = None
@@ -95,30 +98,30 @@ class GateReplacer(Visitor):
     def visit_default(self, obj):
         return obj
 
-    def visit_Macro(self, macro: core.Macro):
+    def visit_Macro(self, macro: Macro):
         self.parameters = macro.parameters
         return self.visit(macro.body)
 
-    def visit_BlockStatement(self, block: core.BlockStatement):
-        return core.BlockStatement(
+    def visit_BlockStatement(self, block: BlockStatement):
+        return BlockStatement(
             parallel=block.parallel,
             statements=[self.visit(stmt) for stmt in block.statements],
         )
 
-    def visit_LoopStatement(self, loop: core.LoopStatement):
-        return core.LoopStatement(
+    def visit_LoopStatement(self, loop: LoopStatement):
+        return LoopStatement(
             iterations=self.visit(loop.iterations),
             statements=self.visit(loop.statements),
         )
 
-    def visit_GateStatement(self, gate: core.GateStatement):
+    def visit_GateStatement(self, gate: GateStatement):
         new_parameters = {
             name: self.visit(param) for name, param in gate.parameters.items()
         }
-        new_gate = core.GateStatement(gate.gate_def, new_parameters)
+        new_gate = GateStatement(gate.gate_def, new_parameters)
         return replace_gate(new_gate, self.macros)
 
-    def visit_Parameter(self, param: core.Parameter):
+    def visit_Parameter(self, param: Parameter):
         if param.name in self.arguments:
             arg = self.arguments[param.name]
             # This check will basically always pass as Jaqal has no
@@ -128,7 +131,7 @@ class GateReplacer(Visitor):
         else:
             return param
 
-    def visit_NamedQubit(self, qubit: core.NamedQubit):
+    def visit_NamedQubit(self, qubit: NamedQubit):
         """This happens when the user indexes a qubit register."""
         alias_from = self.visit(qubit.alias_from)
         alias_index = filter_float(self.visit(qubit.alias_index))

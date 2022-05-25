@@ -5,7 +5,9 @@
 
 from jaqalpaq.error import JaqalError
 from jaqalpaq.core.algorithm.visitor import Visitor
-import jaqalpaq.core as core
+from jaqalpaq.core import circuitbuilder
+from jaqalpaq.core.register import Register, NamedQubit
+from jaqalpaq.core.constant import Constant
 
 
 def fill_in_let(circuit, override_dict=None):
@@ -55,7 +57,7 @@ class LetFiller(Visitor):
             *statements,
         ]
         inject_pulses = circuit.native_gates or None
-        return core.circuitbuilder.build(sexpr, inject_pulses=inject_pulses)
+        return circuitbuilder.build(sexpr, inject_pulses=inject_pulses)
 
     def visit_BlockStatement(self, block):
         if block.parallel:
@@ -92,7 +94,7 @@ class LetFiller(Visitor):
     def visit_NamedQubit(self, qubit):
         """Visit a named qubit that may possibly have its index
         remapped. Doing so will change the name of the qubit."""
-        if isinstance(qubit.alias_index, core.Constant):
+        if isinstance(qubit.alias_index, Constant):
             new_index = self.resolve_constant(qubit.alias_index)
             new_from = self.visit(qubit.alias_from)
             return new_from[new_index]
@@ -103,7 +105,7 @@ class LetFiller(Visitor):
         """Visit either a fundamental register or a map alias. Either may
         contain lurking let constants."""
         if reg.fundamental:
-            if isinstance(reg.size, core.Constant):
+            if isinstance(reg.size, Constant):
                 new_size = self.resolve_constant(reg.size)
                 return ["register", reg.name, new_size]
             else:
@@ -118,7 +120,7 @@ class LetFiller(Visitor):
                     self.visit(reg.alias_slice.stop),
                     self.visit(reg.alias_slice.step),
                 )
-            return core.Register(
+            return Register(
                 reg.name, alias_from=new_alias_from, alias_slice=new_alias_slice
             )
 
@@ -162,9 +164,9 @@ class RegisterVisitor(LetFiller):
     def visit_NamedQubit(self, qubit):
         """Visit a named qubit that may possibly have its index
         remapped. Doing so will change the name of the qubit."""
-        if isinstance(qubit.alias_index, core.Constant):
+        if isinstance(qubit.alias_index, Constant):
             new_index = self.resolve_constant(qubit.alias_index)
             new_from = self.visit(qubit.alias_from)
-            return core.NamedQubit(qubit.name, new_from, new_index)
+            return NamedQubit(qubit.name, new_from, new_index)
         else:
             return qubit

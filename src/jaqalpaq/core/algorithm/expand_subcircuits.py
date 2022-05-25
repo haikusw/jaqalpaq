@@ -1,7 +1,9 @@
 """Expand all subcircuits in place in a Circuit."""
 
-import jaqalpaq.core as core
 from jaqalpaq.core.algorithm.visitor import Visitor
+from jaqalpaq.core.circuit import Circuit
+from jaqalpaq.core.block import BlockStatement, LoopStatement
+from jaqalpaq.core.gatedef import GateDefinition
 
 
 def expand_subcircuits(circuit, prepare_def=None, measure_def=None):
@@ -46,7 +48,7 @@ def _choose_bounding_gate(user_def, default_name, circuit):
     except KeyError:
         pass
 
-    return core.GateDefinition(name)
+    return GateDefinition(name)
 
 
 class SubcircuitExpander(Visitor):
@@ -59,7 +61,7 @@ class SubcircuitExpander(Visitor):
         return obj
 
     def visit_Circuit(self, circuit):
-        new_circuit = core.circuit.Circuit(native_gates=circuit.native_gates)
+        new_circuit = Circuit(native_gates=circuit.native_gates)
         new_circuit.macros.update(circuit.macros)
         new_circuit.constants.update(circuit.constants)
         new_circuit.registers.update(circuit.registers)
@@ -67,7 +69,7 @@ class SubcircuitExpander(Visitor):
         return new_circuit
 
     def visit_LoopStatement(self, loop):
-        return core.LoopStatement(loop.iterations, self.visit(loop.statements))
+        return LoopStatement(loop.iterations, self.visit(loop.statements))
 
     def visit_BlockStatement(self, block):
         if block.subcircuit:
@@ -81,8 +83,8 @@ class SubcircuitExpander(Visitor):
             *(self.visit(stmt) for stmt in block.statements),
             self.measure_def(),
         ]
-        return core.BlockStatement(parallel=block.parallel, statements=statements)
+        return BlockStatement(parallel=block.parallel, statements=statements)
 
     def process_non_subcircuit_block(self, block):
         statements = [self.visit(stmt) for stmt in block.statements]
-        return core.BlockStatement(parallel=block.parallel, statements=statements)
+        return BlockStatement(parallel=block.parallel, statements=statements)

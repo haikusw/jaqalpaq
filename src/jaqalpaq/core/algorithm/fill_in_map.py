@@ -5,7 +5,7 @@
 
 from jaqalpaq.error import JaqalError
 from jaqalpaq.core.algorithm.visitor import Visitor
-import jaqalpaq.core as core
+from jaqalpaq.core import circuitbuilder
 
 
 def fill_in_map(circuit):
@@ -52,7 +52,7 @@ class MapFiller(Visitor):
             *statements,
         ]
         inject_pulses = circuit.native_gates or None
-        return core.circuitbuilder.build(sexpr, inject_pulses=inject_pulses)
+        return circuitbuilder.build(sexpr, inject_pulses=inject_pulses)
 
     def visit_BlockStatement(self, block):
         if block.parallel:
