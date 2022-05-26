@@ -11,17 +11,55 @@ touch $tmpfile
 line="$(grep -nF '[options.data_files]' setup.cfg | awk -F: '{print $1}')"
 rest="$(tail -n +"$line" setup.cfg | tr -d '\r'|grep -n '^$'|head -n1|awk -F: '{print $1}')"
 
+sharepath="$(basename "$PWD")"
+case "$sharepath" in
+    jaqalpaq|jaqalpaq-extras)
+      sharepath="share/jaqalpaq"
+        ;;
+    qscout-gatemodels|qscout-gatemodels-ionsim|jaqalpaw)
+      sharepath="share/${sharepath}"
+        ;;
+    *)
+      echo "Unknown package"
+      exit 1
+        ;;
+esac
+
 head -n "$line" setup.cfg >"$tmpfile"
+
+search_dirs=()
+[ -d tests ] && search_dirs+=(tests)
+[ -d examples ] && search_dirs+=(examples)
+[ -d contrib ] && search_dirs+=(contrib)
+
 prevpath=""
-find examples tests \( -type d -name '__pycache__' -prune \) -o -type f -exec bash -c 'prefix=${0%/*} ; echo "${#prefix},${0}"' {} \; | sort -fn | cut -d , -f 2- | while read -r line ; do
-    thepath="${line%/*}"
-    if [ "$thepath" != "$prevpath" ] ; then
-        echo "share/jaqalpaq/$thepath =" >>"$tmpfile"
-        prevpath="$thepath"
+find "${search_dirs[@]}" \( -type d \( -name '__pycache__' -o -name ".pytest_cache" -o -name ".ipynb_checkpoints" \) -prune \) -o -type f -print |
+    while read -r unsortedline ; do # This could be improved significantly.  We're trying to group by directory
+        prefix="${unsortedline%/*}"
+        printf "%s\n" "${#prefix},${unsortedline}"
+    done | sort -fn | cut -d, -f 2- |
+while read -r line ; do
+    if [ "$line" = "tests/__init__.py" ] ; then
+        [ "$(basename "$PWD")" = "jaqalpaq-extras" ] && continue
+    fi
+    srcpath="${line%/*}"
+    if [ "$srcpath" != "$prevpath" ] ; then
+        prevpath="$srcpath"
+        case "${srcpath%%/*}" in
+            examples|tests)
+                echo "$sharepath/$srcpath =" >>"$tmpfile"
+                ;;
+            contrib)
+                echo "share${srcpath##contrib} =" >>"$tmpfile"
+                ;;
+        esac
     fi
     echo "    ${line}" >>"$tmpfile"
 done
-tail -n +$((line + rest-1)) setup.cfg | tail -n "${rest}" >>"$tmpfile"
+
+if [ -n "$rest" ] ; then
+    tail -n +$((line + rest-1)) setup.cfg | tail -n "${rest}" >>"$tmpfile"
+fi
 
 if [ -z "$1" ] ; then
     mv "${tmpfile}" setup.cfg
