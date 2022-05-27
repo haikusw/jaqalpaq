@@ -2,8 +2,10 @@ image: python:3.7
 
 variables:
   TEST_REPRODUCE: $TEST_REPRODUCE
+  RELEASE: $RELEASE
   QSCOUT_BRANCH: $QSCOUT_BRANCH
   JAQALPAQ_EXTRAS_BRANCH: $JAQALPAQ_EXTRAS_BRANCH
+  JAQALPAW_BRANCH: $JAQALPAW_BRANCH
   PYGSTI_COMMIT: $PYGSTI_COMMIT
 
 before_script:
@@ -36,6 +38,7 @@ before_script:
 stages:
   - Analysis and Tests
   - Reproducibility
+  - Release
 
 Unified Tests:
   stage: Analysis and Tests
@@ -95,4 +98,35 @@ Notebooks:
     when: always
     paths:
       - executed-notebooks.tar
+    expire_in: 1 week
+
+Packaging:
+  stage: Release
+  only:
+    variables:
+      - $RELEASE == "1"
+  script:
+    - git fetch origin master
+    - cd ..
+    - rm -fr qscout-gatemodels && git clone --depth 1 "$(echo "${CI_REPOSITORY_URL}" | sed 's/jaqalpaq.git/qscout-gatemodels.git/')" -b "${QSCOUT_BRANCH}"
+    - rm -fr jaqalpaq-extras && git clone --depth 1 "$(echo "${CI_REPOSITORY_URL}" | sed 's/jaqalpaq.git/jaqalpaq-extras.git/')" -b "${JAQALPAQ_EXTRAS_BRANCH}"
+    - rm -fr jaqalpaw && git clone --depth 1 "$(echo "${CI_REPOSITORY_URL}" | sed 's/jaqalpaq.git/jaqalpaw.git/')" -b "${JAQALPAW_BRANCH}"
+    - rm -fr /tmp/build-jaqal
+    - pip install build
+    - jaqalpaq/devel/build
+    - rm -f jaqalpaq/packages.tar
+    - tar -cf jaqalpaq/packages.tar -C /tmp/build-jaqal dist
+    - rm -fr /tmp/jaqal-test-venv
+    - python3 -m venv /tmp/jaqal-test-venv
+    - source /tmp/jaqal-test-venv/bin/activate
+    - cd /tmp/build-jaqal/dist
+    - pip install $(echo ./JaqalPaq-*.whl)'[pygsti-integration]' ./JaqalPaq_extras-*.whl $(echo ./JaqalPaw-*.whl)'[tests]' ./QSCOUT_gatemodels-*.whl
+    - cd /tmp/jaqal-test-venv/share/jaqalpaq && pytest .
+    - cd /tmp/jaqal-test-venv/share/jaqalpaw && pytest .
+    - cd /tmp/jaqal-test-venv/share/qscout-gatemodels && pytest .
+    - rm -fr /tmp/jaqal-test-venv
+  artifacts:
+    when: always
+    paths:
+      - packages.tar
     expire_in: 1 week
