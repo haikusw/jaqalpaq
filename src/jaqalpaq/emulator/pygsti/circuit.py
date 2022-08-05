@@ -84,21 +84,32 @@ class pyGSTiCircuitGeneratingVisitor(UsedQubitIndicesVisitor):
         super().__init__(**kwargs)
 
     def idle_gate(self, indices, duration, parallel=None):
-        labels = self.labels(indices)
-        if len(labels) == 0:
+        if not indices:
             return parallel
+
+        (k,) = indices
 
         if parallel is None:
             ops = []
         else:
             ops = [parallel]
 
-        for lbl in labels:
+        for lbl in indices[k]:
             ops.append(Label(("Gidle", lbl, ";", duration)))
 
         return Label(ops)
 
     def visit_Circuit(self, obj, context=None):
+        if len(obj.registers) > 1:
+            raise NotImplementedError("Multiple fundamental registers unsupported.")
+        (k,) = obj.registers
+        try:
+            self.llbls
+        except AttributeError:
+            pass
+        else:
+            raise JaqalError("Cannot reuse pyGSTiGeneratingVisitor")
+        self.llbls = list(range(len(obj.registers[k])))
         op, indices, duration = super().visit_Circuit(obj, context=context)
         return Circuit(() if op is None else (op,), line_labels=self.llbls)
 
@@ -115,10 +126,7 @@ class pyGSTiCircuitGeneratingVisitor(UsedQubitIndicesVisitor):
     def visit_BlockStatement(self, obj, context=None):
         visitor = UsedQubitIndicesVisitor(trace=self.trace)
         visitor.all_qubits = self.all_qubits
-        try:
-            llbls = self.llbls
-        except AttributeError:
-            llbls = self.llbls = self.labels(self.all_qubits)
+        llbls = self.llbls
 
         indices = visitor.visit(obj, context=context)
 
@@ -170,15 +178,6 @@ class pyGSTiCircuitGeneratingVisitor(UsedQubitIndicesVisitor):
                 return (None, indices, 0)
 
             return (CircuitLabel("", ops, llbls), indices, duration)
-
-    def labels(self, indices):
-        if not indices:
-            return []
-
-        if len(indices) > 1:
-            raise NotImplementedError("Multiple fundamental registers unsupported.")
-        (k,) = indices
-        return list(range(len(indices[k])))
 
     def visit_GateStatement(self, obj, context=None):
         # Note: The code originally checked if a gate was a native gate, macro, or neither,
