@@ -494,3 +494,64 @@ loop 2 {
 
         (rz_dur,) = pc[4][1].args
         self.assertAlmostEqual(rz_dur, 0)
+
+    def test_idle_padding(self):
+        with open(example("idle_padding.jaqal"), "r") as f:
+            content = f.read()
+
+        from jaqalpaq.emulator.pygsti import backends
+
+        orig_KPO = backends.KEEP_PYGSTI_OBJECTS
+        backends.KEEP_PYGSTI_OBJECTS = True
+
+        try:
+            circ = jaqalpaq.parser.parse_jaqal_string(content)
+
+            backend = SNLToy1(3, rotation_error=0, depolarization=0.1)
+            exe_res = run_jaqal_circuit(circ, backend=backend)
+            sc = exe_res.subcircuits[0]
+
+            probs = sc.probability_by_int
+            self.assertAlmostEqual(probs[0], 0.48055181)
+            self.assertAlmostEqual(probs[1], 0.16081769)
+            self.assertAlmostEqual(probs[2], 0.23973497)
+            self.assertAlmostEqual(probs[3], 0.08022782)
+            self.assertAlmostEqual(probs[4], 0.01932925)
+            self.assertAlmostEqual(probs[5], 0.00646858)
+            self.assertAlmostEqual(probs[6], 0.00964287)
+            self.assertAlmostEqual(probs[7], 0.00322701)
+
+            pc = sc._pygsti_circuit
+            # This checks that there are two "layers" of pygsti gates.
+            self.assertEqual(len(pc), 2)
+
+            # This checks that the first layer has three gates:
+            self.assertEqual(len(pc[0]), 3)
+
+            ref = {0: "GJRx", 1: "GJRx", 2: "Gidle"}
+            # an Rx applied to qubit 0;
+            # an Rx applied to qubit 1;
+            # and an idle applied to qubit 2.
+
+            # But, the order of the gates in this layer is irrelevant:
+            dkt = {}
+            for op in pc[0]:
+                (qubit,) = op.qubits
+                assert qubit not in dkt
+                dkt[qubit] = op.name
+                # Special case: store the argument to the idle
+                if qubit == 2:
+                    args = op.args
+
+            self.assertEqual(dkt, ref)
+            self.assertEqual(args, (0.7639437268410976,))
+
+            # This checks that the second layer has a single gate:
+            self.assertEqual(len(pc[1]), 1)
+
+            self.assertEqual(pc[1][0].name, "Gidle")
+            self.assertEqual(pc[1][0].qubits, (0,))
+            self.assertEqual(pc[1][0].args, (0.1273239544735162,))
+            # an idle applied to qubit 0.
+        finally:
+            backends.KEEP_PYGSTI_OBJECTS = orig_KPO
