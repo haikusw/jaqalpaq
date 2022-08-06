@@ -480,9 +480,7 @@ loop 2 {
 
         backend = SNLToy1(3, stretched_gates="add")
 
-        pc = pygsti_circuit_from_circuit(
-            jc, durations=backend.gate_durations, n_qubits=3
-        )
+        pc = pygsti_circuit_from_circuit(jc, durations=backend.gate_durations)
 
         (rx_dur,) = pc[0][1].args
         (rx_stretched_dur,) = pc[1][1].args

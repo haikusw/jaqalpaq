@@ -14,7 +14,7 @@ from jaqalpaq.core.gatedef import IdleGateDefinition
 from jaqalpaq.core.algorithm.used_qubit_visitor import UsedQubitIndicesVisitor
 
 
-def pygsti_label_from_statement(gate, n_qubits):
+def pygsti_label_from_statement(gate):
     """Generate a pyGSTi label appropriate for a Jaqal gate
 
     :param gate: A Jaqal gate object
@@ -34,7 +34,7 @@ def pygsti_label_from_statement(gate, n_qubits):
                 args.append(param)
         else:
             # quantum argument: a qubit
-            args.append(n_qubits - param.alias_index - 1)
+            args.append(param.alias_index)
     return Label(args)
 
 
@@ -63,7 +63,7 @@ def pygsti_circuit_from_gatelist(gates, n_qubits):
             else:
                 assert False, "You can't end a circuit twice!"
         else:
-            label = pygsti_label_from_statement(gate, n_qubits)
+            label = pygsti_label_from_statement(gate)
             if label is not None:
                 lst.append(label)
 
@@ -78,9 +78,8 @@ def pygsti_circuit_from_circuit(circuit, **kwargs):
 class pyGSTiCircuitGeneratingVisitor(UsedQubitIndicesVisitor):
     validate_parallel = True
 
-    def __init__(self, *args, durations=None, n_qubits=None, **kwargs):
+    def __init__(self, *args, durations=None, **kwargs):
         self.durations = durations
-        self.n_qubits = n_qubits
         super().__init__(**kwargs)
 
     def idle_gate(self, indices, duration, parallel=None):
@@ -196,7 +195,7 @@ class pyGSTiCircuitGeneratingVisitor(UsedQubitIndicesVisitor):
                 # Special case handling of prepare/measure
                 return (None, indices, 0)
 
-            label = pygsti_label_from_statement(obj, self.n_qubits)
+            label = pygsti_label_from_statement(obj)
             for param in obj.used_qubits:
                 if param is all:
                     self.merge_into(indices, self.all_qubits)

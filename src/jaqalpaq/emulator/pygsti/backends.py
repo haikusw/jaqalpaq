@@ -28,9 +28,6 @@ class pyGSTiSubcircuit(ProbabilisticSubcircuit, ReadoutSubcircuit):
 
     Additionally, you can also store the pyGSTi "circuit" and "model" objects used for
     the simulation by setting KEEP_PYGSTI_OBJECTS = True.
-
-    WARNING: THE ORDER OF QUBITS IN THE PYGSTI CIRCUIT AND MODEL OBJECTS IS REVERSED
-        RELATIVE TO JAQALPAQ CONVENTION!
     """
 
     _pygsti_circuit = None
@@ -63,11 +60,8 @@ class CircuitEmulator(IndependentSubcircuitsBackend):
         :return: A pyGSTi outcome dictionary.
         """
 
-        circ = job.circuit
-        n_qubits = self.get_n_qubits(circ)
-
         pc = pygsti_circuit_from_circuit(
-            circ, trace=trace, durations=self.gate_durations, n_qubits=n_qubits
+            job.circuit, trace=trace, durations=self.gate_durations
         )
 
         model = self.model
@@ -76,7 +70,7 @@ class CircuitEmulator(IndependentSubcircuitsBackend):
 
         probs = zeros(len(prob_dict), dtype=float)
         for k, v in prob_dict.items():
-            probs[int(k, 2)] = v
+            probs[int(k[::-1], 2)] = v
 
         return pyGSTiSubcircuit(
             trace,
