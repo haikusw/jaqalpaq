@@ -14,6 +14,10 @@ from jaqalpaq.emulator.backend import IndependentSubcircuitsBackend, ExtensibleB
 from .circuit import pygsti_circuit_from_circuit
 from .model import build_noisy_native_model
 
+# Set this to True if you would like Subcircuit objects to retain the pyGSTi objects
+# used to generate probabilities during their emulation.
+KEEP_PYGSTI_OBJECTS = False
+
 
 class pyGSTiSubcircuit(ProbabilisticSubcircuit, ReadoutSubcircuit):
     """Encapsulate one part of the circuit between a prepare_all and measure_all gate.
@@ -23,13 +27,11 @@ class pyGSTiSubcircuit(ProbabilisticSubcircuit, ReadoutSubcircuit):
     probabilities, and the ideal density matrix.
 
     Additionally, you can also store the pyGSTi "circuit" and "model" objects used for
-    the simulation by setting pyGSTiSubcircuit.KEEP_PYGSTI_OBJECTS = True.
+    the simulation by setting KEEP_PYGSTI_OBJECTS = True.
 
     WARNING: THE ORDER OF QUBITS IN THE PYGSTI CIRCUIT AND MODEL OBJECTS IS REVERSED
         RELATIVE TO JAQALPAQ CONVENTION!
     """
-
-    KEEP_PYGSTI_OBJECTS = False
 
     _pygsti_circuit = None
     _pygsti_model = None
@@ -38,7 +40,7 @@ class pyGSTiSubcircuit(ProbabilisticSubcircuit, ReadoutSubcircuit):
         super().__init__(*args, **kwargs)
         self._density_matrix = density_matrix
 
-        if self.KEEP_PYGSTI_OBJECTS:
+        if KEEP_PYGSTI_OBJECTS:
             self._pygsti_circuit = pyGSTi_circuit
             self._pygsti_model = pyGSTi_model
 
