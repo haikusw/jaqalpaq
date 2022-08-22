@@ -553,3 +553,21 @@ loop 2 {
             # an idle applied to qubit 0.
         finally:
             backends.KEEP_PYGSTI_OBJECTS = orig_KPO
+
+    def test_idle(self):
+        with open(example("only_idles.jaqal"), "r") as f:
+            content = f.read()
+
+        from jaqalpaq.emulator.pygsti import backends
+
+        circ = jaqalpaq.parser.parse_jaqal_string(content)
+
+        backend = SNLToy1(2, rotation_error=0, depolarization=0.1)
+        exe_res = run_jaqal_circuit(circ, backend=backend)
+        sc = exe_res.subcircuits[0]
+
+        probs = sc.probability_by_int
+        self.assertAlmostEqual(probs[0], 0.36710198608176264)
+        self.assertAlmostEqual(probs[1], 0.23878743128890134)
+        self.assertAlmostEqual(probs[2], 0.23878743128890134)
+        self.assertAlmostEqual(probs[3], 0.15532315134043467)
