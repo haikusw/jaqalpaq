@@ -1,0 +1,9 @@
+from qscout.v1.std usepulses *
+
+register q[2]
+
+prepare_all
+
+< I_Rx q[0] 20 >
+
+measure_all
