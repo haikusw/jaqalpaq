@@ -82,21 +82,14 @@ class pyGSTiCircuitGeneratingVisitor(UsedQubitIndicesVisitor):
         self.durations = durations
         super().__init__(**kwargs)
 
-    def idle_gate(self, indices, duration, parallel=None):
-        if not indices:
-            return parallel
+    def idle_gates(self, indices, duration):
+        if (duration == 0) or not indices:
+            return
 
         (k,) = indices
 
-        if parallel is None:
-            ops = []
-        else:
-            ops = [parallel]
-
         for lbl in indices[k]:
-            ops.append(Label(("Gidle", lbl, ";", duration)))
-
-        return Label(ops)
+            yield Label(("Gidle", lbl, ";", duration))
 
     def visit_Circuit(self, obj, context=None):
         if len(obj.registers) > 1:
@@ -145,14 +138,13 @@ class pyGSTiCircuitGeneratingVisitor(UsedQubitIndicesVisitor):
                 idle_dur = duration - sub_duration
 
                 if sub_op is None:
-                    if duration > 0:
-                        ops.append(self.idle_gate(sub_indices, duration))
+                    ops.extend(self.idle_gates(sub_indices, duration))
                 elif idle_dur <= 0:
                     ops.append(sub_op)
                 else:
                     ops.append(
                         CircuitLabel(
-                            "", (sub_op, self.idle_gate(sub_indices, idle_dur)), llbls
+                            "", (sub_op, *self.idle_gates(sub_indices, idle_dur)), llbls
                         )
                     )
 
@@ -162,7 +154,7 @@ class pyGSTiCircuitGeneratingVisitor(UsedQubitIndicesVisitor):
             duration = 0
             for n, sub_obj in self.trace_statements(obj.statements):
                 sub_op, sub_indices, sub_duration = self.visit(sub_obj, context=context)
-                if (sub_duration <= 0) and (sub_op is None):
+                if (sub_duration == 0) and (sub_op is None):
                     continue
 
                 duration += sub_duration
@@ -171,7 +163,9 @@ class pyGSTiCircuitGeneratingVisitor(UsedQubitIndicesVisitor):
                 for reg in list(inv_indices.keys()):
                     inv_indices[reg] = inv_indices[reg] - sub_indices[reg]
 
-                ops.append(self.idle_gate(inv_indices, sub_duration, parallel=sub_op))
+                if sub_op is not None:
+                    ops.append(sub_op)
+                ops.extend(self.idle_gates(inv_indices, sub_duration))
 
             if len(ops) == 0:
                 return (None, indices, 0)
