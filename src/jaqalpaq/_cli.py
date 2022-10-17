@@ -90,7 +90,7 @@ def main(argv=sys.argv[1:]):
         txt = sys.stdin.read()
 
     import numpy.random
-    from .emulator import run_jaqal_file, run_jaqal_circuit
+    from .run import run_jaqal_file, run_jaqal_circuit
     from .emulator._validator import validate_jaqal_string, generate_jaqal_validation
     from .parser import parse_jaqal_string
 
