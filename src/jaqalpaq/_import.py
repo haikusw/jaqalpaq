@@ -87,9 +87,8 @@ def jaqal_import(
     if module and reload_module:
         if full_reload:
             del sys.modules[mod_name]
-            for k in sys.modules.keys():
-                if k.startswith(f"{mod_name}."):
-                    del sys.modules[k]
+            for k in [k for k in sys.modules.keys() if k.startswith(f"{mod_name}.")]:
+                del sys.modules[k]
             module = None
         elif relative:
             module = None
