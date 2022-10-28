@@ -34,7 +34,9 @@ class UsepulsesTester(unittest.TestCase):
             return
 
         text = "from .gpf1 usepulses *"
-        jc = parse_jaqal_string(text, autoload_pulses=True, filename=__file__)
+        jc = parse_jaqal_string(
+            text, autoload_pulses=True, import_path=Path(__file__).parents[0]
+        )
         from gpf1 import jaqal_gates as ng1
 
         self.assertTrue(jc.native_gates["testgate"] is ng1.ALL_GATES["testgate"])
@@ -49,12 +51,14 @@ class UsepulsesTester(unittest.TestCase):
         """Test that usepulses correctly reloads pulses into NATIVE_GATES
         when referenced relatively"""
         text = "from .gpf1 usepulses *"
-        jc = parse_jaqal_string(text, autoload_pulses=True, filename=__file__)
+        jc = parse_jaqal_string(
+            text, autoload_pulses=True, import_path=Path(__file__).parents[0]
+        )
         self.assertTrue("testgate" in jc.native_gates)
         self.assertTrue("reloadedtestgate" not in jc.native_gates)
 
-        second = Path(__file__).parent / "reload" / "fake.jaqal"
-        jc2 = parse_jaqal_string(text, autoload_pulses=True, filename=str(second))
+        second = Path(__file__).parent / "reload"
+        jc2 = parse_jaqal_string(text, autoload_pulses=True, import_path=str(second))
         self.assertTrue("testgate" not in jc2.native_gates)
         self.assertTrue("reloadedtestgate" in jc2.native_gates)
 

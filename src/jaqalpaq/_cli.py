@@ -2,6 +2,7 @@
 # Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains
 # certain rights in this software.
 import sys, argparse, time
+from pathlib import Path
 
 
 def main(argv=sys.argv[1:]):
@@ -80,9 +81,11 @@ def main(argv=sys.argv[1:]):
     else:
         (ns.output,) = ns.output
 
+    import_path = None
     if ns.filename:
         with open(ns.filename, "r") as f:
             txt = f.read()
+        import_path = Path(ns.filename).parents[0]
     else:
         txt = sys.stdin.read()
 
@@ -101,7 +104,7 @@ def main(argv=sys.argv[1:]):
 
     if ns.validate:
         try:
-            v = validate_jaqal_string(txt)
+            v = validate_jaqal_string(txt, import_path=import_path)
         except Exception as ex:
             if ns.debug:
                 import pdb, traceback
@@ -122,7 +125,7 @@ def main(argv=sys.argv[1:]):
         return
 
     try:
-        circ = parse_jaqal_string(txt, autoload_pulses=True)
+        circ = parse_jaqal_string(txt, autoload_pulses=True, import_path=import_path)
     except Exception as ex:
         if ns.debug:
             import pdb, traceback

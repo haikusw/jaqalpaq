@@ -1,6 +1,7 @@
 # Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC (NTESS).
 # Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains
 # certain rights in this software.
+from pathlib import Path
 from .slyparse import JaqalLexer, JaqalParser, _monkeypatch_sly, HeaderParsingDone
 from jaqalpaq.core.algorithm import fill_in_let, expand_macros
 from jaqalpaq.core.algorithm.fill_in_map import fill_in_map
@@ -18,6 +19,7 @@ def parse_jaqal_file(
     return_usepulses=False,
     inject_pulses=None,
     autoload_pulses=True,
+    import_path=None,
 ):
     """Parse a file written in Jaqal into core types.
 
@@ -31,12 +33,16 @@ def parse_jaqal_file(
     :param bool return_usepulses: Whether to both add a second return value and populate it with the usepulses statement.
     :param inject_pulses: If given, use these pulses specifically.
     :param bool autoload_pulses: Whether to employ the usepulses statement for parsing.  Requires appropriate gate definitions.
+    :param str import_path: The path to be used for relative Jaqal imports. Defaults to the file's directory.
     :return: The circuit representation of the file and usepulses if
         requested. usepulses is stored in a dict under the key
         'usepulses'. It is itself a dict mapping :class:`Identifier`
         bjects to what the import, which may be the special symbol all.
 
     """
+    if import_path is None:
+        import_path = Path(filename).parents[0]
+
     with open(filename) as fd:
         return parse_jaqal_string(
             fd.read(),
@@ -47,7 +53,7 @@ def parse_jaqal_file(
             return_usepulses=return_usepulses,
             inject_pulses=inject_pulses,
             autoload_pulses=autoload_pulses,
-            filename=filename,
+            import_path=import_path,
         )
 
 
@@ -60,7 +66,7 @@ def parse_jaqal_string(
     return_usepulses=False,
     inject_pulses=None,
     autoload_pulses=True,
-    filename=None,
+    import_path=None,
 ):
     """Parse a string written in Jaqal into core types.
 
@@ -74,8 +80,7 @@ def parse_jaqal_string(
     :param bool return_usepulses: Whether to both add a second return value and populate it with the usepulses statement.
     :param inject_pulses: If given, use these pulses specifically.
     :param bool autoload_pulses: Whether to employ the usepulses statement for parsing.  Requires appropriate gate definitions.
-    :param str filename: The (effective) name of the Jaqal file, used for relative
-        imports.
+    :param str import_path: The path to be used for relative Jaqal imports. Defaults to the current working directory.
     :return: The circuit representation of the file and usepulses if
         requested. usepulses is stored in a dict under the key
         'usepulses'. It is itself a dict mapping :class:`Identifier`
@@ -91,7 +96,7 @@ def parse_jaqal_string(
         sexpr,
         inject_pulses=inject_pulses,
         autoload_pulses=autoload_pulses,
-        filename=filename,
+        import_path=import_path,
     )
 
     if expand_macro:

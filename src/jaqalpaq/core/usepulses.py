@@ -14,9 +14,9 @@ class UsePulsesStatement:
 
     _gates = None
 
-    def __init__(self, module, names, *, filename=None):
+    def __init__(self, module, names, *, import_path=None):
         self._module = module
-        self._filename = filename
+        self._import_path = import_path
 
         if names is all or names == "*":
             self._names = all
@@ -80,7 +80,7 @@ class UsePulsesStatement:
     def _load(self):
         from jaqalpaq._import import get_jaqal_gates
 
-        self._gates = get_jaqal_gates(self._module, jaqal_filename=self._filename)
+        self._gates = get_jaqal_gates(self._module, import_path=self._import_path)
 
     def __hash__(self):
         return hash((self.__class__, self._module, self._names))

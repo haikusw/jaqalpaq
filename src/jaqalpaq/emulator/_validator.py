@@ -140,10 +140,11 @@ def parse_jaqal_validation(txt):
     return expected
 
 
-def validate_jaqal_string(txt, **kwargs):
+def validate_jaqal_string(txt, *, import_path=None, **kwargs):
     """[undocumented] validate a Jaqal program with validation comments
 
     :param txt: a full Jaqal program, possibly with validation comments
+    :param import_path: the current directory to perform the Jaqal imports from
     :return: a list of validations performed
 
     All keyword arguments are passed to run_jaqal_string
@@ -151,7 +152,7 @@ def validate_jaqal_string(txt, **kwargs):
     """
 
     expected = parse_jaqal_validation(txt)
-    ret = validate_jaqal_parse(txt, expected)
+    ret = validate_jaqal_parse(txt, expected, import_path=import_path)
 
     if isinstance(ret, list):
         return ret
@@ -159,11 +160,11 @@ def validate_jaqal_string(txt, **kwargs):
     return validate_jaqal_circuit(ret, expected, **kwargs)
 
 
-def validate_jaqal_parse(txt, expected):
+def validate_jaqal_parse(txt, expected, import_path=None):
     if "error" in expected:
         exc, exc_message = expected["error"]
         try:
-            return parse_jaqal_string(txt)
+            return parse_jaqal_string(txt, import_path=import_path)
             exe = run_jaqal_circuit(circ, **kwargs)
         except Exception as e:
             assertisinstance(e, exc)
@@ -173,7 +174,7 @@ def validate_jaqal_parse(txt, expected):
             raise ValueError("Expected an exception, but none thrown.")
         return ["raised expected exception"]
     else:
-        return parse_jaqal_string(txt)
+        return parse_jaqal_string(txt, import_path=import_path)
 
 
 def validate_jaqal_circuit(circ, expected, **kwargs):

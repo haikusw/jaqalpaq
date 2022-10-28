@@ -1,13 +1,11 @@
 # Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC (NTESS).
 # Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains
 # certain rights in this software.
-import sys, importlib
+import sys, importlib, os
 from pathlib import Path
 
 
-def _jaqal_find_spec_relative_to_file(mod_name, jaqal_filename):
-    search_path = Path(jaqal_filename).parent
-
+def _jaqal_find_spec_relative(mod_name, search_path):
     # Our top preference is a module in a directory:
     try_directory = search_path / mod_name
     if try_directory.is_dir():
@@ -54,20 +52,20 @@ def _jaqal_find_spec_relative_to_file(mod_name, jaqal_filename):
     )
 
 
-def _jaqal_import_module_relative_to_file(mod_name, jaqal_filename):
+def _jaqal_import_module_relative(mod_name, import_path):
     top_level, *module_heirarchy = mod_name.split(".")
 
-    if not jaqal_filename:
-        raise ImportError("Unable to perform relative import without jaqal_filename")
+    if not import_path:
+        raise ImportError("Unable to perform relative import without import_path")
 
-    spec = _jaqal_find_spec_relative_to_file(top_level, jaqal_filename)
+    spec = _jaqal_find_spec_relative(top_level, import_path)
     module = spec.loader.load_module(top_level)
 
     return module
 
 
 def jaqal_import(
-    mod_name, obj_name, jaqal_filename, reload_module="relative_only", full_reload=True
+    mod_name, obj_name, import_path, reload_module="relative_only", full_reload=True
 ):
     assert reload_module in (True, False, "relative_only")
 
@@ -97,7 +95,7 @@ def jaqal_import(
 
     if module is None:
         if relative:
-            module = _jaqal_import_module_relative_to_file(mod_name, jaqal_filename)
+            module = _jaqal_import_module_relative(mod_name, import_path)
         else:
             module = importlib.import_module(mod_name)
 
@@ -117,6 +115,9 @@ def jaqal_import(
         return ret
 
 
-def get_jaqal_gates(jaqal_module, jaqal_filename=None):
-    jg = jaqal_import(str(jaqal_module), "jaqal_gates", jaqal_filename=jaqal_filename)
+def get_jaqal_gates(jaqal_module, import_path=None):
+    if not import_path:
+        import_path = os.getcwd()
+
+    jg = jaqal_import(str(jaqal_module), "jaqal_gates", import_path=Path(import_path))
     return jg.ALL_GATES

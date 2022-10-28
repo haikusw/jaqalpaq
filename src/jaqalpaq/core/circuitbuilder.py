@@ -19,7 +19,7 @@ from .usepulses import UsePulsesStatement
 from jaqalpaq.error import JaqalError
 
 
-def build(expression, inject_pulses=None, autoload_pulses=False, filename=None):
+def build(expression, inject_pulses=None, autoload_pulses=False, import_path=None):
     """Given an expression in a specific format, return the appropriate type, recursively
     constructed, from the core types library.
 
@@ -28,8 +28,7 @@ def build(expression, inject_pulses=None, autoload_pulses=False, filename=None):
     :param inject_pulses: If given, use these pulses specifically.
     :param bool autoload_pulses: Whether to employ the usepulses statement for parsing.
         Requires appropriate gate definitions.
-    :param str filename: The effective location of the Jaqal file, used for relative
-        imports.
+    :param str import_path: The path to be used for relative Jaqal imports.
 
     :return: An appropriate core type object.
     :raises JaqalError: If an undefined identifier is used.
@@ -65,7 +64,9 @@ def build(expression, inject_pulses=None, autoload_pulses=False, filename=None):
     """
 
     builder = Builder(
-        inject_pulses=inject_pulses, autoload_pulses=autoload_pulses, filename=filename
+        inject_pulses=inject_pulses,
+        autoload_pulses=autoload_pulses,
+        import_path=import_path,
     )
     return builder.build(expression)
 
@@ -78,12 +79,12 @@ def build(expression, inject_pulses=None, autoload_pulses=False, filename=None):
 class Builder:
     """Helper class to recursively build a circuit (or type within it) from s-expressions."""
 
-    def __init__(self, *, inject_pulses, autoload_pulses, filename):
+    def __init__(self, *, inject_pulses, autoload_pulses, import_path):
         if inject_pulses is not None:
             inject_pulses = normalize_native_gates(inject_pulses)
         self.inject_pulses = inject_pulses
         self.autoload_pulses = autoload_pulses
-        self.filename = filename
+        self.import_path = import_path
 
         self.gate_memo = GateMemoizer()
 
@@ -370,7 +371,7 @@ class Builder:
         if (filt is not all) and (filt != "*"):
             raise JaqalError("Only from ... usepulses * currently supported.")
 
-        return UsePulsesStatement(name, all, filename=self.filename)
+        return UsePulsesStatement(name, all, import_path=self.import_path)
 
 
 def rebuild_macro_in_context(macro, context, gate_context):
@@ -589,7 +590,7 @@ class BlockBuilder:
         """Return the expression being built, as a list."""
         return self._expression
 
-    def build(self, inject_pulses=None, autoload_pulses=False, filename=None):
+    def build(self, inject_pulses=None, autoload_pulses=False, import_path=None):
         """Create a circuit.
 
         Recursively construct an immutable core object of the appropriate type, as
@@ -598,8 +599,7 @@ class BlockBuilder:
         :param inject_pulses: If given, use these pulses specifically.
         :param bool autoload_pulses: Whether to employ the usepulses statement for
             parsing.  Requires appropriate gate definitions.
-        :param str filename: The effective location of the Jaqal file, used for
-            relative imports.
+        :param str import_path: The path to be used for relative Jaqal imports.
         :return: An appropriate core type object.
 
         """
@@ -607,7 +607,7 @@ class BlockBuilder:
             self.expression,
             inject_pulses=inject_pulses,
             autoload_pulses=autoload_pulses,
-            filename=filename,
+            import_path=import_path,
         )
 
     def gate(self, name, *args, no_duplicate=False):
