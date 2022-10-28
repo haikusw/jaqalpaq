@@ -24,7 +24,7 @@ from jaqalpaq.parser import parse_jaqal_file, parse_jaqal_string
 from jaqalpaq.core.algorithm import expand_macros, fill_in_let, expand_subcircuits
 
 
-def run_jaqal_circuit(circuit, backend=None, force_sim=False):
+def run_jaqal_circuit(circuit, backend=None, force_sim=False, emulator_backend=None):
     """Execute a Jaqal :class:`~jaqalpaq.core.Circuit` using either an
     emulator or by communicating over IPC with another process.
 
@@ -48,6 +48,15 @@ def run_jaqal_circuit(circuit, backend=None, force_sim=False):
         return jaqalpaq.ipc.ipc.run_jaqal_circuit(circuit, **kwargs)
     elif runner_type != "emulator":
         raise JaqalError("Internal error: unknown runner")
+
+    if emulator_backend is not None:
+        import warnings
+
+        warnings.warn("emulator_backend is deprecated, please use backend instead.")
+
+        if backend is not None:
+            raise JaqalError("backend and emulator_backend cannot both be set!")
+        backend = emulator_backend
 
     if backend is None:
         from jaqalpaq.emulator.unitary import UnitarySerializedEmulator
