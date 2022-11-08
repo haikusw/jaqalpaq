@@ -165,7 +165,6 @@ def validate_jaqal_parse(txt, expected, import_path=None):
         exc, exc_message = expected["error"]
         try:
             return parse_jaqal_string(txt, import_path=import_path)
-            exe = run_jaqal_circuit(circ, **kwargs)
         except Exception as e:
             assertisinstance(e, exc)
             if len(exc_message) > 0:
