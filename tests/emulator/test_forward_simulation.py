@@ -66,15 +66,18 @@ measure_all
                 "\n".join(("from qscout.v1.std usepulses *", self.jaqal_string))
             )
 
-            c_dict = res.subcircuits[0].probability_by_str
-            self.assertAlmostEqual(c_dict["000"], 0.5)
-            self.assertAlmostEqual(c_dict["001"], 0)
-            self.assertAlmostEqual(c_dict["010"], 0)
-            self.assertAlmostEqual(c_dict["011"], 0)
-            self.assertAlmostEqual(c_dict["100"], 0)
-            self.assertAlmostEqual(c_dict["101"], 0)
-            self.assertAlmostEqual(c_dict["110"], 0.5)
-            self.assertAlmostEqual(c_dict["111"], 0)
+            for c_dict in (
+                res.subcircuits[0].probability_by_str,
+                res.subcircuits[0].simulated_probability_by_str,
+            ):
+                self.assertAlmostEqual(c_dict["000"], 0.5)
+                self.assertAlmostEqual(c_dict["001"], 0)
+                self.assertAlmostEqual(c_dict["010"], 0)
+                self.assertAlmostEqual(c_dict["011"], 0)
+                self.assertAlmostEqual(c_dict["100"], 0)
+                self.assertAlmostEqual(c_dict["101"], 0)
+                self.assertAlmostEqual(c_dict["110"], 0.5)
+                self.assertAlmostEqual(c_dict["111"], 0)
 
     def test_emulate_subcircuit(self):
         jaqal_string = """let pi2 1.5707963267948966

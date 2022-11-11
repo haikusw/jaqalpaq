@@ -141,13 +141,33 @@ class RelativeFrequencySubcircuit(Subcircuit):
 
     @property
     def relative_frequency_by_str(self):
-        """Return the probability associated with each measurement result formatted as a
+        """Return the relative frequency associated with each measurement result formatted as a
         dictionary mapping result strings to their respective probabilities."""
         qubits = len(self._trace.used_qubits)
         rf = self._relative_frequencies
         return OrderedDict(
             [(f"{n:b}".zfill(qubits)[::-1], v) for n, v in enumerate(rf)]
         )
+
+    @property
+    def probability_by_int(self):
+        """(deprecated) Return the relative frequency of each measurement result as a list,
+        ordered by the integer representation of the result, with least significant bit
+        representing qubit 0.  I.e., "000" for 0b000, "100" for 0b001, "010" for 0b010,
+        etc.
+
+        Use relative_frequency_by_int.
+        """
+        return self.relative_frequency_by_int
+
+    @property
+    def probability_by_str(self):
+        """(deprecated) Return the relative frequency associated with each measurement result formatted as a
+        dictionary mapping result strings to their respective probabilities.
+
+        Use relative_frequency_by_str.
+        """
+        return self.relative_frequency_by_str
 
 
 class ReadoutSubcircuit(RelativeFrequencySubcircuit):
@@ -233,7 +253,7 @@ class ProbabilisticSubcircuit(Subcircuit):
             warnings.warn(msg, category=RuntimeWarning)
 
     @property
-    def probability_by_int(self):
+    def simulated_probability_by_int(self):
         """Return the probability associated with each measurement result as a list,
         ordered by the integer representation of the result, with least significant bit
         representing qubit 0.  I.e., "000" for 0b000, "100" for 0b001, "010" for 0b010,
@@ -242,12 +262,32 @@ class ProbabilisticSubcircuit(Subcircuit):
         return self._probabilities
 
     @property
-    def probability_by_str(self):
+    def simulated_probability_by_str(self):
         """Return the probability associated with each measurement result formatted as a
         dictionary mapping result strings to their respective probabilities."""
         qubits = len(self._trace.used_qubits)
         p = self._probabilities
         return OrderedDict([(f"{n:b}".zfill(qubits)[::-1], v) for n, v in enumerate(p)])
+
+    @property
+    def probability_by_int(self):
+        """(deprecated) Return the probability associated with each measurement result as a list,
+        ordered by the integer representation of the result, with least significant bit
+        representing qubit 0.  I.e., "000" for 0b000, "100" for 0b001, "010" for 0b010,
+        etc.
+
+        Use simulated_probability_by_int or relative_frequency_by_int.
+        """
+        return self.simulated_probability_by_int
+
+    @property
+    def probability_by_str(self):
+        """(deprecated) Return the probability associated with each measurement result formatted as a
+        dictionary mapping result strings to their respective probabilities.
+
+        Use simulated_probability_by_str or relative_frequency_by_str.
+        """
+        return self.simulated_probability_by_str
 
 
 class OutputParser(TraceVisitor):
