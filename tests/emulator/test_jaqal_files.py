@@ -38,7 +38,7 @@ class TestExecuteAnnotatedJaqalFile:
         ret = validate_jaqal_parse(txt, expected)
 
         if isinstance(ret, list):
-            return ret
+            return
 
         circ = ret
 
