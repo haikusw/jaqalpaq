@@ -59,7 +59,9 @@ def _jaqal_import_module_relative(mod_name, import_path):
         raise ImportError("Unable to perform relative import without import_path")
 
     spec = _jaqal_find_spec_relative(top_level, import_path)
-    module = spec.loader.load_module(top_level)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[mod_name] = module
+    spec.loader.exec_module(module)
 
     return module
 
