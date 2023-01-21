@@ -2,6 +2,9 @@
    :maxdepth: 2
    :caption: Contents:
 
+   jaqalpaq
+   glossary
+
 Python Jaqal Programming Package (JaqalPaq)
 ===========================================
 
