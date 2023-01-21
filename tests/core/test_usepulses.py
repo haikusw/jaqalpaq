@@ -35,7 +35,7 @@ class UsepulsesTester(unittest.TestCase):
 
         text = "from .gpf1 usepulses *"
         jc = parse_jaqal_string(
-            text, autoload_pulses=True, import_path=Path(__file__).parents[0]
+            text, autoload_pulses=True, import_path=Path(__file__).parent
         )
         from gpf1 import jaqal_gates as ng1
 
@@ -52,7 +52,7 @@ class UsepulsesTester(unittest.TestCase):
         when referenced relatively"""
         text = "from .gpf1 usepulses *"
         jc = parse_jaqal_string(
-            text, autoload_pulses=True, import_path=Path(__file__).parents[0]
+            text, autoload_pulses=True, import_path=Path(__file__).parent
         )
         self.assertTrue("testgate" in jc.native_gates)
         self.assertTrue("reloadedtestgate" not in jc.native_gates)

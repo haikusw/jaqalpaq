@@ -85,7 +85,7 @@ def main(argv=sys.argv[1:]):
     if ns.filename:
         with open(ns.filename, "r") as f:
             txt = f.read()
-        import_path = Path(ns.filename).parents[0]
+        import_path = Path(ns.filename).parent
     else:
         txt = sys.stdin.read()
 

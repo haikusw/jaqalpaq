@@ -41,7 +41,7 @@ def parse_jaqal_file(
 
     """
     if import_path is None:
-        import_path = Path(filename).parents[0]
+        import_path = Path(filename).parent
 
     with open(filename) as fd:
         return parse_jaqal_string(
