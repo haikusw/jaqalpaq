@@ -40,18 +40,18 @@ def build(expression, inject_pulses=None, autoload_pulses=False, import_path=Non
     the first element is before the colon and the remaining are space separated after the
     colon.
 
-    circuit : \*elements
-    macro : \*parameter_names block
-    let : identifier value
-    register : name size
-    map : name [src_name | src_name src_index | src_name src_start src_stop src_step]
-    loop : count sequential_block
-    gate : \*arguments
-    sequential_block : \*statements
-    parallel_block : \*statements
-    subcircuit_block : \*statements
-    array_item : identifier index
-    usepulses : identifier [all]
+     - :samp:`circuit : *{elements}`
+     - :samp:`macro : *{parameter_names} {block}`
+     - :samp:`let : {identifier} {value}`
+     - :samp:`register : {name} {size}`
+     - :samp:`map : {name} [{src_name} | {src_name} {src_index} | {src_name} {src_start} {src_stop} {src_step}]`
+     - :samp:`loop : {count} {sequential_block}`
+     - :samp:`gate : *{arguments}`
+     - :samp:`sequential_block : *{statements}`
+     - :samp:`parallel_block : *{statements}`
+     - :samp:`subcircuit_block : *{statements}`
+     - :samp:`array_item : {identifier} {index}`
+     - :samp:`usepulses : {identifier} [{all}]`
 
     In lieu of an s-expression, the appropriate type from the core library will also be
     accepted. This allows the user to build up new expressions using partially built old
@@ -844,7 +844,7 @@ class CircuitBuilder(BlockBuilder):
     def macro(self, name, parameters=None, body=None, unevaluated=False):
         """
         Defines a :class:`Macro` and adds it to the circuit. Equivalent to the Jaqal
-        statement :samp:`macro {name} {parameters} \{{body}\}`.
+        statement :samp:`macro {name} {parameters} {{body}}`.
 
         :param str name: The name of the macro.
         :param list parameters: What arguments (numbers, qubits, etc) the macro should be
