@@ -15,11 +15,11 @@ class ParamMeta(enum.EnumMeta):
 
 
 class ParamType(enum.Enum, metaclass=ParamMeta):
-    NONE = None  # Unknown type
     QUBIT = enum.auto()
     FLOAT = enum.auto()
     REGISTER = enum.auto()
     INT = enum.auto()
+    NONE = None  # Unknown type
 
     @classmethod
     def make(cls, obj):
