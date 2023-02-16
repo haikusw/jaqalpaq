@@ -371,6 +371,11 @@ class Builder:
         if (filt is not all) and (filt != "*"):
             raise JaqalError("Only from ... usepulses * currently supported.")
 
+        if not isinstance(name, str):
+            # This was causing issues with Identifier objects coming
+            # from the parser but strings coming from s-expressions and
+            # them not comparing equal in tests.
+            name = str(name)
         return UsePulsesStatement(name, all, import_path=self.import_path)
 
 

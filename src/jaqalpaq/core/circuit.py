@@ -54,7 +54,7 @@ class Circuit:
                 and self.native_gates == other.native_gates
                 and self.registers == other.registers
                 and self.body == other.body
-                and self.usepulses == self.usepulses
+                and self.usepulses == other.usepulses
             )
         except AttributeError:
             return False

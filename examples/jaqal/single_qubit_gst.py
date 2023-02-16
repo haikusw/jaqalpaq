@@ -1,5 +1,6 @@
 (
     "circuit",
+    ("usepulses", "qscout.v1.std", "*"),
     ("register", "q", 1),
     ("macro", "F0", "qubit", ("sequential_block",)),
     ("macro", "F1", "qubit", ("sequential_block", ("gate", "Sx", "qubit"))),
