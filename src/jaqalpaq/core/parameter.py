@@ -177,6 +177,12 @@ class Parameter(AnnotatedValue):
                 ParamType.NONE,
             ):
                 pass
+            elif (
+                isinstance(value, AnnotatedValue)
+                and value.kind == ParamType.FLOAT
+                and int(value.value) == value.value
+            ):
+                pass
             else:
                 raise JaqalError(
                     f"Type-checking failed: parameter {self.name}={value} does not have type {self.kind}."

@@ -1,7 +1,9 @@
 import unittest
 
 from jaqalpaq.error import JaqalError
-from jaqalpaq.core.parameter import ParamType
+from jaqalpaq.core.parameter import ParamType, Parameter
+from jaqalpaq.core.constant import Constant
+
 
 from jaqalpaq.core.register import Register, NamedQubit
 from . import common
@@ -45,6 +47,29 @@ class ParameterTester(unittest.TestCase):
                 else:
                     with self.assertRaises(Exception):
                         param.validate(ex_value)
+
+    def test_validate_constant(self):
+        """Test validating against let constants with certain types."""
+        # Let-Constants cannot take on these values and are thus
+        # skipped for this test.
+        bad_types = {ParamType.REGISTER, ParamType.QUBIT}
+        for ex_value, ex_types in self.example_values:
+            if bad_types & set(ex_types):
+                continue
+            const_value = Constant("c", ex_value)
+            for param_kind, param in self.example_params.items():
+                if param.kind in ex_types:
+                    param.validate(const_value)
+                else:
+                    with self.assertRaises(Exception):
+                        param.validate(const_value)
+
+    def test_validate_none_parameter(self):
+        """Test validating against another parameter with no value like in a macro."""
+        for ex_value, ex_types in self.example_values:
+            macro_param = Parameter(ex_value, ParamType.NONE)
+            for param_kind, param in self.example_params.items():
+                param.validate(macro_param)
 
     def test_resolve_value(self):
         """Test resolving a value within some context."""
