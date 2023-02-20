@@ -176,23 +176,12 @@ class ReadoutSubcircuit(RelativeFrequencySubcircuit):
     Additionally, track the specific measurement results, and their relative frequencies.
     """
 
-    def __init__(self, trace, index, *, readouts=None, **kwargs):
-        if readouts is None:
-            self._readouts = []
-        else:
-            self._readouts = readouts
-
+    def __init__(self, trace, index, **kwargs):
         assert "relative_frequencies" not in kwargs
+        assert "readouts" not in kwargs
 
+        self._readouts = []
         super().__init__(trace, index, relative_frequencies=None, **kwargs)
-        if readouts:
-            self._recalculate_relative_frequencies()
-
-    def _recalculate_relative_frequencies(self):
-        rf = self._relative_frequencies
-        rf[:] = 0
-        for ro in self.readouts:
-            rf[ro.as_int] += 1
 
     def accept_readout(self, readout):
         readout._subcircuit = self
