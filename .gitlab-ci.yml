@@ -27,10 +27,10 @@ before_script:
         cd ../jaqalpaq ;
     fi
   - if echo "$CI_PROJECT_URL" | grep -q cee-gitlab.sandia.gov ; then
-        repo="https://nexus.web.sandia.gov/repository/pypi-proxy/simple" &&
+        ( repo="https://nexus.web.sandia.gov/repository/pypi-proxy/simple" &&
         pip config set global.index "$repo" &&
         pip config set global.index-url "$repo" &&
-        echo -e '[easy_install]\nindex_url = '"${repo}" >~/.pydistutils.cfg ;
+        echo -e '[easy_install]\nindex_url = '"${repo}" >~/.pydistutils.cfg );
         unset https_proxy ;
     fi
   - pip install --upgrade pip wheel
@@ -51,9 +51,11 @@ Unified Tests:
         echo "Run devel/refresh-data-files to refresh examples list." ;
         exit 1 ;
       fi
-    - pip install black~=23.1 && black --check .
+    - pip install black~=23.1
+    - black --check .
     - cd ..
-    - rm -fr qscout-gatemodels && git clone --depth 1 "$(echo "${CI_REPOSITORY_URL}" | sed 's/jaqalpaq.git/qscout-gatemodels.git/')" -b "${QSCOUT_BRANCH}"
+    - rm -fr qscout-gatemodels
+    - git clone --depth 1 "$(echo "${CI_REPOSITORY_URL}" | sed 's/jaqalpaq.git/qscout-gatemodels.git/')" -b "${QSCOUT_BRANCH}"
     - LOCAL_JAQALPAQ=./jaqalpaq LOCAL_JAQALPAQ_EXTRAS="" LOCAL_QSCOUT_GATEMODELS=./qscout-gatemodels
       JAQALPAQ_OPTS="pygsti-integration,tests"
       ./jaqalpaq/install.sh
@@ -69,8 +71,9 @@ Notebooks:
   script:
     - git fetch origin master
     - cd ..
-    - rm -fr qscout-gatemodels && git clone --depth 1 "$(echo "${CI_REPOSITORY_URL}" | sed 's/jaqalpaq.git/qscout-gatemodels.git/')" -b "${QSCOUT_BRANCH}"
-    - rm -fr jaqalpaq-extras && git clone --depth 1 "$(echo "${CI_REPOSITORY_URL}" | sed 's/jaqalpaq.git/jaqalpaq-extras.git/')" -b "${JAQALPAQ_EXTRAS_BRANCH}"
+    - rm -fr qscout-gatemodels jaqalpaq-extras
+    - git clone --depth 1 "$(echo "${CI_REPOSITORY_URL}" | sed 's/jaqalpaq.git/qscout-gatemodels.git/')" -b "${QSCOUT_BRANCH}"
+    - git clone --depth 1 "$(echo "${CI_REPOSITORY_URL}" | sed 's/jaqalpaq.git/jaqalpaq-extras.git/')" -b "${JAQALPAQ_EXTRAS_BRANCH}"
     - pip install matplotlib==3.5.2
     - LOCAL_JAQALPAQ=./jaqalpaq LOCAL_JAQALPAQ_EXTRAS="" LOCAL_QSCOUT_GATEMODELS=./qscout-gatemodels
       JAQALPAQ_OPTS="pygsti-integration,notebooks"
@@ -108,9 +111,10 @@ Packaging:
   script:
     - git fetch origin master
     - cd ..
-    - rm -fr qscout-gatemodels && git clone --depth 1 "$(echo "${CI_REPOSITORY_URL}" | sed 's/jaqalpaq.git/qscout-gatemodels.git/')" -b "${QSCOUT_BRANCH}"
-    - rm -fr jaqalpaq-extras && git clone --depth 1 "$(echo "${CI_REPOSITORY_URL}" | sed 's/jaqalpaq.git/jaqalpaq-extras.git/')" -b "${JAQALPAQ_EXTRAS_BRANCH}"
-    - rm -fr jaqalpaw && git clone --depth 1 "$(echo "${CI_REPOSITORY_URL}" | sed 's/jaqalpaq.git/jaqalpaw.git/')" -b "${JAQALPAW_BRANCH}"
+    - rm -fr qscout-gatemodels jaqalpaq-extras jaqalpaw
+    - git clone --depth 1 "$(echo "${CI_REPOSITORY_URL}" | sed 's/jaqalpaq.git/qscout-gatemodels.git/')" -b "${QSCOUT_BRANCH}"
+    - git clone --depth 1 "$(echo "${CI_REPOSITORY_URL}" | sed 's/jaqalpaq.git/jaqalpaq-extras.git/')" -b "${JAQALPAQ_EXTRAS_BRANCH}"
+    - git clone --depth 1 "$(echo "${CI_REPOSITORY_URL}" | sed 's/jaqalpaq.git/jaqalpaw.git/')" -b "${JAQALPAW_BRANCH}"
     - rm -fr /tmp/build-jaqal
     - pip install build
     - jaqalpaq/devel/build
@@ -121,9 +125,9 @@ Packaging:
     - source /tmp/jaqal-test-venv/bin/activate
     - cd /tmp/build-jaqal/dist
     - pip install $(echo ./JaqalPaq-*.whl)'[pygsti-integration]' ./JaqalPaq_extras-*.whl $(echo ./JaqalPaw-*.whl)'[tests]' ./QSCOUT_gatemodels-*.whl
-    - cd /tmp/jaqal-test-venv/share/jaqalpaq && pytest .
-    - cd /tmp/jaqal-test-venv/share/jaqalpaw && pytest .
-    - cd /tmp/jaqal-test-venv/share/qscout-gatemodels && pytest .
+    - ( cd /tmp/jaqal-test-venv/share/jaqalpaq && pytest . )
+    - ( cd /tmp/jaqal-test-venv/share/jaqalpaw && pytest . )
+    - ( cd /tmp/jaqal-test-venv/share/qscout-gatemodels && pytest . )
     - rm -fr /tmp/jaqal-test-venv
   artifacts:
     when: always
