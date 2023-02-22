@@ -28,7 +28,6 @@ def example(*args):
 
 class ForwardSimulatorTester(unittest.TestCase):
     def setUp(self):
-
         builder = CircuitBuilder(jaqal_gates.ALL_GATES)
 
         pi2 = builder.let("pi2", np.pi / 2)

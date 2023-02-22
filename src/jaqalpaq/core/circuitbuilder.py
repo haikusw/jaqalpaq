@@ -496,6 +496,7 @@ class GateMemoizer:
     def _make_gate_memo_key(self, gate_name, gate_args, context):
         """Create a key uniquely identifying the given gate within some
         context."""
+
         # We take the context into account by creating a tuple of
         # corresponding values in the context or None if they don't
         # appear in the current context.

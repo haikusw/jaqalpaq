@@ -65,14 +65,16 @@ class Visitor:
         """Method called when no method matches. Override to provide default behavior.
 
         :param object obj: The Jaqal core type object to visit.
-        :raises JaqalError: Because this method should never be called unless overriden."""
+        :raises JaqalError: Because this method should never be called unless overriden.
+        """
         raise JaqalError(f"No visitor defined for {obj}")
 
     def visit(self, obj, *args, **kwargs):
         """Find the appropriate visitor method for the argument and call it.
 
         :param object obj: The Jaqal core type object to visit.
-        :raises JaqalError: If there is no matching visitor method and the default visitor has not been overriden."""
+        :raises JaqalError: If there is no matching visitor method and the default visitor has not been overriden.
+        """
         method_name = self._resolve_method_name(obj)
         return getattr(self, method_name)(obj, *args, **kwargs)
 

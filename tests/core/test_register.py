@@ -6,7 +6,6 @@ from . import common
 
 
 class RegisterTester(unittest.TestCase):
-
     # Note: We may wish to create additional Register constructors to reduce the
     # number of possible illegal ways to create a Register.
 

@@ -54,7 +54,7 @@ def generate_jaqal_validation(exe):
 
     for sc_index, se in enumerate(exe.subcircuits):
         emit(f"// SUBCIRCUIT {sc_index}")
-        for (n, ((s, ps), p)) in enumerate(
+        for n, ((s, ps), p) in enumerate(
             zip(se.probability_by_str.items(), se.probability_by_int)
         ):
             assert ps == p

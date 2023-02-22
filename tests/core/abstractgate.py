@@ -8,7 +8,6 @@ from .randomize import random_identifier, random_whole
 
 
 class AbstractGateTesterBase:
-
     ##
     # Interface derived classes must adhere to
     #

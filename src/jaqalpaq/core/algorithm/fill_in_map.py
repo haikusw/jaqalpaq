@@ -28,7 +28,6 @@ def fill_in_map(circuit):
 
 
 class MapFiller(Visitor):
-
     ##
     # Visitor Methods
     #
