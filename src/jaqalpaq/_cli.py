@@ -21,7 +21,13 @@ def main(argv=sys.argv[1:]):
         "-s",
         dest="suppress",
         action="store_true",
-        help="Do not produce literal Jaqal output, i.e., a time-ordered list of bit strings.  Implies -p, and outputs to stdout.",
+        help="(deprecated and now enabled by default) Do not produce literal Jaqal output.",
+    )
+    parser.add_argument(
+        "--readouts",
+        dest="readouts",
+        action="store_true",
+        help="Produce literal Jaqal output, i.e., a time-ordered list of bit strings.",
     )
     parser.add_argument(
         "--probabilities",
@@ -75,6 +81,13 @@ def main(argv=sys.argv[1:]):
     except Exception:
         print(f"Invalid cutoff {ns.cutoff}", file=sys.stderr)
         return 2
+
+    if ns.readouts:
+        if ns.suppress:
+            print("--suppress is not compatible with --readouts")
+            return 1
+    else:
+        ns.suppress = True
 
     if not ns.output:
         ns.output = "human"
